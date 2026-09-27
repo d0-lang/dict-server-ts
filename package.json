@@ -1,15 +1,22 @@
 {
   "name": "server",
-  "module": "index.ts",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "start": "bun src/index.ts",
+    "test": "vitest run"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@effect/vitest": "4.0.0-rc.117",
+    "@types/bun": "latest",
+    "vitest": "5.0.2"
   },
   "peerDependencies": {
     "typescript": "^7"
   },
-  "private": true,
-  "type": "module",
   "dependencies": {
-    "effect": "^4.0.0-rc.117"
+    "effect": "4.0.0-rc.117"
   }
 }

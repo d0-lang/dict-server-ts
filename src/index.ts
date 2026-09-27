@@ -1,5 +1,12 @@
-import { Effect, Console } from "effect";
+import { loadConfig } from "./config.ts"
+import { makeWebHandler } from "./http/app.ts"
 
-const program = Console.log("Hello, World!");
+const { handler } = makeWebHandler()
+const { port } = loadConfig()
 
-const result = Effect.runSync(program); // => undefined
+Bun.serve({
+  port,
+  fetch: (request) => handler(request)
+})
+
+console.log(`dict server listening on http://localhost:${port}`)

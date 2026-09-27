@@ -1,106 +1,28 @@
+Default to Bun for install, run, and TypeScript. Use Effect 4 APIs from the `effect` package — HTTP and Schema live there, not in the old `@effect/platform` HTTP stack.
 
-Default to using Bun instead of Node.js.
+## Bun
 
-- Use `bun <file>` instead of `node <file>` or `ts-node <file>`
-- Use `bun test` instead of `jest` or `vitest`
-- Use `bun build <file.html|file.ts|file.css>` instead of `webpack` or `esbuild`
-- Use `bun install` instead of `npm install` or `yarn install` or `pnpm install`
-- Use `bun run <script>` instead of `npm run <script>` or `yarn run <script>` or `pnpm run <script>`
-- Use `bunx <package> <command>` instead of `npx <package> <command>`
-- Bun automatically loads .env, so don't use dotenv.
+- `bun <file>` instead of `node`
+- `bun install` instead of npm/yarn/pnpm
+- `bun --hot src/index.ts` for the HTTP server
+- Bun loads `.env` automatically
 
-## APIs
+Do not add Express or Hono. Serve with `HttpRouter.toWebHandler` + `Bun.serve`.
 
-- `Bun.serve()` supports WebSockets, HTTPS, and routes. Don't use `express`.
-- `bun:sqlite` for SQLite. Don't use `better-sqlite3`.
-- `Bun.redis` for Redis. Don't use `ioredis`.
-- `Bun.sql` for Postgres. Don't use `pg` or `postgres.js`.
-- `WebSocket` is built-in. Don't use `ws`.
-- Prefer `Bun.file` over `node:fs`'s readFile/writeFile
-- Bun.$`ls` instead of execa.
+## Effect 4
 
-## Testing
+Read the docs shipped with the installed package before inventing APIs:
 
-Use `bun test` to run tests.
+- `node_modules/effect/AGENTS.md` — coding style (`Effect.fn`, services, Layers, Schema)
+- `node_modules/effect/ai-docs/src/51_http-server/` — HttpApi, handlers, `toWebHandler`, `HttpApiTest`
+- `node_modules/effect/ai-docs/src/09_testing/` — `@effect/vitest`
 
-```ts#index.test.ts
-import { test, expect } from "bun:test";
+Prefer `effect/unstable/httpapi` and `effect/unstable/http`. Sign `/v1/get-meta` over the **exact JSON body bytes** (do not re-serialize after signing).
 
-test("hello world", () => {
-  expect(1).toBe(1);
-});
-```
+## Tests
 
-## Frontend
-
-Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
-
-Server:
-
-```ts#index.ts
-import index from "./index.html"
-
-Bun.serve({
-  routes: {
-    "/": index,
-    "/api/users/:id": {
-      GET: (req) => {
-        return new Response(JSON.stringify({ id: req.params.id }));
-      },
-    },
-  },
-  // optional websocket support
-  websocket: {
-    open: (ws) => {
-      ws.send("Hello, world!");
-    },
-    message: (ws, message) => {
-      ws.send(message);
-    },
-    close: (ws) => {
-      // handle close
-    }
-  },
-  development: {
-    hmr: true,
-    console: true,
-  }
-})
-```
-
-HTML files can import .tsx, .jsx or .js files directly and Bun's bundler will transpile & bundle automatically. `<link>` tags can point to stylesheets and Bun's CSS bundler will bundle.
-
-```html#index.html
-<html>
-  <body>
-    <h1>Hello, world!</h1>
-    <script type="module" src="./frontend.tsx"></script>
-  </body>
-</html>
-```
-
-With the following `frontend.tsx`:
-
-```tsx#frontend.tsx
-import React from "react";
-import { createRoot } from "react-dom/client";
-
-// import .css files directly and it works
-import './index.css';
-
-const root = createRoot(document.body);
-
-export default function Frontend() {
-  return <h1>Hello, world!</h1>;
-}
-
-root.render(<Frontend />);
-```
-
-Then, run index.ts
+Use Vitest + `@effect/vitest` (`it.effect`, `layer(...)`, `HttpApiTest`), not `bun:test`.
 
 ```sh
-bun --hot ./index.ts
+bun run test
 ```
-
-For more information, read the Bun API docs in `node_modules/bun-types/docs/**.mdx`.
