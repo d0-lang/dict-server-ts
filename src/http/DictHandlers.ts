@@ -60,6 +60,10 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
   })
 )
 
+export const DictHandlersMemory = DictHandlersNoDeps.pipe(
+  Layer.provide([Identity.layerMemory, AppConfig.layer])
+)
+
 export const DictHandlers = DictHandlersNoDeps.pipe(
   Layer.provide([Identity.layer, AppConfig.layer])
 )

@@ -1,8 +1,39 @@
 import { assert, describe, it } from "@effect/vitest"
-import { Effect } from "effect"
+import { Effect, Encoding } from "effect"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import { Identity } from "./Identity.ts"
 
 const utf8 = new TextEncoder()
+const subtle = globalThis.crypto.subtle
+
+const copyForSubtle = (bytes: Uint8Array): Uint8Array<ArrayBuffer> =>
+  new Uint8Array(bytes)
+
+const verifyWithPublicKey = async (
+  publicKeyBase64: string,
+  body: Uint8Array,
+  signatureBase64: string
+) => {
+  const publicKeyBytes = Encoding.decodeBase64(publicKeyBase64)
+  const signatureBytes = Encoding.decodeBase64(signatureBase64)
+  if (publicKeyBytes._tag === "Failure" || signatureBytes._tag === "Failure") {
+    return false
+  }
+  const publicKey = await subtle.importKey(
+    "raw",
+    copyForSubtle(publicKeyBytes.success),
+    "Ed25519",
+    false,
+    ["verify"]
+  )
+  return subtle.verify(
+    "Ed25519",
+    publicKey,
+    copyForSubtle(signatureBytes.success),
+    copyForSubtle(body)
+  )
+}
 
 describe("Identity", () => {
   it.effect("signs body bytes and verifies them", () =>
@@ -11,9 +42,29 @@ describe("Identity", () => {
       const body = utf8.encode(`{"nonce":"abc"}`)
       const signature = yield* identity.sign(body)
 
-      assert.isTrue(yield* identity.verify(body, signature))
-      assert.isFalse(yield* identity.verify(utf8.encode(`{"nonce":"abd"}`), signature))
+      assert.isTrue(
+        yield* Effect.promise(() => verifyWithPublicKey(identity.publicKeyBase64, body, signature))
+      )
+      assert.isFalse(
+        yield* Effect.promise(() =>
+          verifyWithPublicKey(identity.publicKeyBase64, utf8.encode(`{"nonce":"abd"}`), signature)
+        )
+      )
       assert.isString(identity.publicKeyBase64)
       assert.isAbove(identity.publicKeyBase64.length, 0)
-    }).pipe(Effect.provide(Identity.layer)))
+    }).pipe(Effect.provide(Identity.layerMemory)))
+
+  it.effect("reloads the same public key from disk", () =>
+    Effect.gen(function*() {
+      const path = join(tmpdir(), `dict-identity-${crypto.randomUUID()}.json`)
+      const first = yield* Identity.pipe(Effect.provide(Identity.layerFile(path)))
+      const second = yield* Identity.pipe(Effect.provide(Identity.layerFile(path)))
+      assert.strictEqual(second.publicKeyBase64, first.publicKeyBase64)
+      const signature = yield* first.sign(utf8.encode(`{"nonce":"reload"}`))
+      assert.isTrue(
+        yield* Effect.promise(() =>
+          verifyWithPublicKey(second.publicKeyBase64, utf8.encode(`{"nonce":"reload"}`), signature)
+        )
+      )
+    }))
 })

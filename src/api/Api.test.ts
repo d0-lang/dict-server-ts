@@ -1,14 +1,41 @@
 import { assert, it, layer } from "@effect/vitest"
-import { Effect, Layer } from "effect"
+import { Effect, Encoding, Layer } from "effect"
 import { HttpApiTest } from "effect/unstable/httpapi"
 import { HttpServer } from "effect/unstable/http"
 import { Api } from "./Api.ts"
-import { DictHandlers } from "../http/DictHandlers.ts"
+import { DictHandlersMemory } from "../http/DictHandlers.ts"
 import { makeWebHandler } from "../http/app.ts"
 import { LookupRequest } from "../domain/schemas.ts"
-import { verifyWithPublicKey } from "../identity/Identity.ts"
 
-const HandlersLayer = Layer.mergeAll(DictHandlers, HttpServer.layerServices)
+const copyForSubtle = (bytes: Uint8Array): Uint8Array<ArrayBuffer> =>
+  new Uint8Array(bytes)
+
+const verifyWithPublicKey = async (
+  publicKeyBase64: string,
+  body: Uint8Array,
+  signatureBase64: string
+) => {
+  const publicKeyBytes = Encoding.decodeBase64(publicKeyBase64)
+  const signatureBytes = Encoding.decodeBase64(signatureBase64)
+  if (publicKeyBytes._tag === "Failure" || signatureBytes._tag === "Failure") {
+    return false
+  }
+  const publicKey = await crypto.subtle.importKey(
+    "raw",
+    copyForSubtle(publicKeyBytes.success),
+    "Ed25519",
+    false,
+    ["verify"]
+  )
+  return crypto.subtle.verify(
+    "Ed25519",
+    publicKey,
+    copyForSubtle(signatureBytes.success),
+    copyForSubtle(body)
+  )
+}
+
+const HandlersLayer = Layer.mergeAll(DictHandlersMemory, HttpServer.layerServices)
 const makeClient = HttpApiTest.groups(Api, ["dict"])
 
 layer(HandlersLayer)("DictApi", (it) => {
@@ -48,7 +75,7 @@ layer(HandlersLayer)("DictApi", (it) => {
 it.live("signs the exact get-meta body bytes", () =>
   Effect.tryPromise({
     try: async () => {
-      const { handler, dispose } = makeWebHandler()
+      const { handler, dispose } = makeWebHandler(DictHandlersMemory)
       try {
         const nonce = "live-nonce"
         const metaResponse = await handler(
@@ -67,8 +94,10 @@ it.live("signs the exact get-meta body bytes", () =>
         const keyResponse = await handler(new Request("http://localhost/v1/get-key"))
         const { key } = await keyResponse.json() as { key: string }
 
-        const ok = await Effect.runPromise(
-          verifyWithPublicKey(key, new TextEncoder().encode(body), signature!)
+        const ok = await verifyWithPublicKey(
+          key,
+          new TextEncoder().encode(body),
+          signature!
         )
         assert.isTrue(ok)
 

@@ -4,13 +4,17 @@ import { HttpApiBuilder } from "effect/unstable/httpapi"
 import { Api } from "../api/Api.ts"
 import { DictHandlers } from "./DictHandlers.ts"
 
-export const HttpLive = HttpApiBuilder.layer(Api).pipe(
-  Layer.provide(DictHandlers),
-  Layer.provide(HttpRouter.cors({
-    allowedHeaders: ["x-nonce", "content-type"],
-    exposedHeaders: ["x-signature"]
-  })),
-  Layer.provide(HttpServer.layerServices)
-)
+export const makeHttpLive = (handlers: typeof DictHandlers = DictHandlers) =>
+  HttpApiBuilder.layer(Api).pipe(
+    Layer.provide(handlers),
+    Layer.provide(HttpRouter.cors({
+      allowedHeaders: ["x-nonce", "content-type"],
+      exposedHeaders: ["x-signature"]
+    })),
+    Layer.provide(HttpServer.layerServices)
+  )
 
-export const makeWebHandler = () => HttpRouter.toWebHandler(HttpLive)
+export const HttpLive = makeHttpLive()
+
+export const makeWebHandler = (handlers: typeof DictHandlers = DictHandlers) =>
+  HttpRouter.toWebHandler(makeHttpLive(handlers))

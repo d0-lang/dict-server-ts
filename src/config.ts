@@ -12,6 +12,7 @@ export type AppConfigValues = {
   readonly tosLink: string
   readonly privacyChange: string | undefined
   readonly tosChange: string | undefined
+  readonly identityFile: string
 }
 
 const env = (name: string): string | undefined => {
@@ -59,7 +60,8 @@ export const loadConfig = (): AppConfigValues => ({
   privacyLink: envString("PRIVACY_LINK", "https://example.invalid/privacy"),
   tosLink: envString("TOS_LINK", "https://example.invalid/tos"),
   privacyChange: env("PRIVACY_CHANGE"),
-  tosChange: env("TOS_CHANGE")
+  tosChange: env("TOS_CHANGE"),
+  identityFile: envString("IDENTITY_FILE", "data/identity.json")
 })
 
 export class AppConfig extends Context.Service<AppConfig, AppConfigValues>()("server/config/AppConfig") {
