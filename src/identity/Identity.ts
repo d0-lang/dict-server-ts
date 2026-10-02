@@ -21,14 +21,17 @@ export class Identity extends Context.Service<
     readonly sign: (body: Uint8Array) => Effect.Effect<string>;
   }
 >()("server/identity/Identity") {
+  /** Tests only: ephemeral key, no filesystem. */
   static readonly layerMemory = Layer.effect(
     Identity,
     Effect.suspend(() => generateIdentity()),
   );
 
+  /** Load or create the identity JSON at `path`. Requires FileSystem and Path. */
   static readonly layerFile = (path: string) =>
     Layer.effect(Identity, loadOrCreateIdentity(path));
 
+  /** Production: `layerFile` using `IDENTITY_FILE` from config. */
   static readonly layer = Layer.unwrap(
     Effect.sync(() => Identity.layerFile(loadConfig().identityFile)),
   );
@@ -59,7 +62,9 @@ const loadOrCreateIdentity = Effect.fnUntraced(function* (path: string) {
     path,
     new StoredIdentity({
       publicKeyBase64,
-      privateKeyPkcs8Base64: yield* exportPrivateKeyPkcs8Base64(pair.privateKey),
+      privateKeyPkcs8Base64: yield* exportPrivateKeyPkcs8Base64(
+        pair.privateKey,
+      ),
     }),
   );
   return Identity.of({

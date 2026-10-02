@@ -1,7 +1,8 @@
 import { assert, describe, it } from "@effect/vitest"
-import { Effect, Encoding } from "effect"
+import { Effect, Encoding, Layer } from "effect"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
+import { PlatformLive } from "../platform.ts"
 import { Identity } from "./Identity.ts"
 
 const utf8 = new TextEncoder()
@@ -57,8 +58,9 @@ describe("Identity", () => {
   it.effect("reloads the same public key from disk", () =>
     Effect.gen(function*() {
       const path = join(tmpdir(), `dict-identity-${crypto.randomUUID()}.json`)
-      const first = yield* Identity.pipe(Effect.provide(Identity.layerFile(path)))
-      const second = yield* Identity.pipe(Effect.provide(Identity.layerFile(path)))
+      const fileLayer = Identity.layerFile(path).pipe(Layer.provide(PlatformLive))
+      const first = yield* Identity.pipe(Effect.provide(fileLayer))
+      const second = yield* Identity.pipe(Effect.provide(fileLayer))
       assert.strictEqual(second.publicKeyBase64, first.publicKeyBase64)
       const signature = yield* first.sign(utf8.encode(`{"nonce":"reload"}`))
       assert.isTrue(
