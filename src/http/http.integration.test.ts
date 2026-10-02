@@ -1,0 +1,89 @@
+import { afterAll, assert, describe, it } from "@effect/vitest"
+import { Encoding } from "effect"
+import { DictHandlersMemory } from "./DictHandlers.ts"
+import { makeWebHandler } from "./app.ts"
+
+const verifyEd25519 = async (
+  publicKeyBase64: string,
+  body: Uint8Array,
+  signatureBase64: string
+) => {
+  const publicKeyBytes = Encoding.decodeBase64(publicKeyBase64)
+  const signatureBytes = Encoding.decodeBase64(signatureBase64)
+  if (publicKeyBytes._tag === "Failure" || signatureBytes._tag === "Failure") {
+    return false
+  }
+  const publicKey = await crypto.subtle.importKey(
+    "raw",
+    new Uint8Array(publicKeyBytes.success),
+    "Ed25519",
+    false,
+    ["verify"]
+  )
+  return crypto.subtle.verify(
+    "Ed25519",
+    publicKey,
+    new Uint8Array(signatureBytes.success),
+    new Uint8Array(body)
+  )
+}
+
+describe("HTTP API", () => {
+  const { handler, dispose } = makeWebHandler(DictHandlersMemory)
+
+  afterAll(() => dispose())
+
+  it("GET /v1/get-key returns a public key", async () => {
+    const response = await handler(new Request("http://localhost/v1/get-key"))
+    const body = await response.json() as { key: string }
+    assert.strictEqual(response.status, 200)
+    assert.isString(body.key)
+    assert.isAbove(body.key.length, 0)
+  })
+
+  it("GET /v1/get-meta requires X-Nonce", async () => {
+    const response = await handler(new Request("http://localhost/v1/get-meta"))
+    assert.strictEqual(response.status, 400)
+  })
+
+  it("GET /v1/get-meta signs the exact JSON body", async () => {
+    const nonce = "black-box-nonce"
+    const metaResponse = await handler(
+      new Request("http://localhost/v1/get-meta", {
+        headers: { "X-Nonce": nonce, Origin: "http://example.com" }
+      })
+    )
+    const body = await metaResponse.text()
+    const signature = metaResponse.headers.get("x-signature")
+    assert.strictEqual(metaResponse.status, 200)
+    assert.isString(signature)
+    assert.include(
+      metaResponse.headers.get("access-control-expose-headers") ?? "",
+      "x-signature"
+    )
+
+    const parsed = JSON.parse(body) as { nonce: string; name: string; languages: Array<string> }
+    assert.strictEqual(parsed.nonce, nonce)
+    assert.strictEqual(parsed.name, "dict poc")
+    assert.deepStrictEqual(parsed.languages, ["de_en"])
+
+    const keyResponse = await handler(new Request("http://localhost/v1/get-key"))
+    const { key } = await keyResponse.json() as { key: string }
+    assert.isTrue(await verifyEd25519(key, new TextEncoder().encode(body), signature!))
+    assert.isFalse(
+      await verifyEd25519(key, new TextEncoder().encode(`${body} `), signature!)
+    )
+  })
+
+  it("GET /v1/lookup returns the stub translation", async () => {
+    const payload = encodeURIComponent(JSON.stringify({ word: "Mutter", lang: "de_en" }))
+    const response = await handler(new Request(`http://localhost/v1/lookup?payload=${payload}`))
+    assert.strictEqual(response.status, 200)
+    assert.deepStrictEqual(await response.json(), { word: "Mutter", translation: "TBD" })
+  })
+
+  it("unknown route is not found", async () => {
+    const response = await handler(new Request("http://localhost/v1/nope"))
+    assert.strictEqual(response.status, 404)
+  })
+})
