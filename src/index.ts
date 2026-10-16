@@ -1,12 +1,12 @@
-import { loadConfig } from "./config.ts"
-import { makeWebHandler } from "./http/app.ts"
+import { loadConfig } from "./config.ts";
+import { makeWebHandler } from "./http/app.ts";
 
-const { handler } = makeWebHandler()
-const { port } = loadConfig()
+const { handler } = makeWebHandler();
+const { port } = loadConfig();
 
 Bun.serve({
   port,
-  fetch: (request) => handler(request)
-})
+  fetch: (request) => handler(request),
+});
 
-console.log(`dict server listening on http://localhost:${port}`)
+console.log(`dict server listening on http://localhost:${port}`);

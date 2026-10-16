@@ -6,11 +6,13 @@
   "scripts": {
     "dev": "bun --hot src/index.ts",
     "start": "bun src/index.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@effect/vitest": "4.0.5",
     "@types/bun": "latest",
+    "prettier": "^3.9.10",
     "vitest": "5.0.2"
   },
   "peerDependencies": {
