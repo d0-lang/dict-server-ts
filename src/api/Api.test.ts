@@ -1,7 +1,7 @@
 import { assert, layer } from "@effect/vitest";
 import { Effect, Layer } from "effect";
-import { HttpApiTest } from "effect/unstable/httpapi";
-import { HttpServer } from "effect/unstable/http";
+import { HttpApiTest } from "effect/http-api";
+import { HttpServer } from "effect/http";
 import { Api } from "./Api.ts";
 import { DictHandlersMemory } from "../http/DictHandlers.ts";
 import { LookupRequest } from "../domain/schemas.ts";

@@ -1,4 +1,5 @@
-import { Effect, Encoding } from "effect";
+import { Effect } from "effect";
+import { Base64 } from "effect/encoding";
 
 const subtle = globalThis.crypto.subtle;
 
@@ -26,7 +27,7 @@ export const exportPublicKeyBase64 = Effect.fnUntraced(function* (
     catch: (cause) =>
       new Error(`Failed to export Ed25519 public key: ${String(cause)}`),
   }).pipe(Effect.orDie);
-  return Encoding.encodeBase64(new Uint8Array(raw));
+  return Base64.encode(new Uint8Array(raw));
 });
 
 export const exportPrivateKeyPkcs8Base64 = Effect.fnUntraced(function* (
@@ -37,13 +38,13 @@ export const exportPrivateKeyPkcs8Base64 = Effect.fnUntraced(function* (
     catch: (cause) =>
       new Error(`Failed to export Ed25519 private key: ${String(cause)}`),
   }).pipe(Effect.orDie);
-  return Encoding.encodeBase64(new Uint8Array(pkcs8));
+  return Base64.encode(new Uint8Array(pkcs8));
 });
 
 export const importPrivateKey = Effect.fnUntraced(function* (
   pkcs8Base64: string,
 ) {
-  const bytes = Encoding.decodeBase64(pkcs8Base64);
+  const bytes = Base64.decode(pkcs8Base64);
   if (bytes._tag === "Failure") {
     return yield* Effect.die(new Error("Invalid private key base64"));
   }
@@ -65,5 +66,5 @@ export const signWithPrivateKey = Effect.fnUntraced(function* (
     try: () => subtle.sign("Ed25519", privateKey, copyForSubtle(body)),
     catch: (cause) => new Error(`Failed to sign body: ${String(cause)}`),
   }).pipe(Effect.orDie);
-  return Encoding.encodeBase64(new Uint8Array(signature));
+  return Base64.encode(new Uint8Array(signature));
 });
