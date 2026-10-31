@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "bun --hot src/index.ts",
     "start": "bun src/index.ts",
-    "test": "vitest run",
-    "format": "prettier --write ."
+    "test": "bun --bun vitest run",
+    "format": "prettier --write .",
+    "import": "bun src/import/cli.ts"
   },
   "devDependencies": {
     "@effect/vitest": "4.0.5",
@@ -20,6 +21,7 @@
   },
   "dependencies": {
     "@effect/platform-node": "4.0.5",
+    "drizzle-orm": "^0.45.4",
     "effect": "4.0.5"
   }
 }
