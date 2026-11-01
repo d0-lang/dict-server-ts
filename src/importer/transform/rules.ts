@@ -66,17 +66,20 @@ export const skipSense = (
   SKIPPED_SENSE_TAGS.find((tag) => tags.includes(tag)) ??
   (isHistorical(language, tags) ? "historical-stage" : undefined);
 
+const hasWhitespace = (text: string): boolean => /\s/.test(text);
+
 /** Whether a raw form is indexed as a form of its lemma. */
 export const keepForm = (
   language: LanguageRules,
-  lemmaHasSpace: boolean,
+  lemma: string,
   form: WiktextractForm,
 ): boolean => {
   const word = form.form.trim();
   if (word === "" || word === "-" || word === "—") return false;
-  // "-(e)m robił", "będę robił": analytic forms of single-word lemmas are not
-  // something a single-word lookup can hit, and they bloat the index.
-  if (!lemmaHasSpace && /\s/.test(word)) return false;
+  // "będę robił", "bym robił": multi-word forms of a single-word lemma are not
+  // indexed, to keep the index small. Each word still resolves on its own, but a
+  // tokenizer sending the whole span finds nothing (see docs/importer-notes.md).
+  if (hasWhitespace(word) && !hasWhitespace(lemma)) return false;
   if (word.startsWith("-") || word.includes("(")) return false;
   const tags = form.tags ?? [];
   if (tags.some((t) => TEMPLATE_FORM_TAGS.has(t))) return false;

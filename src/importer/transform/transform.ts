@@ -118,11 +118,10 @@ const collectForms = (
   rawForms: ReadonlyArray<WiktextractForm>,
 ): { readonly forms: ReadonlyArray<string>; readonly dropped: number } => {
   const lemmaKey = lookupKey(lemma);
-  const lemmaHasSpace = /\s/.test(lemma);
   const forms = new Set<string>();
   let dropped = 0;
   for (const form of rawForms) {
-    if (!keepForm(rules, lemmaHasSpace, form)) {
+    if (!keepForm(rules, lemma, form)) {
       dropped++;
       continue;
     }
