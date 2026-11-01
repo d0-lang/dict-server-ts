@@ -40,6 +40,8 @@ export type ImportOptions = {
   readonly input: string;
   /** output file; built as `<out>.tmp` and renamed on success */
   readonly out: string;
+  /** replace `out` if it already exists; otherwise the import fails up front */
+  readonly force?: boolean;
   /** add form -> lemma rows from form-of / alt-of entries (default true) */
   readonly formOfFallback?: boolean;
   /** lines of the target language per write transaction */
@@ -96,7 +98,7 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
   const progressEvery = options.progressEvery ?? 0;
   const formOfFallback = options.formOfFallback ?? true;
 
-  yield* prepareOutput(options.out, tmp);
+  yield* prepareOutput(options.out, tmp, options.force ?? false);
   const db = yield* Effect.acquireRelease(
     Effect.try({
       try: () => createDictionaryFile(tmp),

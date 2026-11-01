@@ -35,7 +35,14 @@ curl -LO https://kaikki.org/dictionary/raw-wiktextract-data.jsonl.gz
 bun run import --lang pl --input raw-wiktextract-data.jsonl.gz --out data/pl_en.sqlite
 ```
 
-Flags: `--lang` (default `pl`; rules per language in `src/importer/transform/languages.ts`), `--input` (path or URL, default the raw dump URL), `--out` (default `data/<lang>_en.sqlite`), `--no-form-of-fallback`, `--limit <n>` (stop after n lines of the language, for samples). The file is built as `<out>.tmp` and renamed when the import succeeds, so a running server never sees a half-written file. A JSON summary (counts, size, time) is printed at the end.
+Flags: `--lang` (default `pl`; rules per language in `src/importer/transform/languages.ts`), `--input` (path or URL, default the raw dump URL), `--out` (default `data/<lang>_en.sqlite`), `--force` (overwrite `--out` if it exists; without it the import stops before doing any work), `--no-form-of-fallback`, `--limit <n>` (stop after n lines of the language, for samples). The file is built as `<out>.tmp` and renamed when the import succeeds, so a running server never sees a half-written file. A JSON summary (counts, size, time) is printed at the end.
+
+To avoid scanning the whole dump on every run, copy one language's lines into their own file and import that (`data/` is gitignored):
+
+```bash
+bun run filter --lang pl --input raw-wiktextract-data.jsonl.gz --out data/raw/pl.jsonl
+bun run import --lang pl --input data/raw/pl.jsonl
+```
 
 For Polish, a run over the full local dump takes about 70 s (about 10 s from a pre-filtered `pl` JSONL) and produces a ~39 MB file.
 

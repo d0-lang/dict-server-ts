@@ -1,7 +1,7 @@
 import { assert, describe, it } from "@effect/vitest";
 import { Database } from "bun:sqlite";
 import { Effect } from "effect";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { openDictionary } from "../dictionary/DictionaryDb.ts";
@@ -107,6 +107,29 @@ describe("importWiktextract", () => {
         .get();
       assert.isNull(hit);
       db.close();
+    }).pipe(Effect.scoped),
+  );
+
+  it.effect("refuses to overwrite an existing file unless forced", () =>
+    Effect.gen(function* () {
+      const dir = yield* tempDir;
+      const out = join(dir, "pl_en.sqlite");
+      yield* Effect.promise(() => writeFile(out, "existing"));
+
+      const refused = yield* Effect.flip(
+        importWiktextract({ lang: "pl", input: FIXTURE, out }),
+      );
+      assert.include(refused.message, "already exists");
+      const untouched = yield* Effect.promise(() => readFile(out, "utf8"));
+      assert.strictEqual(untouched, "existing");
+
+      const stats = yield* importWiktextract({
+        lang: "pl",
+        input: FIXTURE,
+        out,
+        force: true,
+      });
+      assert.strictEqual(stats.entries, 10);
     }).pipe(Effect.scoped),
   );
 

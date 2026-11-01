@@ -1,19 +1,35 @@
 import type { Database } from "bun:sqlite";
+import { existsSync } from "node:fs";
 import { mkdir, rename, rm, stat } from "node:fs/promises";
 import { dirname } from "node:path";
 import { Effect } from "effect";
 import { FormSource } from "../../dictionary/schema.ts";
-import { importFailure } from "../errors.ts";
+import { ImportError, importFailure } from "../errors.ts";
 
-/** Create the output directory and remove any temp file from an earlier run. */
-export const prepareOutput = (out: string, tmp: string) =>
-  Effect.tryPromise({
+/**
+ * Refuse to replace an existing file unless forced, then create the output
+ * directory and remove any temp file from an earlier run.
+ */
+export const prepareOutput = Effect.fnUntraced(function* (
+  out: string,
+  tmp: string,
+  force: boolean,
+) {
+  if (!force && existsSync(out)) {
+    return yield* Effect.fail(
+      new ImportError({
+        message: `${out} already exists, pass --force to overwrite it`,
+      }),
+    );
+  }
+  yield* Effect.tryPromise({
     try: async () => {
       await mkdir(dirname(out), { recursive: true });
       await rm(tmp, { force: true });
     },
     catch: importFailure(`cannot prepare ${tmp}`),
   });
+});
 
 export const countForms = (sqlite: Database) => {
   const count = (source: FormSource) =>

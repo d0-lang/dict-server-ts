@@ -8,6 +8,7 @@
     "start": "bun src/index.ts",
     "test": "bun --bun run vitest run",
     "import": "bun src/importer/cli.ts",
+    "filter": "bun src/importer/filterCli.ts",
     "format": "prettier --write ."
   },
   "devDependencies": {

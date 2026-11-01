@@ -25,6 +25,10 @@ const command = Command.make(
       ),
       Flag.optional,
     ),
+    force: Flag.Boolean("force").pipe(
+      Flag.withDescription("overwrite the output file if it already exists"),
+      Flag.withDefault(false),
+    ),
     noFormOfFallback: Flag.Boolean("no-form-of-fallback").pipe(
       Flag.withDescription(
         "do not add form -> lemma rows from separate form-of entries",
@@ -36,7 +40,7 @@ const command = Command.make(
       Flag.optional,
     ),
   },
-  Effect.fn(function* ({ lang, input, out, noFormOfFallback, limit }) {
+  Effect.fn(function* ({ lang, input, out, force, noFormOfFallback, limit }) {
     const rules = yield* languageRules(lang);
     const outPath = Option.getOrElse(
       out,
@@ -47,6 +51,7 @@ const command = Command.make(
       lang,
       input,
       out: outPath,
+      force,
       formOfFallback: !noFormOfFallback,
       limit: Option.getOrUndefined(limit),
       progressEvery: 20_000,
