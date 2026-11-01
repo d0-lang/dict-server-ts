@@ -1,4 +1,4 @@
-import type { UdPos } from "../dictionary/schema.ts";
+import type { UdPos } from "../../dictionary/schema.ts";
 
 /**
  * wiktextract `pos` label -> Universal Dependencies tag. Anything missing

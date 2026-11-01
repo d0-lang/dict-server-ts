@@ -1,6 +1,6 @@
-import type { DictionaryDb } from "../dictionary/DictionaryDb.ts";
-import { FormSource, formKey } from "../dictionary/schema.ts";
-import type { FormOfLink, ImportEntry } from "./transform.ts";
+import type { DictionaryDb } from "../../dictionary/DictionaryDb.ts";
+import { FormSource, formKey } from "../../dictionary/schema.ts";
+import type { FormOfLink, ImportEntry } from "../transform/transform.ts";
 
 export type WriterCounts = {
   entries: number;

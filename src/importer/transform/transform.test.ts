@@ -1,7 +1,7 @@
 import { assert, describe, it } from "@effect/vitest";
 import { LANGUAGES } from "./languages.ts";
 import { transformEntry } from "./transform.ts";
-import type { WiktextractEntry } from "./wiktextract.ts";
+import type { WiktextractEntry } from "../source/wiktextract.ts";
 
 const pl = LANGUAGES.pl!;
 

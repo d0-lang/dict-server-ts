@@ -1,24 +1,37 @@
-import { mkdir, rename, rm, stat } from "node:fs/promises";
-import { dirname } from "node:path";
-import { Effect, Exit, Result, Schema, Stream } from "effect";
+import { Effect, Result, Stream } from "effect";
 import { createDictionaryFile } from "../dictionary/DictionaryDb.ts";
-import { FormSource, SCHEMA_VERSION } from "../dictionary/schema.ts";
-import { LANGUAGES, languagePair, type LanguageRules } from "./languages.ts";
-import { transformEntry } from "./transform.ts";
-import { decodeWiktextractEntry, lineMayBeLanguage } from "./wiktextract.ts";
-import { makeWriter } from "./writer.ts";
+import { SCHEMA_VERSION } from "../dictionary/schema.ts";
+import { ImportError, importFailure } from "./errors.ts";
+import {
+  countForms,
+  finalizeDatabase,
+  prepareOutput,
+  publish,
+} from "./output/finalize.ts";
+import { makeWriter } from "./output/writer.ts";
+import { isUrl, openInput } from "./source/input.ts";
+import { parseLine, type WiktextractEntry } from "./source/wiktextract.ts";
+import {
+  makeTally,
+  tallyResult,
+  type ImportStats,
+  type Tally,
+} from "./stats.ts";
+import {
+  LANGUAGES,
+  languagePair,
+  type LanguageRules,
+} from "./transform/languages.ts";
+import { transformEntry } from "./transform/transform.ts";
+
+export { ImportError } from "./errors.ts";
+export type { ImportStats } from "./stats.ts";
 
 /** Raw English Wiktionary extract, every language (~3 GB gzipped). */
 export const RAW_DUMP_URL =
   "https://kaikki.org/dictionary/raw-wiktextract-data.jsonl.gz";
 
-export class ImportError extends Schema.TaggedError<ImportError>()(
-  "ImportError",
-  {
-    message: Schema.String,
-    cause: Schema.optional(Schema.Defect()),
-  },
-) {}
+const DEFAULT_BATCH_SIZE = 1000;
 
 export type ImportOptions = {
   /** wiktextract `lang_code`, must be configured in `languages.ts` */
@@ -37,86 +50,6 @@ export type ImportOptions = {
   readonly progressEvery?: number;
 };
 
-export type ImportStats = {
-  readonly pair: string;
-  readonly input: string;
-  readonly out: string;
-  readonly linesScanned: number;
-  readonly languageLines: number;
-  readonly invalidLines: number;
-  readonly entries: number;
-  readonly mergedLines: number;
-  readonly linesWithoutEntry: number;
-  readonly senses: number;
-  readonly skippedSenses: {
-    archaic: number;
-    historical: number;
-    noGloss: number;
-  };
-  readonly pronunciations: number;
-  readonly droppedForms: number;
-  readonly forms: { lemma: number; inflection: number; formOf: number };
-  readonly formOfLinks: number;
-  readonly formOfUnresolved: number;
-  readonly fileBytes: number;
-  readonly seconds: number;
-};
-
-const isUrl = (input: string) => /^https?:\/\//.test(input);
-
-const fail = (message: string) => (cause: unknown) =>
-  new ImportError({
-    message: `${message}: ${cause instanceof Error ? cause.message : String(cause)}`,
-    cause,
-  });
-
-/** Bytes of a local file or URL, gunzipped when the name ends in `.gz`. */
-export const openInput = (
-  input: string,
-): Stream.Stream<Uint8Array, ImportError> => {
-  const gunzip = (body: ReadableStream<Uint8Array>) =>
-    /\.gz($|\?)/.test(input)
-      ? body.pipeThrough(
-          new DecompressionStream("gzip") as ReadableWritablePair<
-            Uint8Array,
-            Uint8Array
-          >,
-        )
-      : body;
-  const onError = fail(`reading ${input}`);
-  if (!isUrl(input)) {
-    return Stream.unwrap(
-      Effect.tryPromise({
-        try: () => stat(input),
-        catch: fail(`cannot open ${input}`),
-      }).pipe(
-        Effect.as(
-          Stream.fromReadableStream({
-            evaluate: () => gunzip(Bun.file(input).stream()),
-            onError,
-          }),
-        ),
-      ),
-    );
-  }
-  return Stream.unwrap(
-    Effect.tryPromise({ try: () => fetch(input), catch: onError }).pipe(
-      Effect.flatMap((response) =>
-        response.ok && response.body !== null
-          ? Effect.succeed(response.body)
-          : Effect.fail(
-              new ImportError({
-                message: `GET ${input}: HTTP ${response.status}`,
-              }),
-            ),
-      ),
-      Effect.map((body) =>
-        Stream.fromReadableStream({ evaluate: () => gunzip(body), onError }),
-      ),
-    ),
-  );
-};
-
 export const languageRules = (
   lang: string,
 ): Effect.Effect<LanguageRules, ImportError> => {
@@ -130,6 +63,21 @@ export const languageRules = (
     : Effect.succeed(rules);
 };
 
+/** Entries of one language from the input, counting every line read. */
+const readEntries = (input: string, langCode: string, tally: Tally) =>
+  openInput(input).pipe(
+    Stream.decodeText(),
+    Stream.splitLines,
+    Stream.filterMap((line) => {
+      tally.linesScanned++;
+      const parsed = parseLine(line, langCode);
+      if (parsed === "invalid") tally.invalidLines++;
+      return typeof parsed === "string"
+        ? Result.failVoid
+        : Result.succeed<WiktextractEntry>(parsed);
+    }),
+  );
+
 /**
  * Stream a wiktextract JSONL (the raw all-language dump or an already filtered
  * file, plain or gzipped, local or remote), keep `lang_code == lang` and
@@ -142,112 +90,56 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
   options: ImportOptions,
 ) {
   const started = performance.now();
+  const elapsedSeconds = () => (performance.now() - started) / 1000;
   const rules = yield* languageRules(options.lang);
   const tmp = `${options.out}.tmp`;
   const progressEvery = options.progressEvery ?? 0;
   const formOfFallback = options.formOfFallback ?? true;
 
-  yield* Effect.tryPromise({
-    try: async () => {
-      await mkdir(dirname(options.out), { recursive: true });
-      await rm(tmp, { force: true });
-    },
-    catch: fail(`cannot prepare ${tmp}`),
-  });
-
+  yield* prepareOutput(options.out, tmp);
   const db = yield* Effect.acquireRelease(
     Effect.try({
       try: () => createDictionaryFile(tmp),
-      catch: fail(`cannot create ${tmp}`),
+      catch: importFailure(`cannot create ${tmp}`),
     }),
     (db) => Effect.sync(() => db.$client.close(false)),
   );
   const writer = makeWriter(db);
-  const read = { scanned: 0, language: 0, invalid: 0, withoutEntry: 0 };
-  const skipped = { archaic: 0, historical: 0, noGloss: 0 };
-  let droppedForms = 0;
+  const tally = makeTally();
 
-  const parse = (line: string) => {
-    read.scanned++;
-    if (!lineMayBeLanguage(line, rules.code)) return undefined;
-    let json: unknown;
-    try {
-      json = JSON.parse(line);
-    } catch {
-      read.invalid++;
-      return undefined;
-    }
+  const logProgress = () =>
+    console.error(
+      `[${elapsedSeconds().toFixed(0)}s] ${tally.linesScanned} lines scanned, ${tally.languageLines} ${rules.code}, ${writer.counts.entries} entries`,
+    );
+
+  const writeBatch = (batch: ReadonlyArray<WiktextractEntry>) => {
+    const results = batch.map((raw) => transformEntry(rules, raw));
+    results.forEach((result) => tallyResult(tally, result));
+    writer.writeBatch(results);
+    const before = tally.languageLines;
+    tally.languageLines += batch.length;
     if (
-      typeof json !== "object" ||
-      json === null ||
-      (json as { lang_code?: unknown }).lang_code !== rules.code
+      progressEvery > 0 &&
+      Math.floor(before / progressEvery) !==
+        Math.floor(tally.languageLines / progressEvery)
     ) {
-      return undefined; // the code only appeared nested (e.g. in translations)
+      logProgress();
     }
-    const decoded = decodeWiktextractEntry(json);
-    if (Exit.isFailure(decoded)) {
-      read.invalid++;
-      return undefined;
-    }
-    return decoded.value;
   };
 
-  let entries = openInput(options.input).pipe(
-    Stream.decodeText(),
-    Stream.splitLines,
-    Stream.filterMap((line) => {
-      const entry = parse(line);
-      return entry === undefined ? Result.failVoid : Result.succeed(entry);
-    }),
-  );
-  if (options.limit !== undefined) {
-    entries = entries.pipe(Stream.take(options.limit));
-  }
-
-  yield* entries.pipe(
-    Stream.grouped(options.batchSize ?? 1000),
-    Stream.runForEach((batch) =>
-      Effect.sync(() => {
-        const results = batch.map((raw) => transformEntry(rules, raw));
-        for (const r of results) {
-          if (r.entry === undefined) read.withoutEntry++;
-          skipped.archaic += r.skippedSenses.archaic;
-          skipped.historical += r.skippedSenses.historical;
-          skipped.noGloss += r.skippedSenses["no-gloss"];
-          droppedForms += r.droppedForms;
-        }
-        writer.writeBatch(results);
-        const before = read.language;
-        read.language += batch.length;
-        if (
-          progressEvery > 0 &&
-          Math.floor(before / progressEvery) !==
-            Math.floor(read.language / progressEvery)
-        ) {
-          const secs = ((performance.now() - started) / 1000).toFixed(0);
-          console.error(
-            `[${secs}s] ${read.scanned} lines scanned, ${read.language} ${rules.code}, ${writer.counts.entries} entries`,
-          );
-        }
-      }),
-    ),
+  const entries = readEntries(options.input, rules.code, tally);
+  yield* (
+    options.limit === undefined
+      ? entries
+      : entries.pipe(Stream.take(options.limit))
+  ).pipe(
+    Stream.grouped(options.batchSize ?? DEFAULT_BATCH_SIZE),
+    Stream.runForEach((batch) => Effect.sync(() => writeBatch(batch))),
   );
 
   const formOf = writer.resolveFormOf(formOfFallback);
-  const sqlite = db.$client;
-  const countForms = (source: FormSource) =>
-    sqlite
-      .query<{ n: number }, [number]>(
-        "SELECT count(*) AS n FROM forms WHERE source = ?",
-      )
-      .get(source)?.n ?? 0;
-  const forms = {
-    lemma: countForms(FormSource.Lemma),
-    inflection: countForms(FormSource.Inflection),
-    formOf: countForms(FormSource.FormOf),
-  };
-
-  const meta: Record<string, string> = {
+  const forms = countForms(db.$client);
+  finalizeDatabase(db.$client, {
     schema_version: String(SCHEMA_VERSION),
     pair: languagePair(rules),
     lang_code: rules.code,
@@ -257,45 +149,28 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     form_of_fallback: formOfFallback ? "on" : "off",
     entries: String(writer.counts.entries),
     forms: String(forms.lemma + forms.inflection + forms.formOf),
-  };
-  const insertMeta = sqlite.prepare(
-    "INSERT INTO meta (key, value) VALUES (?, ?)",
-  );
-  sqlite.transaction(() => {
-    for (const [k, v] of Object.entries(meta)) insertMeta.run(k, v);
-  })();
-  sqlite.run("ANALYZE");
-  sqlite.run("VACUUM");
-  sqlite.close(false);
-
-  yield* Effect.tryPromise({
-    try: () => rename(tmp, options.out),
-    catch: fail(`cannot move ${tmp} to ${options.out}`),
   });
-  const fileBytes = (yield* Effect.tryPromise({
-    try: () => stat(options.out),
-    catch: fail(`cannot stat ${options.out}`),
-  })).size;
+  const fileBytes = yield* publish(tmp, options.out);
 
   const stats: ImportStats = {
     pair: languagePair(rules),
     input: options.input,
     out: options.out,
-    linesScanned: read.scanned,
-    languageLines: read.language,
-    invalidLines: read.invalid,
+    linesScanned: tally.linesScanned,
+    languageLines: tally.languageLines,
+    invalidLines: tally.invalidLines,
     entries: writer.counts.entries,
     mergedLines: writer.counts.mergedLines,
-    linesWithoutEntry: read.withoutEntry,
+    linesWithoutEntry: tally.linesWithoutEntry,
     senses: writer.counts.senses,
-    skippedSenses: skipped,
+    skippedSenses: tally.skippedSenses,
     pronunciations: writer.counts.pronunciations,
-    droppedForms,
+    droppedForms: tally.droppedForms,
     forms,
     formOfLinks: writer.counts.formOfLinks,
     formOfUnresolved: formOf.unresolved,
     fileBytes,
-    seconds: (performance.now() - started) / 1000,
+    seconds: elapsedSeconds(),
   };
   return stats;
 }, Effect.scoped);

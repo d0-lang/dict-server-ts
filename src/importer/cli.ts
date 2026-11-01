@@ -1,7 +1,7 @@
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { Console, Effect, Option } from "effect";
 import { Command, Flag } from "effect/cli";
-import { languagePair } from "./languages.ts";
+import { languagePair } from "./transform/languages.ts";
 import { RAW_DUMP_URL, importWiktextract, languageRules } from "./Importer.ts";
 
 const command = Command.make(

@@ -1,4 +1,4 @@
-import { formKey, type PronKind, type UdPos } from "../dictionary/schema.ts";
+import { formKey, type PronKind, type UdPos } from "../../dictionary/schema.ts";
 import { SKIPPED_SENSE_TAGS, type LanguageRules } from "./languages.ts";
 import { toUdPos } from "./pos.ts";
 import type {
@@ -6,7 +6,7 @@ import type {
   WiktextractForm,
   WiktextractSense,
   WiktextractSound,
-} from "./wiktextract.ts";
+} from "../source/wiktextract.ts";
 
 /** A dictionary entry ready to be written. */
 export type ImportEntry = {
@@ -160,6 +160,53 @@ const toEtymology = (value: number | string | undefined): number => {
   return n !== undefined && Number.isInteger(n) && n >= 0 ? n : 0;
 };
 
+/** What one wiktextract sense turns into. */
+type SenseOutcome =
+  | { readonly kind: "skip"; readonly reason: SkippedSenseReason }
+  | { readonly kind: "link"; readonly targets: ReadonlyArray<string> }
+  | { readonly kind: "gloss"; readonly gloss: string };
+
+const classifySense = (
+  rules: LanguageRules,
+  sense: WiktextractSense,
+): SenseOutcome => {
+  const tags = sense.tags ?? [];
+  if (tags.some((t) => SKIPPED_SENSE_TAGS.includes(t))) {
+    const reason = tags.includes("archaic") ? "archaic" : "no-gloss";
+    return { kind: "skip", reason };
+  }
+  if (isHistorical(rules, tags)) return { kind: "skip", reason: "historical" };
+  if (tags.includes("form-of") || tags.includes("alt-of")) {
+    const links = [...(sense.form_of ?? []), ...(sense.alt_of ?? [])];
+    return { kind: "link", targets: links.map((l) => formKey(l.word)) };
+  }
+  const gloss = senseGloss(sense);
+  return gloss === undefined
+    ? { kind: "skip", reason: "no-gloss" }
+    : { kind: "gloss", gloss };
+};
+
+/** Normalized forms to index for a lemma, and how many raw forms were dropped. */
+const collectForms = (
+  rules: LanguageRules,
+  lemma: string,
+  rawForms: ReadonlyArray<WiktextractForm>,
+): { readonly forms: ReadonlyArray<string>; readonly dropped: number } => {
+  const lemmaKey = formKey(lemma);
+  const lemmaHasSpace = /\s/.test(lemma);
+  const forms = new Set<string>();
+  let dropped = 0;
+  for (const form of rawForms) {
+    if (!keepForm(rules, lemmaHasSpace, form)) {
+      dropped++;
+      continue;
+    }
+    const key = formKey(form.form);
+    if (key !== lemmaKey) forms.add(key);
+  }
+  return { forms: [...forms], dropped };
+};
+
 /** Pure mapping of one wiktextract line (already known to be `rules.code`). */
 export const transformEntry = (
   rules: LanguageRules,
@@ -167,75 +214,54 @@ export const transformEntry = (
 ): TransformResult => {
   const lemma = raw.word.normalize("NFC").trim();
   const lemmaKey = formKey(lemma);
-  const skipped: Record<SkippedSenseReason, number> = {
+  const skippedSenses: Record<SkippedSenseReason, number> = {
     archaic: 0,
     historical: 0,
     "no-gloss": 0,
   };
   const formOf: Array<FormOfLink> = [];
-  const senses: Array<ReadonlyArray<string>> = [];
-  const seenGlosses = new Set<string>();
+  const glosses = new Set<string>();
 
   for (const sense of raw.senses ?? []) {
-    const tags = sense.tags ?? [];
-    if (tags.some((t) => SKIPPED_SENSE_TAGS.includes(t))) {
-      skipped[tags.includes("archaic") ? "archaic" : "no-gloss"]++;
-      continue;
-    }
-    if (isHistorical(rules, tags)) {
-      skipped.historical++;
-      continue;
-    }
-    if (tags.includes("form-of") || tags.includes("alt-of")) {
-      for (const link of [...(sense.form_of ?? []), ...(sense.alt_of ?? [])]) {
-        const target = formKey(link.word);
-        if (target !== "" && target !== lemmaKey) {
-          formOf.push({ form: lemmaKey, lemma: target, sourcePos: raw.pos });
+    const outcome = classifySense(rules, sense);
+    switch (outcome.kind) {
+      case "skip":
+        skippedSenses[outcome.reason]++;
+        break;
+      case "link":
+        for (const target of outcome.targets) {
+          if (target !== "" && target !== lemmaKey) {
+            formOf.push({ form: lemmaKey, lemma: target, sourcePos: raw.pos });
+          }
         }
-      }
-      continue;
-    }
-    const gloss = senseGloss(sense);
-    if (gloss === undefined) {
-      skipped["no-gloss"]++;
-      continue;
-    }
-    if (seenGlosses.has(gloss)) continue;
-    seenGlosses.add(gloss);
-    senses.push([gloss]);
-  }
-
-  const rawForms = raw.forms ?? [];
-  const lemmaHasSpace = /\s/.test(lemma);
-  const forms = new Set<string>();
-  let droppedForms = 0;
-  if (senses.length > 0) {
-    for (const form of rawForms) {
-      if (keepForm(rules, lemmaHasSpace, form)) {
-        const key = formKey(form.form);
-        if (key !== lemmaKey) forms.add(key);
-      } else {
-        droppedForms++;
-      }
+        break;
+      case "gloss":
+        glosses.add(outcome.gloss);
+        break;
     }
   }
 
+  const links = dedupeLinks(formOf);
+  // Pure form-of lines and archaic-only words produce no entry, so their forms
+  // are not looked at.
+  if (glosses.size === 0) {
+    return { entry: undefined, formOf: links, skippedSenses, droppedForms: 0 };
+  }
+
+  const { forms, dropped } = collectForms(rules, lemma, raw.forms ?? []);
   return {
-    entry:
-      senses.length === 0
-        ? undefined
-        : {
-            lemma,
-            pos: toUdPos(raw.pos),
-            sourcePos: raw.pos,
-            etymology: toEtymology(raw.etymology_number),
-            senses,
-            pronunciations: pickPronunciations(rules, raw.sounds ?? []),
-            forms: [...forms],
-          },
-    formOf: dedupeLinks(formOf),
-    skippedSenses: skipped,
-    droppedForms,
+    entry: {
+      lemma,
+      pos: toUdPos(raw.pos),
+      sourcePos: raw.pos,
+      etymology: toEtymology(raw.etymology_number),
+      senses: [...glosses].map((gloss) => [gloss]),
+      pronunciations: pickPronunciations(rules, raw.sounds ?? []),
+      forms,
+    },
+    formOf: links,
+    skippedSenses,
+    droppedForms: dropped,
   };
 };
 

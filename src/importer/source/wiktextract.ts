@@ -1,4 +1,4 @@
-import { Schema } from "effect";
+import { Exit, Schema } from "effect";
 
 /**
  * The subset of a raw wiktextract JSONL line the importer reads. Unknown keys
@@ -53,8 +53,7 @@ export const WiktextractEntry = Schema.Struct({
 });
 export type WiktextractEntry = typeof WiktextractEntry.Type;
 
-export const decodeWiktextractEntry =
-  Schema.decodeUnknownExit(WiktextractEntry);
+const decodeEntry = Schema.decodeUnknownExit(WiktextractEntry);
 
 /**
  * Cheap pre-filter on the raw line before `JSON.parse`. The full dump is
@@ -63,6 +62,37 @@ export const decodeWiktextractEntry =
  * candidate: nested translation lists also contain `lang_code`, so the
  * top-level field is checked again after parsing.
  */
-export const lineMayBeLanguage = (line: string, langCode: string): boolean =>
+const lineMayBeLanguage = (line: string, langCode: string): boolean =>
   line.includes(`"lang_code": "${langCode}"`) ||
   line.includes(`"lang_code":"${langCode}"`);
+
+const parseJson = (line: string): { readonly ok: boolean; value?: unknown } => {
+  try {
+    return { ok: true, value: JSON.parse(line) };
+  } catch {
+    return { ok: false };
+  }
+};
+
+/**
+ * One raw line: its entry when it belongs to `langCode`, `"other-language"`
+ * when it doesn't, or `"invalid"` when it can't be parsed or decoded.
+ */
+export const parseLine = (
+  line: string,
+  langCode: string,
+): WiktextractEntry | "other-language" | "invalid" => {
+  if (!lineMayBeLanguage(line, langCode)) return "other-language";
+  const json = parseJson(line);
+  if (!json.ok) return "invalid";
+  const value = json.value;
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    (value as { lang_code?: unknown }).lang_code !== langCode
+  ) {
+    return "other-language"; // the code only appeared nested (e.g. in translations)
+  }
+  const decoded = decodeEntry(value);
+  return Exit.isSuccess(decoded) ? decoded.value : "invalid";
+};
