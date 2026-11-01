@@ -14,7 +14,7 @@ Ed25519 identity is stored at `IDENTITY_FILE` (default `data/identity.json`, git
 
 - `GET /v1/get-key` — unsigned Ed25519 public key (base64)
 - `GET /v1/get-meta` — signed metadata (`X-Nonce` required, `X-Signature` over exact body bytes)
-- `GET /v1/lookup?payload=<url-encoded JSON>` — stub translation
+- `GET /v1/lookup?word=<word>&lang=<pair>` — entries from `data/<pair>.sqlite`. Every pair in `LANGUAGES` needs its file: build it first, see below
 
 ```bash
 bun run test
@@ -44,14 +44,16 @@ bun run filter --lang pl --input raw-wiktextract-data.jsonl.gz --out data/raw/pl
 bun run import --lang pl --input data/raw/pl.jsonl
 ```
 
-For Polish, a run over the full local dump takes about 70 s (about 10 s from a pre-filtered `pl` JSONL) and produces a ~39 MB file.
+For Polish, a run over the full local dump takes about 60 s (about 12 s from a pre-filtered `pl` JSONL) and produces a ~43 MB file.
 
 What gets imported:
 
 - one entry per word + etymology + part of speech (wiktextract lines that repeat that key are merged); `pos` is mapped to a Universal Dependencies tag, `X` if unknown
-- senses: the most specific gloss of each sense; archaic senses and the language's historical stages (Middle/Old Polish) are skipped
+- senses: the most specific gloss of each sense; archaic senses and the language's historical stages (Middle/Old Polish) are skipped (see the last point below)
 - pronunciation: standard IPA (regional variants only when nothing else exists) and `upload.wikimedia.org` audio URLs
 - `forms`: every form from the lemma's inflection table plus the lemma itself, normalized (NFC, lowercase, diacritics kept); template rows, multi-word analytic forms and related words (diminutives, aspect partners, ...) are dropped. The `(form, entry_id)` primary key deduplicates
-- form-of / alt-of entries ("domu: genitive singular of dom") never become entries; they add `form -> lemma` rows when the lemma exists and the form was missing from its table (turn off with `--no-form-of-fallback`)
+- form-of / alt-of senses that are grammar or spelling ("domu: genitive singular of dom") never become entries; they add `form -> lemma` rows when the lemma exists and the form was missing from its table. A word with no entry also passes on its own table, following chains, so `tańsi` (from the table of `tańszy`, comparative of `tani`) returns `tani` (turn all of this off with `--no-form-of-fallback`)
+- derived words and abbreviations get their own entry, recognised by the gloss opening (`isOwnEntryGloss` in `rules.ts`). A gloss that only names its base gets the base's meanings, one sense each ("diminutive of bal: log"): same part of speech first, following chains, skipping `synonym of` senses, and every etymology when the base has several. If nothing is found, the bare gloss stays
+- a word whose only senses are historical keeps them, if it has no other entry
 
 Bump `SCHEMA_VERSION` in `src/dictionary/schema.ts` when the schema changes; it is stored as `PRAGMA user_version`, and `openDictionary` refuses files built for another version.

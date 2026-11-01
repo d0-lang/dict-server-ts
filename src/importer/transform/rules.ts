@@ -66,7 +66,50 @@ export const skipSense = (
   SKIPPED_SENSE_TAGS.find((tag) => tags.includes(tag)) ??
   (isHistorical(language, tags) ? "historical-stage" : undefined);
 
+/**
+ * Gloss openings of `form-of` / `alt-of` senses that describe a word of its own
+ * rather than a grammatical form of another word. Matched on the text because
+ * tags can't tell these apart (`feminine` is also on inflections). All glosses
+ * are English, so the list holds across languages. Any other opening is a form:
+ * a word missing from this list redirects to its target, it doesn't lose data.
+ * An optional first word covers qualifiers ("endearing diminutive of").
+ */
+const OWN_ENTRY_OPENING =
+  /^(?:\S+\s+)?(?:(?:female|male) equivalent|diminutive|augmentative|verbal noun|agent noun|frequentative|iterative|singulative|abbreviation|initialism|acronym|clipping|ellipsis) of\b/i;
+
+export const isOwnEntryGloss = (gloss: string): boolean =>
+  OWN_ENTRY_OPENING.test(gloss);
+
+/** Senses that only refer to another word: not copied onto derived words. */
+export const isPointerGloss = (gloss: string): boolean =>
+  /^synonym of\b/i.test(gloss);
+
+/**
+ * Whether a derived gloss has nothing beyond its target: "diminutive of kotek",
+ * or "diminutive of па́лка (pálka)" with a romanization. Anything else, like
+ * "diminutive of dziewczyna; little girl", already explains the word.
+ */
+export const isBareDerivedGloss = (
+  gloss: string,
+  targets: ReadonlyArray<string>,
+): boolean => {
+  const rest = gloss.replace(/^.*?\bof\s+/is, "").toLowerCase();
+  return targets.some((target) => {
+    const word = target.trim().toLowerCase();
+    if (!rest.startsWith(word)) return false;
+    const after = rest.slice(word.length).replace(/^\s*\([^“)]*\)/, "");
+    return /^[\s.,;:]*$/.test(after);
+  });
+};
+
 const hasWhitespace = (text: string): boolean => /\s/.test(text);
+
+/**
+ * Conjugation tables list the verbal noun, which is a word of its own. It only
+ * resolves to the verb when the dump has no line for it.
+ */
+export const isVerbalNounForm = (form: WiktextractForm): boolean =>
+  form.tags?.includes("noun-from-verb") ?? false;
 
 /** Whether a raw form is indexed as a form of its lemma. */
 export const keepForm = (
@@ -83,6 +126,7 @@ export const keepForm = (
   if (word.startsWith("-") || word.includes("(")) return false;
   const tags = form.tags ?? [];
   if (tags.some((t) => TEMPLATE_FORM_TAGS.has(t))) return false;
+  if (isVerbalNounForm(form)) return false;
   if (isHistorical(language, tags)) return false;
   if (form.source === undefined) {
     return (

@@ -171,6 +171,9 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     forms,
     formOfLinks: writer.counts.formOfLinks,
     formOfUnresolved: formOf.unresolved,
+    historicalEntries: writer.counts.historicalEntries,
+    derivedCopied: writer.counts.derivedCopied,
+    derivedBare: writer.counts.derivedBare,
     fileBytes,
     seconds: elapsedSeconds(),
   };

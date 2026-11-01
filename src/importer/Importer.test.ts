@@ -36,9 +36,9 @@ describe("importWiktextract", () => {
 
       assert.strictEqual(stats.linesScanned, 18);
       assert.strictEqual(stats.languageLines, 17); // the English line is dropped
-      assert.strictEqual(stats.entries, 10);
+      assert.strictEqual(stats.entries, 11);
       assert.strictEqual(stats.mergedLines, 3); // pies x3, robić x2 -> one entry each
-      assert.strictEqual(stats.linesWithoutEntry, 4); // domu, człowieki, matka 2, kolera
+      assert.strictEqual(stats.linesWithoutEntry, 3); // domu, człowieki, kolera
       assert.strictEqual(stats.forms.formOf, 1);
       assert.strictEqual(stats.skippedSenses.archaic, 1);
 
@@ -55,6 +55,8 @@ describe("importWiktextract", () => {
       ]);
       // only reachable through the form-of fallback (missing from the table)
       assert.deepStrictEqual(lemmas(db, "człowieki"), ["człowiek/NOUN"]);
+      // etymology 2 of matka is its own word's entry, not a redirect to mata
+      assert.deepStrictEqual(lemmas(db, "matka"), ["matka/NOUN", "matka/NOUN"]);
       // junk and multi-word forms are not indexed
       assert.deepStrictEqual(lemmas(db, "no-table-tags"), []);
       assert.deepStrictEqual(lemmas(db, "kolera"), []);
@@ -78,6 +80,125 @@ describe("importWiktextract", () => {
     }).pipe(Effect.scoped),
   );
 
+  it.effect("gives derived words self-contained entries", () =>
+    Effect.gen(function* () {
+      const dir = yield* tempDir;
+      const input = join(dir, "pl.jsonl");
+      const line = (
+        word: string,
+        pos: string,
+        senses: ReadonlyArray<object>,
+        extra: object = {},
+      ) => JSON.stringify({ word, pos, lang_code: "pl", senses, ...extra });
+      const link = (gloss: string, target: string) => ({
+        glosses: [gloss],
+        tags: ["form-of"],
+        form_of: [{ word: target }],
+      });
+      // Derived words come first: a base may appear later in the dump.
+      yield* Effect.promise(() =>
+        writeFile(
+          input,
+          [
+            line("koteczek", "noun", [link("diminutive of kotek", "kotek")], {
+              forms: [{ form: "koteczka", source: "declension" }],
+            }),
+            line("kotek", "noun", [link("diminutive of kot", "kot")]),
+            line("kot", "noun", [
+              { glosses: ["cat"] },
+              { glosses: ["synonym of kocur"] },
+            ]),
+            line("psa", "noun", [link("genitive singular of pies", "pies")]),
+            line("pies", "noun", [{ glosses: ["dog"] }]),
+            line("bieganie", "noun", [link("verbal noun of biegać", "biegać")]),
+            line("biegać", "verb", [{ glosses: ["to run"] }], {
+              forms: [
+                {
+                  form: "bieganie",
+                  tags: ["noun-from-verb"],
+                  source: "conjugation",
+                },
+                {
+                  form: "bieżenie",
+                  tags: ["noun-from-verb"],
+                  source: "conjugation",
+                },
+              ],
+            }),
+            line("USA", "name", [
+              link(
+                "initialism of the United States: a country",
+                "the United States",
+              ),
+            ]),
+            line("kotosio", "noun", [link("diminutive of kotoś", "kotoś")]),
+            line("tańsi", "adj", [link("plural of tańszy", "tańszy")]),
+            line(
+              "tańszy",
+              "adj",
+              [link("comparative degree of tani", "tani")],
+              {
+                forms: [{ form: "tańsza", source: "declension" }],
+              },
+            ),
+            line("tani", "adj", [{ glosses: ["cheap"] }]),
+            line("książę", "noun", [
+              { glosses: ["prince"], tags: ["Middle", "Polish"] },
+            ]),
+            line("księcia", "noun", [link("genitive of książę", "książę")]),
+            line("bal", "noun", [{ glosses: ["dance"] }], {
+              etymology_number: 1,
+            }),
+            line("bal", "noun", [{ glosses: ["log"] }], {
+              etymology_number: 2,
+            }),
+            line("balik", "noun", [link("diminutive of bal", "bal")]),
+          ].join("\n"),
+        ),
+      );
+      const out = join(dir, "pl_en.sqlite");
+      const stats = yield* importWiktextract({ lang: "pl", input, out });
+      const db = yield* openDictionary(out);
+      const senses = (word: string) =>
+        findEntriesByForm(db, word).map((e) => [
+          e.lemma,
+          ...e.senses.map((s) => s.translations[0]),
+        ]);
+
+      // chain across lines, skipping the pointer sense, with its own table
+      assert.deepStrictEqual(senses("koteczek"), [
+        ["koteczek", "diminutive of kotek: cat"],
+      ]);
+      assert.deepStrictEqual(senses("koteczka"), senses("koteczek"));
+      // true inflections still redirect
+      assert.deepStrictEqual(senses("psa"), [["pies", "dog"]]);
+      // the base's part of speech differs: fall back to it
+      assert.deepStrictEqual(senses("bieganie"), [
+        ["bieganie", "verbal noun of biegać: to run"],
+      ]);
+      // a verbal noun with no line of its own still reaches the verb
+      assert.deepStrictEqual(senses("bieżenie"), [["biegać", "to run"]]);
+      // kept when the base has no entry
+      assert.deepStrictEqual(senses("usa"), [
+        ["USA", "initialism of the United States: a country"],
+      ]);
+      assert.deepStrictEqual(senses("kotosio"), [
+        ["kotosio", "diminutive of kotoś"],
+      ]);
+      // word with no entry: its form, and its table, reach the final word
+      assert.deepStrictEqual(senses("tańsi"), [["tani", "cheap"]]);
+      assert.deepStrictEqual(senses("tańsza"), [["tani", "cheap"]]);
+      // historical-only word survives, with its forms
+      assert.deepStrictEqual(senses("księcia"), [["książę", "prince"]]);
+      // several etymologies: all of them are copied
+      assert.deepStrictEqual(senses("balik"), [
+        ["balik", "diminutive of bal: dance", "diminutive of bal: log"],
+      ]);
+      assert.strictEqual(stats.historicalEntries, 1);
+      assert.strictEqual(stats.derivedBare, 1);
+    }).pipe(Effect.scoped),
+  );
+
   it.effect("streams gzip input and can skip the form-of fallback", () =>
     Effect.gen(function* () {
       const dir = yield* tempDir;
@@ -93,7 +214,7 @@ describe("importWiktextract", () => {
         formOfFallback: false,
         batchSize: 3,
       });
-      assert.strictEqual(stats.entries, 10);
+      assert.strictEqual(stats.entries, 11);
       assert.strictEqual(stats.forms.formOf, 0);
 
       const db = new Database(out, { readonly: true });
@@ -129,7 +250,7 @@ describe("importWiktextract", () => {
         out,
         force: true,
       });
-      assert.strictEqual(stats.entries, 10);
+      assert.strictEqual(stats.entries, 11);
     }).pipe(Effect.scoped),
   );
 

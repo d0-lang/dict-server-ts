@@ -21,6 +21,9 @@ export type ImportStats = {
   readonly forms: { lemma: number; inflection: number; formOf: number };
   readonly formOfLinks: number;
   readonly formOfUnresolved: number;
+  readonly historicalEntries: number;
+  readonly derivedCopied: number;
+  readonly derivedBare: number;
   readonly fileBytes: number;
   readonly seconds: number;
 };
