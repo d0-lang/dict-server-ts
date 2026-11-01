@@ -2,8 +2,16 @@ import { Effect, Layer } from "effect";
 import { HttpApiBuilder } from "effect/http-api";
 import { Api } from "../api/Api.ts";
 import { AppConfig } from "../config.ts";
-import { Legal, LookupResponse, Meta, PublicKey } from "../domain/schemas.ts";
+import { Dictionaries } from "../dictionary/Dictionaries.ts";
+import {
+  Legal,
+  LookupError,
+  LookupResponse,
+  Meta,
+  PublicKey,
+} from "../domain/schemas.ts";
 import { Identity } from "../identity/Identity.ts";
+import { lookupStub } from "./lookupStub.ts";
 import { signedMetaResponse } from "./signMeta.ts";
 
 const sha256Hex = Effect.fnUntraced(function* (text: string) {
@@ -22,6 +30,7 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
   Effect.fnUntraced(function* (handlers) {
     const identity = yield* Identity;
     const config = yield* AppConfig;
+    const dictionaries = yield* Dictionaries;
 
     const privacy_hash = yield* sha256Hex(config.privacyShort);
     const tos_hash = yield* sha256Hex(config.tosShort);
@@ -57,20 +66,33 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
           }),
         ).pipe(Effect.orDie),
       lookup: ({ query }) =>
-        Effect.succeed(
-          new LookupResponse({
-            word: query.payload.word,
-            translation: "TBD",
-          }),
-        ),
+        !query.word || !query.lang
+          ? Effect.fail(new LookupError({ error: "bad_request" }))
+          : !config.languages.includes(query.lang)
+            ? Effect.fail(new LookupError({ error: "unsupported_lang" }))
+            : Effect.succeed(
+                new LookupResponse({
+                  entries: dictionaries.lookup(query.lang, query.word),
+                }),
+              ),
     });
   }),
 );
 
 export const DictHandlersMemory = DictHandlersNoDeps.pipe(
-  Layer.provide([Identity.layerMemory, AppConfig.layer]),
+  Layer.provide([
+    Identity.layerMemory,
+    AppConfig.layer,
+    Layer.succeed(Dictionaries, {
+      lookup: (_pair, word) => lookupStub(word),
+    }),
+  ]),
 );
 
 export const DictHandlers = DictHandlersNoDeps.pipe(
-  Layer.provide([Identity.layer, AppConfig.layer]),
+  Layer.provide([
+    Identity.layer,
+    AppConfig.layer,
+    Dictionaries.layer().pipe(Layer.provide(AppConfig.layer)),
+  ]),
 );

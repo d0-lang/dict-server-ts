@@ -4,7 +4,6 @@ import { HttpApiTest } from "effect/http-api";
 import { HttpServer } from "effect/http";
 import { Api } from "./Api.ts";
 import { DictHandlersMemory } from "../http/DictHandlers.ts";
-import { LookupRequest } from "../domain/schemas.ts";
 
 const HandlersLayer = Layer.mergeAll(
   DictHandlersMemory,
@@ -35,16 +34,16 @@ layer(HandlersLayer)("DictApi", (it) => {
     }),
   );
 
-  it.effect("looks up a word with a stub translation", () =>
+  it.effect("looks up a word in the protocol's shape", () =>
     Effect.gen(function* () {
       const client = yield* makeClient;
       const result = yield* client.dict.lookup({
-        query: {
-          payload: new LookupRequest({ word: "Mutter", lang: "de_en" }),
-        },
+        query: { word: "Mutter", lang: "de_en" },
       });
-      assert.strictEqual(result.word, "Mutter");
-      assert.strictEqual(result.translation, "TBD");
+      assert.deepStrictEqual(
+        result.entries.map((e) => e.senses[0]?.translations),
+        [["mother"], ["nut (for a bolt)"]],
+      );
     }),
   );
 });

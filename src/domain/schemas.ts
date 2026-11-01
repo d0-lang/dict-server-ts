@@ -25,17 +25,31 @@ export class Meta extends Schema.Class<Meta>("server/domain/Meta")({
   verification_urls: Schema.Array(Schema.String),
 }) {}
 
-export class LookupRequest extends Schema.Class<LookupRequest>(
-  "server/domain/LookupRequest",
-)({
-  word: Schema.String,
-  lang: Schema.String,
-  context: Schema.optionalKey(Schema.String),
-}) {}
+export const LookupEntry = Schema.Struct({
+  lemma: Schema.String,
+  pos: Schema.String,
+  pron: Schema.optionalKey(
+    Schema.Struct({
+      ipa: Schema.optionalKey(Schema.Array(Schema.String)),
+      audio: Schema.optionalKey(Schema.Array(Schema.String)),
+      reading: Schema.optionalKey(Schema.String),
+    }),
+  ),
+  senses: Schema.Array(
+    Schema.Struct({ translations: Schema.Array(Schema.String) }),
+  ),
+});
+export type LookupEntry = typeof LookupEntry.Type;
 
 export class LookupResponse extends Schema.Class<LookupResponse>(
   "server/domain/LookupResponse",
 )({
-  word: Schema.String,
-  translation: Schema.String,
+  entries: Schema.Array(LookupEntry),
 }) {}
+
+export class LookupError extends Schema.Class<LookupError>(
+  "server/domain/LookupError",
+)(
+  { error: Schema.Literals(["bad_request", "unsupported_lang"]) },
+  { httpApiStatus: 400 },
+) {}

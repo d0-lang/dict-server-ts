@@ -7,7 +7,7 @@ import {
 } from "effect/http-api";
 import { Schema } from "effect";
 import {
-  LookupRequest,
+  LookupError,
   LookupResponse,
   Meta,
   PublicKey,
@@ -29,9 +29,12 @@ export class DictApi extends HttpApiGroup.make("dict")
     }),
     HttpApiEndpoint.get("lookup", "/lookup", {
       query: {
-        payload: Schema.fromJsonString(LookupRequest),
+        // Optional so a missing one gets the protocol's error body from the handler.
+        word: Schema.optionalKey(Schema.String),
+        lang: Schema.optionalKey(Schema.String),
       },
       success: LookupResponse,
+      error: LookupError,
     }),
   )
   .prefix("/v1") {}
