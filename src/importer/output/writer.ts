@@ -1,5 +1,6 @@
 import type { DictionaryDb } from "../../dictionary/DictionaryDb.ts";
-import { FormSource, formKey } from "../../dictionary/schema.ts";
+import { lookupKey } from "../../dictionary/lookupKey.ts";
+import { FormSource } from "../../dictionary/schema.ts";
 import type { FormOfLink, ImportEntry } from "../transform/transform.ts";
 
 export type WriterCounts = {
@@ -81,7 +82,7 @@ export const makeWriter = (db: DictionaryDb) => {
         entry.sourcePos,
         entry.etymology,
       );
-      insertForm.run(formKey(entry.lemma), state.id, FormSource.Lemma);
+      insertForm.run(lookupKey(entry.lemma), state.id, FormSource.Lemma);
     } else {
       counts.mergedLines++;
     }

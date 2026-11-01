@@ -1,8 +1,8 @@
 import { asc, eq, inArray } from "drizzle-orm";
 import type { DictionaryDb } from "./DictionaryDb.ts";
+import { lookupKey } from "./lookupKey.ts";
 import {
   entries,
-  formKey,
   forms,
   pronunciations,
   senses,
@@ -35,7 +35,7 @@ export const findEntriesByForm = (
   const ids = db
     .select({ id: forms.entryId })
     .from(forms)
-    .where(eq(forms.form, formKey(word)))
+    .where(eq(forms.form, lookupKey(word)))
     .all()
     .map((r) => r.id);
   if (ids.length === 0) return [];

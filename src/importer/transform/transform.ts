@@ -1,4 +1,5 @@
-import { formKey, type PronKind, type UdPos } from "../../dictionary/schema.ts";
+import { cleanWord, lookupKey } from "../../dictionary/lookupKey.ts";
+import type { PronKind, UdPos } from "../../dictionary/schema.ts";
 import { isHistorical, type LanguageRules } from "./languages.ts";
 import { toUdPos } from "./pos.ts";
 import { keepForm, skipSense, type SkippedSenseReason } from "./rules.ts";
@@ -21,7 +22,7 @@ export type ImportEntry = {
     readonly kind: PronKind;
     readonly value: string;
   }>;
-  /** Normalized (`formKey`) inflected forms, lemma excluded, deduplicated. */
+  /** Normalized (`lookupKey`) inflected forms, lemma excluded, deduplicated. */
   readonly forms: ReadonlyArray<string>;
 };
 
@@ -31,9 +32,9 @@ export type ImportEntry = {
  * exists, as a fallback for forms missing from Y's inflection table.
  */
 export type FormOfLink = {
-  /** `formKey` of the word carrying the form-of sense. */
+  /** `lookupKey` of the word carrying the form-of sense. */
   readonly form: string;
-  /** `formKey` of the lemma it points at. */
+  /** `lookupKey` of the lemma it points at. */
   readonly lemma: string;
   readonly sourcePos: string;
 };
@@ -102,7 +103,7 @@ const classifySense = (
   if (reason !== undefined) return { kind: "skip", reason };
   if (tags.includes("form-of") || tags.includes("alt-of")) {
     const links = [...(sense.form_of ?? []), ...(sense.alt_of ?? [])];
-    return { kind: "link", targets: links.map((l) => formKey(l.word)) };
+    return { kind: "link", targets: links.map((l) => lookupKey(l.word)) };
   }
   const gloss = senseGloss(sense);
   return gloss === undefined
@@ -116,7 +117,7 @@ const collectForms = (
   lemma: string,
   rawForms: ReadonlyArray<WiktextractForm>,
 ): { readonly forms: ReadonlyArray<string>; readonly dropped: number } => {
-  const lemmaKey = formKey(lemma);
+  const lemmaKey = lookupKey(lemma);
   const lemmaHasSpace = /\s/.test(lemma);
   const forms = new Set<string>();
   let dropped = 0;
@@ -125,7 +126,7 @@ const collectForms = (
       dropped++;
       continue;
     }
-    const key = formKey(form.form);
+    const key = lookupKey(form.form);
     if (key !== lemmaKey) forms.add(key);
   }
   return { forms: [...forms], dropped };
@@ -136,8 +137,8 @@ export const transformEntry = (
   rules: LanguageRules,
   raw: WiktextractEntry,
 ): TransformResult => {
-  const lemma = raw.word.normalize("NFC").trim();
-  const lemmaKey = formKey(lemma);
+  const lemma = cleanWord(raw.word);
+  const lemmaKey = lookupKey(lemma);
   const skippedSenses: Record<SkippedSenseReason, number> = {
     archaic: 0,
     "historical-stage": 0,

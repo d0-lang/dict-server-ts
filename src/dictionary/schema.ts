@@ -102,7 +102,7 @@ export type FormSource = (typeof FormSource)[keyof typeof FormSource];
 
 /**
  * Deinflection index: normalized surface form -> entry. The lemma itself is a
- * row too, so a lookup is a single primary-key prefix scan on `formKey(word)`.
+ * row too, so a lookup is a single primary-key prefix scan on `lookupKey(word)`.
  * The composite primary key makes duplicates impossible; writers use
  * `INSERT OR IGNORE` and let SQLite drop them.
  */
@@ -160,10 +160,3 @@ CREATE TABLE forms (
 `;
 
 export const schema = { meta, entries, senses, pronunciations, forms };
-
-/**
- * Normalization shared by the importer and lookups: NFC, trimmed, lowercased.
- * Diacritics are kept on purpose (Polish "łza" and "lza" are different words).
- */
-export const formKey = (word: string): string =>
-  word.normalize("NFC").trim().toLowerCase();
