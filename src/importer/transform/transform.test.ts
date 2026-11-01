@@ -32,7 +32,7 @@ describe("transformEntry", () => {
     ]);
     assert.deepStrictEqual(result.skippedSenses, {
       archaic: 1,
-      historical: 1,
+      "historical-stage": 1,
       "no-gloss": 0,
     });
   });

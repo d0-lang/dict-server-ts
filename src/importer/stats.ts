@@ -13,7 +13,7 @@ export type ImportStats = {
   readonly senses: number;
   readonly skippedSenses: {
     archaic: number;
-    historical: number;
+    historicalStage: number;
     noGloss: number;
   };
   readonly pronunciations: number;
@@ -32,14 +32,15 @@ export const makeTally = () => ({
   invalidLines: 0,
   linesWithoutEntry: 0,
   droppedForms: 0,
-  skippedSenses: { archaic: 0, historical: 0, noGloss: 0 },
+  skippedSenses: { archaic: 0, historicalStage: 0, noGloss: 0 },
 });
 export type Tally = ReturnType<typeof makeTally>;
 
 export const tallyResult = (tally: Tally, result: TransformResult) => {
   if (result.entry === undefined) tally.linesWithoutEntry++;
   tally.skippedSenses.archaic += result.skippedSenses.archaic;
-  tally.skippedSenses.historical += result.skippedSenses.historical;
+  tally.skippedSenses.historicalStage +=
+    result.skippedSenses["historical-stage"];
   tally.skippedSenses.noGloss += result.skippedSenses["no-gloss"];
   tally.droppedForms += result.droppedForms;
 };

@@ -1,6 +1,7 @@
 import { formKey, type PronKind, type UdPos } from "../../dictionary/schema.ts";
-import { SKIPPED_SENSE_TAGS, type LanguageRules } from "./languages.ts";
+import { isHistorical, type LanguageRules } from "./languages.ts";
 import { toUdPos } from "./pos.ts";
+import { keepForm, skipSense, type SkippedSenseReason } from "./rules.ts";
 import type {
   WiktextractEntry,
   WiktextractForm,
@@ -37,86 +38,12 @@ export type FormOfLink = {
   readonly sourcePos: string;
 };
 
-export type SkippedSenseReason = "archaic" | "historical" | "no-gloss";
-
 export type TransformResult = {
   /** Undefined when no sense survived (pure form-of entries, archaic-only words). */
   readonly entry: ImportEntry | undefined;
   readonly formOf: ReadonlyArray<FormOfLink>;
   readonly skippedSenses: Readonly<Record<SkippedSenseReason, number>>;
   readonly droppedForms: number;
-};
-
-const hasTagSet = (
-  tags: ReadonlyArray<string> | undefined,
-  set: ReadonlyArray<string>,
-): boolean =>
-  tags !== undefined && set.length > 0 && set.every((t) => tags.includes(t));
-
-const isHistorical = (
-  rules: LanguageRules,
-  tags: ReadonlyArray<string> | undefined,
-): boolean => rules.excludedTagSets.some((set) => hasTagSet(tags, set));
-
-/** Rows of an inflection table that are template metadata, not words. */
-const JUNK_FORM_TAGS = new Set([
-  "table-tags",
-  "inflection-template",
-  "class",
-  "canonical",
-  "romanization",
-]);
-
-/**
- * `forms` rows without a `source` come from the headword line. Most are
- * related *words* (diminutives, aspect partners, feminine equivalents, the
- * derived adverb), which must not resolve to this lemma. Only these tags mark
- * a real form of the same lexeme there.
- */
-const HEAD_FORM_KEEP_TAGS = new Set([
-  "alternative",
-  "comparative",
-  "superlative",
-]);
-const HEAD_FORM_DERIVED_TAGS = new Set([
-  "adjective",
-  "adverb",
-  "augmentative",
-  "demonym",
-  "derived",
-  "diminutive",
-  "feminine",
-  "masculine",
-  "neuter",
-  "abbreviation",
-  "imperfective",
-  "perfective",
-  "frequentative",
-  "surname",
-  "noun-from-verb",
-]);
-
-const keepForm = (
-  rules: LanguageRules,
-  lemmaHasSpace: boolean,
-  form: WiktextractForm,
-): boolean => {
-  const word = form.form.trim();
-  if (word === "" || word === "-" || word === "—") return false;
-  // "-(e)m robił", "będę robił": analytic forms of single-word lemmas are not
-  // something a single-word lookup can hit, and they bloat the index.
-  if (!lemmaHasSpace && /\s/.test(word)) return false;
-  if (word.startsWith("-") || word.includes("(")) return false;
-  const tags = form.tags ?? [];
-  if (tags.some((t) => JUNK_FORM_TAGS.has(t))) return false;
-  if (isHistorical(rules, tags)) return false;
-  if (form.source === undefined) {
-    return (
-      tags.some((t) => HEAD_FORM_KEEP_TAGS.has(t)) &&
-      !tags.some((t) => HEAD_FORM_DERIVED_TAGS.has(t))
-    );
-  }
-  return true;
 };
 
 /**
@@ -171,11 +98,8 @@ const classifySense = (
   sense: WiktextractSense,
 ): SenseOutcome => {
   const tags = sense.tags ?? [];
-  if (tags.some((t) => SKIPPED_SENSE_TAGS.includes(t))) {
-    const reason = tags.includes("archaic") ? "archaic" : "no-gloss";
-    return { kind: "skip", reason };
-  }
-  if (isHistorical(rules, tags)) return { kind: "skip", reason: "historical" };
+  const reason = skipSense(rules, tags);
+  if (reason !== undefined) return { kind: "skip", reason };
   if (tags.includes("form-of") || tags.includes("alt-of")) {
     const links = [...(sense.form_of ?? []), ...(sense.alt_of ?? [])];
     return { kind: "link", targets: links.map((l) => formKey(l.word)) };
@@ -216,7 +140,7 @@ export const transformEntry = (
   const lemmaKey = formKey(lemma);
   const skippedSenses: Record<SkippedSenseReason, number> = {
     archaic: 0,
-    historical: 0,
+    "historical-stage": 0,
     "no-gloss": 0,
   };
   const formOf: Array<FormOfLink> = [];

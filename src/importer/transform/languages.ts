@@ -1,6 +1,8 @@
 /**
- * Per-language import rules. Everything language specific lives here; the
- * transform in `transform.ts` is generic.
+ * Per-language import rules; rules shared by every language are in `rules.ts`.
+ *
+ * `rules.ts` and `pos.ts` were written against Polish data, so check them on a
+ * real extract when adding a language too.
  */
 export type LanguageRules = {
   /** wiktextract `lang_code` of the source language. */
@@ -8,23 +10,17 @@ export type LanguageRules = {
   /** Target (gloss) language; always English for the English Wiktionary dump. */
   readonly target: string;
   /**
-   * Tag combinations that mark a historical stage of the language. A sense,
-   * form or pronunciation is dropped when its tags contain every tag of any set.
-   * (Replaces the old hard-coded "Middle Polish" check.)
+   * Historical stages of the language. A sense, form or pronunciation is dropped
+   * when its tags contain every tag of a stage. Each stage is a list because
+   * wiktextract splits "Middle Polish" into the tags "Middle" and "Polish".
    */
-  readonly excludedTagSets: ReadonlyArray<ReadonlyArray<string>>;
+  readonly historicalStages: ReadonlyArray<ReadonlyArray<string>>;
   /**
    * `note` values on `sounds` that still mean the standard pronunciation
    * (other notes are regional variants, kept only when nothing else exists).
    */
   readonly standardPronNotes: ReadonlyArray<string>;
 };
-
-/** Sense tags dropped for every language. */
-export const SKIPPED_SENSE_TAGS: ReadonlyArray<string> = [
-  "archaic",
-  "no-gloss",
-];
 
 /**
  * Supported source languages. To add one, add its rules here and check its
@@ -34,7 +30,7 @@ export const LANGUAGES: Readonly<Record<string, LanguageRules>> = {
   pl: {
     code: "pl",
     target: "en",
-    excludedTagSets: [
+    historicalStages: [
       ["Middle", "Polish"],
       ["Old", "Polish"],
     ],
@@ -44,3 +40,10 @@ export const LANGUAGES: Readonly<Record<string, LanguageRules>> = {
 
 export const languagePair = (rules: LanguageRules): string =>
   `${rules.code}_${rules.target}`;
+
+/** Whether the tags mark a historical stage of the language. */
+export const isHistorical = (
+  rules: LanguageRules,
+  tags: ReadonlyArray<string> = [],
+): boolean =>
+  rules.historicalStages.some((stage) => stage.every((t) => tags.includes(t)));
