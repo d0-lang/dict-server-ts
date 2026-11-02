@@ -1,0 +1,6 @@
+# Allowlist: data/ holds a 25 GB dump and the private key, .env stays out too.
+*
+!package.json
+!bun.lock
+!tsconfig.json
+!src

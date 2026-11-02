@@ -1,0 +1,19 @@
+services:
+  dict-server:
+    build: .
+    container_name: dict-server
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      PORT: "3000"
+      LANGUAGES: pl_en
+      IDENTITY_FILE: data/identity.json
+    ports:
+      # Not 3000, so `bun run dev` can run alongside.
+      - "127.0.0.1:37421:3000"
+    volumes:
+      # The whole directory, not single files: the importer replaces a dictionary
+      # by renaming, which a file mount would not see.
+      - ./data:/app/data:ro
