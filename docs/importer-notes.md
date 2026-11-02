@@ -17,6 +17,18 @@ Measured, not decided. Throwaway scripts, so class counts come from gloss and ta
 - `książę` (prince) and `księcia` return nothing: all the `książę` senses shown carry `Middle` + `Polish`, so the historical-stage rule drops the word. Cause not checked against Wiktionary.
 - Russian: 2.5M of 2.9M forms and most link targets carry stress marks but headwords don't, so about 94% of inflection links miss with `lookupKey`. Needs fixing before adding Russian.
 
+## Lookup eval, first run (2026-11-02)
+
+Findings, not decisions. See `eval/README.md`. Haiku judged 200 words in context from the `dict-corpus` repo, and the verified points were checked against the dump: 79.5% Clear, 23 Buried, 14 Misleading, 4 No help.
+
+- Fixed phrases cause half of the Misleading and No help results (9 of 18). The entries usually exist (`po prostu`, `od razu`, `w miarę`, `przede wszystkim`) but a click only sends one word, so the 8,642 multi-word entries are mostly unreachable. Verb phrases also have no inflected forms: `wejść w życie` exists, `wszedł w życie` doesn't.
+- Order and noise cause 21 of the 23 Buried results, e.g. `mam` -> `mama`, `rządem` -> row, then government.
+- Misses rarely hurt: 7 of the 8 misses in the sample were rated Clear (English words, names, `art`).
+- Wiktextract appears to read a gloss starting "form of ..." as a form-of link, and the importer then drops it: `ustrój`, and `cześć`, which loses its greeting sense entirely.
+- Polish `i` ("and") has no entry anywhere in the full raw dump, only the letter. Cause not checked.
+- `król` has no "monarch" sense in the dump; its first sense is "synonym of państwo". Cause not checked.
+- Unresolved templates reach readers in 3 senses, affecting 52 lookup forms, e.g. `Template:syn of`.
+
 ## Current state (2026-11-01)
 
 - Derived words (section 1), table moves and historical-only words are implemented, uncommitted on `importer`, along with real `/v1/lookup`, which includes the `lookup-stub` commit's changes. The proposed details in section 1 are confirmed.

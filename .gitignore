@@ -35,3 +35,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Ed25519 identity (includes the private key)
 data/
+
+# lookup eval runs, which contain copies of the source texts
+eval/out
