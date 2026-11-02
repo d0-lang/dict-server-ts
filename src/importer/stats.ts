@@ -15,6 +15,7 @@ export type ImportStats = {
     archaic: number;
     historicalStage: number;
     noGloss: number;
+    placeholder: number;
   };
   readonly pronunciations: number;
   readonly droppedForms: number;
@@ -24,6 +25,12 @@ export type ImportStats = {
   readonly historicalEntries: number;
   readonly derivedCopied: number;
   readonly derivedBare: number;
+  readonly seeLinks: number;
+  /** Most repeated parent glosses across words, to spot new templates by eye. */
+  readonly topParentGlosses: ReadonlyArray<{
+    readonly gloss: string;
+    readonly words: number;
+  }>;
   readonly fileBytes: number;
   readonly seconds: number;
 };
@@ -35,9 +42,16 @@ export const makeTally = () => ({
   invalidLines: 0,
   linesWithoutEntry: 0,
   droppedForms: 0,
-  skippedSenses: { archaic: 0, historicalStage: 0, noGloss: 0 },
+  skippedSenses: { archaic: 0, historicalStage: 0, noGloss: 0, placeholder: 0 },
+  parentGlosses: new Map<string, number>(),
 });
 export type Tally = ReturnType<typeof makeTally>;
+
+export const topParentGlosses = (tally: Tally, limit = 15) =>
+  [...tally.parentGlosses]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([gloss, words]) => ({ gloss, words }));
 
 export const tallyResult = (tally: Tally, result: TransformResult) => {
   if (result.entry === undefined) tally.linesWithoutEntry++;
@@ -45,5 +59,9 @@ export const tallyResult = (tally: Tally, result: TransformResult) => {
   tally.skippedSenses.historicalStage +=
     result.skippedSenses["historical-stage"];
   tally.skippedSenses.noGloss += result.skippedSenses["no-gloss"];
+  tally.skippedSenses.placeholder += result.skippedSenses.placeholder;
   tally.droppedForms += result.droppedForms;
+  for (const gloss of result.parentGlosses) {
+    tally.parentGlosses.set(gloss, (tally.parentGlosses.get(gloss) ?? 0) + 1);
+  }
 };

@@ -7,6 +7,8 @@
 export type LanguageRules = {
   /** wiktextract `lang_code` of the source language. */
   readonly code: string;
+  /** Language name, as in the `#Polish` anchors of wiktextract links. */
+  readonly name: string;
   /** Target (gloss) language; always English for the English Wiktionary dump. */
   readonly target: string;
   /**
@@ -29,6 +31,7 @@ export type LanguageRules = {
 export const LANGUAGES: Readonly<Record<string, LanguageRules>> = {
   pl: {
     code: "pl",
+    name: "Polish",
     target: "en",
     historicalStages: [
       ["Middle", "Polish"],

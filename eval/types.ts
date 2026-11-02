@@ -15,33 +15,21 @@ export type Item = {
   readonly weight: number;
 };
 
-export type Rating = "clear" | "buried" | "misleading" | "no_help";
-
-export type Cause =
-  | "none"
-  | "order"
-  | "noise"
-  | "missing_sense"
-  | "missing_word"
-  | "fixed_phrase"
-  | "bad_gloss"
-  | "form_gloss"
-  | "transcription_error"
-  | "name"
-  | "foreign_word"
-  | "other";
+export type Understood = "yes" | "partly" | "wrong" | "no";
+export type Flag = "marginal" | "junk";
 
 export type Verdict = {
   readonly id: string;
-  readonly meaning: string;
-  readonly rating: Rating;
-  /** The rating before the second look, for anything first rated below clear. */
-  readonly first_rating: Rating;
-  readonly cause: Cause;
+  readonly understood: Understood;
+  /** `group.sense`, both from 1, or null when no sense gives the meaning. */
+  readonly fits: string | null;
+  /** Keyed by `group` or `group.sense`. Anything absent is valid. */
+  readonly flags: Readonly<Record<string, Flag>>;
+  readonly cause: string;
   readonly note: string;
 };
 
 export type SampleRecord = Item & {
-  readonly id: string;
-  readonly batch: string;
+  /** Where it was picked from: the frequent words or the random rest. */
+  readonly stratum: "frequent" | "random";
 };

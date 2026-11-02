@@ -14,8 +14,13 @@ const WordLink = Schema.Struct({
 });
 
 export const WiktextractSense = Schema.Struct({
+  /** The path from the top parent gloss down to this sense. */
   glosses: Schema.optionalKey(Schema.Array(Schema.String)),
+  /** Same path with its labels, like "(obsolete) ...", when any level has one. */
+  raw_glosses: Schema.optionalKey(Schema.Array(Schema.String)),
   tags: Tags,
+  /** `[text, target]` pairs for the whole path; targets look like `dom#Polish`. */
+  links: Schema.optionalKey(Schema.Array(Schema.Array(Schema.String))),
   /** `form-of` senses point at their lemma here ("domu" -> "dom"). */
   form_of: Schema.optionalKey(Schema.Array(WordLink)),
   /** `alt-of` senses point at the main spelling here. */

@@ -14,6 +14,7 @@ import { parseLine, type WiktextractEntry } from "./source/wiktextract.ts";
 import {
   makeTally,
   tallyResult,
+  topParentGlosses,
   type ImportStats,
   type Tally,
 } from "./stats.ts";
@@ -174,6 +175,8 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     historicalEntries: writer.counts.historicalEntries,
     derivedCopied: writer.counts.derivedCopied,
     derivedBare: writer.counts.derivedBare,
+    seeLinks: writer.counts.seeLinks,
+    topParentGlosses: topParentGlosses(tally),
     fileBytes,
     seconds: elapsedSeconds(),
   };

@@ -17,7 +17,33 @@ const SKIPPED_SENSE_TAGS = ["archaic", "no-gloss"] as const;
  * `historicalStages`, unrelated to wiktextract's `historical` tag.
  */
 export type SkippedSenseReason =
-  (typeof SKIPPED_SENSE_TAGS)[number] | "historical-stage";
+  | (typeof SKIPPED_SENSE_TAGS)[number]
+  | "historical-stage"
+  | "placeholder";
+
+/** Wiktionary's text for a sense nobody could define; not a meaning. */
+const PLACEHOLDER_GLOSS = "The meaning of this term is uncertain";
+
+export const isPlaceholderGloss = (gloss: string): boolean =>
+  gloss.startsWith(PLACEHOLDER_GLOSS);
+
+/**
+ * Whether a level's own `raw_glosses` text is labelled as out of use. `tags`
+ * covers the whole path, so only this tells a dead parent from a dead child.
+ */
+export const hasDeadLabel = (
+  language: LanguageRules,
+  rawGloss: string | undefined,
+): boolean => {
+  const label = rawGloss?.match(/^\(([^)]*)\)/)?.[1];
+  if (label === undefined) return false;
+  const words = label.split(/[\s,]+/);
+  return (
+    words.includes("archaic") ||
+    words.includes("obsolete") ||
+    isHistorical(language, words)
+  );
+};
 
 /** Rows of an inflection table that are template metadata, not words. */
 const TEMPLATE_FORM_TAGS: ReadonlySet<string> = new Set([
@@ -83,6 +109,96 @@ export const isOwnEntryGloss = (gloss: string): boolean =>
 /** Senses that only refer to another word: not copied onto derived words. */
 export const isPointerGloss = (gloss: string): boolean =>
   /^synonym of\b/i.test(gloss);
+
+/**
+ * "Form of address" style glosses, which wiktextract reads as a `form-of` link
+ * with the rest of the sentence as its target. Real form glosses never open
+ * with these words: they name the form ("alternative form of x").
+ */
+export const isMisreadFormOf = (gloss: string): boolean =>
+  /^form of\b/i.test(gloss);
+
+const GRAMMAR_CASES: ReadonlySet<string> = new Set([
+  "nominative",
+  "genitive",
+  "dative",
+  "accusative",
+  "instrumental",
+  "locative",
+  "vocative",
+]);
+
+const GRAMMAR_WORDS: ReadonlySet<string> = new Set([
+  ...GRAMMAR_CASES,
+  "singular",
+  "plural",
+  "masculine",
+  "feminine",
+  "neuter",
+  "personal",
+  "animate",
+  "ani",
+  "virile",
+  "nonvirile",
+  "nondeprecative",
+  "old",
+]);
+
+/** Pages a sense links to in this language, keeping the text shown for each. */
+const languageLinks = (
+  language: LanguageRules,
+  links: ReadonlyArray<ReadonlyArray<string>>,
+) => {
+  const anchor = `#${language.name}`;
+  return links.flatMap((link) => {
+    const [text, target] = link;
+    return text !== undefined && target?.endsWith(anchor)
+      ? [{ text, word: target.slice(0, -anchor.length) }]
+      : [];
+  });
+};
+
+/**
+ * The target of a gloss like "vocative/locative singular of sens", which has no
+ * `form-of` tag. Every word before "of" must be grammar and the rest must be a
+ * link, so "forms genitive singular of neuter nouns" is not one.
+ */
+export const grammarPointerTarget = (
+  language: LanguageRules,
+  gloss: string,
+  links: ReadonlyArray<ReadonlyArray<string>>,
+): string | undefined => {
+  const match = gloss.match(/^(.+?) of (.+)$/);
+  if (match === null) return undefined;
+  const words = match[1]!.toLowerCase().split(/[\s/]+/);
+  if (
+    !words.some((word) => GRAMMAR_CASES.has(word)) ||
+    !words.every((word) => GRAMMAR_WORDS.has(word))
+  ) {
+    return undefined;
+  }
+  return languageLinks(language, links).find((l) => l.text === match[2])?.word;
+};
+
+/**
+ * The words a "synonym of x" gloss points at. `links` covers the whole path and
+ * topic labels, so only links whose text follows "synonym of" count.
+ */
+export const synonymTargets = (
+  language: LanguageRules,
+  gloss: string,
+  links: ReadonlyArray<ReadonlyArray<string>>,
+): ReadonlyArray<string> => {
+  if (!isPointerGloss(gloss)) return [];
+  const rest = gloss.replace(/^synonym of\s+/i, "");
+  return [
+    ...new Set(
+      languageLinks(language, links)
+        .filter((l) => rest.includes(l.text))
+        .map((l) => l.word),
+    ),
+  ];
+};
 
 /**
  * Whether a derived gloss has nothing beyond its target: "diminutive of kotek",

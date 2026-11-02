@@ -17,6 +17,31 @@ Measured, not decided. Throwaway scripts, so class counts come from gloss and ta
 - `książę` (prince) and `księcia` return nothing: all the `książę` senses shown carry `Middle` + `Polish`, so the historical-stage rule drops the word. Cause not checked against Wiktionary.
 - Russian: 2.5M of 2.9M forms and most link targets carry stress marks but headwords don't, so about 94% of inflection links miss with `lookupKey`. Needs fixing before adding Russian.
 
+## Importer fixes, measured as one change (2026-11-02)
+
+Branch `importer-fixes`. Polish went from 100,019 to 99,136 entries and from 180,977 to 178,430 senses. 911 senses now hold a parent and its children.
+
+- Nested senses merge under their top parent. `król` now opens with "king (male monarch...)".
+- `The meaning of this term is uncertain` is dropped at every level. `Form of ...` glosses stay glosses (6 senses). Untagged `<case> of X` glosses become links, and `==Polish==` is stripped from `form_of` targets.
+- `see` holds synonym targets that have an entry: 6,442 senses. 436 `synonym of` senses keep no target. A bare synonym is dropped at lookup when its target is already in the result, which is a query rule, not import data.
+- 7 words stop resolving and none of them is a mistake: 6 point only at senses dropped as archaic or Middle Polish (`kacerze` -> `kacerz`), and `siołaj` was only a placeholder.
+- `razu` loses "synonym of raz" at lookup. Its other sense, "synonym of ani razu", stays with no `see`, because `ani razu` has no entry.
+- Eval against `base` (116 of 1,000 popovers changed and re-judged): understood 83.3% -> 83.8%, junk senses 7.0% -> 6.1%, popovers with junk 28.1% -> 24.9%, first group 83.3% -> 83.5%, first sense 58.1% -> 58.7%. 8 items better, 7 worse. Junk flags on the changed popovers went from 136 to 71.
+- First run's regressions, now fixed: pointer links added wrong entries through the form-of fallback (`tych` -> `ta` INTJ, CCONJ and PART; `prostu` -> `prosty` NOUN), and a grammar pointer could show as a parent (`się` opened with "dative/locative singular of się"). Pointer links now take only the same part of speech and skip a form that already reaches the lemma. Grammar parents are dropped, with their children kept and a pointer link added.
+- After those fixes (`eval/out/pl/after-importer-2`, 14 popovers re-judged): understood 83.8%, no-help verdicts 51 (base 52), junk senses 6.1%, popovers with junk 25.6%. 9 items better and 4 worse than `base`.
+- Not changed: 83 merged senses open with a form-style parent like "alternative form of ręka" and 63 with "synonym of ...".
+- Still open: nested `form-of` senses keep only their last gloss (67 senses outside `inflection of`), so `prawy` "ellipsis of prawa strona" loses its parent there unless the parent also exists as its own sense. Popover support for `see` isn't built, so the eval can't credit links yet.
+
+## Lookup eval, baseline (2026-11-02)
+
+Findings, not decisions. 1,000 items judged by Haiku at medium effort (`eval/out/pl/base`): 83.3% understood (85.6% without foreign words, typos and names), 7.0% of senses flagged junk, 5.8% marginal, and the fitting sense is in the first group for 83.3% and first overall for 58.1%. For the frequent words, the first-group figure is 77.9%.
+
+- `senseGloss` keeps only the last item of `glosses`, dropping the parent. 1,973 of 157,956 non-form senses are nested. Checked for `król`; not all of them lose information.
+- The commonest words fail on order: `to`, `w`, `nie`, `jest`, `no`, `tak` and `z` have the fitting sense outside the first group, in at least the sentences sampled.
+- Fixed phrases are the largest cause (53 of 167 not understood), then form glosses (36), e.g. `mi` and `mnie` -> "I", `te` -> "this", and comparatives.
+- 21 of the 167 are English speech in the texts, which isn't a dictionary fault.
+- Of 374 senses flagged junk, 198 are `synonym of` or grammar pointers, which hold up. Many of the rest are wrong, e.g. `ktoś` "someone", so the junk score overstates the problem. Read 30 items rated `yes` and found no clear errors.
+
 ## Lookup eval, first run (2026-11-02)
 
 Findings, not decisions. See `eval/README.md`. Haiku judged 200 words in context from the `dict-corpus` repo, and the verified points were checked against the dump: 79.5% Clear, 23 Buried, 14 Misleading, 4 No help.
@@ -26,7 +51,7 @@ Findings, not decisions. See `eval/README.md`. Haiku judged 200 words in context
 - Misses rarely hurt: 7 of the 8 misses in the sample were rated Clear (English words, names, `art`).
 - Wiktextract appears to read a gloss starting "form of ..." as a form-of link, and the importer then drops it: `ustrój`, and `cześć`, which loses its greeting sense entirely.
 - Polish `i` ("and") has no entry anywhere in the full raw dump, only the letter. Cause not checked.
-- `król` has no "monarch" sense in the dump; its first sense is "synonym of państwo". Cause not checked.
+- `król` shows no "monarch" sense, but the dump has it: "king (male monarch)" is the parent in a nested `glosses` array, and `senseGloss` keeps only the last item, here "synonym of państwo". Corrected after the baseline run below.
 - Unresolved templates reach readers in 3 senses, affecting 52 lookup forms, e.g. `Template:syn of`.
 
 ## Current state (2026-11-01)

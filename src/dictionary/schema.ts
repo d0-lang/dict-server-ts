@@ -12,7 +12,7 @@ import {
  * Bump `SCHEMA_VERSION` whenever the DDL below changes; files are rebuilt by
  * the importer, not migrated. It is stored as `PRAGMA user_version`.
  */
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /** Universal Dependencies part-of-speech tags (https://universaldependencies.org/u/pos/). */
 export const UD_POS = [
@@ -61,7 +61,10 @@ export const entries = sqliteTable("entries", {
   etymology: integer("etymology").notNull(),
 });
 
-/** Ordered senses; `translations` is a JSON array of strings (never empty). */
+/**
+ * Ordered senses; `translations` is a JSON array of strings (never empty) and
+ * `see` a JSON array of words with an entry, or null.
+ */
 export const senses = sqliteTable(
   "senses",
   {
@@ -70,6 +73,7 @@ export const senses = sqliteTable(
     translations: text("translations", { mode: "json" })
       .$type<ReadonlyArray<string>>()
       .notNull(),
+    see: text("see", { mode: "json" }).$type<ReadonlyArray<string>>(),
   },
   (t) => [primaryKey({ columns: [t.entryId, t.idx] })],
 );
@@ -140,6 +144,7 @@ CREATE TABLE senses (
   entry_id     INTEGER NOT NULL,
   idx          INTEGER NOT NULL,
   translations TEXT NOT NULL,
+  see          TEXT,
   PRIMARY KEY (entry_id, idx)
 ) WITHOUT ROWID;
 

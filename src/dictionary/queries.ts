@@ -20,7 +20,36 @@ export type LookupEntry = {
   };
   readonly senses: ReadonlyArray<{
     readonly translations: ReadonlyArray<string>;
+    readonly see?: ReadonlyArray<string>;
   }>;
+};
+
+type LookupSense = LookupEntry["senses"][number];
+
+/** "synonym of x" with nothing else to read: no meaning in brackets, no parent. */
+const isBareSynonym = (sense: LookupSense): boolean =>
+  sense.see !== undefined &&
+  sense.translations.length === 1 &&
+  /^synonym of [^(“]*$/i.test(sense.translations[0]!);
+
+/**
+ * Drop bare synonyms of a word the result already shows, and entries left with
+ * no senses (`razu` -> "synonym of raz" next to `raz`). Keeps everything if that
+ * would empty the result, as when two words only point at each other.
+ */
+const dropRedundantSynonyms = (
+  results: ReadonlyArray<LookupEntry>,
+): ReadonlyArray<LookupEntry> => {
+  const shown = new Set(results.map((entry) => lookupKey(entry.lemma)));
+  const kept = results.flatMap((entry) => {
+    const senses = entry.senses.filter(
+      (sense) =>
+        !isBareSynonym(sense) ||
+        !sense.see!.every((word) => shown.has(lookupKey(word))),
+    );
+    return senses.length > 0 ? [{ ...entry, senses }] : [];
+  });
+  return kept.length > 0 ? kept : results;
 };
 
 /**
@@ -59,7 +88,7 @@ export const findEntriesByForm = (
     .orderBy(asc(pronunciations.entryId), asc(pronunciations.idx))
     .all();
 
-  return heads.map((head) => {
+  const results = heads.map((head) => {
     const prons = pronRows.filter((p) => p.entryId === head.id);
     const ipa = prons.filter((p) => p.kind === "ipa").map((p) => p.value);
     const audio = prons.filter((p) => p.kind === "audio").map((p) => p.value);
@@ -75,7 +104,11 @@ export const findEntriesByForm = (
       ...(Object.keys(pron).length > 0 ? { pron } : {}),
       senses: senseRows
         .filter((s) => s.entryId === head.id)
-        .map((s) => ({ translations: s.translations })),
+        .map((s) => ({
+          translations: s.translations,
+          ...(s.see !== null ? { see: s.see } : {}),
+        })),
     };
   });
+  return dropRedundantSynonyms(results);
 };

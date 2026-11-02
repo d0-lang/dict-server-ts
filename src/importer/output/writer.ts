@@ -25,6 +25,8 @@ export type WriterCounts = {
   derivedCopied: number;
   /** derived senses left as a bare gloss, because no meaning was found */
   derivedBare: number;
+  /** `see` targets that have an entry */
+  seeLinks: number;
 };
 
 export type FormOfResult = {
@@ -55,6 +57,7 @@ export const makeWriter = (db: DictionaryDb) => {
     form       TEXT NOT NULL,
     lemma      TEXT NOT NULL,
     source_pos TEXT NOT NULL,
+    pointer    INTEGER NOT NULL,
     PRIMARY KEY (form, lemma, source_pos)
   ) WITHOUT ROWID`);
 
@@ -62,7 +65,7 @@ export const makeWriter = (db: DictionaryDb) => {
     "INSERT INTO entries (id, lemma, pos, source_pos, etymology) VALUES (?, ?, ?, ?, ?)",
   );
   const insertSense = sqlite.prepare(
-    "INSERT INTO senses (entry_id, idx, translations) VALUES (?, ?, ?)",
+    "INSERT INTO senses (entry_id, idx, translations, see) VALUES (?, ?, ?, ?)",
   );
   const insertPron = sqlite.prepare(
     "INSERT INTO pronunciations (entry_id, idx, kind, value) VALUES (?, ?, ?, ?)",
@@ -71,7 +74,8 @@ export const makeWriter = (db: DictionaryDb) => {
     "INSERT OR IGNORE INTO forms (form, entry_id, source) VALUES (?, ?, ?)",
   );
   const insertPending = sqlite.prepare(
-    "INSERT OR IGNORE INTO form_of_pending (form, lemma, source_pos) VALUES (?, ?, ?)",
+    `INSERT INTO form_of_pending (form, lemma, source_pos, pointer) VALUES (?, ?, ?, ?)
+     ON CONFLICT DO UPDATE SET pointer = 0 WHERE pointer = 1 AND excluded.pointer = 0`,
   );
 
   const counts: WriterCounts = {
@@ -83,6 +87,7 @@ export const makeWriter = (db: DictionaryDb) => {
     historicalEntries: 0,
     derivedCopied: 0,
     derivedBare: 0,
+    seeLinks: 0,
   };
   const byKey = new Map<string, EntryState>();
   const historicalEntries: Array<ImportEntry> = [];
@@ -107,13 +112,14 @@ export const makeWriter = (db: DictionaryDb) => {
     } else {
       counts.mergedLines++;
     }
-    for (const translations of entry.senses) {
+    for (const { translations, see } of entry.senses) {
       const k = translations.join("\u0000");
       if (state.glosses.has(k)) continue;
       insertSense.run(
         state.id,
         state.glosses.size,
         JSON.stringify(translations),
+        see.length > 0 ? JSON.stringify(see) : null,
       );
       state.glosses.add(k);
       counts.senses++;
@@ -144,6 +150,7 @@ export const makeWriter = (db: DictionaryDb) => {
         link.form,
         link.lemma,
         link.sourcePos,
+        link.pointer ? 1 : 0,
       ).changes;
     }
   };
@@ -186,8 +193,8 @@ export const makeWriter = (db: DictionaryDb) => {
   const followLinkChains = () => {
     for (let step = 1; step < MAX_CHAIN_STEPS; step++) {
       const added = sqlite.run(
-        `INSERT OR IGNORE INTO form_of_pending (form, lemma, source_pos)
-         SELECT p.form, q.lemma, p.source_pos
+        `INSERT OR IGNORE INTO form_of_pending (form, lemma, source_pos, pointer)
+         SELECT p.form, q.lemma, p.source_pos, max(p.pointer, q.pointer)
          FROM form_of_pending p
          JOIN form_of_pending q ON q.form = p.lemma
          WHERE q.lemma <> p.form
@@ -214,13 +221,16 @@ export const makeWriter = (db: DictionaryDb) => {
       `SELECT e.id, e.source_pos FROM forms f JOIN entries e ON e.id = f.entry_id
        WHERE f.form = ? AND f.source = ? ORDER BY e.id`,
     );
-    const glossesOf = (id: number) =>
+    const sensesOf = (id: number) =>
       sqlite
-        .query<{ translations: string }, [number]>(
-          "SELECT translations FROM senses WHERE entry_id = ? ORDER BY idx",
+        .query<{ translations: string; see: string | null }, [number]>(
+          "SELECT translations, see FROM senses WHERE entry_id = ? ORDER BY idx",
         )
         .all(id)
-        .map((row) => (JSON.parse(row.translations) as Array<string>)[0]!);
+        .map((row) => ({
+          translations: JSON.parse(row.translations) as Array<string>,
+          see: row.see,
+        }));
     const linkTargets = sqlite.query<{ lemma: string }, [string]>(
       "SELECT lemma FROM form_of_pending WHERE form = ?",
     );
@@ -248,11 +258,13 @@ export const makeWriter = (db: DictionaryDb) => {
       const otherPos = all.filter((e) => e.source_pos !== sourcePos);
       for (const group of [samePos, otherPos]) {
         const meanings = group.flatMap((entry) =>
-          glossesOf(entry.id).filter(
-            (gloss) =>
-              !isPointerGloss(gloss) &&
-              !derivedByEntry.get(entry.id)?.has(gloss),
-          ),
+          sensesOf(entry.id).flatMap(({ translations }) => {
+            if (derivedByEntry.get(entry.id)?.has(translations[0]!)) return [];
+            const meaning = translations
+              .filter((gloss) => !isPointerGloss(gloss))
+              .join("; ");
+            return meaning === "" ? [] : [meaning];
+          }),
         );
         if (meanings.length > 0) return [...new Set(meanings)];
         const viaChain = follow(
@@ -272,36 +284,72 @@ export const makeWriter = (db: DictionaryDb) => {
     );
     const rewrites = [...derivedByEntry].map(([entryId, derived]) => {
       const sourcePos = sourcePosOf.get(entryId)!.source_pos;
-      const glosses = glossesOf(entryId).flatMap((gloss) => {
+      const rows = sensesOf(entryId).flatMap((row) => {
+        const gloss = row.translations[0]!;
         const sense = derived.get(gloss);
-        if (sense === undefined) return [gloss];
+        if (sense === undefined) return [row];
         const meanings = sense.bases.flatMap((base) =>
           meaningsOf(base, sourcePos, new Set()),
         );
         if (meanings.length === 0) {
           counts.derivedBare++;
-          return [gloss];
+          return [row];
         }
         counts.derivedCopied++;
         const prefix = gloss.replace(/[\s.,;:]+$/, "");
-        return meanings.map((meaning) => `${prefix}: ${meaning}`);
+        return meanings.map((meaning) => ({
+          translations: [`${prefix}: ${meaning}`],
+          see: null,
+        }));
       });
-      return { entryId, glosses: [...new Set(glosses)] };
+      const seen = new Set<string>();
+      return {
+        entryId,
+        rows: rows.filter(({ translations }) => {
+          const key = translations.join("\u0000");
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        }),
+      };
     });
 
     const deleteSenses = sqlite.prepare(
       "DELETE FROM senses WHERE entry_id = ?",
     );
     sqlite.transaction(() => {
-      for (const { entryId, glosses } of rewrites) {
+      for (const { entryId, rows } of rewrites) {
         counts.senses -= deleteSenses.run(entryId).changes;
-        glosses.forEach((gloss, idx) => {
-          insertSense.run(entryId, idx, JSON.stringify([gloss]));
+        rows.forEach(({ translations, see }, idx) => {
+          insertSense.run(entryId, idx, JSON.stringify(translations), see);
           counts.senses++;
         });
       }
     })();
   };
+
+  /** Keep only `see` targets that have an entry, now that all entries exist. */
+  const resolveSee = sqlite.transaction(() => {
+    const update = sqlite.prepare(
+      "UPDATE senses SET see = ? WHERE entry_id = ? AND idx = ?",
+    );
+    const rows = sqlite
+      .query<{ entry_id: number; idx: number; see: string }, []>(
+        "SELECT entry_id, idx, see FROM senses WHERE see IS NOT NULL",
+      )
+      .all();
+    for (const row of rows) {
+      const see = (JSON.parse(row.see) as Array<string>).filter((word) =>
+        hasEntry(lookupKey(word)),
+      );
+      update.run(
+        see.length > 0 ? JSON.stringify(see) : null,
+        row.entry_id,
+        row.idx,
+      );
+      counts.seeLinks += see.length;
+    }
+  });
 
   /**
    * Finish the words that depend on others, which may come later in the dump,
@@ -310,11 +358,14 @@ export const makeWriter = (db: DictionaryDb) => {
    * has no entry with that pos, to all its entries. Rows already present (the
    * usual case: the form is in the lemma's table) are ignored by the primary
    * key, so `changes` is exactly the number of rows the fallback added.
+   * Pointer links only take the same pos, and skip a form that already reaches
+   * the lemma, so `prostu` doesn't add `prosty` the noun next to the adjective.
    */
   const resolveFormOf = (enabled: boolean): FormOfResult => {
     restoreHistoricalEntries();
     followLinkChains();
     copyDerivedMeanings();
+    resolveSee();
     const unresolved =
       sqlite
         .query<{ n: number }, []>(
@@ -339,12 +390,20 @@ export const makeWriter = (db: DictionaryDb) => {
          FROM form_of_pending p
          JOIN forms f ON f.form = p.lemma AND f.source = ${FormSource.Lemma}
          JOIN entries e ON e.id = f.entry_id
-         WHERE e.source_pos = p.source_pos
-            OR NOT EXISTS (
-              SELECT 1 FROM forms f2 JOIN entries e2 ON e2.id = f2.entry_id
-              WHERE f2.form = p.lemma AND f2.source = ${FormSource.Lemma}
-                AND e2.source_pos = p.source_pos
-            )`,
+         WHERE (p.pointer = 0 AND (
+             e.source_pos = p.source_pos
+             OR NOT EXISTS (
+               SELECT 1 FROM forms f2 JOIN entries e2 ON e2.id = f2.entry_id
+               WHERE f2.form = p.lemma AND f2.source = ${FormSource.Lemma}
+                 AND e2.source_pos = p.source_pos
+             )
+           ))
+           OR (p.pointer = 1 AND e.source_pos = p.source_pos AND NOT EXISTS (
+             SELECT 1 FROM forms reached
+             JOIN forms target ON target.entry_id = reached.entry_id
+             WHERE reached.form = p.form
+               AND target.form = p.lemma AND target.source = ${FormSource.Lemma}
+           ))`,
       ).changes;
     }
     sqlite.run("DROP TABLE form_of_pending");

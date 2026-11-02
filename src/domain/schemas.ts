@@ -36,7 +36,10 @@ export const LookupEntry = Schema.Struct({
     }),
   ),
   senses: Schema.Array(
-    Schema.Struct({ translations: Schema.Array(Schema.String) }),
+    Schema.Struct({
+      translations: Schema.Array(Schema.String),
+      see: Schema.optionalKey(Schema.Array(Schema.String)),
+    }),
   ),
 });
 export type LookupEntry = typeof LookupEntry.Type;

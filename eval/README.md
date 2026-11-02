@@ -1,34 +1,38 @@
 # Lookup eval
 
-Tests whether the dictionary helps a reader understand words in real text. Texts live in the private `dict-corpus` repo, next to this one, and stay out of this repo because many are copyrighted. Run outputs go to `eval/out`, which is ignored because they quote the texts.
+The point is to make lookup better. A lookup is good when the reader understands the text thanks to it, and isn't shown junk that diverts effort from understanding. Texts live in the private `dict-corpus` repo, next to this one, and stay out of this repo because many are copyrighted. Run outputs go to `eval/out`, which is ignored because they quote the texts.
 
-The question for each word is: after reading this popover, does the reader understand the word in this sentence? Absence of data is easy to detect, but wrong data isn't, so an LLM judges the results.
+Absence of data is easy to detect, but wrong data isn't, so synthetic learners judge the results. They already know the language, so they predict what a learner would take away. That's good for comparing two versions of the server, but the absolute scores aren't learner data.
 
 The agent-ready version of this process, including the review, is in [`.agents/skills/lookup-eval/SKILL.md`](../.agents/skills/lookup-eval/SKILL.md).
 
-## Running it
+## The loop
 
-The server must be running. `--base` defaults to the Docker service on port 37421.
+Change the server, restart it, then for that language:
 
 ```sh
 bun eval/collect.ts --texts ../corpus/pl --lang pl_en --out eval/out/pl
-bun eval/sample.ts --run eval/out/pl --name run-1 --batches 5 --size 40
+bun eval/sample.ts --run eval/out/pl --name after --from base
+bun eval/judge.ts --dir eval/out/pl/after --effort medium
+bun eval/score.ts --dir eval/out/pl/after --base eval/out/pl/base
 ```
 
-Have Claude Code start one Haiku subagent per batch with this prompt:
+The server must be running. `--base` on `collect.ts` defaults to the Docker service on port 37421. `judge.ts` saves verdicts in `eval/out/<lang>/verdicts.jsonl`, keyed by word, sentence, popover and prompt, so only changed popovers cost tokens. Editing `judge-prompt.md` invalidates every verdict.
 
-> Read `eval/judge-prompt.md` and follow it exactly. The input is `eval/out/pl/run-1/batch-NN.json`. Write your JSON array with the Write tool to `eval/out/pl/run-1/batch-NN-verdicts.json`. Do not open any other file, run code or look anything up.
+The first run for a language needs a baseline: `bun eval/sample.ts --run eval/out/pl --name base --frequent 700 --random 300`. For 1,000 items, expect about 0.8M tokens on your Claude login.
 
-Then score it:
+## The scores
 
-```sh
-bun eval/score.ts --dir eval/out/pl/run-1
-```
+- **Understanding:** the share of items rated `yes`. Trust yes against not-yes more than the grades below it.
+- **Relevance:** the share of senses flagged `junk` or `marginal`. A word with many real meanings scores perfectly. `marginal` varies between repeat runs, and `junk` is reliable for pointer-like glosses but not much beyond them.
+- **Order:** whether the sense that fits is in the first group, and whether it's the first sense.
 
-This prints ratings per genre and causes, and writes `report.json` and `review.json`. Expect about 60k tokens per batch of 40.
+The judge sees the popover as text, grouped the way the extension groups it, without pronunciation. `popover.ts` copies that grouping, so keep it in step with `groupEntries` in the extension.
+
+Judges run through `claude -p` with no tools and only `judge-prompt.md` as the system prompt, which costs far less than subagents. A batch with no thinking is retried, because those judged measurably worse.
 
 ## Reading the results
 
-Have a stronger model review `review.json` and a random sample of the Clear items, tracing problems back through the dump. The judge is a fallible prediction of what a reader would understand: it tends to be picky about near-synonyms, and it can't say why something went wrong. Verify a finding before acting on it or reporting it upstream.
+Have a stronger model review `review.json` and a random sample of items rated `yes`, tracing problems back through the dump. Verify a finding before acting on it or reporting it upstream.
 
-The sample takes the same number of words per genre and favours frequent words, so scores aren't an estimate for all running text. Use the same `--seed` to compare runs on the same words.
+The sample is 700 items from the most frequent words, with 3 sentences each for the top 100, plus 300 from a random sample of the rest. Report the two parts separately. Neither is an estimate for all running text.

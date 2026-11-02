@@ -199,6 +199,133 @@ describe("importWiktextract", () => {
     }).pipe(Effect.scoped),
   );
 
+  it.effect("links synonyms to existing words and keeps groups when copying", () =>
+    Effect.gen(function* () {
+      const dir = yield* tempDir;
+      const input = join(dir, "pl.jsonl");
+      const line = (word: string, senses: ReadonlyArray<object>, extra = {}) =>
+        JSON.stringify({ word, pos: "noun", lang_code: "pl", senses, ...extra });
+      const synonym = (target: string) => ({
+        glosses: [`synonym of ${target}`],
+        links: [[target, `${target}#Polish`]],
+      });
+      yield* Effect.promise(() =>
+        writeFile(
+          input,
+          [
+            line("królik", [
+              {
+                glosses: ["diminutive of król"],
+                tags: ["form-of"],
+                form_of: [{ word: "król" }],
+              },
+            ]),
+            line("król", [
+              { glosses: ["king", "synonym of państwo"], links: [["państwo", "państwo#Polish"]] },
+              { glosses: ["king", "royal couple"] },
+            ]),
+            line("państwo", [{ glosses: ["state"] }]),
+            line("grządka", [synonym("zagon"), synonym("brak")]),
+            line("zagon", [{ glosses: ["field"] }]),
+            line("razu", [synonym("raz")]),
+            line("raz", [{ glosses: ["once"] }], {
+              forms: [{ form: "razu", source: "declension" }],
+            }),
+            line("sam", [synonym("tam")]),
+            line("tam", [synonym("sam")], {
+              forms: [{ form: "sam", source: "declension" }],
+            }),
+          ].join("\n"),
+        ),
+      );
+      const out = join(dir, "pl_en.sqlite");
+      const stats = yield* importWiktextract({ lang: "pl", input, out });
+      const db = yield* openDictionary(out);
+      const senses = (word: string) =>
+        findEntriesByForm(db, word).map((e) => [e.lemma, e.senses]);
+
+      assert.deepStrictEqual(senses("król"), [
+        [
+          "król",
+          [
+            {
+              translations: ["king", "synonym of państwo", "royal couple"],
+              see: ["państwo"],
+            },
+          ],
+        ],
+      ]);
+      // the pointer is left out of the copy, and the group stays one sense
+      assert.deepStrictEqual(senses("królik"), [
+        [
+          "królik",
+          [{ translations: ["diminutive of król: king; royal couple"] }],
+        ],
+      ]);
+      // a target with no entry gets no link
+      assert.deepStrictEqual(senses("grządka"), [
+        [
+          "grządka",
+          [
+            { translations: ["synonym of zagon"], see: ["zagon"] },
+            { translations: ["synonym of brak"] },
+          ],
+        ],
+      ]);
+      // the target is already in the result
+      assert.deepStrictEqual(senses("razu"), [
+        ["raz", [{ translations: ["once"] }]],
+      ]);
+      // words that only point at each other still return something
+      assert.strictEqual(senses("sam").length, 2);
+      assert.strictEqual(stats.seeLinks, 5);
+    }).pipe(Effect.scoped),
+  );
+
+  it.effect("resolves pointer links only to new words of the same pos", () =>
+    Effect.gen(function* () {
+      const dir = yield* tempDir;
+      const input = join(dir, "pl.jsonl");
+      const line = (
+        word: string,
+        pos: string,
+        senses: ReadonlyArray<object>,
+        extra = {},
+      ) => JSON.stringify({ word, pos, lang_code: "pl", senses, ...extra });
+      const pointer = (gloss: string, target: string) => ({
+        glosses: [gloss],
+        links: [[target, `${target}#Polish`]],
+      });
+      yield* Effect.promise(() =>
+        writeFile(
+          input,
+          [
+            line("tych", "pron", [
+              pointer("genitive/locative plural of ta", "ta"),
+              pointer("genitive/locative plural of to", "to"),
+            ]),
+            line("ta", "intj", [{ glosses: ["yes"] }]),
+            line("to", "pron", [{ glosses: ["this"] }]),
+            line("prostu", "noun", [pointer("old dative of prosty", "prosty")]),
+            line("prosty", "adj", [{ glosses: ["straight"] }], {
+              forms: [{ form: "prostu", source: "declension" }],
+            }),
+            line("prosty", "noun", [{ glosses: ["jab"] }]),
+            line("sensie", "noun", [pointer("locative of sens", "sens")]),
+            line("sens", "noun", [{ glosses: ["sense"] }]),
+          ].join("\n"),
+        ),
+      );
+      const out = join(dir, "pl_en.sqlite");
+      yield* importWiktextract({ lang: "pl", input, out });
+      const db = yield* openDictionary(out);
+
+      assert.deepStrictEqual(lemmas(db, "tych"), ["to/PRON"]);
+      assert.deepStrictEqual(lemmas(db, "prostu"), ["prosty/ADJ"]);
+      assert.deepStrictEqual(lemmas(db, "sensie"), ["sens/NOUN"]);
+    }).pipe(Effect.scoped),
+  );
+
   it.effect("streams gzip input and can skip the form-of fallback", () =>
     Effect.gen(function* () {
       const dir = yield* tempDir;
