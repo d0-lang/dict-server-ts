@@ -110,12 +110,11 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     }),
     (db) => Effect.sync(() => db.$client.close(false)),
   );
-  const writer = makeWriter(db);
   const grammar = yield* Effect.try({
     try: () => options.grammar ?? loadGrammar(rules.code),
     catch: importFailure("cannot read the grammar file"),
   });
-  writer.writeGrammar(grammar);
+  const writer = makeWriter(db, grammar);
   const tally = makeTally();
 
   const logProgress = () =>
@@ -148,7 +147,7 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     Stream.runForEach((batch) => Effect.sync(() => writeBatch(batch))),
   );
 
-  const formOf = writer.resolveFormOf(formOfFallback);
+  const formOf = writer.finish(formOfFallback);
   const forms = countForms(db.$client);
   finalizeDatabase(db.$client, {
     schema_version: String(SCHEMA_VERSION),

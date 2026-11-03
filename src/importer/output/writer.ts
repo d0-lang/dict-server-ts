@@ -1,7 +1,11 @@
 import type { DictionaryDb } from "../../dictionary/DictionaryDb.ts";
 import { caseClass, lookupKey } from "../../dictionary/lookupKey.ts";
 import { FormSource } from "../../dictionary/schema.ts";
-import { GRAMMAR_POS, type GrammarEntry } from "../grammar.ts";
+import {
+  GRAMMAR_POS,
+  GRAMMAR_SOURCE_POS,
+  type GrammarEntry,
+} from "../grammar.ts";
 import { isPointerGloss } from "../transform/rules.ts";
 import type {
   DerivedSense,
@@ -51,14 +55,19 @@ type EntryState = {
 
 /**
  * Batched writer over prepared statements on the raw bun:sqlite client (the
- * hot path; Drizzle's query builder is used for reads). Call `writeBatch` once
- * per batch: each call is one transaction.
+ * hot path; Drizzle's query builder is used for reads). The grammar file's
+ * entries are written on creation, so they come first in import order. Call
+ * `writeBatch` once per batch (each call is one transaction), then `finish`
+ * once.
  *
  * Forms are deduplicated by the `forms` primary key with `INSERT OR IGNORE`,
  * not in memory. The only in-memory state is one small record per entry, to
  * merge wiktextract lines that share word + etymology + pos.
  */
-export const makeWriter = (db: DictionaryDb) => {
+export const makeWriter = (
+  db: DictionaryDb,
+  grammar: ReadonlyArray<GrammarEntry>,
+) => {
   const sqlite = db.$client;
   sqlite.run(`CREATE TEMP TABLE form_of_pending (
     form       TEXT NOT NULL,
@@ -81,9 +90,13 @@ export const makeWriter = (db: DictionaryDb) => {
   const insertForm = sqlite.prepare(
     "INSERT OR IGNORE INTO forms (form, entry_id, source) VALUES (?, ?, ?)",
   );
+  // Two links between the same words: the less weak one wins whole, as in
+  // `dedupeLinks`, so a marked link and a pointer link don't merge into a
+  // plain one. (A chain instead takes the weaker value of each flag.)
   const insertPending = sqlite.prepare(
     `INSERT INTO form_of_pending (form, lemma, source_pos, pointer, marked) VALUES (?, ?, ?, ?, ?)
-     ON CONFLICT DO UPDATE SET pointer = min(pointer, excluded.pointer), marked = min(marked, excluded.marked)`,
+     ON CONFLICT DO UPDATE SET pointer = excluded.pointer, marked = excluded.marked
+     WHERE excluded.pointer + excluded.marked < pointer + marked`,
   );
 
   const counts: WriterCounts = {
@@ -100,6 +113,7 @@ export const makeWriter = (db: DictionaryDb) => {
     grammarReplaced: 0,
     abbreviations: 0,
   };
+  let lastId = 0;
   const byKey = new Map<string, EntryState>();
   const historicalEntries: Array<ImportEntry> = [];
   const verbalNouns: Array<{ form: string; entryId: number }> = [];
@@ -110,7 +124,8 @@ export const makeWriter = (db: DictionaryDb) => {
     const key = `${entry.lemma}\u0000${entry.sourcePos}\u0000${entry.etymology}`;
     let state = byKey.get(key);
     if (state === undefined) {
-      state = { id: ++counts.entries, glosses: new Set(), prons: new Set() };
+      state = { id: ++lastId, glosses: new Set(), prons: new Set() };
+      counts.entries++;
       byKey.set(key, state);
       insertEntry.run(
         state.id,
@@ -156,56 +171,64 @@ export const makeWriter = (db: DictionaryDb) => {
     }
   };
 
-  /** Ids up to this one are grammar-file entries. */
-  let lastGrammarId = 0;
-  const grammarKeys = new Set<string>();
-
-  /**
-   * Write the grammar file's entries before anything else, so they come first
-   * in import order. They are not merged with Wiktionary lines.
-   */
-  const writeGrammar = sqlite.transaction(
-    (grammar: ReadonlyArray<GrammarEntry>) => {
-      for (const entry of grammar) {
-        const id = ++counts.entries;
-        insertEntry.run(
-          id,
-          entry.lemma,
-          entry.pos,
-          "grammar",
-          0,
-          caseClass(entry.lemma),
-        );
-        insertForm.run(lookupKey(entry.lemma), id, FormSource.Lemma);
-        entry.senses.forEach((sense, idx) => {
-          insertSense.run(id, idx, JSON.stringify([sense]), null);
-          counts.senses++;
-        });
-        grammarKeys.add(lookupKey(entry.lemma));
-        lastGrammarId = id;
-        counts.grammarEntries++;
-      }
-    },
-  );
+  /** Grammar-file entries are not merged with Wiktionary lines. */
+  sqlite.transaction(() => {
+    for (const entry of grammar) {
+      const id = ++lastId;
+      insertEntry.run(
+        id,
+        entry.lemma,
+        entry.pos,
+        GRAMMAR_SOURCE_POS,
+        0,
+        caseClass(entry.lemma),
+      );
+      insertForm.run(lookupKey(entry.lemma), id, FormSource.Lemma);
+      entry.senses.forEach((sense, idx) => {
+        insertSense.run(id, idx, JSON.stringify([sense]), null);
+        counts.senses++;
+      });
+      counts.entries++;
+      counts.grammarEntries++;
+    }
+  })();
 
   /** A word in the grammar file shows none of Wiktionary's grammar-word entries. */
-  const replaceGrammarWords = sqlite.transaction(() => {
-    const drop = sqlite.prepare(
-      `DELETE FROM forms WHERE form = ? AND entry_id > ? AND entry_id IN (
-         SELECT id FROM entries WHERE pos IN (${[...GRAMMAR_POS].map((p) => `'${p}'`).join(", ")})
+  const replaceGrammarWords = () => {
+    counts.grammarReplaced = sqlite.run(
+      `DELETE FROM forms
+       WHERE form IN (
+         SELECT f.form FROM forms f JOIN entries e ON e.id = f.entry_id
+         WHERE f.source = ${FormSource.Lemma} AND e.source_pos = '${GRAMMAR_SOURCE_POS}'
+       )
+       AND entry_id IN (
+         SELECT id FROM entries
+         WHERE source_pos <> '${GRAMMAR_SOURCE_POS}'
+           AND pos IN (${[...GRAMMAR_POS].map((p) => `'${p}'`).join(", ")})
        )`,
-    );
-    for (const key of grammarKeys) {
-      counts.grammarReplaced += drop.run(key, lastGrammarId).changes;
-    }
-  });
+    ).changes;
+  };
+
+  /** Entries no form reaches any more (Wiktionary's replaced grammar words). */
+  const dropUnreachedEntries = () => {
+    const unreached = `NOT IN (SELECT entry_id FROM forms)`;
+    counts.senses -= sqlite.run(
+      `DELETE FROM senses WHERE entry_id ${unreached}`,
+    ).changes;
+    counts.pronunciations -= sqlite.run(
+      `DELETE FROM pronunciations WHERE entry_id ${unreached}`,
+    ).changes;
+    counts.entries -= sqlite.run(
+      `DELETE FROM entries WHERE id ${unreached}`,
+    ).changes;
+  };
 
   /**
    * `bzw` -> `bzw.`: tokenizers drop the period that belongs to an
    * abbreviation. Only for spellings with no other row, decided before any is
    * added, so `c` reaches every lemma `c.` when it reaches nothing else.
    */
-  const addAbbreviations = sqlite.transaction(() => {
+  const addAbbreviations = () => {
     sqlite.run(`CREATE TEMP TABLE abbreviations AS
       SELECT substr(form, 1, length(form) - 1) AS bare, entry_id FROM forms
       WHERE source = ${FormSource.Lemma} AND form LIKE '%_.'
@@ -218,7 +241,7 @@ export const makeWriter = (db: DictionaryDb) => {
        SELECT bare, entry_id, ${FormSource.Abbreviation} FROM abbreviations`,
     ).changes;
     sqlite.run("DROP TABLE abbreviations");
-  });
+  };
 
   const writeLinks = (links: ReadonlyArray<FormOfLink>) => {
     for (const link of links) {
@@ -428,44 +451,39 @@ export const makeWriter = (db: DictionaryDb) => {
     }
   });
 
+  /** Words with a link, directly or through a chain, to no entry in this file. */
+  const countUnresolvedLinks = (): number =>
+    sqlite
+      .query<{ n: number }, []>(
+        `SELECT count(DISTINCT p.form) AS n FROM form_of_pending p
+         WHERE NOT EXISTS (
+           SELECT 1 FROM form_of_pending p2
+           JOIN forms f ON f.form = p2.lemma AND f.source = ${FormSource.Lemma}
+           WHERE p2.form = p.form
+         )`,
+      )
+      .get()?.n ?? 0;
+
   /**
-   * Finish the words that depend on others, which may come later in the dump,
-   * then turn staged links into `forms` rows. A link resolves to the entries
-   * whose lemma matches and whose source pos is the link's pos; if the lemma
-   * has no entry with that pos, to all its entries. Rows already present (the
-   * usual case: the form is in the lemma's table) are ignored by the primary
-   * key, so `changes` is exactly the number of rows the fallback added.
-   * Pointer links only take the same pos, and skip a form that already reaches
-   * the lemma, so `prostu` doesn't add `prosty` the noun next to the adjective.
-   * Marked links (obsolete or dialect spellings) resolve last, and only for
-   * forms that reached no entry any other way.
+   * Turn staged links into `forms` rows; returns how many were added. A link
+   * resolves to the entries whose lemma matches and whose source pos is the
+   * link's pos; if the lemma has no entry with that pos, to all its entries.
+   * Rows already present (the usual case: the form is in the lemma's table)
+   * are ignored by the primary key, so `changes` is exactly the number of rows
+   * the fallback added. Pointer links only take the same pos, and skip a form
+   * that already reaches the lemma, so `prostu` doesn't add `prosty` the noun
+   * next to the adjective. Marked links (obsolete or dialect spellings)
+   * resolve last, and only for forms that reached no entry any other way.
    */
-  const resolveFormOf = (enabled: boolean): FormOfResult => {
-    restoreHistoricalEntries();
-    followLinkChains();
-    copyDerivedMeanings();
-    resolveSee();
-    const unresolved =
-      sqlite
-        .query<{ n: number }, []>(
-          `SELECT count(DISTINCT p.form) AS n FROM form_of_pending p
-           WHERE NOT EXISTS (
-             SELECT 1 FROM form_of_pending p2
-             JOIN forms f ON f.form = p2.lemma AND f.source = ${FormSource.Lemma}
-             WHERE p2.form = p.form
-           )`,
-        )
-        .get()?.n ?? 0;
-    let added = 0;
-    if (enabled) {
-      sqlite.transaction(() => {
-        for (const { form, entryId } of verbalNouns) {
-          if (!hasEntry(form)) insertForm.run(form, entryId, FormSource.FormOf);
-        }
-      })();
-      const resolveLinks = (where: string) =>
-        sqlite.run(
-          `INSERT OR IGNORE INTO forms (form, entry_id, source)
+  const resolveFormOf = (): number => {
+    sqlite.transaction(() => {
+      for (const { form, entryId } of verbalNouns) {
+        if (!hasEntry(form)) insertForm.run(form, entryId, FormSource.FormOf);
+      }
+    })();
+    const resolveLinks = (where: string) =>
+      sqlite.run(
+        `INSERT OR IGNORE INTO forms (form, entry_id, source)
          SELECT p.form, f.entry_id, ${FormSource.FormOf}
          FROM form_of_pending p
          JOIN forms f ON f.form = p.lemma AND f.source = ${FormSource.Lemma}
@@ -484,25 +502,43 @@ export const makeWriter = (db: DictionaryDb) => {
              WHERE reached.form = p.form
                AND target.form = p.lemma AND target.source = ${FormSource.Lemma}
            )))`,
-        ).changes;
-      added = resolveLinks("p.marked = 0");
-      // Decided before any marked row is added, so a word with two marked
-      // spellings gets both targets.
-      sqlite.run(`CREATE TEMP TABLE unreached AS
-        SELECT DISTINCT form FROM form_of_pending p
-        WHERE p.marked = 1 AND NOT EXISTS (SELECT 1 FROM forms f WHERE f.form = p.form)`);
-      added += resolveLinks(
-        "p.marked = 1 AND p.form IN (SELECT form FROM unreached)",
-      );
-      sqlite.run("DROP TABLE unreached");
-    }
+      ).changes;
+    let added = resolveLinks("p.marked = 0");
+    // Decided before any marked row is added, so a word with two marked
+    // spellings gets both targets.
+    sqlite.run(`CREATE TEMP TABLE unreached AS
+      SELECT DISTINCT form FROM form_of_pending p
+      WHERE p.marked = 1 AND NOT EXISTS (SELECT 1 FROM forms f WHERE f.form = p.form)`);
+    added += resolveLinks(
+      "p.marked = 1 AND p.form IN (SELECT form FROM unreached)",
+    );
+    sqlite.run("DROP TABLE unreached");
+    return added;
+  };
+
+  /**
+   * Everything that needs the whole dump, in order. Call once, after the last
+   * `writeBatch`. `formOfFallback: false` skips only the link fallback.
+   */
+  const finish = (formOfFallback: boolean): FormOfResult => {
+    // Words that depend on others, which may come later in the dump.
+    restoreHistoricalEntries();
+    followLinkChains();
+    copyDerivedMeanings();
+    resolveSee();
+    const unresolved = countUnresolvedLinks();
+    const added = formOfFallback ? resolveFormOf() : 0;
     sqlite.run("DROP TABLE form_of_pending");
-    replaceGrammarWords();
-    addAbbreviations();
+    // Then the steps that need every form in place.
+    sqlite.transaction(() => {
+      replaceGrammarWords();
+      dropUnreachedEntries();
+      addAbbreviations();
+    })();
     return { added, unresolved };
   };
 
-  return { counts, writeGrammar, writeBatch, resolveFormOf };
+  return { counts, writeBatch, finish };
 };
 
 export type Writer = ReturnType<typeof makeWriter>;

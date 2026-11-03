@@ -40,6 +40,9 @@ export const GRAMMAR_POS: ReadonlySet<UdPos> = new Set([
   "AUX",
 ]);
 
+/** `entries.source_pos` of grammar-file entries. */
+export const GRAMMAR_SOURCE_POS = "grammar";
+
 const POS: ReadonlySet<string> = new Set(UD_POS);
 
 export const parseGrammarFile = (
