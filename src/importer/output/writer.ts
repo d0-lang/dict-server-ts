@@ -1,6 +1,7 @@
 import type { DictionaryDb } from "../../dictionary/DictionaryDb.ts";
-import { lookupKey } from "../../dictionary/lookupKey.ts";
+import { caseClass, lookupKey } from "../../dictionary/lookupKey.ts";
 import { FormSource } from "../../dictionary/schema.ts";
+import { GRAMMAR_POS, type GrammarEntry } from "../grammar.ts";
 import { isPointerGloss } from "../transform/rules.ts";
 import type {
   DerivedSense,
@@ -27,6 +28,12 @@ export type WriterCounts = {
   derivedBare: number;
   /** `see` targets that have an entry */
   seeLinks: number;
+  /** entries from the language's grammar file */
+  grammarEntries: number;
+  /** Wiktionary grammar-word rows replaced by those entries */
+  grammarReplaced: number;
+  /** abbreviations also reachable without their period */
+  abbreviations: number;
 };
 
 export type FormOfResult = {
@@ -58,11 +65,12 @@ export const makeWriter = (db: DictionaryDb) => {
     lemma      TEXT NOT NULL,
     source_pos TEXT NOT NULL,
     pointer    INTEGER NOT NULL,
+    marked     INTEGER NOT NULL,
     PRIMARY KEY (form, lemma, source_pos)
   ) WITHOUT ROWID`);
 
   const insertEntry = sqlite.prepare(
-    "INSERT INTO entries (id, lemma, pos, source_pos, etymology) VALUES (?, ?, ?, ?, ?)",
+    "INSERT INTO entries (id, lemma, pos, source_pos, etymology, case_class) VALUES (?, ?, ?, ?, ?, ?)",
   );
   const insertSense = sqlite.prepare(
     "INSERT INTO senses (entry_id, idx, translations, see) VALUES (?, ?, ?, ?)",
@@ -74,8 +82,8 @@ export const makeWriter = (db: DictionaryDb) => {
     "INSERT OR IGNORE INTO forms (form, entry_id, source) VALUES (?, ?, ?)",
   );
   const insertPending = sqlite.prepare(
-    `INSERT INTO form_of_pending (form, lemma, source_pos, pointer) VALUES (?, ?, ?, ?)
-     ON CONFLICT DO UPDATE SET pointer = 0 WHERE pointer = 1 AND excluded.pointer = 0`,
+    `INSERT INTO form_of_pending (form, lemma, source_pos, pointer, marked) VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT DO UPDATE SET pointer = min(pointer, excluded.pointer), marked = min(marked, excluded.marked)`,
   );
 
   const counts: WriterCounts = {
@@ -88,6 +96,9 @@ export const makeWriter = (db: DictionaryDb) => {
     derivedCopied: 0,
     derivedBare: 0,
     seeLinks: 0,
+    grammarEntries: 0,
+    grammarReplaced: 0,
+    abbreviations: 0,
   };
   const byKey = new Map<string, EntryState>();
   const historicalEntries: Array<ImportEntry> = [];
@@ -107,6 +118,7 @@ export const makeWriter = (db: DictionaryDb) => {
         entry.pos,
         entry.sourcePos,
         entry.etymology,
+        caseClass(entry.lemma),
       );
       insertForm.run(lookupKey(entry.lemma), state.id, FormSource.Lemma);
     } else {
@@ -144,6 +156,70 @@ export const makeWriter = (db: DictionaryDb) => {
     }
   };
 
+  /** Ids up to this one are grammar-file entries. */
+  let lastGrammarId = 0;
+  const grammarKeys = new Set<string>();
+
+  /**
+   * Write the grammar file's entries before anything else, so they come first
+   * in import order. They are not merged with Wiktionary lines.
+   */
+  const writeGrammar = sqlite.transaction(
+    (grammar: ReadonlyArray<GrammarEntry>) => {
+      for (const entry of grammar) {
+        const id = ++counts.entries;
+        insertEntry.run(
+          id,
+          entry.lemma,
+          entry.pos,
+          "grammar",
+          0,
+          caseClass(entry.lemma),
+        );
+        insertForm.run(lookupKey(entry.lemma), id, FormSource.Lemma);
+        entry.senses.forEach((sense, idx) => {
+          insertSense.run(id, idx, JSON.stringify([sense]), null);
+          counts.senses++;
+        });
+        grammarKeys.add(lookupKey(entry.lemma));
+        lastGrammarId = id;
+        counts.grammarEntries++;
+      }
+    },
+  );
+
+  /** A word in the grammar file shows none of Wiktionary's grammar-word entries. */
+  const replaceGrammarWords = sqlite.transaction(() => {
+    const drop = sqlite.prepare(
+      `DELETE FROM forms WHERE form = ? AND entry_id > ? AND entry_id IN (
+         SELECT id FROM entries WHERE pos IN (${[...GRAMMAR_POS].map((p) => `'${p}'`).join(", ")})
+       )`,
+    );
+    for (const key of grammarKeys) {
+      counts.grammarReplaced += drop.run(key, lastGrammarId).changes;
+    }
+  });
+
+  /**
+   * `bzw` -> `bzw.`: tokenizers drop the period that belongs to an
+   * abbreviation. Only for spellings with no other row, decided before any is
+   * added, so `c` reaches every lemma `c.` when it reaches nothing else.
+   */
+  const addAbbreviations = sqlite.transaction(() => {
+    sqlite.run(`CREATE TEMP TABLE abbreviations AS
+      SELECT substr(form, 1, length(form) - 1) AS bare, entry_id FROM forms
+      WHERE source = ${FormSource.Lemma} AND form LIKE '%_.'
+        AND instr(form, ' ') = 0
+        AND NOT EXISTS (
+          SELECT 1 FROM forms other WHERE other.form = substr(forms.form, 1, length(forms.form) - 1)
+        )`);
+    counts.abbreviations = sqlite.run(
+      `INSERT OR IGNORE INTO forms (form, entry_id, source)
+       SELECT bare, entry_id, ${FormSource.Abbreviation} FROM abbreviations`,
+    ).changes;
+    sqlite.run("DROP TABLE abbreviations");
+  });
+
   const writeLinks = (links: ReadonlyArray<FormOfLink>) => {
     for (const link of links) {
       counts.formOfLinks += insertPending.run(
@@ -151,6 +227,7 @@ export const makeWriter = (db: DictionaryDb) => {
         link.lemma,
         link.sourcePos,
         link.pointer ? 1 : 0,
+        link.marked ? 1 : 0,
       ).changes;
     }
   };
@@ -193,8 +270,8 @@ export const makeWriter = (db: DictionaryDb) => {
   const followLinkChains = () => {
     for (let step = 1; step < MAX_CHAIN_STEPS; step++) {
       const added = sqlite.run(
-        `INSERT OR IGNORE INTO form_of_pending (form, lemma, source_pos, pointer)
-         SELECT p.form, q.lemma, p.source_pos, max(p.pointer, q.pointer)
+        `INSERT OR IGNORE INTO form_of_pending (form, lemma, source_pos, pointer, marked)
+         SELECT p.form, q.lemma, p.source_pos, max(p.pointer, q.pointer), max(p.marked, q.marked)
          FROM form_of_pending p
          JOIN form_of_pending q ON q.form = p.lemma
          WHERE q.lemma <> p.form
@@ -360,6 +437,8 @@ export const makeWriter = (db: DictionaryDb) => {
    * key, so `changes` is exactly the number of rows the fallback added.
    * Pointer links only take the same pos, and skip a form that already reaches
    * the lemma, so `prostu` doesn't add `prosty` the noun next to the adjective.
+   * Marked links (obsolete or dialect spellings) resolve last, and only for
+   * forms that reached no entry any other way.
    */
   const resolveFormOf = (enabled: boolean): FormOfResult => {
     restoreHistoricalEntries();
@@ -384,13 +463,14 @@ export const makeWriter = (db: DictionaryDb) => {
           if (!hasEntry(form)) insertForm.run(form, entryId, FormSource.FormOf);
         }
       })();
-      added = sqlite.run(
-        `INSERT OR IGNORE INTO forms (form, entry_id, source)
+      const resolveLinks = (where: string) =>
+        sqlite.run(
+          `INSERT OR IGNORE INTO forms (form, entry_id, source)
          SELECT p.form, f.entry_id, ${FormSource.FormOf}
          FROM form_of_pending p
          JOIN forms f ON f.form = p.lemma AND f.source = ${FormSource.Lemma}
          JOIN entries e ON e.id = f.entry_id
-         WHERE (p.pointer = 0 AND (
+         WHERE ${where} AND ((p.pointer = 0 AND (
              e.source_pos = p.source_pos
              OR NOT EXISTS (
                SELECT 1 FROM forms f2 JOIN entries e2 ON e2.id = f2.entry_id
@@ -403,14 +483,26 @@ export const makeWriter = (db: DictionaryDb) => {
              JOIN forms target ON target.entry_id = reached.entry_id
              WHERE reached.form = p.form
                AND target.form = p.lemma AND target.source = ${FormSource.Lemma}
-           ))`,
-      ).changes;
+           )))`,
+        ).changes;
+      added = resolveLinks("p.marked = 0");
+      // Decided before any marked row is added, so a word with two marked
+      // spellings gets both targets.
+      sqlite.run(`CREATE TEMP TABLE unreached AS
+        SELECT DISTINCT form FROM form_of_pending p
+        WHERE p.marked = 1 AND NOT EXISTS (SELECT 1 FROM forms f WHERE f.form = p.form)`);
+      added += resolveLinks(
+        "p.marked = 1 AND p.form IN (SELECT form FROM unreached)",
+      );
+      sqlite.run("DROP TABLE unreached");
     }
     sqlite.run("DROP TABLE form_of_pending");
+    replaceGrammarWords();
+    addAbbreviations();
     return { added, unresolved };
   };
 
-  return { counts, writeBatch, resolveFormOf };
+  return { counts, writeGrammar, writeBatch, resolveFormOf };
 };
 
 export type Writer = ReturnType<typeof makeWriter>;

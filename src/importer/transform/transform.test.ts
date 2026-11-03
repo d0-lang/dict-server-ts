@@ -4,6 +4,7 @@ import { transformEntry } from "./transform.ts";
 import type { WiktextractEntry } from "../source/wiktextract.ts";
 
 const pl = LANGUAGES.pl!;
+const de = LANGUAGES.de!;
 
 const entry = (patch: Partial<WiktextractEntry>): WiktextractEntry => ({
   word: "lapis",
@@ -326,11 +327,17 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(result), [["queen ant"], ["character"]]);
+    assert.deepStrictEqual(translations(result), [
+      ["queen ant"],
+      ["character"],
+    ]);
     assert.strictEqual(result.skippedSenses.placeholder, 1);
     assert.deepStrictEqual(result.parentGlosses, []);
 
-    const only = transformEntry(pl, entry({ senses: [{ glosses: [placeholder] }] }));
+    const only = transformEntry(
+      pl,
+      entry({ senses: [{ glosses: [placeholder] }] }),
+    );
     assert.strictEqual(only.entry, undefined);
   });
 
@@ -451,5 +458,22 @@ describe("transformEntry", () => {
       { translations: ["synonym of strunnik"], see: ["strunnik"] },
       { translations: ["dog"], see: [] },
     ]);
+  });
+
+  it("does not index the perfect auxiliary as a form of the verb", () => {
+    const result = transformEntry(
+      de,
+      entry({
+        word: "fallen",
+        pos: "verb",
+        lang_code: "de",
+        senses: [{ glosses: ["to fall"] }],
+        forms: [
+          { form: "fiel", tags: ["preterite"], source: "conjugation" },
+          { form: "sein", tags: ["auxiliary"], source: "conjugation" },
+        ],
+      }),
+    );
+    assert.deepStrictEqual(result.entry?.forms, ["fiel"]);
   });
 });

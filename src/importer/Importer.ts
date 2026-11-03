@@ -2,6 +2,7 @@ import { Effect, Result, Stream } from "effect";
 import { createDictionaryFile } from "../dictionary/DictionaryDb.ts";
 import { SCHEMA_VERSION } from "../dictionary/schema.ts";
 import { ImportError, importFailure } from "./errors.ts";
+import { loadGrammar, type GrammarEntry } from "./grammar.ts";
 import {
   countForms,
   finalizeDatabase,
@@ -51,6 +52,8 @@ export type ImportOptions = {
   readonly limit?: number;
   /** log progress every N target-language lines (0 = off) */
   readonly progressEvery?: number;
+  /** grammar entries to use instead of `grammar/<lang>.tsv` (tests) */
+  readonly grammar?: ReadonlyArray<GrammarEntry>;
 };
 
 export const languageRules = (
@@ -108,6 +111,11 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     (db) => Effect.sync(() => db.$client.close(false)),
   );
   const writer = makeWriter(db);
+  const grammar = yield* Effect.try({
+    try: () => options.grammar ?? loadGrammar(rules.code),
+    catch: importFailure("cannot read the grammar file"),
+  });
+  writer.writeGrammar(grammar);
   const tally = makeTally();
 
   const logProgress = () =>
@@ -151,7 +159,9 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     limit: options.limit === undefined ? "none" : String(options.limit),
     form_of_fallback: formOfFallback ? "on" : "off",
     entries: String(writer.counts.entries),
-    forms: String(forms.lemma + forms.inflection + forms.formOf),
+    forms: String(
+      forms.lemma + forms.inflection + forms.formOf + forms.abbreviation,
+    ),
   });
   const fileBytes = yield* publish(tmp, options.out);
 
@@ -176,6 +186,9 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     derivedCopied: writer.counts.derivedCopied,
     derivedBare: writer.counts.derivedBare,
     seeLinks: writer.counts.seeLinks,
+    grammarEntries: writer.counts.grammarEntries,
+    grammarReplaced: writer.counts.grammarReplaced,
+    abbreviations: writer.counts.abbreviations,
     topParentGlosses: topParentGlosses(tally),
     fileBytes,
     seconds: elapsedSeconds(),

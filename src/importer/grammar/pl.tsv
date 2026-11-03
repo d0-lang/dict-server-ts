@@ -1,0 +1,234 @@
+# Polish grammar words. One line per word as written + part of speech:
+# word <TAB> UD part of speech <TAB> senses separated by " | ".
+# The file replaces Wiktionary's determiner, pronoun, preposition, conjunction,
+# particle and auxiliary entries for every word listed here; nouns, verbs and
+# other content words stay (je "eats", mam "I have"). See src/importer/grammar.ts.
+
+## Personal pronouns
+ja	PRON	I
+mnie	PRON	me (genitive or accusative: "nie ma mnie", I'm not here; "widzisz mnie", you see me) | to me (dative, stressed) | me (after prepositions: "o mnie", about me; "u mnie", at my place)
+mi	PRON	me, to me (dative, unstressed: "daj mi", give me; "podoba mi się", I like it)
+mną	PRON	me (instrumental, after prepositions: "ze mną", with me; "nade mną", above me)
+ty	PRON	you (singular, informal)
+ciebie	PRON	you (singular, genitive or accusative, stressed) | you (after prepositions: "dla ciebie", for you)
+cię	PRON	you (singular, genitive or accusative, unstressed: "kocham cię", I love you)
+tobie	PRON	to you (singular, dative, stressed) | you (after prepositions: "o tobie", about you)
+ci	PRON	you, to you (singular, dative, unstressed: "dziękuję ci", I thank you) | these, those (men or mixed groups: "ci ludzie", these people)
+tobą	PRON	you (singular, instrumental: "z tobą", with you)
+on	PRON	he | it (for a masculine noun)
+jego	PRON	him, it (genitive or accusative, stressed: "nie ma jego", he isn't here)
+jego	DET	his, its
+go	PRON	him, it (genitive or accusative, unstressed: "widzę go", I see him)
+niego	PRON	him, it (after prepositions: "dla niego", for him; "do niego", to him)
+jemu	PRON	to him, to it (dative, stressed)
+mu	PRON	to him, to it (dative, unstressed: "daj mu", give him)
+niemu	PRON	him, it (dative after prepositions: "ku niemu", towards him)
+nim	PRON	him, it (instrumental or locative after prepositions: "z nim", with him; "o nim", about him)
+nim	SCONJ	before (literary, for zanim)
+ona	PRON	she | it (for a feminine noun)
+jej	PRON	her, to her (genitive or dative: "nie ma jej", she isn't here; "daj jej", give her)
+jej	DET	her, its
+niej	PRON	her, it (after prepositions: "o niej", about her; "do niej", to her)
+ją	PRON	her, it (accusative: "widzę ją", I see her)
+nią	PRON	her, it (instrumental, after prepositions: "z nią", with her)
+ono	PRON	it
+je	PRON	them (accusative, for women, children, animals or things: "widzę je", I see them) | it (accusative of ono)
+my	PRON	we
+nas	PRON	us (genitive, accusative or locative: "dla nas", for us; "o nas", about us)
+nam	PRON	us, to us (dative)
+nami	PRON	us (instrumental: "z nami", with us)
+wy	PRON	you (plural)
+was	PRON	you (plural, genitive, accusative or locative: "dla was", for you)
+wam	PRON	you, to you (plural, dative)
+wami	PRON	you (plural, instrumental: "z wami", with you)
+oni	PRON	they (men or mixed groups)
+one	PRON	they (women, children, animals or things)
+ich	PRON	them (genitive, or accusative for men or mixed groups: "widzę ich", I see them)
+ich	DET	their
+nich	PRON	them (after prepositions: "dla nich", for them; "o nich", about them)
+im	PRON	them, to them (dative: "daj im", give them)
+nimi	PRON	them (instrumental: "z nimi", with them)
+
+## Reflexive
+się	PRON	oneself, myself, yourself, himself, herself, itself, ourselves, themselves (reflexive) | each other | (makes a verb reflexive or impersonal, often with no English equivalent: "mówi się", people say; "boję się", I'm afraid)
+siebie	PRON	oneself, each other (genitive or accusative: "dla siebie", for oneself) | home, one's own place ("u siebie", at home, at one's place; "do siebie", home)
+sobie	PRON	to oneself, for oneself (dative: "kupiłem sobie", I bought myself; "cenić sobie", to value) | oneself (locative: "o sobie", about oneself) | (casual, adds ease: "idzie sobie", strolls along)
+sobą	PRON	oneself (instrumental: "przed sobą", in front of oneself; "pociągać za sobą", to entail) | each other ("między sobą", among themselves)
+
+## Possessives
+mój	DET	my, mine
+moja	DET	my, mine
+moje	DET	my, mine
+mojego	DET	my, mine (genitive; masculine animate accusative)
+mojej	DET	my, mine (feminine genitive, dative or locative)
+mojemu	DET	my, to my (dative)
+moim	DET	my (instrumental or locative; plural dative)
+moją	DET	my (feminine accusative or instrumental)
+moi	DET	my (men or mixed groups)
+moich	DET	my, mine (plural genitive, locative; men accusative)
+moimi	DET	my (plural instrumental)
+twój	DET	your, yours (singular)
+twoja	DET	your, yours (singular)
+twoje	DET	your, yours (singular)
+twojego	DET	your, yours (singular, genitive)
+twojej	DET	your, yours (singular, feminine genitive, dative or locative)
+twojemu	DET	your, to your (singular, dative)
+twoim	DET	your (singular, instrumental or locative)
+twoją	DET	your (singular, feminine accusative or instrumental)
+twoi	DET	your (singular owner; men or mixed groups)
+twoich	DET	your, yours (singular owner; plural genitive)
+twoimi	DET	your (singular owner; plural instrumental)
+swój	DET	one's own: my, your, his, her, its, our, their own (refers back to the subject)
+swoja	DET	one's own (refers back to the subject)
+swoje	DET	one's own (refers back to the subject)
+swojego	DET	one's own (genitive)
+swojej	DET	one's own (feminine genitive, dative or locative)
+swojemu	DET	one's own, to one's own (dative)
+swoim	DET	one's own (instrumental or locative)
+swoją	DET	one's own (feminine accusative or instrumental)
+swoi	DET	one's own (men or mixed groups) | one's own people ("swoi", our people)
+swoich	DET	one's own (plural genitive or locative)
+swoimi	DET	one's own (plural instrumental)
+nasz	DET	our, ours
+nasza	DET	our, ours
+nasze	DET	our, ours
+naszego	DET	our, ours (genitive)
+naszej	DET	our, ours (feminine genitive, dative or locative)
+naszemu	DET	our, to our (dative)
+naszym	DET	our (instrumental or locative)
+naszą	DET	our (feminine accusative or instrumental)
+nasi	DET	our (men or mixed groups) | our people, our side
+naszych	DET	our, ours (plural genitive or locative)
+naszymi	DET	our (plural instrumental)
+wasz	DET	your, yours (plural)
+wasza	DET	your, yours (plural)
+wasze	DET	your, yours (plural)
+waszego	DET	your, yours (plural owner, genitive)
+waszej	DET	your, yours (plural owner, feminine genitive, dative or locative)
+waszemu	DET	your, to your (plural owner, dative)
+waszym	DET	your (plural owner, instrumental or locative)
+waszą	DET	your (plural owner, feminine accusative or instrumental)
+wasi	DET	your (plural owner; men or mixed groups)
+waszych	DET	your, yours (plural owner; plural genitive)
+
+## Demonstratives
+ten	DET	this, that (masculine)
+ten	PRON	this one, that one
+ten	PART	(colloquial filler) um, like ("no, ten...", well, um...)
+ta	DET	this, that (feminine)
+ta	PRON	this one, that one
+to	DET	this, that (neuter)
+to	PRON	this, that, it ("to jest dobre", this is good) | (linking two things) is, are ("Warszawa to stolica", Warsaw is the capital)
+to	PART	(for emphasis or to move on) so, then, well ("to idziemy?", so are we going?)
+tego	DET	this, that (genitive; masculine animate accusative)
+tego	PRON	this, that, it (genitive: "nie wiem tego", I don't know that)
+tej	DET	this, that (feminine genitive, dative or locative)
+temu	DET	this, that, to this (dative)
+temu	PRON	to this, to that (dative)
+temu	ADP	ago (after a time: "dwa lata temu", two years ago)
+tym	DET	this, that (instrumental or locative; plural dative)
+tym	PRON	this, that, it (instrumental or locative: "o tym", about it; "z tym", with that)
+tym	PART	(with a comparative) the ("tym lepiej", all the better; "im więcej, tym lepiej", the more the better)
+tę	DET	this, that (feminine accusative)
+tą	DET	this, that (feminine instrumental; colloquial accusative)
+te	DET	these, those (women, children, animals or things)
+te	PRON	these, those
+tych	DET	these, those (plural genitive or locative; men accusative)
+tych	PRON	these, those (plural genitive or locative)
+tymi	DET	these, those (plural instrumental)
+tamten	DET	that (over there)
+tamta	DET	that (over there)
+tamto	DET	that (over there)
+tamto	PRON	that
+tamtego	DET	that (over there; genitive)
+tamtej	DET	that (over there; feminine genitive, dative or locative)
+tamtym	DET	that (over there; instrumental or locative)
+tamci	DET	those (men or mixed groups)
+tamte	DET	those
+tamtych	DET	those (genitive or locative)
+taki	DET	such, like this, like that | ("taki sam", the same)
+taka	DET	such, like this, like that
+takie	DET	such, like this, like that
+takiego	DET	such (genitive: "czegoś takiego", something like that)
+takiej	DET	such (feminine genitive, dative or locative)
+takim	DET	such (instrumental or locative)
+taką	DET	such (feminine accusative or instrumental)
+tacy	DET	such (men or mixed groups)
+takich	DET	such (plural genitive or locative)
+
+## Interrogatives and relatives
+kto	PRON	who | whoever, anyone who ("kto chce, może iść", whoever wants can go)
+kogo	PRON	whom, who (genitive or accusative: "kogo widzisz?", who do you see?)
+komu	PRON	to whom, who (dative: "komu to dałeś?", who did you give it to?)
+kim	PRON	whom, who (instrumental or locative: "z kim?", with whom?; "o kim?", about whom?)
+co	PRON	what | which, that (relative: "to, co mówisz", what you say)
+co	ADP	every ("co roku", every year; "co chwilę", every moment)
+co	PART	(in questions or exclamations) what, how ("co za dzień!", what a day!) | (at the end of a sentence) right?, eh? ("fajne, co?", nice, right?)
+czego	PRON	what (genitive: "czego szukasz?", what are you looking for?) | why, what for (colloquial: "czego się gapisz?", what are you staring at?)
+czemu	PRON	to what (dative)
+czemu	ADV	why (colloquial: "czemu nie?", why not?)
+czym	PRON	what (instrumental or locative: "czym jedziesz?", how are you travelling?; "o czym?", about what?)
+który	DET	which, what
+który	PRON	who, which, that (relative)
+która	DET	which, what
+która	PRON	who, which, that (relative)
+które	DET	which, what
+które	PRON	which, that (relative)
+którego	PRON	whom, which, whose (genitive; masculine animate accusative)
+której	PRON	whom, which, whose (feminine genitive, dative or locative)
+któremu	PRON	to whom, to which (dative)
+którym	PRON	whom, which (instrumental or locative; plural dative)
+którą	PRON	whom, which (feminine accusative or instrumental)
+którzy	PRON	who (men or mixed groups)
+których	PRON	whom, which, whose (plural genitive or locative; men accusative)
+którymi	PRON	whom, which (plural instrumental)
+jaki	DET	what, what kind of, which | such as, like (relative)
+jaka	DET	what, what kind of, which
+jakie	DET	what, what kind of, which
+jakiego	DET	what, what kind of (genitive)
+jakiej	DET	what, what kind of (feminine genitive, dative or locative)
+jakim	DET	what, what kind of (instrumental or locative)
+jaką	DET	what, what kind of (feminine accusative or instrumental)
+jacy	DET	what, what kind of (men or mixed groups)
+jakich	DET	what, what kind of (plural genitive or locative)
+
+## Quantifiers and indefinites
+każdy	DET	every, each
+każdy	PRON	everyone, everybody, each one
+każda	DET	every, each
+każde	DET	every, each
+każdego	DET	every, each (genitive; masculine animate accusative: "każdego dnia", every day)
+każdego	PRON	everyone (genitive or accusative)
+każdej	DET	every, each (feminine genitive, dative or locative)
+każdemu	DET	every, to every (dative)
+każdemu	PRON	everyone, to everyone
+każdym	DET	every, each (instrumental or locative)
+każdą	DET	every, each (feminine accusative or instrumental)
+wszystko	PRON	everything, all
+wszystkiego	PRON	everything (genitive: "wszystkiego najlepszego", all the best)
+wszystkiego	PART	in all, in total ("wszystkiego dziesięć osób", ten people in all)
+wszystkim	PRON	everyone, to everyone (dative) | everything (instrumental or locative: "o wszystkim", about everything)
+wszyscy	PRON	everyone, everybody, all (men or mixed groups)
+wszystkie	DET	all (women, children, animals or things)
+wszystkie	PRON	all of them
+wszystkich	PRON	everyone, all (genitive, locative; men accusative)
+wszystkich	DET	all (genitive or locative)
+wszystkimi	PRON	everyone, all (instrumental)
+nic	PRON	nothing ("nic nie wiem", I don't know anything)
+niczego	PRON	nothing (genitive)
+niczym	PRON	nothing (instrumental or locative: "o niczym", about nothing) | like (literary: "niczym ptak", like a bird)
+nikt	PRON	nobody, no one
+nikogo	PRON	nobody, no one (genitive or accusative)
+nikomu	PRON	to nobody, nobody (dative)
+nikim	PRON	nobody (instrumental or locative)
+coś	PRON	something, anything
+coś	PART	(colloquial) somehow, for some reason ("coś mi nie pasuje", somehow it doesn't suit me) | about, something like ("coś koło piątej", about five o'clock)
+czegoś	PRON	something, anything (genitive: "czegoś takiego", anything like that)
+czymś	PRON	something (instrumental or locative)
+ktoś	PRON	someone, somebody
+kogoś	PRON	someone, somebody (genitive or accusative)
+komuś	PRON	to someone (dative)
+kimś	PRON	someone (instrumental or locative)
+sam	DET	alone, by oneself | himself, myself, yourself (emphatic: "sam to zrobiłem", I did it myself) | the very ("sam środek", the very middle)
+sama	DET	alone, by herself | herself, myself (emphatic) | the very
+samo	DET	alone, by itself | the same ("to samo", the same thing)

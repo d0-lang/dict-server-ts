@@ -12,7 +12,7 @@ import {
  * Bump `SCHEMA_VERSION` whenever the DDL below changes; files are rebuilt by
  * the importer, not migrated. It is stored as `PRAGMA user_version`.
  */
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 /** Universal Dependencies part-of-speech tags (https://universaldependencies.org/u/pos/). */
 export const UD_POS = [
@@ -39,6 +39,18 @@ export type UdPos = (typeof UD_POS)[number];
 export const PRON_KINDS = ["ipa", "audio", "reading"] as const;
 export type PronKind = (typeof PRON_KINDS)[number];
 
+/**
+ * How a word is capitalised, for ranking: a lowercase word shows lowercase
+ * lemmas first (`oder` "or" before the river `Oder`), and acronyms go last
+ * unless the word is all caps. See `caseClass` in `lookupKey.ts`.
+ */
+export const CaseClass = {
+  Lower: 0,
+  Capitalised: 1,
+  AllCaps: 2,
+} as const;
+export type CaseClass = (typeof CaseClass)[keyof typeof CaseClass];
+
 /** Key/value info about the import (pair, source, date, counts). */
 export const meta = sqliteTable("meta", {
   key: text("key").primaryKey(),
@@ -59,6 +71,8 @@ export const entries = sqliteTable("entries", {
   sourcePos: text("source_pos").notNull(),
   /** wiktextract `etymology_number`, 0 when the word has a single etymology. */
   etymology: integer("etymology").notNull(),
+  /** `CaseClass` of the lemma, which lookups rank by. */
+  caseClass: integer("case_class").$type<CaseClass>().notNull(),
 });
 
 /**
@@ -101,6 +115,11 @@ export const FormSource = {
   Inflection: 1,
   /** fallback: a separate "X is a form of Y" entry pointing at the lemma */
   FormOf: 2,
+  /**
+   * an abbreviation without its period (`bzw` -> `bzw.`), which tokenizers
+   * drop; only for spellings that reach nothing else
+   */
+  Abbreviation: 3,
 } as const;
 export type FormSource = (typeof FormSource)[keyof typeof FormSource];
 
@@ -137,7 +156,8 @@ CREATE TABLE entries (
   lemma      TEXT NOT NULL,
   pos        TEXT NOT NULL,
   source_pos TEXT NOT NULL,
-  etymology  INTEGER NOT NULL
+  etymology  INTEGER NOT NULL,
+  case_class INTEGER NOT NULL
 );
 
 CREATE TABLE senses (

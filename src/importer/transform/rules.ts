@@ -17,9 +17,7 @@ const SKIPPED_SENSE_TAGS = ["archaic", "no-gloss"] as const;
  * `historicalStages`, unrelated to wiktextract's `historical` tag.
  */
 export type SkippedSenseReason =
-  | (typeof SKIPPED_SENSE_TAGS)[number]
-  | "historical-stage"
-  | "placeholder";
+  (typeof SKIPPED_SENSE_TAGS)[number] | "historical-stage" | "placeholder";
 
 /** Wiktionary's text for a sense nobody could define; not a meaning. */
 const PLACEHOLDER_GLOSS = "The meaning of this term is uncertain";
@@ -159,6 +157,27 @@ const languageLinks = (
 };
 
 /**
+ * A form-of target that is really English, as when wiktextract reads `sich`
+ * "Reflexive pronoun of the third person singular or plural: herself, ..." as a
+ * form of "the third person singular or plural". Such a target is several
+ * words, the lemma is one, and the sense doesn't link it as a word of the
+ * language. The sense is then a gloss, not a link to nothing.
+ */
+export const isMisreadTarget = (
+  language: LanguageRules,
+  lemma: string,
+  targets: ReadonlyArray<string>,
+  links: ReadonlyArray<ReadonlyArray<string>>,
+): boolean => {
+  if (targets.length === 0 || hasWhitespace(lemma)) return false;
+  // "czesać się" links its text to the page `czesać`, so either counts.
+  const linked = new Set(
+    languageLinks(language, links).flatMap((l) => [l.word, l.text]),
+  );
+  return targets.every((t) => hasWhitespace(t.trim()) && !linked.has(t));
+};
+
+/**
  * The target of a gloss like "vocative/locative singular of sens", which has no
  * `form-of` tag. Every word before "of" must be grammar and the rest must be a
  * link, so "forms genitive singular of neuter nouns" is not one.
@@ -227,6 +246,53 @@ const hasWhitespace = (text: string): boolean => /\s/.test(text);
 export const isVerbalNounForm = (form: WiktextractForm): boolean =>
   form.tags?.includes("noun-from-verb") ?? false;
 
+/**
+ * German verb tables list the perfect auxiliary (`haben`, `sein`) as a row, so
+ * without this `haben` resolves to every verb that takes it.
+ */
+const isAuxiliaryRow = (form: WiktextractForm): boolean =>
+  form.tags?.includes("auxiliary") ?? false;
+
+/**
+ * Usage labels of a spelling outside the standard language. A form-of link or
+ * headword alternative carrying one is "marked": it only resolves when the
+ * word reaches nothing else, so obsolete `für` ("alternative form of vor")
+ * doesn't add `vor` to the everyday `für`, while a word that is only a
+ * dialect spelling still finds its standard form.
+ */
+const MARKED_TAGS: ReadonlySet<string> = new Set([
+  "obsolete",
+  "archaic",
+  "dated",
+  "rare",
+  "uncommon",
+  "colloquial",
+  "informal",
+  "slang",
+  "dialectal",
+  "regional",
+  "poetic",
+  "literary",
+  "humorous",
+  "nonstandard",
+  "proscribed",
+  "misspelling",
+  "pronunciation-spelling",
+  "Internet",
+  "Biblical",
+  "historical",
+  "extinct",
+]);
+
+export const isMarked = (tags: ReadonlyArray<string> = []): boolean =>
+  tags.some((t) => MARKED_TAGS.has(t));
+
+/** A headword-line spelling variant with a usage label: a marked link, not a form. */
+export const isMarkedAlternative = (form: WiktextractForm): boolean =>
+  form.source === undefined &&
+  (form.tags?.includes("alternative") ?? false) &&
+  isMarked(form.tags);
+
 /** Whether a raw form is indexed as a form of its lemma. */
 export const keepForm = (
   language: LanguageRules,
@@ -243,8 +309,10 @@ export const keepForm = (
   const tags = form.tags ?? [];
   if (tags.some((t) => TEMPLATE_FORM_TAGS.has(t))) return false;
   if (isVerbalNounForm(form)) return false;
+  if (isAuxiliaryRow(form)) return false;
   if (isHistorical(language, tags)) return false;
   if (form.source === undefined) {
+    if (isMarkedAlternative(form)) return false;
     return (
       tags.some((t) => HEADWORD_FORM_TAGS.sameWord.has(t)) &&
       !tags.some((t) => HEADWORD_FORM_TAGS.relatedWord.has(t))

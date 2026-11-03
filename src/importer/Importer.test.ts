@@ -29,6 +29,7 @@ describe("importWiktextract", () => {
       const dir = yield* tempDir;
       const out = join(dir, "pl_en.sqlite");
       const stats = yield* importWiktextract({
+        grammar: [],
         lang: "pl",
         input: FIXTURE,
         out,
@@ -157,7 +158,12 @@ describe("importWiktextract", () => {
         ),
       );
       const out = join(dir, "pl_en.sqlite");
-      const stats = yield* importWiktextract({ lang: "pl", input, out });
+      const stats = yield* importWiktextract({
+        lang: "pl",
+        input,
+        out,
+        grammar: [],
+      });
       const db = yield* openDictionary(out);
       const senses = (word: string) =>
         findEntriesByForm(db, word).map((e) => [
@@ -199,87 +205,107 @@ describe("importWiktextract", () => {
     }).pipe(Effect.scoped),
   );
 
-  it.effect("links synonyms to existing words and keeps groups when copying", () =>
-    Effect.gen(function* () {
-      const dir = yield* tempDir;
-      const input = join(dir, "pl.jsonl");
-      const line = (word: string, senses: ReadonlyArray<object>, extra = {}) =>
-        JSON.stringify({ word, pos: "noun", lang_code: "pl", senses, ...extra });
-      const synonym = (target: string) => ({
-        glosses: [`synonym of ${target}`],
-        links: [[target, `${target}#Polish`]],
-      });
-      yield* Effect.promise(() =>
-        writeFile(
+  it.effect(
+    "links synonyms to existing words and keeps groups when copying",
+    () =>
+      Effect.gen(function* () {
+        const dir = yield* tempDir;
+        const input = join(dir, "pl.jsonl");
+        const line = (
+          word: string,
+          senses: ReadonlyArray<object>,
+          extra = {},
+        ) =>
+          JSON.stringify({
+            word,
+            pos: "noun",
+            lang_code: "pl",
+            senses,
+            ...extra,
+          });
+        const synonym = (target: string) => ({
+          glosses: [`synonym of ${target}`],
+          links: [[target, `${target}#Polish`]],
+        });
+        yield* Effect.promise(() =>
+          writeFile(
+            input,
+            [
+              line("królik", [
+                {
+                  glosses: ["diminutive of król"],
+                  tags: ["form-of"],
+                  form_of: [{ word: "król" }],
+                },
+              ]),
+              line("król", [
+                {
+                  glosses: ["king", "synonym of państwo"],
+                  links: [["państwo", "państwo#Polish"]],
+                },
+                { glosses: ["king", "royal couple"] },
+              ]),
+              line("państwo", [{ glosses: ["state"] }]),
+              line("grządka", [synonym("zagon"), synonym("brak")]),
+              line("zagon", [{ glosses: ["field"] }]),
+              line("razu", [synonym("raz")]),
+              line("raz", [{ glosses: ["once"] }], {
+                forms: [{ form: "razu", source: "declension" }],
+              }),
+              line("sam", [synonym("tam")]),
+              line("tam", [synonym("sam")], {
+                forms: [{ form: "sam", source: "declension" }],
+              }),
+            ].join("\n"),
+          ),
+        );
+        const out = join(dir, "pl_en.sqlite");
+        const stats = yield* importWiktextract({
+          lang: "pl",
           input,
-          [
-            line("królik", [
-              {
-                glosses: ["diminutive of król"],
-                tags: ["form-of"],
-                form_of: [{ word: "król" }],
-              },
-            ]),
-            line("król", [
-              { glosses: ["king", "synonym of państwo"], links: [["państwo", "państwo#Polish"]] },
-              { glosses: ["king", "royal couple"] },
-            ]),
-            line("państwo", [{ glosses: ["state"] }]),
-            line("grządka", [synonym("zagon"), synonym("brak")]),
-            line("zagon", [{ glosses: ["field"] }]),
-            line("razu", [synonym("raz")]),
-            line("raz", [{ glosses: ["once"] }], {
-              forms: [{ form: "razu", source: "declension" }],
-            }),
-            line("sam", [synonym("tam")]),
-            line("tam", [synonym("sam")], {
-              forms: [{ form: "sam", source: "declension" }],
-            }),
-          ].join("\n"),
-        ),
-      );
-      const out = join(dir, "pl_en.sqlite");
-      const stats = yield* importWiktextract({ lang: "pl", input, out });
-      const db = yield* openDictionary(out);
-      const senses = (word: string) =>
-        findEntriesByForm(db, word).map((e) => [e.lemma, e.senses]);
+          out,
+          grammar: [],
+        });
+        const db = yield* openDictionary(out);
+        const senses = (word: string) =>
+          findEntriesByForm(db, word).map((e) => [e.lemma, e.senses]);
 
-      assert.deepStrictEqual(senses("król"), [
-        [
-          "król",
+        assert.deepStrictEqual(senses("król"), [
           [
-            {
-              translations: ["king", "synonym of państwo", "royal couple"],
-              see: ["państwo"],
-            },
+            "król",
+            [
+              {
+                translations: ["king", "synonym of państwo", "royal couple"],
+                see: ["państwo"],
+              },
+            ],
           ],
-        ],
-      ]);
-      // the pointer is left out of the copy, and the group stays one sense
-      assert.deepStrictEqual(senses("królik"), [
-        [
-          "królik",
-          [{ translations: ["diminutive of król: king; royal couple"] }],
-        ],
-      ]);
-      // a target with no entry gets no link
-      assert.deepStrictEqual(senses("grządka"), [
-        [
-          "grządka",
+        ]);
+        // the pointer is left out of the copy, and the group stays one sense
+        assert.deepStrictEqual(senses("królik"), [
           [
-            { translations: ["synonym of zagon"], see: ["zagon"] },
-            { translations: ["synonym of brak"] },
+            "królik",
+            [{ translations: ["diminutive of król: king; royal couple"] }],
           ],
-        ],
-      ]);
-      // the target is already in the result
-      assert.deepStrictEqual(senses("razu"), [
-        ["raz", [{ translations: ["once"] }]],
-      ]);
-      // words that only point at each other still return something
-      assert.strictEqual(senses("sam").length, 2);
-      assert.strictEqual(stats.seeLinks, 5);
-    }).pipe(Effect.scoped),
+        ]);
+        // a target with no entry gets no link
+        assert.deepStrictEqual(senses("grządka"), [
+          [
+            "grządka",
+            [
+              { translations: ["synonym of zagon"], see: ["zagon"] },
+              { translations: ["synonym of brak"] },
+            ],
+          ],
+        ]);
+        // the target is already in the result
+        assert.deepStrictEqual(senses("razu"), [
+          ["raz", [{ translations: ["once"] }]],
+        ]);
+        // words that only point at each other still return something
+        assert.strictEqual(senses("sam").length, 2);
+        assert.strictEqual(stats.seeLinks, 5);
+      }).pipe(Effect.scoped),
   );
 
   it.effect("resolves pointer links only to new words of the same pos", () =>
@@ -317,7 +343,7 @@ describe("importWiktextract", () => {
         ),
       );
       const out = join(dir, "pl_en.sqlite");
-      yield* importWiktextract({ lang: "pl", input, out });
+      yield* importWiktextract({ lang: "pl", input, out, grammar: [] });
       const db = yield* openDictionary(out);
 
       assert.deepStrictEqual(lemmas(db, "tych"), ["to/PRON"]);
@@ -335,6 +361,7 @@ describe("importWiktextract", () => {
       );
       const out = join(dir, "pl_en.sqlite");
       const stats = yield* importWiktextract({
+        grammar: [],
         lang: "pl",
         input: gz,
         out,
@@ -365,13 +392,14 @@ describe("importWiktextract", () => {
       yield* Effect.promise(() => writeFile(out, "existing"));
 
       const refused = yield* Effect.flip(
-        importWiktextract({ lang: "pl", input: FIXTURE, out }),
+        importWiktextract({ lang: "pl", input: FIXTURE, out, grammar: [] }),
       );
       assert.include(refused.message, "already exists");
       const untouched = yield* Effect.promise(() => readFile(out, "utf8"));
       assert.strictEqual(untouched, "existing");
 
       const stats = yield* importWiktextract({
+        grammar: [],
         lang: "pl",
         input: FIXTURE,
         out,
@@ -381,11 +409,196 @@ describe("importWiktextract", () => {
     }).pipe(Effect.scoped),
   );
 
+  it.effect(
+    "resolves marked spellings only for words that reach nothing else",
+    () =>
+      Effect.gen(function* () {
+        const dir = yield* tempDir;
+        const input = join(dir, "de.jsonl");
+        const line = (
+          word: string,
+          pos: string,
+          senses: ReadonlyArray<object>,
+          extra: object = {},
+        ) => JSON.stringify({ word, pos, lang_code: "de", senses, ...extra });
+        const alt = (target: string, ...tags: Array<string>) => ({
+          glosses: [`alternative form of ${target}`],
+          tags: ["alt-of", "alternative", ...tags],
+          alt_of: [{ word: target }],
+        });
+        yield* Effect.promise(() =>
+          writeFile(
+            input,
+            [
+              line("für", "prep", [{ glosses: ["for"] }]),
+              line("für", "prep", [alt("vor", "obsolete")], {
+                etymology_number: 2,
+              }),
+              line("vor", "prep", [{ glosses: ["before"] }]),
+              line("nich", "adv", [alt("nicht", "colloquial")]),
+              line("nicht", "adv", [{ glosses: ["not"] }]),
+              line("Mann", "noun", [{ glosses: ["man"] }], {
+                forms: [
+                  { form: "man", tags: ["alternative", "obsolete"] },
+                  { form: "Mahn", tags: ["alternative", "obsolete"] },
+                ],
+              }),
+              line("man", "pron", [{ glosses: ["one"] }]),
+              line("sich", "pron", [
+                {
+                  glosses: ["Reflexive pronoun of the third person: oneself"],
+                  tags: ["form-of", "reflexive"],
+                  form_of: [{ word: "the third person" }],
+                  links: [["third person", "third person"]],
+                },
+              ]),
+            ].join("\n"),
+          ),
+        );
+        const out = join(dir, "de_en.sqlite");
+        yield* importWiktextract({ lang: "de", input, out, grammar: [] });
+        const db = yield* openDictionary(out);
+
+        // a word of its own keeps only its own entries
+        assert.deepStrictEqual(lemmas(db, "für"), ["für/ADP"]);
+        assert.deepStrictEqual(lemmas(db, "man"), ["man/PRON"]);
+        // a spelling that is nothing else still finds its standard word
+        assert.deepStrictEqual(lemmas(db, "nich"), ["nicht/ADV"]);
+        assert.deepStrictEqual(lemmas(db, "mahn"), ["Mann/NOUN"]);
+        // an English "target" leaves the gloss in place
+        assert.deepStrictEqual(
+          findEntriesByForm(db, "sich").map((e) => e.senses[0]?.translations),
+          [["Reflexive pronoun of the third person: oneself"]],
+        );
+      }).pipe(Effect.scoped),
+  );
+
+  it.effect("lets the grammar file replace Wiktionary's grammar words", () =>
+    Effect.gen(function* () {
+      const dir = yield* tempDir;
+      const input = join(dir, "de.jsonl");
+      const line = (word: string, pos: string, gloss: string, extra = {}) =>
+        JSON.stringify({
+          word,
+          pos,
+          lang_code: "de",
+          senses: [{ glosses: [gloss] }],
+          ...extra,
+        });
+      yield* Effect.promise(() =>
+        writeFile(
+          input,
+          [
+            line("der", "article", "the", {
+              forms: [{ form: "des", source: "declension" }],
+            }),
+            line("sein", "verb", "to be"),
+            line("sein", "det", "his", {
+              forms: [{ form: "ihr", source: "declension" }],
+            }),
+            line("ihr", "pron", "you (plural)"),
+          ].join("\n"),
+        ),
+      );
+      const out = join(dir, "de_en.sqlite");
+      const stats = yield* importWiktextract({
+        lang: "de",
+        input,
+        out,
+        grammar: [
+          { lemma: "des", pos: "DET", senses: ["of the"] },
+          { lemma: "ihr", pos: "PRON", senses: ["you (plural)", "to her"] },
+          { lemma: "ihr", pos: "DET", senses: ["her, their"] },
+          { lemma: "sein", pos: "DET", senses: ["his, its"] },
+        ],
+      });
+      assert.strictEqual(stats.grammarEntries, 4);
+      const db = yield* openDictionary(out);
+      const senses = (word: string) =>
+        findEntriesByForm(db, word).map((e) => [
+          `${e.lemma}/${e.pos}`,
+          ...e.senses.map((s) => s.translations[0]),
+        ]);
+      // the file's entry instead of a redirect to `der`
+      assert.deepStrictEqual(senses("des"), [["des/DET", "of the"]]);
+      // no `sein` (det) through its table, no second `ihr` pronoun
+      assert.deepStrictEqual(senses("ihr"), [
+        ["ihr/PRON", "you (plural)", "to her"],
+        ["ihr/DET", "her, their"],
+      ]);
+      // content words stay
+      assert.deepStrictEqual(senses("sein"), [
+        ["sein/DET", "his, its"],
+        ["sein/VERB", "to be"],
+      ]);
+    }).pipe(Effect.scoped),
+  );
+
+  it.effect(
+    "ranks by case and spelling, and finds abbreviations without the period",
+    () =>
+      Effect.gen(function* () {
+        const dir = yield* tempDir;
+        const input = join(dir, "de.jsonl");
+        const line = (word: string, pos: string, extra = {}) =>
+          JSON.stringify({
+            word,
+            pos,
+            lang_code: "de",
+            senses: [{ glosses: [word] }],
+            ...extra,
+          });
+        yield* Effect.promise(() =>
+          writeFile(
+            input,
+            [
+              line("Oder", "name"),
+              line("oder", "conj"),
+              line("AM", "noun"),
+              line("an", "prep", {
+                forms: [{ form: "am", source: "declension" }],
+              }),
+              line("fragen", "verb", {
+                forms: [{ form: "frage", source: "conjugation" }],
+              }),
+              line("Frage", "noun"),
+              line("bzw.", "adv"),
+            ].join("\n"),
+          ),
+        );
+        const out = join(dir, "de_en.sqlite");
+        const stats = yield* importWiktextract({
+          lang: "de",
+          input,
+          out,
+          grammar: [],
+        });
+        assert.strictEqual(stats.abbreviations, 1);
+        const db = yield* openDictionary(out);
+        assert.deepStrictEqual(lemmas(db, "oder"), [
+          "oder/CCONJ",
+          "Oder/PROPN",
+        ]);
+        assert.deepStrictEqual(lemmas(db, "Oder"), [
+          "Oder/PROPN",
+          "oder/CCONJ",
+        ]);
+        assert.deepStrictEqual(lemmas(db, "Am"), ["an/ADP", "AM/NOUN"]);
+        assert.deepStrictEqual(lemmas(db, "AM"), ["AM/NOUN", "an/ADP"]);
+        assert.deepStrictEqual(lemmas(db, "Frage"), [
+          "Frage/NOUN",
+          "fragen/VERB",
+        ]);
+        assert.deepStrictEqual(lemmas(db, "bzw"), ["bzw./ADV"]);
+      }).pipe(Effect.scoped),
+  );
+
   it.effect("fails on an unknown language or a missing file", () =>
     Effect.gen(function* () {
       const dir = yield* tempDir;
       const unknown = yield* Effect.flip(
         importWiktextract({
+          grammar: [],
           lang: "xx",
           input: FIXTURE,
           out: join(dir, "x.sqlite"),
@@ -394,6 +607,7 @@ describe("importWiktextract", () => {
       assert.include(unknown.message, 'no import rules for "xx"');
       const missing = yield* Effect.flip(
         importWiktextract({
+          grammar: [],
           lang: "pl",
           input: join(dir, "nope.jsonl"),
           out: join(dir, "y.sqlite"),

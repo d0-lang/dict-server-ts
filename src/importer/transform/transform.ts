@@ -6,7 +6,10 @@ import {
   grammarPointerTarget,
   hasDeadLabel,
   isBareDerivedGloss,
+  isMarked,
+  isMarkedAlternative,
   isMisreadFormOf,
+  isMisreadTarget,
   isOwnEntryGloss,
   isPlaceholderGloss,
   isVerbalNounForm,
@@ -73,6 +76,11 @@ export type FormOfLink = {
    * form doesn't already reach that lemma.
    */
   readonly pointer?: true;
+  /**
+   * From a spelling with a usage label (obsolete, dialectal, ...). It only
+   * resolves when the form reaches no entry in any other way.
+   */
+  readonly marked?: true;
 };
 
 export type TransformResult = {
@@ -127,15 +135,23 @@ const toEtymology = (value: number | string | undefined): number => {
   return n !== undefined && Number.isInteger(n) && n >= 0 ? n : 0;
 };
 
-const isLinkSense = (sense: WiktextractSense): boolean => {
+/** `sens==Polish==`: a heading the dump left on a link target. */
+const cleanTarget = (word: string): string => word.replace(/==.*$/, "");
+
+const isLinkSense = (
+  rules: LanguageRules,
+  lemma: string,
+  sense: WiktextractSense,
+): boolean => {
   const tags = sense.tags ?? [];
   if (!tags.includes("form-of") && !tags.includes("alt-of")) return false;
   const gloss = senseGloss(sense);
-  return gloss === undefined || !isMisreadFormOf(gloss);
+  if (gloss !== undefined && isMisreadFormOf(gloss)) return false;
+  const targets = [...(sense.form_of ?? []), ...(sense.alt_of ?? [])].map(
+    (link) => cleanTarget(link.word),
+  );
+  return !isMisreadTarget(rules, lemma, targets, sense.links ?? []);
 };
-
-/** `sens==Polish==`: a heading the dump left on a link target. */
-const cleanTarget = (word: string): string => word.replace(/==.*$/, "");
 
 const stripParentColon = (gloss: string): string =>
   gloss.replace(/\s*:\s*$/, "");
@@ -221,6 +237,7 @@ type SenseOutcome =
       readonly kind: "link";
       readonly targets: ReadonlyArray<string>;
       readonly pointer?: true;
+      readonly marked?: true;
     }
   | {
       readonly kind: "derived";
@@ -231,13 +248,14 @@ type SenseOutcome =
 
 const classifySense = (
   rules: LanguageRules,
+  lemma: string,
   sense: WiktextractSense,
 ): SenseOutcome => {
   const tags = sense.tags ?? [];
   const reason = skipSense(rules, tags);
   if (reason !== undefined) return { kind: "skip", reason };
   const gloss = senseGloss(sense);
-  if (isLinkSense(sense)) {
+  if (isLinkSense(rules, lemma, sense)) {
     const links = [...(sense.form_of ?? []), ...(sense.alt_of ?? [])].map(
       (link) => ({ word: cleanTarget(link.word) }),
     );
@@ -253,7 +271,11 @@ const classifySense = (
           : [],
       };
     }
-    return { kind: "link", targets: links.map((l) => lookupKey(l.word)) };
+    return {
+      kind: "link",
+      targets: links.map((l) => lookupKey(l.word)),
+      ...(isMarked(tags) ? { marked: true as const } : {}),
+    };
   }
   if (gloss === undefined) return { kind: "skip", reason: "no-gloss" };
   if (glossPath(rules, sense).length === 0) {
@@ -308,11 +330,11 @@ export const transformEntry = (
   const derived: Array<DerivedSense> = [];
 
   for (const sense of raw.senses ?? []) {
-    const outcome = classifySense(rules, sense);
+    const outcome = classifySense(rules, lemma, sense);
     switch (outcome.kind) {
       case "skip": {
         skippedSenses[outcome.reason]++;
-        if (!isLinkSense(sense)) {
+        if (!isLinkSense(rules, lemma, sense)) {
           senses.add(livingParents(rules, sense));
           if (outcome.reason === "historical-stage") {
             historicalSenses.add(glossPath(rules, sense));
@@ -334,6 +356,7 @@ export const transformEntry = (
               lemma: target,
               sourcePos: raw.pos,
               ...(outcome.pointer ? { pointer: true as const } : {}),
+              ...(outcome.marked ? { marked: true as const } : {}),
             });
           }
         }
@@ -364,6 +387,20 @@ export const transformEntry = (
   }
 
   const { forms, dropped } = collectForms(rules, lemma, raw.forms ?? []);
+  // `man` on the headword line of `Mann` ("obsolete"): the variant points here
+  // only if it turns out to be no word of its own.
+  for (const form of raw.forms ?? []) {
+    if (!isMarkedAlternative(form)) continue;
+    const key = lookupKey(form.form);
+    if (key !== "" && key !== lemmaKey && !/\s/.test(key)) {
+      formOf.push({
+        form: key,
+        lemma: lemmaKey,
+        sourcePos: raw.pos,
+        marked: true,
+      });
+    }
+  }
   const makeEntry = (
     entrySenses: ReadonlyArray<ImportSense>,
     derivedSenses: ReadonlyArray<DerivedSense>,
@@ -411,14 +448,18 @@ export const transformEntry = (
   };
 };
 
-/** One link per form and lemma; a tagged link beats a pointer to the same word. */
+/** How weak a link is: a pointer or a marked spelling is weaker than a plain link. */
+const weakness = (link: FormOfLink): number =>
+  (link.pointer ? 1 : 0) + (link.marked ? 1 : 0);
+
+/** One link per form and lemma; the strongest link to the same word wins. */
 const dedupeLinks = (links: ReadonlyArray<FormOfLink>) => {
   if (links.length < 2) return links;
   const byKey = new Map<string, FormOfLink>();
   for (const link of links) {
     const k = `${link.form}\u0000${link.lemma}`;
     const seen = byKey.get(k);
-    if (seen === undefined || (seen.pointer && !link.pointer)) {
+    if (seen === undefined || weakness(link) < weakness(seen)) {
       byKey.set(k, link);
     }
   }

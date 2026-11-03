@@ -39,6 +39,15 @@ export const LANGUAGES: Readonly<Record<string, LanguageRules>> = {
     ],
     standardPronNotes: ["normal speech", "prescriptive"],
   },
+  de: {
+    code: "de",
+    name: "German",
+    target: "en",
+    // Middle and Old High German are separate languages in the dump (gmh, goh),
+    // not tags on German senses.
+    historicalStages: [],
+    standardPronNotes: [],
+  },
 };
 
 export const languagePair = (rules: LanguageRules): string =>

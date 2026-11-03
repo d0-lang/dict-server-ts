@@ -19,13 +19,24 @@ export type ImportStats = {
   };
   readonly pronunciations: number;
   readonly droppedForms: number;
-  readonly forms: { lemma: number; inflection: number; formOf: number };
+  readonly forms: {
+    lemma: number;
+    inflection: number;
+    formOf: number;
+    abbreviation: number;
+  };
   readonly formOfLinks: number;
   readonly formOfUnresolved: number;
   readonly historicalEntries: number;
   readonly derivedCopied: number;
   readonly derivedBare: number;
   readonly seeLinks: number;
+  /** Entries from `grammar/<lang>.tsv`. */
+  readonly grammarEntries: number;
+  /** Wiktionary grammar-word `forms` rows those entries replaced. */
+  readonly grammarReplaced: number;
+  /** Abbreviations also reachable without their period (`bzw` -> `bzw.`). */
+  readonly abbreviations: number;
   /** Most repeated parent glosses across words, to spot new templates by eye. */
   readonly topParentGlosses: ReadonlyArray<{
     readonly gloss: string;

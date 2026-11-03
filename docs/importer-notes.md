@@ -54,6 +54,22 @@ Findings, not decisions. See `eval/README.md`. Haiku judged 200 words in context
 - `król` shows no "monarch" sense, but the dump has it: "king (male monarch)" is the parent in a nested `glosses` array, and `senseGloss` keeps only the last item, here "synonym of państwo". Corrected after the baseline run below.
 - Unresolved templates reach readers in 3 senses, affecting 52 lookup forms, e.g. `Template:syn of`.
 
+## German (2026-11-03)
+
+Branch `german`, not committed yet. The eval corpus is 25 openly licensed or official texts, about 31,500 words, in `dict-corpus/de` (Wikinews, Wikipedia, Wikivoyage, the Wikibooks cookbook, Bundestag protocols). Haiku judged 1,000 items at medium effort, the same items in every run.
+
+| Run | Understood | Frequent | Random | Junk senses | First group |
+|---|---|---|---|---|---|
+| First import | 82.2% | 85.5% | 74.7% | 9.6% | 81.4% |
+| Final (`eval/out/de/iter6`) | 87.2% | 89.3% | 82.3% | 3.9% | 87.8% |
+
+Polish on the same code (`eval/out/pl/de-iter6`, against `after-importer-2`): understood 83.8% -> 86.2%, first group 83.5% -> 85.5%.
+
+- Fixed in the data: German verb tables list the perfect auxiliary as a row (`haben` reached 9,034 verbs). Spellings with a usage label (obsolete, dialectal, ...) only resolve for words that reach nothing else (`für` no longer gives `vor`). A form-of target that is several words with no link in the language keeps its gloss (`sich` lost "reflexive pronoun"). That last rule catches 1,401 German senses, mostly targets with text pasted after the word (`Imbiß` -> "Imbiss which was deprecated..."). Taking the linked word as the target would resolve them; not done.
+- Grammar words come from `src/importer/grammar/<lang>.tsv`, written by hand and to be proofread by a speaker. It replaced rules for the shared pronoun table, the possessive box of `sein`/`Ihr`, and closed-class form-of entries.
+- Lookup ranking (case, then own lemma, then import order) and abbreviations without a period are worked out at import (`SCHEMA_VERSION` 3). Compound splitting stays at lookup; `Proposal-word-segments.md` next to `Protocol.md` proposes a response format for it.
+- Left: fixed phrases and separable verbs (40 of 128 not understood, for the multi-word work), missing words (32: names, abbreviations, words Wiktionary lacks), grammar-only glosses (25: tense and number aren't shown). `gewesen` and Polish `było` open with an adjective or a form entry because of the own-lemma rule.
+
 ## Current state (2026-11-01)
 
 - Derived words (section 1), table moves and historical-only words are implemented, uncommitted on `importer`, along with real `/v1/lookup`, which includes the `lookup-stub` commit's changes. The proposed details in section 1 are confirmed.

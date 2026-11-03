@@ -1,7 +1,8 @@
 import { Context, Effect, Layer } from "effect";
 import { AppConfig } from "../config.ts";
 import type { LookupEntry } from "../domain/schemas.ts";
-import { findEntriesByForm } from "./queries.ts";
+import { compoundLinkers } from "./compounds.ts";
+import { findEntriesByForm, findEntriesWithCompounds } from "./queries.ts";
 import { openDictionary } from "./DictionaryDb.ts";
 
 /** The dictionary files of the language pairs this server lists. */
@@ -27,7 +28,9 @@ export class Dictionaries extends Context.Service<
         return Dictionaries.of({
           lookup: (pair, word) => {
             const db = files.get(pair);
-            return db === undefined ? [] : findEntriesByForm(db, word);
+            return db === undefined
+              ? []
+              : findEntriesWithCompounds(db, word, compoundLinkers(pair));
           },
         });
       }),
