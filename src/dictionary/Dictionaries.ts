@@ -1,5 +1,5 @@
 import { Context, Effect, Layer } from "effect";
-import { AppConfig } from "../config.ts";
+import { AppConfig, DATA_DIR } from "../config.ts";
 import type { LookupEntry } from "../domain/schemas.ts";
 import { compoundLinkers } from "./compounds.ts";
 import { findEntriesByForm, findEntriesWithCompounds } from "./queries.ts";
@@ -13,7 +13,7 @@ export class Dictionaries extends Context.Service<
   }
 >()("server/dictionary/Dictionaries") {
   /** Opens `<dir>/<pair>.sqlite` for each listed pair; a missing file is fatal. */
-  static readonly layer = (dir = "data") =>
+  static readonly layer = (dir = DATA_DIR) =>
     Layer.effect(
       Dictionaries,
       Effect.gen(function* () {

@@ -1,7 +1,7 @@
 import { Effect, Layer } from "effect";
 import { HttpApiBuilder } from "effect/http-api";
 import { Api } from "../api/Api.ts";
-import { AppConfig } from "../config.ts";
+import { AppConfig, loadConfig } from "../config.ts";
 import { Dictionaries } from "../dictionary/Dictionaries.ts";
 import {
   Legal,
@@ -79,10 +79,13 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
   }),
 );
 
+/** In-memory handlers for tests: a stub dictionary and `de_en`, whatever is in `data/`. */
 export const DictHandlersMemory = DictHandlersNoDeps.pipe(
   Layer.provide([
     Identity.layerMemory,
-    AppConfig.layer,
+    Layer.sync(AppConfig, () =>
+      AppConfig.of({ ...loadConfig(), languages: ["de_en"] }),
+    ),
     Layer.succeed(Dictionaries, {
       lookup: (_pair, word) => lookupStub(word),
     }),

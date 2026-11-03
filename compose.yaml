@@ -4,11 +4,10 @@ services:
     container_name: dict-server
     restart: unless-stopped
     env_file:
-      - path: .env
+      - path: .env.docker
         required: false
     environment:
       PORT: "3000"
-      LANGUAGES: pl_en
       IDENTITY_FILE: data/identity.json
     ports:
       # Not 3000, so `bun run dev` can run alongside.

@@ -14,7 +14,7 @@ Ed25519 identity is stored at `IDENTITY_FILE` (default `data/identity.json`, git
 
 - `GET /v1/get-key` — unsigned Ed25519 public key (base64)
 - `GET /v1/get-meta` — signed metadata (`X-Nonce` required, `X-Signature` over exact body bytes)
-- `GET /v1/lookup?word=<word>&lang=<pair>` — entries from `data/<pair>.sqlite`. Every pair in `LANGUAGES` needs its file: build it first, see below
+- `GET /v1/lookup?word=<word>&lang=<pair>` — entries from `data/<pair>.sqlite`. Without `LANGUAGES`, every `data/<pair>.sqlite` is served; a pair listed in `LANGUAGES` needs its file: build it first, see below
 
 ```bash
 bun run test

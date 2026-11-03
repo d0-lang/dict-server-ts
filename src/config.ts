@@ -1,4 +1,24 @@
+import { existsSync, readdirSync } from "node:fs";
 import { Context, Layer } from "effect";
+
+/** Where the dictionary files live, one `<pair>.sqlite` per language pair. */
+export const DATA_DIR = "data";
+
+const PAIR_FILE = /^([a-z]{2,3}_[a-z]{2,3})\.sqlite$/;
+
+/**
+ * The pairs with a dictionary file in `dir`, sorted. Used when `LANGUAGES` is
+ * unset; the importer's `<out>.tmp` files and other files don't match.
+ */
+export const discoverLanguages = (dir = DATA_DIR): ReadonlyArray<string> =>
+  existsSync(dir)
+    ? readdirSync(dir)
+        .flatMap((file) => {
+          const pair = PAIR_FILE.exec(file)?.[1];
+          return pair === undefined ? [] : [pair];
+        })
+        .sort()
+    : [];
 
 export type AppConfigValues = {
   readonly port: number;
@@ -56,10 +76,16 @@ const envBool = (name: string, fallback: boolean): boolean => {
   return fallback;
 };
 
+/** `LANGUAGES` when set, otherwise every dictionary file in `data/`. */
+const languages = (): ReadonlyArray<string> => {
+  const listed = envList("LANGUAGES", []);
+  return listed.length > 0 ? listed : discoverLanguages();
+};
+
 export const loadConfig = (): AppConfigValues => ({
   port: Number(envString("PORT", "3000")),
   name: envString("SERVER_NAME", "dict poc"),
-  languages: envList("LANGUAGES", ["de_en"]),
+  languages: languages(),
   includeLegal: envBool("INCLUDE_LEGAL", true),
   verificationUrls: envList("VERIFICATION_URLS", [
     "https://example.invalid/verify",
