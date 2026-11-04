@@ -32,6 +32,8 @@ export class DictApi extends HttpApiGroup.make("dict")
         // Optional so a missing one gets the protocol's error body from the handler.
         word: Schema.optionalKey(Schema.String),
         lang: Schema.optionalKey(Schema.String),
+        // The sentence around `word`. Never logged: the logger drops the query string.
+        context: Schema.optionalKey(Schema.String),
       },
       success: LookupResponse,
       error: LookupError,

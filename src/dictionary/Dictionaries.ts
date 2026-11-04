@@ -1,36 +1,43 @@
 import { Context, Effect, Layer } from "effect";
 import { AppConfig, DATA_DIR } from "../config.ts";
-import type { LookupEntry } from "../domain/schemas.ts";
-import { compoundLinkers } from "./compounds.ts";
-import { findEntriesByForm, findEntriesWithCompounds } from "./queries.ts";
-import { openDictionary } from "./DictionaryDb.ts";
+import { phraseIndex } from "./context.ts";
+import { openDictionary, type DictionaryDb } from "./DictionaryDb.ts";
+import { lookupWord } from "./lookup.ts";
+import type { LookupBody } from "../domain/schemas.ts";
 
 /** The dictionary files of the language pairs this server lists. */
 export class Dictionaries extends Context.Service<
   Dictionaries,
   {
-    readonly lookup: (pair: string, word: string) => ReadonlyArray<LookupEntry>;
+    /** `context` is the sentence around `word`, when the client sent one. */
+    readonly lookup: (
+      pair: string,
+      word: string,
+      context?: string,
+    ) => LookupBody;
   }
 >()("server/dictionary/Dictionaries") {
-  /** Opens `<dir>/<pair>.sqlite` for each listed pair; a missing file is fatal. */
+  /**
+   * Opens `<dir>/<pair>.sqlite` for each listed pair; a missing file is fatal.
+   * With `context` on, the phrase index is built here, not on the first lookup.
+   */
   static readonly layer = (dir = DATA_DIR) =>
     Layer.effect(
       Dictionaries,
       Effect.gen(function* () {
-        const { languages } = yield* AppConfig;
-        const files = new Map<
-          string,
-          Parameters<typeof findEntriesByForm>[0]
-        >();
+        const { languages, context } = yield* AppConfig;
+        const files = new Map<string, DictionaryDb>();
         for (const pair of languages) {
-          files.set(pair, yield* openDictionary(`${dir}/${pair}.sqlite`));
+          const db = yield* openDictionary(`${dir}/${pair}.sqlite`);
+          if (context) phraseIndex(db, pair.split("_")[0]!);
+          files.set(pair, db);
         }
         return Dictionaries.of({
-          lookup: (pair, word) => {
+          lookup: (pair, word, sentence) => {
             const db = files.get(pair);
             return db === undefined
-              ? []
-              : findEntriesWithCompounds(db, word, compoundLinkers(pair));
+              ? { entries: [] }
+              : lookupWord(db, pair, word, sentence);
           },
         });
       }),

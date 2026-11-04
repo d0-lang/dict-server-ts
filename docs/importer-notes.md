@@ -70,6 +70,10 @@ Polish on the same code (`eval/out/pl/de-iter6`, against `after-importer-2`): un
 - Lookup ranking (case, then own lemma, then import order) and abbreviations without a period are worked out at import (`SCHEMA_VERSION` 3). Compound splitting stays at lookup; `Proposal-word-segments.md` next to `Protocol.md` proposes a response format for it.
 - Left: fixed phrases and separable verbs (40 of 128 not understood, for the multi-word work), missing words (32: names, abbreviations, words Wiktionary lacks), grammar-only glosses (25: tense and number aren't shown). `gewesen` and Polish `było` open with an adjective or a form entry because of the own-lemma rule.
 
+## Context and segments (2026-11-04)
+
+Lookup `context` (phrases, German separable verbs) and response `segments` are implemented. See `context-and-segments.md`. Understood: German 87.2% -> 88.6%, Polish 86.2% -> 89.8%. Fixed-phrase failures: 39 -> 28 and 54 -> 18.
+
 ## Current state (2026-11-01)
 
 - Derived words (section 1), table moves and historical-only words are implemented, uncommitted on `importer`, along with real `/v1/lookup`, which includes the `lookup-stub` commit's changes. The proposed details in section 1 are confirmed.

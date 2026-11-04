@@ -70,6 +70,9 @@ describe("HTTP API", () => {
     assert.strictEqual(parsed.nonce, nonce);
     assert.strictEqual(parsed.name, "dict poc");
     assert.deepStrictEqual(parsed.languages, ["de_en"]);
+    assert.deepStrictEqual((parsed as { features?: Array<string> }).features, [
+      "context",
+    ]);
 
     const keyResponse = await handler(
       new Request("http://localhost/v1/get-key"),
@@ -103,6 +106,33 @@ describe("HTTP API", () => {
         },
       ],
     });
+  });
+
+  it("GET /v1/lookup returns segments for a split word", async () => {
+    const response = await lookup(
+      `?word=${encodeURIComponent("Gemüsefonds")}&lang=de_en`,
+    );
+    const body = (await response.json()) as {
+      entries: Array<{ lemma: string }>;
+      segments: Array<{ text: string; entries?: Array<number> }>;
+    };
+    assert.deepStrictEqual(
+      body.entries.map((entry) => entry.lemma),
+      ["Gemüse", "Fonds", "Fond"],
+    );
+    assert.deepStrictEqual(body.segments, [
+      { text: "Gemüse", entries: [0] },
+      { text: "fonds", entries: [1, 2] },
+    ]);
+  });
+
+  it("GET /v1/lookup accepts a context", async () => {
+    const response = await lookup(
+      `?word=Mutter&lang=de_en&context=${encodeURIComponent("Meine Mutter kocht.")}`,
+    );
+    assert.strictEqual(response.status, 200);
+    const body = (await response.json()) as { entries: Array<unknown> };
+    assert.strictEqual(body.entries.length, 2);
   });
 
   it("GET /v1/lookup returns no entries for an unknown word", async () => {

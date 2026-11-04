@@ -35,9 +35,30 @@ const isBareSynonym = (sense: LookupSense): boolean =>
   /^synonym of [^(“]*$/i.test(sense.translations[0]!);
 
 /**
- * Drop bare synonyms of a word the result already shows, and entries left with
- * no senses (`razu` -> "synonym of raz" next to `raz`). Keeps everything if that
- * would empty the result, as when two words only point at each other.
+ * Wiktionary's pointer from an idiom to its literal reading ("Used other than
+ * figuratively or idiomatically: see w, ten."). The words' own entries say
+ * more, and context lookups show them right after the phrase.
+ */
+const isLiteralPointer = (sense: LookupSense): boolean =>
+  sense.translations.length === 1 &&
+  sense.translations[0]!.startsWith(
+    "Used other than figuratively or idiomatically",
+  );
+
+/** `entries` without literal pointers, and without entries left with no senses. */
+export const dropLiteralPointers = (
+  results: ReadonlyArray<LookupEntry>,
+): ReadonlyArray<LookupEntry> =>
+  results.flatMap((entry) => {
+    const senses = entry.senses.filter((sense) => !isLiteralPointer(sense));
+    return senses.length > 0 ? [{ ...entry, senses }] : [];
+  });
+
+/**
+ * Drop literal pointers, bare synonyms of a word the result already shows, and
+ * entries left with no senses (`razu` -> "synonym of raz" next to `raz`). Keeps
+ * everything if that would empty the result, as when two words only point at
+ * each other.
  */
 const dropRedundantSynonyms = (
   results: ReadonlyArray<LookupEntry>,
@@ -46,8 +67,9 @@ const dropRedundantSynonyms = (
   const kept = results.flatMap((entry) => {
     const senses = entry.senses.filter(
       (sense) =>
-        !isBareSynonym(sense) ||
-        !sense.see!.every((word) => shown.has(lookupKey(word))),
+        !isLiteralPointer(sense) &&
+        (!isBareSynonym(sense) ||
+          !sense.see!.every((word) => shown.has(lookupKey(word)))),
     );
     return senses.length > 0 ? [{ ...entry, senses }] : [];
   });
@@ -92,24 +114,12 @@ const rankedIds = (
     .all(key, wordClass, abbreviations ? 1 : 0)
     .map((row) => row.id);
 
-/**
- * All entries a surface word resolves to (deinflection included), ranked by
- * `rankedIds`. `abbreviations: false` leaves out `bzw` -> `bzw.` rows, for
- * compound parts.
- */
-export const findEntriesByForm = (
+/** Entries by id, in the order given, in the shape of the protocol. */
+export const loadEntries = (
   db: DictionaryDb,
-  word: string,
-  { abbreviations = true }: { readonly abbreviations?: boolean } = {},
+  ids: ReadonlyArray<number>,
 ): ReadonlyArray<LookupEntry> => {
-  const ids = rankedIds(
-    db,
-    lookupKey(word),
-    caseClass(cleanWord(word)),
-    abbreviations,
-  );
   if (ids.length === 0) return [];
-
   const heads = db
     .select()
     .from(entries)
@@ -129,7 +139,7 @@ export const findEntriesByForm = (
     .all();
 
   const byId = new Map(heads.map((head) => [head.id, head]));
-  const results = ids.map((id) => {
+  return ids.map((id) => {
     const head = byId.get(id)!;
     const prons = pronRows.filter((p) => p.entryId === id);
     const ipa = prons.filter((p) => p.kind === "ipa").map((p) => p.value);
@@ -152,35 +162,100 @@ export const findEntriesByForm = (
         })),
     };
   });
-  return dropRedundantSynonyms(results);
+};
+
+/**
+ * All entries a surface word resolves to (deinflection included), ranked by
+ * `rankedIds`. `abbreviations: false` leaves out `bzw` -> `bzw.` rows, for
+ * compound parts.
+ */
+export const findEntriesByForm = (
+  db: DictionaryDb,
+  word: string,
+  { abbreviations = true }: { readonly abbreviations?: boolean } = {},
+): ReadonlyArray<LookupEntry> =>
+  dropRedundantSynonyms(
+    loadEntries(
+      db,
+      rankedIds(db, lookupKey(word), caseClass(cleanWord(word)), abbreviations),
+    ),
+  );
+
+/** How the word as sent splits into parts; see `segments` in the protocol. */
+export type Segment = {
+  readonly text: string;
+  /** Indexes into the result's `entries`. */
+  readonly entries?: ReadonlyArray<number>;
+};
+
+export type LookupResult = {
+  readonly entries: ReadonlyArray<LookupEntry>;
+  readonly segments?: ReadonlyArray<Segment>;
+};
+
+/**
+ * `pieces` of `lookupKey(word)` as slices of `word` itself, which segments
+ * must spell exactly. Undefined when normalizing changed the length of the
+ * word (surrounding spaces, decomposed accents), so slices can't be mapped.
+ */
+export const surfaceSlices = (
+  word: string,
+  pieces: ReadonlyArray<string>,
+): ReadonlyArray<string> | undefined => {
+  const original = [...word];
+  const key = [...lookupKey(word)];
+  if (
+    original.length !== key.length ||
+    original.some((char, i) => char.toLowerCase() !== key[i])
+  ) {
+    return undefined;
+  }
+  let at = 0;
+  return pieces.map((piece) => {
+    const length = [...piece].length;
+    const slice = original.slice(at, at + length).join("");
+    at += length;
+    return slice;
+  });
 };
 
 /**
  * `findEntriesByForm`, and for a word with no entry in a compounding language,
  * the content-word entries of its parts in reading order: `Gemüsefonds` gives
- * `Gemüse` then `Fond`. The parts take the word's capitalisation, so a noun
- * compound ranks the noun readings of its parts first.
+ * `Gemüse` then `Fond`, with a segment per part (and per linking element).
+ * The parts take the word's capitalisation, so a noun compound ranks the noun
+ * readings of its parts first.
  */
 export const findEntriesWithCompounds = (
   db: DictionaryDb,
   word: string,
   linkers: ReadonlyArray<string> | undefined,
-): ReadonlyArray<LookupEntry> => {
+): LookupResult => {
   const direct = findEntriesByForm(db, word);
-  if (direct.length > 0 || linkers === undefined) return direct;
+  if (direct.length > 0 || linkers === undefined) return { entries: direct };
+  // Tables don't list a name's genitive (`Dortmunds`), which would split
+  // into nonsense (`Dort` + `Mund`).
+  const capital = caseClass(cleanWord(word)) !== CaseClass.Lower;
+  const key = lookupKey(word);
+  if (capital && key.endsWith("s") && [...key].length > 3) {
+    const names = findEntriesByForm(db, cleanWord(word).slice(0, -1), {
+      abbreviations: false,
+    }).filter((entry) => entry.pos === "PROPN");
+    if (names.length > 0) return { entries: names };
+  }
   const hasContentEntry = db.$client.query<{ n: number }, [string]>(
     `SELECT count(*) AS n FROM forms f JOIN entries e ON e.id = f.entry_id
      WHERE f.form = ? AND f.source <> ${FormSource.Abbreviation} AND e.pos IN (${[...CONTENT_POS].map((p) => `'${p}'`).join(", ")})`,
   );
-  const parts = splitCompound(
-    lookupKey(word),
+  const pieces = splitCompound(
+    key,
     (part) => hasContentEntry.get(part)!.n > 0,
     linkers,
   );
-  if (parts === undefined) return [];
-  const capital = caseClass(cleanWord(word)) !== CaseClass.Lower;
-  const seen = new Set<string>();
-  return parts.flatMap((part, i) => {
+  if (pieces === undefined) return { entries: [] };
+  const parts = pieces.filter((piece) => piece.part);
+  const perPart = parts.map((piece, i) => {
+    const part = piece.text;
     const surface = capital ? part[0]!.toUpperCase() + part.slice(1) : part;
     const found = findEntriesByForm(db, surface, {
       abbreviations: false,
@@ -189,16 +264,44 @@ export const findEntriesWithCompounds = (
     // `tagen`). A modifier is usually a stem as it stands (`Stahl`, not
     // `stehlen`), unless it only exists as a verb stem (`Förder-`).
     const isHead = i === parts.length - 1;
+    // Wiktionary's prefix entry (`sonder-` "special") explains a modifier
+    // better than the verb it is also a form of (`sondern` "to separate").
+    const prefix = isHead
+      ? []
+      : findEntriesByForm(db, `${part}-`, { abbreviations: false });
     const preferred = isHead
       ? capital
         ? found.filter((entry) => entry.pos === "NOUN")
         : []
       : found.filter((entry) => lookupKey(entry.lemma) === part);
-    return (preferred.length > 0 ? preferred : found).filter((entry) => {
+    if (prefix.length > 0 && preferred.length === 0) return prefix;
+    const kept = preferred.length > 0 ? preferred : found;
+    const seen = new Set<string>();
+    return kept.filter((entry) => {
       const id = JSON.stringify([entry.lemma, entry.pos, entry.senses]);
       if (seen.has(id)) return false;
       seen.add(id);
       return true;
     });
   });
+  const result = perPart.flat();
+  const slices = surfaceSlices(
+    word,
+    pieces.map((piece) => piece.text),
+  );
+  if (slices === undefined) return { entries: result };
+  // A part repeated in the word (`Kindeskind`) gets its own copies, since an
+  // entry belongs to at most one segment.
+  let next = 0;
+  let part = 0;
+  const segments = pieces.map((piece, i): Segment => {
+    if (!piece.part) return { text: slices[i]! };
+    const count = perPart[part++]!.length;
+    const indexes = Array.from({ length: count }, (_, k) => next + k);
+    next += count;
+    return count > 0
+      ? { text: slices[i]!, entries: indexes }
+      : { text: slices[i]! };
+  });
+  return { entries: result, segments };
 };

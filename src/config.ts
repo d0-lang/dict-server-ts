@@ -25,6 +25,8 @@ export type AppConfigValues = {
   readonly name: string;
   readonly languages: ReadonlyArray<string>;
   readonly includeLegal: boolean;
+  /** Accept `context` on lookups and list the `context` feature. */
+  readonly context: boolean;
   readonly verificationUrls: ReadonlyArray<string>;
   readonly privacyShort: string;
   readonly tosShort: string;
@@ -87,12 +89,13 @@ export const loadConfig = (): AppConfigValues => ({
   name: envString("SERVER_NAME", "dict poc"),
   languages: languages(),
   includeLegal: envBool("INCLUDE_LEGAL", true),
+  context: envBool("CONTEXT", true),
   verificationUrls: envList("VERIFICATION_URLS", [
     "https://example.invalid/verify",
   ]),
   privacyShort: envString(
     "PRIVACY_SHORT",
-    "PoC privacy policy. Do not use in production.",
+    "PoC privacy policy. Do not use in production. Lookups may send the full sentence around a word, which is used for that lookup only and never stored or logged.",
   ),
   tosShort: envString(
     "TOS_SHORT",

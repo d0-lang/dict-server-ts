@@ -30,10 +30,12 @@ describe("Dictionaries", () => {
       yield* Effect.gen(function* () {
         const dictionaries = yield* Dictionaries;
         assert.deepStrictEqual(
-          dictionaries.lookup("pl_en", "PSA").map((e) => e.lemma),
+          dictionaries.lookup("pl_en", "PSA").entries.map((e) => e.lemma),
           ["pies"],
         );
-        assert.deepStrictEqual(dictionaries.lookup("pl_en", "nope"), []);
+        assert.deepStrictEqual(dictionaries.lookup("pl_en", "nope"), {
+          entries: [],
+        });
       }).pipe(
         Effect.provide(
           Dictionaries.layer(dir).pipe(

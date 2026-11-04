@@ -8,13 +8,15 @@ cp .env.example .env   # already gitignored; Bun loads it automatically
 bun run dev
 ```
 
-Settings live in `.env` (`PORT`, `SERVER_NAME`, `LANGUAGES`, `INCLUDE_LEGAL`, legal copy/links, `VERIFICATION_URLS`, `IDENTITY_FILE`). See `.env.example`.
+Settings live in `.env` (`PORT`, `SERVER_NAME`, `LANGUAGES`, `INCLUDE_LEGAL`, `CONTEXT`, legal copy/links, `VERIFICATION_URLS`, `IDENTITY_FILE`). See `.env.example`.
 
 Ed25519 identity is stored at `IDENTITY_FILE` (default `data/identity.json`, gitignored). A rebuild/restart reloads that file instead of minting a new key.
 
 - `GET /v1/get-key` — unsigned Ed25519 public key (base64)
-- `GET /v1/get-meta` — signed metadata (`X-Nonce` required, `X-Signature` over exact body bytes)
-- `GET /v1/lookup?word=<word>&lang=<pair>` — entries from `data/<pair>.sqlite`. Without `LANGUAGES`, every `data/<pair>.sqlite` is served; a pair listed in `LANGUAGES` needs its file: build it first, see below
+- `GET /v1/get-meta` — signed metadata (`X-Nonce` required, `X-Signature` over exact body bytes); lists `"features": ["context"]` unless `CONTEXT=false`
+- `GET /v1/lookup?word=<word>&lang=<pair>[&context=<sentence>]` — entries from `data/<pair>.sqlite`, and `segments` for a split compound. Without `LANGUAGES`, every `data/<pair>.sqlite` is served; a pair listed in `LANGUAGES` needs its file: build it first, see below
+
+`context` is never logged: Effect's request logger drops the query string, and no tracer is set up. If you add one, redact `context`. The privacy text (`PRIVACY_SHORT`) has to say that full sentences are sent.
 
 ```bash
 bun run test
@@ -60,6 +62,14 @@ What gets imported:
 - table rows that aren't forms of the word are dropped: German verb tables list the perfect auxiliary (`haben`, `sein`)
 - an abbreviation is also found without its period (`bzw` -> `bzw.`), which tokenizers drop, when that spelling reaches nothing else
 
-Lookups rank entries in one query, using what the import stored: first by case (a lowercase word shows lowercase lemmas first, so `oder` gives "or" before the river `Oder`; acronyms go last unless the word is all caps), then the entry whose lemma is the word itself before the words it is a form of (`Frage` before `fragen`), then import order. For German, a word with no entry is split into known parts (`Gemüsefonds` -> `Gemüse` + `Fond`, linking `-s-`, `-n-`, `-en-`, ... allowed) and their entries are returned in reading order (`src/dictionary/compounds.ts`). `Proposal-word-segments.md`, next to `Protocol.md`, proposes how the response could show the split.
+Lookups rank entries in one query, using what the import stored: first by case (a lowercase word shows lowercase lemmas first, so `oder` gives "or" before the river `Oder`; acronyms go last unless the word is all caps), then the entry whose lemma is the word itself before the words it is a form of (`Frage` before `fragen`), then import order. For German, a word with no entry is split into known parts (`Gemüsefonds` -> `Gemüse` + `Fond`, linking `-s-`, `-n-`, `-en-`, ... allowed) and their entries are returned in reading order (`src/dictionary/compounds.ts`), with `segments` that slice the word as sent (`Schifffahrt` | `s` | `geschichte`). If normalizing changed the word's length (decomposed accents, spaces around it), the entries come without segments.
+
+With `context`, the entries matching the sentence come first (`src/dictionary/context.ts`):
+
+- phrases the word is part of: multi-word forms of multi-word entries, all in a row (`vor allem`, `Stanów Zjednoczonych`). Only a verb phrase's verb may be inflected (`miało miejsce` -> `mieć miejsce`) or stand apart from the rest in its clause (`tritt morgen in Kraft`). In German it must come first, and the rest must end the clause, so `ist an` in `Er ist an der Uni` isn't `an sein`. Longest phrase first, at most three
+- German separable verbs: the clicked verb with the particle that ends its clause, or the clicked particle with the nearest verb before it, when particle + verb is a form of a verb starting with that particle (`fand ... statt` -> `stattfinden`; `geht mit ihr` stays `gehen`)
+- then the word's own entries, without those already shown
+
+The phrase index is built at startup, about 0.5 s for German. A lookup with context takes about 0.7 ms on average for German and 0.35 ms for Polish, against 0.2 ms without.
 
 Bump `SCHEMA_VERSION` in `src/dictionary/schema.ts` when the schema changes; it is stored as `PRAGMA user_version`, and `openDictionary` refuses files built for another version.

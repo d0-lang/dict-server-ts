@@ -12,8 +12,12 @@ const words = new Set([
   "tag",
   "hanse",
 ]);
-const split = (word: string) =>
+const pieces = (word: string) =>
   splitCompound(word, (part) => words.has(part), compoundLinkers("de_en")!);
+const split = (word: string) =>
+  pieces(word)
+    ?.filter((piece) => piece.part)
+    .map((piece) => piece.text);
 
 describe("splitCompound", () => {
   it("splits into known parts, removing linking elements", () => {
@@ -23,6 +27,18 @@ describe("splitCompound", () => {
       "geschichte",
     ]);
     assert.deepStrictEqual(split("hansetag"), ["hanse", "tag"]);
+  });
+
+  it("keeps linking elements as pieces without meaning", () => {
+    assert.deepStrictEqual(pieces("gemüsefonds"), [
+      { text: "gemüse", part: true },
+      { text: "fonds", part: true },
+    ]);
+    assert.deepStrictEqual(pieces("schifffahrtsgeschichte"), [
+      { text: "schifffahrt", part: true },
+      { text: "s", part: false },
+      { text: "geschichte", part: true },
+    ]);
   });
 
   it("splits a modifier that is itself a compound", () => {

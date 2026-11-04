@@ -1,4 +1,4 @@
-import type { LookupEntry } from "../domain/schemas.ts";
+import type { LookupBody, LookupEntry } from "../domain/schemas.ts";
 
 const mutterPron = {
   ipa: ["/ˈmʊtər/", "[ˈmʊtɐ]"],
@@ -99,5 +99,28 @@ const SAMPLES: Readonly<Record<string, ReadonlyArray<LookupEntry>>> = {
   ],
 };
 
-export const lookupStub = (word: string): ReadonlyArray<LookupEntry> =>
-  SAMPLES[word.toLowerCase()] ?? [];
+/** A compound split into segments. The pieces spell the word as sent. */
+const gemuesefonds: LookupBody = {
+  entries: [
+    {
+      lemma: "Gemüse",
+      pos: "NOUN",
+      senses: [{ translations: ["vegetable; vegetables"] }],
+    },
+    { lemma: "Fonds", pos: "NOUN", senses: [{ translations: ["fund"] }] },
+    {
+      lemma: "Fond",
+      pos: "NOUN",
+      senses: [{ translations: ["stock (broth)"] }],
+    },
+  ],
+  segments: [
+    { text: "Gemüse", entries: [0] },
+    { text: "fonds", entries: [1, 2] },
+  ],
+};
+
+export const lookupStub = (word: string): LookupBody =>
+  word.toLowerCase() === "gemüsefonds"
+    ? gemuesefonds
+    : { entries: SAMPLES[word.toLowerCase()] ?? [] };

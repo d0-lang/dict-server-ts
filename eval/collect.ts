@@ -3,11 +3,14 @@
  * what came back, one record per word in its sentence. No judgement happens here.
  *
  *   bun eval/collect.ts --texts <dir> --lang pl_en --out eval/out/pl
+ *
+ * Like the extension, it sends the sentence as `context` when the server lists
+ * the `context` feature. `--context off` leaves it out.
  */
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
-import type { Entry, Item } from "./types.ts";
+import type { Entry, Item, Segment } from "./types.ts";
 
 const { values } = parseArgs({
   options: {
@@ -17,6 +20,7 @@ const { values } = parseArgs({
     base: { type: "string", default: "http://127.0.0.1:37421" },
     // The same word in many sentences adds cost faster than it adds information.
     "per-word": { type: "string", default: "3" },
+    context: { type: "string", default: "on" },
   },
 });
 if (!values.texts || !values.lang || !values.out) {
@@ -31,13 +35,22 @@ const sentenceSegmenter = new Intl.Segmenter(locale, {
 });
 const wordSegmenter = new Intl.Segmenter(locale, { granularity: "word" });
 
-const cache = new Map<string, ReadonlyArray<Entry>>();
-const lookup = async (word: string): Promise<ReadonlyArray<Entry>> => {
-  const cached = cache.get(word);
+const meta = (await (
+  await fetch(new URL("/v1/get-meta", base), { headers: { "x-nonce": "eval" } })
+).json()) as { features?: ReadonlyArray<string> };
+const sendContext = values.context !== "off" && (meta.features ?? []).includes("context");
+console.log(`context: ${sendContext ? "sent" : "not sent"}`);
+
+type Found = { readonly entries: ReadonlyArray<Entry>; readonly segments?: ReadonlyArray<Segment> };
+const cache = new Map<string, Found>();
+const lookup = async (word: string, sentence: string): Promise<Found> => {
+  const cacheKey = sendContext ? `${word}\0${sentence}` : word;
+  const cached = cache.get(cacheKey);
   if (cached !== undefined) return cached;
   const url = new URL("/v1/lookup", base);
   url.searchParams.set("word", word);
   url.searchParams.set("lang", lang);
+  if (sendContext) url.searchParams.set("context", sentence);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`${word}: HTTP ${response.status}`);
@@ -48,14 +61,18 @@ const lookup = async (word: string): Promise<ReadonlyArray<Entry>> => {
       pos: string;
       senses: ReadonlyArray<{ translations: ReadonlyArray<string> }>;
     }>;
+    segments?: ReadonlyArray<Segment>;
   };
-  const entries = body.entries.map((entry) => ({
-    lemma: entry.lemma,
-    pos: entry.pos,
-    senses: entry.senses.map((sense) => sense.translations.join("; ")),
-  }));
-  cache.set(word, entries);
-  return entries;
+  const found: Found = {
+    entries: body.entries.map((entry) => ({
+      lemma: entry.lemma,
+      pos: entry.pos,
+      senses: entry.senses.map((sense) => sense.translations.join("; ")),
+    })),
+    ...(body.segments !== undefined ? { segments: body.segments } : {}),
+  };
+  cache.set(cacheKey, found);
+  return found;
 };
 
 type TextStats = {
@@ -85,7 +102,8 @@ for (const text of textFiles) {
       if (!part.isWordLike || !/\p{L}/u.test(part.segment)) continue;
       const surface = part.segment.normalize("NFC");
       const word = surface.toLowerCase();
-      const entries = await lookup(surface);
+      const found = await lookup(surface, sentence);
+      const { entries } = found;
       stat.words++;
       counts.set(word, (counts.get(word) ?? 0) + 1);
       if (entries.length === 0) {
@@ -102,7 +120,7 @@ for (const text of textFiles) {
       const used = perWord.get(word) ?? 0;
       if (used >= perWordCap) continue;
       perWord.set(word, used + 1);
-      items.push({ word: surface, sentence, text, entries, weight: 0 });
+      items.push({ word: surface, sentence, text, ...found, weight: 0 });
     }
   }
 }

@@ -17,7 +17,7 @@ bun eval/judge.ts --dir eval/out/pl/after --effort medium
 bun eval/score.ts --dir eval/out/pl/after --base eval/out/pl/base
 ```
 
-The server must be running. `--base` on `collect.ts` defaults to the Docker service on port 37421. `judge.ts` saves verdicts in `eval/out/<lang>/verdicts.jsonl`, keyed by word, sentence, popover and prompt, so only changed popovers cost tokens. Editing `judge-prompt.md` invalidates every verdict.
+The server must be running. `--base` on `collect.ts` defaults to the Docker service on port 37421. Like the extension, `collect.ts` sends each sentence as `context` when the server lists the `context` feature; `--context off` collects without it. A split word's `segments` are kept, and the popover shows the parts with each group's part, whole-word entries first, as the protocol orders them. `judge.ts` saves verdicts in `eval/out/<lang>/verdicts.jsonl`, keyed by word, sentence, popover and prompt, so only changed popovers cost tokens. Editing `judge-prompt.md` invalidates every verdict.
 
 The first run for a language needs a baseline: `bun eval/sample.ts --run eval/out/pl --name base --frequent 700 --random 300`. For 1,000 items, expect about 0.8M tokens on your Claude login.
 

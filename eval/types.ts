@@ -4,6 +4,12 @@ export type Entry = {
   readonly senses: ReadonlyArray<string>;
 };
 
+/** A piece of the word as sent; `entries` index the item's `entries`. */
+export type Segment = {
+  readonly text: string;
+  readonly entries?: ReadonlyArray<number>;
+};
+
 /** A word in its sentence, with what the API returned for it. No entries means a miss. */
 export type Item = {
   readonly word: string;
@@ -11,6 +17,8 @@ export type Item = {
   /** e.g. `news-article/0001.md` */
   readonly text: string;
   readonly entries: ReadonlyArray<Entry>;
+  /** How the server split the word, if it did. */
+  readonly segments?: ReadonlyArray<Segment>;
   /** Occurrences of the word in the corpus, per saved item of that word. */
   readonly weight: number;
 };

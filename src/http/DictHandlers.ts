@@ -62,6 +62,7 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
             nonce: headers["x-nonce"],
             languages: [...config.languages],
             verification_urls: [...config.verificationUrls],
+            ...(config.context ? { features: ["context"] } : {}),
             ...(legal !== undefined ? { legal } : {}),
           }),
         ).pipe(Effect.orDie),
@@ -71,9 +72,13 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
           : !config.languages.includes(query.lang)
             ? Effect.fail(new LookupError({ error: "unsupported_lang" }))
             : Effect.succeed(
-                new LookupResponse({
-                  entries: dictionaries.lookup(query.lang, query.word),
-                }),
+                new LookupResponse(
+                  dictionaries.lookup(
+                    query.lang,
+                    query.word,
+                    config.context ? query.context : undefined,
+                  ),
+                ),
               ),
     });
   }),

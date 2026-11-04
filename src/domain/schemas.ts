@@ -22,6 +22,7 @@ export class Meta extends Schema.Class<Meta>("server/domain/Meta")({
   nonce: Schema.String,
   languages: Schema.Array(Schema.String),
   legal: Schema.optionalKey(Legal),
+  features: Schema.optionalKey(Schema.Array(Schema.String)),
   verification_urls: Schema.Array(Schema.String),
 }) {}
 
@@ -44,10 +45,23 @@ export const LookupEntry = Schema.Struct({
 });
 export type LookupEntry = typeof LookupEntry.Type;
 
+/** A piece of the word as sent; `entries` index the response's `entries`. */
+export const LookupSegment = Schema.Struct({
+  text: Schema.String,
+  entries: Schema.optionalKey(Schema.Array(Schema.Number)),
+});
+
+/** What a lookup finds: the fields of `LookupResponse`. */
+export type LookupBody = {
+  readonly entries: ReadonlyArray<LookupEntry>;
+  readonly segments?: ReadonlyArray<typeof LookupSegment.Type>;
+};
+
 export class LookupResponse extends Schema.Class<LookupResponse>(
   "server/domain/LookupResponse",
 )({
   entries: Schema.Array(LookupEntry),
+  segments: Schema.optionalKey(Schema.Array(LookupSegment)),
 }) {}
 
 export class LookupError extends Schema.Class<LookupError>(

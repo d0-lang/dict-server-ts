@@ -35,16 +35,23 @@ export const CONTENT_POS: ReadonlySet<UdPos> = new Set([
 ]);
 
 /**
+ * One piece of a split word: a known `part`, or the linking element before
+ * the next part (`s` in `Gemüse|s|fonds`), which has no meaning of its own.
+ */
+export type CompoundPiece = { readonly text: string; readonly part: boolean };
+
+/**
  * Split a normalized word into known parts, longest head first: the head is
  * a word as it stands (it carries the inflection), each modifier a word once
- * its linking element is removed. Undefined when there is no such split.
+ * its linking element is removed. The pieces joined give `key` back.
+ * Undefined when there is no such split.
  */
 export const splitCompound = (
   key: string,
   isPart: (form: string) => boolean,
   linkers: ReadonlyArray<string>,
   maxParts = MAX_PARTS,
-): ReadonlyArray<string> | undefined => {
+): ReadonlyArray<CompoundPiece> | undefined => {
   if (maxParts < 2) return undefined;
   const chars = [...key];
   for (let cut = MIN_PART; cut <= chars.length - MIN_PART; cut++) {
@@ -55,9 +62,13 @@ export const splitCompound = (
       if (!left.endsWith(linker)) continue;
       const stem = left.slice(0, left.length - linker.length);
       if ([...stem].length < MIN_PART) continue;
-      if (isPart(stem)) return [stem, head];
+      const tail: ReadonlyArray<CompoundPiece> = [
+        ...(linker === "" ? [] : [{ text: linker, part: false }]),
+        { text: head, part: true },
+      ];
+      if (isPart(stem)) return [{ text: stem, part: true }, ...tail];
       const inner = splitCompound(stem, isPart, linkers, maxParts - 1);
-      if (inner !== undefined) return [...inner, head];
+      if (inner !== undefined) return [...inner, ...tail];
     }
   }
   return undefined;

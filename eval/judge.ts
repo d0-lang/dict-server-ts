@@ -54,7 +54,7 @@ console.log(`${sample.length} items: ${sample.length - pending.size} already jud
 if (values.dry) process.exit(0);
 
 const render = (key: string, item: SampleRecord) =>
-  `id: ${key.slice(0, 8)}\nword: ${item.word}\nsentence: ${item.sentence}\n${renderPopover(item.entries)}`;
+  `id: ${key.slice(0, 8)}\nword: ${item.word}\nsentence: ${item.sentence}\n${renderPopover(item.entries, item.segments)}`;
 
 const UNDERSTOOD = new Set(["yes", "partly", "wrong", "no"]);
 const parse = (text: string, ids: ReadonlySet<string>): Map<string, Verdict> => {

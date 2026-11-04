@@ -7,7 +7,7 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { groupEntries, renderPopover, verdictKey } from "./popover.ts";
+import { popoverGroups, renderPopover, verdictKey } from "./popover.ts";
 import type { SampleRecord, Verdict } from "./types.ts";
 
 const { values } = parseArgs({
@@ -38,7 +38,7 @@ const load = (path: string): ReadonlyArray<Judged> => {
   return sample.flatMap((item) => {
     const verdict = cache.get(verdictKey(item, prompt));
     if (!verdict) return [];
-    const groups = groupEntries(item.entries);
+    const groups = popoverGroups(item.entries, item.segments);
     let junk = 0;
     let marginal = 0;
     groups.forEach((group, g) => {
@@ -106,10 +106,10 @@ if (values.base) {
     junk: `${old.junk} -> ${item.junk}`,
     marginal: `${old.marginal} -> ${item.marginal}`,
     note: item.verdict.note,
-    before: renderPopover(old.entries),
-    after: renderPopover(item.entries),
+    before: renderPopover(old.entries, old.segments),
+    after: renderPopover(item.entries, item.segments),
   });
-  const changedPopover = pairs.filter((p) => renderPopover(p.item.entries) !== renderPopover(p.old.entries));
+  const changedPopover = pairs.filter((p) => renderPopover(p.item.entries, p.item.segments) !== renderPopover(p.old.entries, p.old.segments));
   const worse = changedPopover.filter((p) => RANK[p.item.verdict.understood] < RANK[p.old.verdict.understood]);
   const better = changedPopover.filter((p) => RANK[p.item.verdict.understood] > RANK[p.old.verdict.understood]);
   console.log(`\nCompared with ${values.base}: ${pairs.length} shared items, ${changedPopover.length} popovers changed, ${better.length} understood better, ${worse.length} worse`);
@@ -131,7 +131,7 @@ writeFileSync(
   JSON.stringify(
     judged
       .filter((item) => item.verdict.understood !== "yes" || item.junk > 0 || item.marginal > 0)
-      .map(({ word, sentence, text, stratum, verdict, entries }) => ({ word, sentence, text, stratum, verdict, popover: renderPopover(entries) })),
+      .map(({ word, sentence, text, stratum, verdict, entries, segments }) => ({ word, sentence, text, stratum, verdict, popover: renderPopover(entries, segments) })),
     null,
     1,
   ),
