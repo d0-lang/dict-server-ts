@@ -1,6 +1,6 @@
 import { asc, inArray } from "drizzle-orm";
 import type { DictionaryDb } from "./DictionaryDb.ts";
-import { CONTENT_POS, splitCompound } from "./compounds.ts";
+import { CONTENT_POS, type PartScore, splitCompound } from "./compounds.ts";
 import { caseClass, cleanWord, lookupKey } from "./lookupKey.ts";
 import {
   CaseClass,
@@ -243,17 +243,38 @@ export const findEntriesWithCompounds = (
     }).filter((entry) => entry.pos === "PROPN");
     if (names.length > 0) return { entries: names };
   }
-  const hasContentEntry = db.$client.query<{ n: number }, [string]>(
+  const content = [...CONTENT_POS].map((p) => `'${p}'`).join(", ");
+  const formScore = db.$client.query<{ score: number | null }, [string]>(
+    `SELECT max(CASE WHEN f.source = ${FormSource.Lemma} AND e.pos <> 'VERB' THEN 2 ELSE 1 END) AS score
+     FROM forms f JOIN entries e ON e.id = f.entry_id
+     WHERE f.form = ? AND f.source <> ${FormSource.Abbreviation} AND e.pos IN (${content})`,
+  );
+  // `left` is a form of a noun whose lemma is `stem` (`tages` of `Tag`).
+  const nounForm = db.$client.query<{ n: number }, [string, string]>(
     `SELECT count(*) AS n FROM forms f JOIN entries e ON e.id = f.entry_id
-     WHERE f.form = ? AND f.source <> ${FormSource.Abbreviation} AND e.pos IN (${[...CONTENT_POS].map((p) => `'${p}'`).join(", ")})`,
+     JOIN forms l ON l.entry_id = e.id AND l.source = ${FormSource.Lemma} AND l.form = ?2
+     WHERE f.form = ?1 AND f.source <> ${FormSource.Abbreviation} AND e.pos IN ('NOUN', 'PROPN')`,
   );
-  const pieces = splitCompound(
-    key,
-    (part) => hasContentEntry.get(part)!.n > 0,
-    linkers,
+  // `stem` is itself a noun, adverb or number (`Mais`, `Eisen`, `links`).
+  const plainLemma = db.$client.query<{ n: number }, [string]>(
+    `SELECT count(*) AS n FROM forms f JOIN entries e ON e.id = f.entry_id
+     WHERE f.form = ? AND f.source = ${FormSource.Lemma} AND e.pos IN ('NOUN', 'ADV', 'NUM')`,
   );
+  /** See `PartScore`: `s`/`es` link any noun, other linkers mostly a plural. */
+  const partScore: PartScore = (stem, linker) => {
+    const score = formScore.get(stem)!.score ?? 0;
+    if (score === 0) return 0;
+    if (linker === "" && plainLemma.get(stem)!.n > 0) return 4;
+    if (linker !== "" && nounForm.get(stem + linker, stem)!.n > 0) return 3;
+    return score === 2 && ["", "s", "es"].includes(linker) ? 2 : 1;
+  };
+  const pieces = splitCompound(key, partScore, linkers);
   if (pieces === undefined) return { entries: [] };
   const parts = pieces.filter((piece) => piece.part);
+  // A modifier followed by a linker is a noun (`Spitze` + `n`), not `spitze` "great".
+  const linked = pieces.flatMap((piece, i) =>
+    piece.part ? [pieces[i + 1]?.part === false] : [],
+  );
   const perPart = parts.map((piece, i) => {
     const part = piece.text;
     const surface = capital ? part[0]!.toUpperCase() + part.slice(1) : part;
@@ -273,7 +294,11 @@ export const findEntriesWithCompounds = (
       ? capital
         ? found.filter((entry) => entry.pos === "NOUN")
         : []
-      : found.filter((entry) => lookupKey(entry.lemma) === part);
+      : found.filter(
+          (entry) =>
+            lookupKey(entry.lemma) === part &&
+            (!linked[i] || entry.pos === "NOUN" || entry.pos === "PROPN"),
+        );
     if (prefix.length > 0 && preferred.length === 0) return prefix;
     const kept = preferred.length > 0 ? preferred : found;
     const seen = new Set<string>();

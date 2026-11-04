@@ -276,6 +276,26 @@ describe("segments", () => {
     });
   });
 
+  it("reads a modifier as a noun with a linker before a verb", () => {
+    const db = dictionary([
+      ["spitzen", "VERB"],
+      ["Spitze", "NOUN", ["spitzen"]],
+      ["Gastronomie", "NOUN"],
+    ]);
+    assert.deepStrictEqual(
+      lookupWord(db, "de_en", "Spitzengastronomie").segments,
+      [
+        { text: "Spitze", entries: [0] },
+        { text: "n" },
+        { text: "gastronomie", entries: [1] },
+      ],
+    );
+    assert.deepStrictEqual(lemmas(db, "de_en", "Spitzengastronomie"), [
+      "Spitze",
+      "Gastronomie",
+    ]);
+  });
+
   it("explains a modifier by its prefix entry when it has one", () => {
     assert.deepStrictEqual(lemmas(german, "de_en", "Sonderausstellungen"), [
       "sonder-",

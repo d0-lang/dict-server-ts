@@ -13,7 +13,11 @@ const words = new Set([
   "hanse",
 ]);
 const pieces = (word: string) =>
-  splitCompound(word, (part) => words.has(part), compoundLinkers("de_en")!);
+  splitCompound(
+    word,
+    (part) => (words.has(part) ? 2 : 0),
+    compoundLinkers("de_en")!,
+  );
 const split = (word: string) =>
   pieces(word)
     ?.filter((piece) => piece.part)
@@ -46,6 +50,41 @@ describe("splitCompound", () => {
       "militär",
       "patrouillen",
       "lauf",
+    ]);
+  });
+
+  it("prefers the modifier its linked form belongs to", () => {
+    // `spitzen` is a form of `Spitze`; `wander` is no form of `Wand`.
+    const scores: Record<string, Record<string, number>> = {
+      spitzen: { "": 1 },
+      spitze: { n: 3 },
+      gastronomie: { "": 2 },
+      wander: { "": 1 },
+      wand: { er: 1 },
+      routen: { "": 1 },
+      tage: { s: 2 },
+      tag: { es: 3 },
+      sätzen: { "": 1 },
+    };
+    const scored = (word: string) =>
+      splitCompound(
+        word,
+        (stem, linker) => scores[stem]?.[linker] ?? (scores[stem] ? 1 : 0),
+        compoundLinkers("de_en")!,
+      );
+    assert.deepStrictEqual(scored("spitzengastronomie"), [
+      { text: "spitze", part: true },
+      { text: "n", part: false },
+      { text: "gastronomie", part: true },
+    ]);
+    assert.deepStrictEqual(scored("wanderrouten"), [
+      { text: "wander", part: true },
+      { text: "routen", part: true },
+    ]);
+    assert.deepStrictEqual(scored("tagessätzen"), [
+      { text: "tag", part: true },
+      { text: "es", part: false },
+      { text: "sätzen", part: true },
     ]);
   });
 
