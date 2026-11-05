@@ -24,6 +24,7 @@ export type ImportStats = {
     inflection: number;
     formOf: number;
     abbreviation: number;
+    letterVariant: number;
   };
   readonly formOfLinks: number;
   readonly formOfUnresolved: number;
@@ -37,6 +38,10 @@ export type ImportStats = {
   readonly grammarReplaced: number;
   /** Abbreviations also reachable without their period (`bzw` -> `bzw.`). */
   readonly abbreviations: number;
+  /** Forms also indexed with an optional letter written plainly (`все` -> `всё`). */
+  readonly letterVariants: number;
+  /** Spaced abbreviations also indexed without the spaces (`z. B.` -> `z.B.`). */
+  readonly unspacedAbbreviations: number;
   /** Most repeated parent glosses across words, to spot new templates by eye. */
   readonly topParentGlosses: ReadonlyArray<{
     readonly gloss: string;

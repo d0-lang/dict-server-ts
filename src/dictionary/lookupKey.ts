@@ -3,16 +3,26 @@ import { CaseClass } from "./schema.ts";
 /** Canonical text of a word: NFC, trimmed, original case kept. */
 export const cleanWord = (word: string): string => word.normalize("NFC").trim();
 
+const CYRILLIC = /\p{Script=Cyrillic}/u;
+/** Combining acute and grave: stress marks in Cyrillic dictionaries. */
+const STRESS = /[̀́]/gu;
+
 /**
  * The spelling a word is indexed and searched by: `cleanWord`, lowercased.
- * Diacritics are kept on purpose (Polish "łza" and "lza" are different words).
+ * Diacritics are kept on purpose (Polish "łza" and "lza" are different words),
+ * except stress marks on Cyrillic words: Wiktionary writes Russian forms
+ * stressed (`соба́ки`) and running text doesn't. `й` and `ё` keep their marks.
  *
  * Stored `forms` rows are built with this function, so changing it requires
  * bumping `SCHEMA_VERSION` and rebuilding every dictionary file; otherwise
  * lookups silently stop matching old rows.
  */
-export const lookupKey = (word: string): string =>
-  cleanWord(word).toLowerCase();
+export const lookupKey = (word: string): string => {
+  const clean = cleanWord(word).toLowerCase();
+  return CYRILLIC.test(clean)
+    ? clean.normalize("NFD").replace(STRESS, "").normalize("NFC").trim()
+    : clean;
+};
 
 const letters = (word: string) => [...word].filter((c) => /\p{L}/u.test(c));
 

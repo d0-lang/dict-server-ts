@@ -7,20 +7,58 @@ import type { UdPos } from "./schema.ts";
  * the parts in reading order usually explain the word.
  */
 
-/**
- * Linking elements that may join a modifier to the next part, by source
- * language. `""` is a plain join (`Gemüse|fond`).
- */
-const LINKERS: Readonly<Record<string, ReadonlyArray<string>>> = {
-  de: ["", "s", "es", "n", "en", "er", "e", "ens"],
+/** How a language joins words into compounds. */
+export type CompoundRules = {
+  /**
+   * Linking elements that may join a modifier to the next part, tried in
+   * order. `""` is a plain join (`Gemüse|fond`).
+   */
+  readonly linkers: ReadonlyArray<string>;
+  /**
+   * Endings a modifier drops before its linker, for languages whose
+   * modifiers are stems rather than words: Russian `нефть` → `нефт|е|газовый`,
+   * `новый` → `нов|о|греческий`. Without them, a modifier is a word form, as
+   * in German.
+   */
+  readonly stemEndings?: ReadonlyArray<string>;
+  /** Letters a stem may be written without (`ё` as `е`), as `[letter, plain]`. */
+  readonly optionalLetters?: ReadonlyArray<readonly [string, string]>;
+  /**
+   * With `stemEndings`: endings of adjective forms (a reflexive `ся` after
+   * them is added in code). A verb form is a head only with one of them, as
+   * a participle (`лес|о|обрабатывающий`), since a
+   * finite verb that doesn't split into known words is mostly a prefixed or
+   * slang verb (`шпиговали` isn't `шпиг` + `валить`).
+   */
+  readonly adjectiveEndings?: ReadonlyArray<string>;
 };
+
+/** Compound rules by source language; a language without them doesn't split. */
+const COMPOUNDS: Readonly<Record<string, CompoundRules>> = {
+  de: { linkers: ["", "s", "es", "n", "en", "er", "e", "ens"] },
+  ru: {
+    // Not `и`: it joins only numbers (`пяти|этажный`, a plain join of the
+    // genitive), and as a linker it misreads `дож|и|мать`.
+    linkers: ["", "о", "е"],
+    stemEndings: ["ый", "ий", "ой", "а", "я", "о", "е", "ы", "и", "ь", "й"],
+    optionalLetters: [["ё", "е"]],
+    adjectiveEndings: [
+      ...["ый", "ий", "ой", "ая", "яя", "ое", "ее", "ые", "ие"],
+      ...["ого", "его", "ому", "ему", "ым", "им", "ых", "их", "ую", "юю", "ей"],
+      ...["ыми", "ими"],
+    ],
+  },
+};
+
+export const compoundRules = (pair: string): CompoundRules | undefined =>
+  COMPOUNDS[pair.split("_")[0]!];
 
 export const compoundLinkers = (
   pair: string,
-): ReadonlyArray<string> | undefined => LINKERS[pair.split("_")[0]!];
+): ReadonlyArray<string> | undefined => compoundRules(pair)?.linkers;
 
 /** Shorter parts match too much by chance (`ei`, `en`). */
-const MIN_PART = 3;
+export const MIN_PART = 3;
 /** Parts per word, so a split can't wander into nonsense. */
 const MAX_PARTS = 3;
 
@@ -58,8 +96,8 @@ const BEST_SCORE = 4;
 
 /**
  * Split a normalized word into known parts, longest head first: the head is
- * a word as it stands (it carries the inflection), each modifier a word once
- * its linking element is removed. Of the linkers that leave a known modifier,
+ * a word as it stands (it carries the inflection, scored by `headScore`),
+ * each modifier a word or stem once its linking element is removed. Of the linkers that leave a known modifier,
  * the first whose modifier scores best wins. The pieces joined give `key`
  * back. Undefined when there is no such split.
  */
@@ -68,14 +106,16 @@ export const splitCompound = (
   partScore: PartScore,
   linkers: ReadonlyArray<string>,
   maxParts = MAX_PARTS,
+  headScore: PartScore = partScore,
 ): ReadonlyArray<CompoundPiece> | undefined => {
   if (maxParts < 2) return undefined;
   const chars = [...key];
   for (let cut = MIN_PART; cut <= chars.length - MIN_PART; cut++) {
     const head = chars.slice(cut).join("");
-    if (partScore(head, "") === 0) continue;
+    if (headScore(head, "") === 0) continue;
     const left = chars.slice(0, cut).join("");
-    let best: { pieces: ReadonlyArray<CompoundPiece>; score: number } | undefined;
+    let best:
+      { pieces: ReadonlyArray<CompoundPiece>; score: number } | undefined;
     for (const linker of linkers) {
       if (!left.endsWith(linker)) continue;
       const stem = left.slice(0, left.length - linker.length);

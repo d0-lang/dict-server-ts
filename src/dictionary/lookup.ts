@@ -1,5 +1,9 @@
-import { compoundLinkers } from "./compounds.ts";
-import { phraseEntryIds, separableEntryIds } from "./context.ts";
+import { compoundRules } from "./compounds.ts";
+import {
+  hyphenEntryIds,
+  phraseEntryIds,
+  separableEntryIds,
+} from "./context.ts";
 import type { DictionaryDb } from "./DictionaryDb.ts";
 import {
   dropLiteralPointers,
@@ -17,8 +21,9 @@ const entryId = (entry: LookupEntry) =>
 
 /**
  * A `/v1/lookup` result. With `context`, the entries that match it come
- * first: the phrases the word is part of there, then the separable verb it
- * belongs to, then the word's own entries (and their segments, re-indexed).
+ * first: the phrases the word is part of there, then the hyphen-joined word
+ * it is part of (`что` in `что-нибудь`), then the separable verb it belongs
+ * to, then the word's own entries (and their segments, re-indexed).
  * An own entry already shown that way is dropped.
  */
 export const lookupWord = (
@@ -28,17 +33,20 @@ export const lookupWord = (
   context?: string,
 ): LookupResult => {
   const lang = pair.split("_")[0]!;
-  const base = findEntriesWithCompounds(db, word, compoundLinkers(pair));
+  const base = findEntriesWithCompounds(db, word, compoundRules(pair));
   if (context === undefined || context.trim() === "") return base;
 
   const phraseIds = phraseEntryIds(db, word, context, lang);
+  const hyphenIds = hyphenEntryIds(db, word, context, lang).filter(
+    (id) => !phraseIds.includes(id),
+  );
   const separableIds = SEPARABLE.has(lang)
     ? separableEntryIds(db, word, context, lang).filter(
         (id) => !phraseIds.includes(id),
       )
     : [];
   const first = dropLiteralPointers(
-    loadEntries(db, [...phraseIds, ...separableIds]),
+    loadEntries(db, [...phraseIds, ...hyphenIds, ...separableIds]),
   );
   if (first.length === 0) return base;
 

@@ -22,6 +22,24 @@ export type LanguageRules = {
    * (other notes are regional variants, kept only when nothing else exists).
    */
   readonly standardPronNotes: ReadonlyArray<string>;
+  /**
+   * Letters that running text may write as another letter (`ё` as `е`), as
+   * `[letter, plain]` pairs. Every form with `letter` is also indexed with
+   * `plain`, ranked after the forms really spelled that way.
+   */
+  readonly optionalLetters?: ReadonlyArray<readonly [string, string]>;
+  /**
+   * Form tags that mark a misparsed table in this language's data, so the row
+   * is dropped. Per language: Polish adjective tables carry
+   * `error-unrecognized-form` on real forms.
+   */
+  readonly untrustedFormTags?: ReadonlyArray<string>;
+  /**
+   * Show the lemma with its stress marks: the headword's `canonical` form,
+   * when it spells the same word (`соба́ка` for `собака`). Lookups still
+   * match unstressed text, since `lookupKey` drops the marks.
+   */
+  readonly stressedLemmas?: boolean;
 };
 
 /**
@@ -47,6 +65,21 @@ export const LANGUAGES: Readonly<Record<string, LanguageRules>> = {
     // not tags on German senses.
     historicalStages: [],
     standardPronNotes: [],
+  },
+  ru: {
+    code: "ru",
+    name: "Russian",
+    target: "en",
+    // Old East Slavic is a separate language in the dump (orv).
+    historicalStages: [],
+    standardPronNotes: [],
+    // Wiktionary writes ё; most texts write е (`все` for `всё`).
+    optionalLetters: [["ё", "е"]],
+    // Only 29 tables: the shared pronoun table and a Braille chart that gives
+    // `азбука Брайля` every letter (`в`, `и`) as a form.
+    untrustedFormTags: ["error-unrecognized-form"],
+    // Russian stress is unpredictable, and learners need it to say the word.
+    stressedLemmas: true,
   },
 };
 

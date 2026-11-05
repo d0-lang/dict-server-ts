@@ -308,6 +308,7 @@ export const keepForm = (
   if (word.startsWith("-") || word.includes("(")) return false;
   const tags = form.tags ?? [];
   if (tags.some((t) => TEMPLATE_FORM_TAGS.has(t))) return false;
+  if (tags.some((t) => language.untrustedFormTags?.includes(t))) return false;
   if (isVerbalNounForm(form)) return false;
   if (isAuxiliaryRow(form)) return false;
   if (isHistorical(language, tags)) return false;

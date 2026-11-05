@@ -43,6 +43,7 @@ export const countForms = (sqlite: Database) => {
     inflection: count(FormSource.Inflection),
     formOf: count(FormSource.FormOf),
     abbreviation: count(FormSource.Abbreviation),
+    letterVariant: count(FormSource.LetterVariant),
   };
 };
 

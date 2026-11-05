@@ -11,37 +11,41 @@ type Word = readonly [
   pos: UdPos,
   forms?: ReadonlyArray<string>,
   senses?: ReadonlyArray<string>,
+  sourcePos?: string,
 ];
 
 /** A dictionary; each sense is one gloss, by default the lemma in brackets. */
 const dictionary = (words: ReadonlyArray<Word>): DictionaryDb => {
   const db = createDictionaryFile(":memory:");
-  words.forEach(([lemma, pos, forms = [], glosses = [`[${lemma}]`]], i) => {
-    const id = i + 1;
-    db.$client.run("INSERT INTO entries VALUES (?, ?, ?, '', 0, ?)", [
-      id,
-      lemma,
-      pos,
-      caseClass(lemma),
-    ]);
-    glosses.forEach((gloss, idx) =>
-      db.$client.run("INSERT INTO senses VALUES (?, ?, ?, NULL)", [
+  words.forEach(
+    ([lemma, pos, forms = [], glosses = [`[${lemma}]`], sourcePos = ""], i) => {
+      const id = i + 1;
+      db.$client.run("INSERT INTO entries VALUES (?, ?, ?, ?, 0, ?)", [
         id,
-        idx,
-        JSON.stringify([gloss]),
-      ]),
-    );
-    for (const [form, source] of [
-      [lemma, FormSource.Lemma],
-      ...forms.map((form) => [form, FormSource.Inflection] as const),
-    ] as const) {
-      db.$client.run("INSERT OR IGNORE INTO forms VALUES (?, ?, ?)", [
-        lookupKey(form),
-        id,
-        source,
+        lemma,
+        pos,
+        sourcePos,
+        caseClass(lemma),
       ]);
-    }
-  });
+      glosses.forEach((gloss, idx) =>
+        db.$client.run("INSERT INTO senses VALUES (?, ?, ?, NULL)", [
+          id,
+          idx,
+          JSON.stringify([gloss]),
+        ]),
+      );
+      for (const [form, source] of [
+        [lemma, FormSource.Lemma],
+        ...forms.map((form) => [form, FormSource.Inflection] as const),
+      ] as const) {
+        db.$client.run("INSERT OR IGNORE INTO forms VALUES (?, ?, ?)", [
+          lookupKey(form),
+          id,
+          source,
+        ]);
+      }
+    },
+  );
   return db;
 };
 
@@ -73,6 +77,11 @@ const german = dictionary([
   ["sondern", "VERB", ["sonder"]],
   ["sonder-", "X"],
   ["Ausstellung", "NOUN", ["ausstellungen"]],
+  ["heißen", "VERB", ["heißt"]],
+  ["wie", "ADV"],
+  ["Sie", "PRON"],
+  ["eigentlich", "ADV"],
+  ["wie heißen Sie", "X", [], ["what is your name?"], "phrase"],
 ]);
 
 const polish = dictionary([
@@ -98,6 +107,75 @@ const polish = dictionary([
   ["móc", "VERB", ["może"]],
   ["może być", "INTJ"],
   ["gorzki", "ADJ"],
+]);
+
+const russian = dictionary([
+  ["кто", "PRON", ["кого"]],
+  ["кто-нибудь", "PRON", ["кого-нибудь"]],
+  ["-нибудь", "X"],
+  ["один", "NUM", ["одним"]],
+  ["единственный", "ADJ", ["единственным"]],
+  ["один-единственный", "ADJ"],
+  ["поехать", "VERB", ["поехали"]],
+  ["-ка", "PART"],
+  ["ну-ка", "INTJ"],
+  ["на-ка", "INTJ"],
+  ["дай-ка", "INTJ"],
+  ["ка", "NOUN"],
+  ["-е", "X"],
+  ["е", "INTJ"],
+  ["кто-то", "PRON"],
+  ["то", "PRON"],
+  ["есть", "VERB"],
+  ["то есть", "CCONJ"],
+  ["после", "ADP"],
+  ["того", "PRON"],
+  ["как", "SCONJ"],
+  ["после того как", "SCONJ"],
+  ["так", "ADV"],
+  ["так как", "SCONJ"],
+  ["иметь", "VERB", ["имеет", "имел", "иметь"]],
+  ["быть", "AUX", ["будет"]],
+  ["брать", "VERB", ["брал"]],
+  ["пример", "NOUN", ["примеры"]],
+  ["брать пример", "VERB"],
+  ["деньги", "NOUN", ["денег"]],
+  ["значение", "NOUN", ["значения"]],
+  ["иметь значение", "VERB", ["имеет значение"]],
+  ["слово", "NOUN", ["слова"]],
+  ["давать", "VERB", ["давал"]],
+  ["давать слово", "VERB", ["давал слово"]],
+  ["никто", "PRON", ["никому"]],
+  ["дать", "VERB", ["дашь", "дал"]],
+  ["дать слово", "VERB"],
+  ["честный", "ADJ", ["честное"]],
+  ["я", "PRON", ["мне"]],
+  ["лес", "NOUN"],
+  ["насаждение", "NOUN", ["насаждения"]],
+  ["нефть", "NOUN"],
+  ["газовый", "ADJ", ["газовая"]],
+  ["кибер-", "X"],
+  ["кабан", "NOUN", ["кабаны"]],
+  ["при-", "X"],
+  ["прийти", "VERB"],
+  ["принести", "VERB"],
+  ["приехать", "VERB"],
+  ["приходить", "VERB"],
+  ["приз", "NOUN"],
+  ["стрелка", "NOUN"],
+  ["стелить", "VERB", ["стелили"]],
+  ["соломка", "NOUN", ["соломку"]],
+  ["стелить соломку", "X", [], ["to play it safe"], "phrase"],
+  ["щука", "NOUN"],
+  ["знать", "VERB", ["знает", "знала"]],
+  ["щука знает свою науку", "X", [], ["[proverb]"], "proverb"],
+  ["свой", "DET", ["свою"]],
+  ["наука", "NOUN", ["науку"]],
+  ["мох", "NOUN"],
+  ["вой", "NOUN"],
+  ["ранг", "NOUN"],
+  ["восток", "NOUN"],
+  ["северо-восток", "NOUN"],
 ]);
 
 const lemmas = (
@@ -222,6 +300,46 @@ describe("lookup with context", () => {
     );
   });
 
+  it("keeps a German untyped phrase out of the verb bracket", () => {
+    // Its rest needn't end the clause, as a separable verb's must.
+    assert.deepStrictEqual(
+      lemmas(german, "de_en", "heißen", "Wie heißen Sie eigentlich?"),
+      ["wie heißen Sie", "heißen"],
+    );
+  });
+
+  it("inflects the verb of an untyped phrase, but not of a proverb", () => {
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "стелили", "Родители всегда стелили соломку."),
+      ["стелить соломку", "стелить"],
+    );
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "знала", "Щука знала свою науку."),
+      ["знать"],
+    );
+  });
+
+  it("allows two words between a verb and the rest in Russian", () => {
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "дашь", "Ты дашь мне честное слово?"),
+      ["дать слово", "дать"],
+    );
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "дашь", "Ты дашь мне очень честное слово?"),
+      ["дать"],
+    );
+    // With the verb twice, the nearer one counts.
+    assert.deepStrictEqual(
+      lemmas(
+        russian,
+        "ru_en",
+        "слово",
+        "Он дал ему хлеб и дал мне честное слово.",
+      ),
+      ["дать слово", "слово"],
+    );
+  });
+
   it("takes an interjection only as a clause of its own", () => {
     assert.deepStrictEqual(lemmas(polish, "pl_en", "być", "No, może być."), [
       "może być",
@@ -245,6 +363,99 @@ describe("lookup with context", () => {
       pos: "ADP",
       senses: [{ translations: ["including"] }],
     });
+  });
+
+  it("joins the parts of a Russian hyphenated word, inflected or not", () => {
+    const context = "Позови кого-нибудь, пусть поможет.";
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "кого", context), [
+      "кто-нибудь",
+      "кто",
+    ]);
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "нибудь", context), [
+      "кто-нибудь",
+    ]);
+    // No form for the inflected word: its parts as lemmas.
+    assert.deepStrictEqual(
+      lemmas(
+        russian,
+        "ru_en",
+        "одним",
+        "Это сделал одним-единственным ударом.",
+      ),
+      ["один-единственный", "один"],
+    );
+  });
+
+  it("falls back to a hyphen affix only beside a word", () => {
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "ка", "Поехали-ка домой."),
+      ["-ка", "ка"],
+    );
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "е", "Это было в 1990-е годы."),
+      ["е"],
+    );
+  });
+
+  it("leaves a word as it is when it also stands alone in the context", () => {
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "восток", "Ветер дул на северо-восток."),
+      ["северо-восток", "восток"],
+    );
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "восток", "Шли на восток и северо-восток."),
+      ["восток"],
+    );
+  });
+
+  it("lets a comma split a long conjunction before its last word", () => {
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "того", "Он ушёл после того, как стемнело."),
+      ["после того как", "того"],
+    );
+    // In a two-word one, the comma makes two words: "the way that", not "because".
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "так", "Сделай так, как я сказал."),
+      ["так"],
+    );
+  });
+
+  it("takes a negated verb phrase with its object in another case", () => {
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "значения", "Это не имеет значения."),
+      ["иметь значение", "значение"],
+    );
+    // The negation doesn't count as a word between the verb and the rest.
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "слова", "Я слова никому не давал."),
+      ["давать слово", "слово"],
+    );
+    // A helper verb may stand between the negation and the verb.
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "значения", "Это не будет иметь значения."),
+      ["иметь значение", "значение"],
+    );
+    // Only the verb the match uses counts as negated.
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "примеры", "Он не брал денег и брал примеры."),
+      ["пример"],
+    );
+    // Without the negation, the object keeps the phrase's own form.
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "значения", "Он имел значения слов."),
+      ["значение"],
+    );
+  });
+
+  it("doesn't let a phrase take one part of a hyphenated word", () => {
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "есть", "Кто-то есть дома?"),
+      ["есть"],
+    );
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "есть", "Он устал, то есть хочет спать."),
+      ["то есть", "есть"],
+    );
   });
 
   it("ignores a word that isn't in the context", () => {
@@ -274,6 +485,34 @@ describe("segments", () => {
         { text: "fonds", entries: [1] },
       ],
     });
+  });
+
+  it("splits a Russian compound into stems and a linker", () => {
+    const parts = (word: string) =>
+      lookupWord(russian, "ru_en", word).segments?.map((s) => s.text);
+    assert.deepStrictEqual(parts("лесонасаждения"), ["лес", "о", "насаждения"]);
+    assert.deepStrictEqual(parts("нефтегазовая"), ["нефт", "е", "газовая"]);
+    assert.deepStrictEqual(parts("киберкабаны"), ["кибер", "кабаны"]);
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "нефтегазовая"), [
+      "нефть",
+      "газовый",
+    ]);
+  });
+
+  it("doesn't split a Russian name or a word with a three-letter head", () => {
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "Лесонасаждения"), []);
+    // `-овой` is an adjective ending, not `о` + `вой` "howl".
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "ранговой"), []);
+  });
+
+  it("splits off a combining form but not a word-forming prefix", () => {
+    // `кибер-` begins no verbs; `при-` begins mostly verbs, so `пристрелка`
+    // isn't `при-` + `стрелка`.
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "киберкабаны"), [
+      "кибер-",
+      "кабан",
+    ]);
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "пристрелка"), []);
   });
 
   it("reads a modifier as a noun with a linker before a verb", () => {

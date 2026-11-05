@@ -150,6 +150,9 @@ const isLinkSense = (
   const targets = [...(sense.form_of ?? []), ...(sense.alt_of ?? [])].map(
     (link) => cleanTarget(link.word),
   );
+  // Russian verbal nouns are tagged `form-of` without naming the verb
+  // (`продолжение` "continuation"); their gloss is the meaning.
+  if (targets.length === 0) return false;
   return !isMisreadTarget(rules, lemma, targets, sense.links ?? []);
 };
 
@@ -317,6 +320,9 @@ export const transformEntry = (
 ): TransformResult => {
   const lemma = cleanWord(raw.word);
   const lemmaKey = lookupKey(lemma);
+  const shownLemma = rules.stressedLemmas
+    ? stressedLemma(lemma, raw.forms ?? [])
+    : lemma;
   const skippedSenses: Record<SkippedSenseReason, number> = {
     archaic: 0,
     "historical-stage": 0,
@@ -405,9 +411,9 @@ export const transformEntry = (
     entrySenses: ReadonlyArray<ImportSense>,
     derivedSenses: ReadonlyArray<DerivedSense>,
   ): ImportEntry => ({
-    lemma,
+    lemma: shownLemma,
     pos: toUdPos(raw.pos),
-    sourcePos: raw.pos,
+    sourcePos: isLetterName(lemma, entrySenses) ? LETTER_NAME_POS : raw.pos,
     etymology: toEtymology(raw.etymology_number),
     senses: entrySenses,
     pronunciations: pickPronunciations(rules, raw.sounds ?? []),
@@ -447,6 +453,44 @@ export const transformEntry = (
     droppedForms: dropped,
   };
 };
+
+/** Combining acute and grave, the stress marks of Russian and other Cyrillic dictionaries. */
+const STRESS_MARKS = /[\u0300\u0301]/gu;
+
+/**
+ * The first `canonical` headword form that is `lemma` with stress marks
+ * (`соба́ка`), or `lemma` itself. A canonical form that differs otherwise
+ * (`к (k)`, a stray mark after a space) is not the lemma.
+ */
+const stressedLemma = (
+  lemma: string,
+  forms: ReadonlyArray<WiktextractForm>,
+): string => {
+  for (const form of forms) {
+    if (!(form.tags ?? []).includes("canonical")) continue;
+    const written = cleanWord(form.form);
+    const plain = written.normalize("NFD").replace(STRESS_MARKS, "").normalize("NFC");
+    if (plain === lemma && written !== lemma) return written;
+  }
+  return lemma;
+};
+
+/**
+ * `entries.source_pos` of a one-letter noun about the letter: its first sense
+ * names it (Russian `а` "the name of the Cyrillic letter А", then "the sound
+ * expressed by the letter", "the first item in a list"). Lookups rank it with
+ * the letter entries, after the word (`а` "but, and").
+ */
+export const LETTER_NAME_POS = "letter-name";
+
+const LETTER_NAME = /^the name of the .*\bletter\b/i;
+
+const isLetterName = (
+  lemma: string,
+  senses: ReadonlyArray<ImportSense>,
+): boolean =>
+  [...lemma].length === 1 &&
+  LETTER_NAME.test(senses[0]?.translations[0] ?? "");
 
 /** How weak a link is: a pointer or a marked spelling is weaker than a plain link. */
 const weakness = (link: FormOfLink): number =>

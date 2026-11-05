@@ -5,6 +5,7 @@ import type { WiktextractEntry } from "../source/wiktextract.ts";
 
 const pl = LANGUAGES.pl!;
 const de = LANGUAGES.de!;
+const ru = LANGUAGES.ru!;
 
 const entry = (patch: Partial<WiktextractEntry>): WiktextractEntry => ({
   word: "lapis",
@@ -160,6 +161,48 @@ describe("transformEntry", () => {
     }
   });
 
+  it("keeps a form-of sense that names no target as a gloss", () => {
+    const result = transformEntry(
+      ru,
+      entry({
+        word: "продолжение",
+        lang_code: "ru",
+        senses: [
+          {
+            glosses: ["continuation (act or state of continuing)"],
+            tags: ["form-of", "noun-from-verb"],
+          },
+        ],
+      }),
+    );
+    assert.deepStrictEqual(translations(result), [
+      ["continuation (act or state of continuing)"],
+    ]);
+    assert.deepStrictEqual(result.formOf, []);
+  });
+
+  it("still links a form-of sense with a target", () => {
+    const result = transformEntry(
+      ru,
+      entry({
+        word: "собаки",
+        lang_code: "ru",
+        senses: [
+          {
+            glosses: ["genitive singular of соба́ка (sobáka)"],
+            tags: ["form-of", "genitive", "singular"],
+            form_of: [{ word: "соба́ка" }],
+          },
+        ],
+      }),
+    );
+    assert.strictEqual(result.entry, undefined);
+    assert.deepStrictEqual(
+      result.formOf.map((link) => link.lemma),
+      ["собака"],
+    );
+  });
+
   it("treats a romanization as part of a bare derived gloss", () => {
     const result = transformEntry(
       pl,
@@ -173,7 +216,8 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(result.entry?.derived[0]?.bases, ["па́лка"]);
+    // Bases are lookup keys, which drop Cyrillic stress marks.
+    assert.deepStrictEqual(result.entry?.derived[0]?.bases, ["палка"]);
   });
 
   it("hands the table of a word with no entry to its target", () => {

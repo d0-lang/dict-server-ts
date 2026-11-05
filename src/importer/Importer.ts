@@ -114,7 +114,7 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     try: () => options.grammar ?? loadGrammar(rules.code),
     catch: importFailure("cannot read the grammar file"),
   });
-  const writer = makeWriter(db, grammar);
+  const writer = makeWriter(db, grammar, rules.optionalLetters);
   const tally = makeTally();
 
   const logProgress = () =>
@@ -159,7 +159,11 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     form_of_fallback: formOfFallback ? "on" : "off",
     entries: String(writer.counts.entries),
     forms: String(
-      forms.lemma + forms.inflection + forms.formOf + forms.abbreviation,
+      forms.lemma +
+        forms.inflection +
+        forms.formOf +
+        forms.abbreviation +
+        forms.letterVariant,
     ),
   });
   const fileBytes = yield* publish(tmp, options.out);
@@ -188,6 +192,8 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     grammarEntries: writer.counts.grammarEntries,
     grammarReplaced: writer.counts.grammarReplaced,
     abbreviations: writer.counts.abbreviations,
+    letterVariants: writer.counts.letterVariants,
+    unspacedAbbreviations: writer.counts.unspacedAbbreviations,
     topParentGlosses: topParentGlosses(tally),
     fileBytes,
     seconds: elapsedSeconds(),

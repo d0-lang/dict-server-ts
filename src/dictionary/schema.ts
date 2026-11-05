@@ -120,6 +120,12 @@ export const FormSource = {
    * drop; only for spellings that reach nothing else
    */
   Abbreviation: 3,
+  /**
+   * a form spelled another common way, ranked after the forms really spelled
+   * so: an optional letter written plainly (`все` for `всё`, see
+   * `optionalLetters`), or an abbreviation without its spaces (`z.B.`)
+   */
+  LetterVariant: 4,
 } as const;
 export type FormSource = (typeof FormSource)[keyof typeof FormSource];
 

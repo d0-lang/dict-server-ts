@@ -1,6 +1,8 @@
 import { assert, describe, it } from "@effect/vitest";
+import { createDictionaryFile } from "./DictionaryDb.ts";
 import { caseClass } from "./lookupKey.ts";
-import { CaseClass } from "./schema.ts";
+import { findEntriesByForm } from "./queries.ts";
+import { CaseClass, FormSource } from "./schema.ts";
 
 describe("caseClass", () => {
   it("classifies lowercase, capitalised and all-caps words", () => {
@@ -12,5 +14,58 @@ describe("caseClass", () => {
     assert.strictEqual(caseClass("ÜBER"), CaseClass.AllCaps);
     assert.strictEqual(caseClass("2024"), CaseClass.Capitalised);
     assert.strictEqual(caseClass("bzw."), CaseClass.Lower);
+  });
+});
+
+const ranked = (
+  rows: ReadonlyArray<
+    readonly [lemma: string, pos: string, sourcePos: string, form: string, source: number]
+  >,
+  word: string,
+) => {
+  const db = createDictionaryFile(":memory:");
+  rows.forEach(([lemma, pos, sourcePos, form, source], i) => {
+    db.$client.run("INSERT OR IGNORE INTO entries VALUES (?, ?, ?, ?, 0, ?)", [
+      i + 1,
+      lemma,
+      pos,
+      sourcePos,
+      caseClass(lemma),
+    ]);
+    db.$client.run("INSERT INTO senses VALUES (?, 0, ?, NULL)", [
+      i + 1,
+      JSON.stringify([`${lemma} ${pos}`]),
+    ]);
+    db.$client.run("INSERT INTO forms VALUES (?, ?, ?)", [form, i + 1, source]);
+  });
+  return findEntriesByForm(db, word).map((entry) => entry.senses[0]!.translations[0]);
+};
+
+describe("findEntriesByForm ranking", () => {
+  it("puts letters and one-letter letter names after the word", () => {
+    assert.deepStrictEqual(
+      ranked(
+        [
+          ["и", "X", "character", "и", FormSource.Lemma],
+          ["и", "NOUN", "letter-name", "и", FormSource.Lemma],
+          ["и", "CCONJ", "conj", "и", FormSource.Lemma],
+        ],
+        "и",
+      ),
+      ["и CCONJ", "и X", "и NOUN"],
+    );
+  });
+
+  it("puts a form reached only through an optional letter after real forms", () => {
+    assert.deepStrictEqual(
+      ranked(
+        [
+          ["всё", "PRON", "pron", "все", FormSource.LetterVariant],
+          ["весь", "DET", "det", "все", FormSource.Inflection],
+        ],
+        "все",
+      ),
+      ["весь DET", "всё PRON"],
+    );
   });
 });

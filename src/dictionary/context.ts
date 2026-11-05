@@ -18,10 +18,17 @@ export type Token = {
   readonly clause: number;
   /** The text between this word and the one before ends a clause. */
   readonly breakBefore: boolean;
+  /** Only a hyphen stands between this word and the one before (`что-нибудь`). */
+  readonly joinedBefore: boolean;
+  /** Only a comma stands between this word and the one before. */
+  readonly commaBefore: boolean;
 };
 
 /** Punctuation that ends a clause. A period also ends abbreviations, which only costs a missed match. */
 const CLAUSE_BREAK = /[.!?;:,()[\]{}"„“”«»‹›–—]/u;
+
+/** A hyphen joining two words with no space, which the segmenter splits apart. */
+const JOINING_HYPHEN = /^[-\u2010\u2011]$/u;
 
 const segmenters = new Map<string, Intl.Segmenter>();
 const segmenterFor = (locale: string): Intl.Segmenter => {
@@ -53,6 +60,8 @@ export const tokenize = (
       caseClass: caseClass(segment),
       clause,
       breakBefore,
+      joinedBefore: tokens.length > 0 && JOINING_HYPHEN.test(between),
+      commaBefore: tokens.length > 0 && between.trim() === ",",
     });
     between = "";
   }
@@ -76,6 +85,10 @@ type TokenInfo = {
   readonly content: boolean;
   /** The form is itself the lemma of a verb, so it can be a phrase's verb. */
   readonly verbLemma: boolean;
+  /** The form can be a conjunction (`что`, `как`, `dass`). */
+  readonly conjunction: boolean;
+  /** The form can be a verb (`будет`, `могу`). */
+  readonly verb: boolean;
 };
 
 type FormRow = { id: number; lemma: string; pos: UdPos };
@@ -100,7 +113,9 @@ const formRows = (
            WHEN ?2 = ${CaseClass.Lower} THEN e.case_class <> ${CaseClass.Lower}
            ELSE 0
          END,
+         e.source_pos IN ('character', 'letter-name'),
          f.source <> ${FormSource.Lemma},
+         f.source = ${FormSource.LetterVariant},
          e.id`,
     )
     .all(key, wordClass);
@@ -124,6 +139,10 @@ const tokenInfos = (db: DictionaryDb) => {
             (row.pos === "VERB" || row.pos === "AUX") &&
             lookupKey(row.lemma) === key,
         ),
+        conjunction: rows.some(
+          (row) => row.pos === "SCONJ" || row.pos === "CCONJ",
+        ),
+        verb: rows.some((row) => row.pos === "VERB" || row.pos === "AUX"),
       };
       cache.set(cacheKey, info);
     }
@@ -136,7 +155,14 @@ type Phrase = {
   readonly tokens: ReadonlyArray<string>;
   readonly breaks: ReadonlyArray<boolean>;
   readonly entryIds: ReadonlyArray<number>;
+  /** Its verb may inflect and stand apart: a verb entry, or an untyped phrase with a verb. */
   readonly verb: boolean;
+  /**
+   * An entry is tagged as a verb. Only these follow the German bracket (the
+   * rest ends the clause, the verb may come first), which untyped phrasebook
+   * lines don't (`Wie heißen Sie eigentlich?`).
+   */
+  readonly verbEntry: boolean;
   /** Every entry is an interjection, which only means that as a clause of its own. */
   readonly interjection: boolean;
 };
@@ -154,30 +180,53 @@ const indexes = new WeakMap<DictionaryDb, PhraseIndex>();
 export const phraseIndex = (db: DictionaryDb, locale: string): PhraseIndex => {
   const cached = indexes.get(db);
   if (cached !== undefined) return cached;
+  // Wiktionary files many verb idioms as untyped phrases (`стелить соломку`,
+  // `ihre Tage haben`), so a phrase with a verb's dictionary form counts as a
+  // verb phrase too. Not proverbs, which are quoted, not inflected.
+  const verbLemmas = new Set(
+    db.$client
+      .query<{ form: string }, []>(
+        `SELECT DISTINCT f.form AS form FROM forms f JOIN entries e ON e.id = f.entry_id
+         WHERE f.source = ${FormSource.Lemma} AND e.pos IN ('VERB', 'AUX')`,
+      )
+      .all()
+      .map((row) => row.form),
+  );
   const rows = db.$client
-    .query<{ form: string; id: number; pos: UdPos }, []>(
-      `SELECT f.form AS form, e.id AS id, e.pos AS pos FROM forms f JOIN entries e ON e.id = f.entry_id
+    .query<{ form: string; id: number; pos: UdPos; sourcePos: string }, []>(
+      `SELECT f.form AS form, e.id AS id, e.pos AS pos, e.source_pos AS sourcePos FROM forms f JOIN entries e ON e.id = f.entry_id
        WHERE instr(f.form, ' ') > 0 AND instr(e.lemma, ' ') > 0 AND f.source <> ${FormSource.Abbreviation}
        ORDER BY f.form, e.id`,
     )
     .all();
   const byForm = new Map<
     string,
-    { ids: Array<number>; verb: boolean; interjection: boolean }
+    {
+      ids: Array<number>;
+      verb: boolean;
+      verbEntry: boolean;
+      interjection: boolean;
+    }
   >();
   for (const row of rows) {
     const phrase = byForm.get(row.form) ?? {
       ids: [],
       verb: false,
+      verbEntry: false,
       interjection: true,
     };
     phrase.ids.push(row.id);
-    phrase.verb ||= row.pos === "VERB";
+    phrase.verbEntry ||= row.pos === "VERB";
+    phrase.verb ||=
+      row.pos === "VERB" ||
+      (row.pos === "X" &&
+        row.sourcePos === "phrase" &&
+        tokenize(row.form, locale).some((token) => verbLemmas.has(token.key)));
     phrase.interjection &&= row.pos === "INTJ";
     byForm.set(row.form, phrase);
   }
   const index = new Map<string, Array<Phrase>>();
-  for (const [form, { ids, verb, interjection }] of byForm) {
+  for (const [form, { ids, verb, verbEntry, interjection }] of byForm) {
     const tokens = tokenize(form, locale);
     if (tokens.length < 2) continue;
     const phrase: Phrase = {
@@ -185,6 +234,7 @@ export const phraseIndex = (db: DictionaryDb, locale: string): PhraseIndex => {
       breaks: tokens.map((token) => token.breakBefore),
       entryIds: ids,
       verb,
+      verbEntry,
       interjection,
     };
     for (const key of new Set(phrase.tokens)) {
@@ -200,21 +250,50 @@ export const phraseIndex = (db: DictionaryDb, locale: string): PhraseIndex => {
 /** Languages that put the rest of a verb phrase at the end of the clause. */
 const BRACKET: ReadonlySet<string> = new Set(["de"]);
 
+/**
+ * Languages that write some words as hyphen-joined parts (`что-нибудь`,
+ * `по-русски`, `какого-то`). The segmenter splits them, so with context the
+ * parts are joined back into one word, and a phrase can't use only one part.
+ */
+const HYPHEN_WORDS: ReadonlySet<string> = new Set(["ru"]);
+
 /** Reflexive pronouns a phrase's `sich` stands for. */
 const REFLEXIVES: Readonly<Record<string, ReadonlySet<string>>> = {
   de: new Set(["sich", "mich", "dich", "uns", "euch", "mir", "dir"]),
+};
+
+/**
+ * The particle that negates a verb, in languages where negation changes the
+ * case of the verb's object: Russian and Polish put it in the genitive
+ * (`иметь значение` → `не имеет значения`, `mieć znaczenie` → `nie ma
+ * znaczenia`), so the phrase's own forms no longer match.
+ */
+const NEGATIONS: Readonly<Record<string, string>> = {
+  ru: "не",
+  pl: "nie",
 };
 
 type Matcher = {
   readonly tokens: ReadonlyArray<Token>;
   readonly info: (key: string, wordClass?: CaseClass) => TokenInfo;
   readonly reflexives: ReadonlySet<string> | undefined;
+  /** Words allowed between a verb and the rest of its phrase (`MAX_GAPS`). */
+  readonly maxGap: number;
+  /** This language's verb negation (`NEGATIONS`). */
+  readonly negation: string | undefined;
+  /**
+   * Trying the phrase with a negated verb (`matchPhrase`): its other words
+   * may stand in any of their forms, not only the phrase's own (`не даю слова`).
+   */
+  readonly negated: boolean;
   /**
    * The verb of a phrase that comes before the rest leaves the rest at the
    * end of the clause, as in German (`tritt morgen in Kraft`). Without this,
    * the `ist an` row of `an sein` matches `Er ist an der Uni`.
    */
   readonly bracket: boolean;
+  /** Hyphen-joined parts are one word (`HYPHEN_WORDS`). */
+  readonly hyphenWords: boolean;
   /** Every context word and its lemmas: a phrase with a word outside it can't match. */
   readonly available: ReadonlySet<string>;
 };
@@ -222,8 +301,9 @@ type Matcher = {
 /**
  * The word `word` of `phrase` can stand for the context word at `at`: as
  * written, as a reflexive, or inflected if it is the verb of a verb phrase
- * (`miało miejsce` for `mieć miejsce`). Other words only match the phrase's
- * own forms, so `niczego` doesn't make the interjection `to nic`.
+ * (`miało miejsce` for `mieć miejsce`), or any word of a negated one
+ * (`не имеет значения`). Other words only match the phrase's own forms, so
+ * `niczego` doesn't make the interjection `to nic`.
  */
 const wordMatches = (
   m: Matcher,
@@ -241,15 +321,30 @@ const wordMatches = (
   ) {
     return true;
   }
-  return (
-    phrase.verb && m.info(token.key).lemmas.has(word) && m.info(word).verbLemma
-  );
+  if (!phrase.verb || !m.info(token.key).lemmas.has(word)) return false;
+  return m.negated || m.info(word).verbLemma;
+};
+
+/**
+ * The verb at context word `i` is negated: right after the negation (`не
+ * имеет`), or after it and one helper verb (`не будет иметь`, `не могу дать`),
+ * which also puts the object in the genitive.
+ */
+const negatedAt = (m: Matcher, i: number): boolean => {
+  const before = (j: number) =>
+    j > 0 && !m.tokens[j]!.breakBefore ? m.tokens[j - 1] : undefined;
+  const prev = before(i);
+  if (prev === undefined) return false;
+  if (prev.key === m.negation) return true;
+  return m.info(prev.key).verb && before(i - 1)?.key === m.negation;
 };
 
 /**
  * The phrase words `positions` sit at context words `start`, `start + 1`, ...
  * in that order, in one clause, with a clause break only where the phrase has
- * one (`z. B.`).
+ * one (`z. B.`). Where hyphens join words, the run starts and ends at whole
+ * words, so `то есть` doesn't match `кто-то есть`; inside it, a hyphen may
+ * stand for a space (`треш-стримеров` for `треш стример`).
  */
 const runMatches = (
   m: Matcher,
@@ -257,14 +352,52 @@ const runMatches = (
   positions: ReadonlyArray<number>,
   start: number,
 ): boolean =>
+  !(m.hyphenWords && m.tokens[start]?.joinedBefore === true) &&
+  !(
+    m.hyphenWords && m.tokens[start + positions.length]?.joinedBefore === true
+  ) &&
   positions.every((p, offset) => {
     const at = start + offset;
     const token = m.tokens[at];
     if (token === undefined || !wordMatches(m, phrase, phrase.tokens[p]!, at)) {
       return false;
     }
-    return offset === 0 || !token.breakBefore || phrase.breaks[p] === true;
+    return (
+      offset === 0 ||
+      !token.breakBefore ||
+      phrase.breaks[p] === true ||
+      splitConjunction(m, phrase, p, token)
+    );
   });
+
+/** Fewest words of a phrase a comma may split before its last word. */
+const MIN_SPLIT_PHRASE_WORDS = 3;
+
+/**
+ * A comma before the last word of a phrase that ends in a conjunction, which
+ * the dictionary writes without it: `после того, как` for `после того как`,
+ * `до тех пор, пока`. Only in phrases of three words or more: a comma inside
+ * a two-word one usually makes two words of it (`так, как` is "the way that",
+ * not `так как` "because"; `так, что` isn't `так что`). Not for
+ * interjections, which stand as a clause of their own, nor for a verb phrase
+ * whose verb stands apart, which must keep the rest in one clause.
+ */
+const splitConjunction = (
+  m: Matcher,
+  phrase: Phrase,
+  p: number,
+  token: Token,
+): boolean =>
+  token.commaBefore &&
+  !phrase.interjection &&
+  p === phrase.tokens.length - 1 &&
+  phrase.tokens.length >= MIN_SPLIT_PHRASE_WORDS &&
+  m.info(phrase.tokens[p]!).conjunction;
+
+/** The context word at `i` is part of a hyphen-joined word. */
+const inHyphenWord = (m: Matcher, i: number): boolean =>
+  m.hyphenWords &&
+  (m.tokens[i]!.joinedBefore || m.tokens[i + 1]?.joinedBefore === true);
 
 type PhraseMatch = {
   readonly phrase: Phrase;
@@ -272,6 +405,8 @@ type PhraseMatch = {
   readonly contiguous: boolean;
   /** Words written exactly as in the phrase. */
   readonly exact: number;
+  /** The context word each phrase word stands for. */
+  readonly placed: ReadonlyArray<number>;
 };
 
 const exactCount = (
@@ -289,7 +424,7 @@ const exactCount = (
  * before the rest, which then ends the clause, elsewhere at most a word away. The rest has to hold a content
  * word, or `an sein` would match any `an` near `ist`.
  */
-const matchPhrase = (
+const placePhrase = (
   m: Matcher,
   phrase: Phrase,
   clicked: number,
@@ -320,15 +455,21 @@ const matchPhrase = (
     const last = phrase.tokens[n - 1]!;
     if (
       m.bracket &&
-      phrase.verb &&
+      phrase.verbEntry &&
       !m.info(last).verbLemma &&
       !endsClause(m.tokens, start + n - 1)
     ) {
       continue;
     }
-    return { phrase, contiguous: true, exact: exactCount(m, phrase, at) };
+    return {
+      phrase,
+      contiguous: true,
+      exact: exactCount(m, phrase, at),
+      placed: at,
+    };
   }
-  if (!phrase.verb) return undefined;
+  // In German an untyped phrase keeps its own order (`sprechen Sie Englisch`).
+  if (!phrase.verb || (m.bracket && !phrase.verbEntry)) return undefined;
   const clause = m.tokens[clicked]!.clause;
   const inClause = m.tokens.flatMap((token, i) =>
     token.clause === clause ? [i] : [],
@@ -350,11 +491,29 @@ const matchPhrase = (
       }
       const verbAt = inClause.filter(
         (i) =>
-          !at.includes(i) && wordMatches(m, phrase, phrase.tokens[verb]!, i),
+          !at.includes(i) &&
+          !inHyphenWord(m, i) &&
+          wordMatches(m, phrase, phrase.tokens[verb]!, i),
       );
       const covers = at.includes(clicked) || verbAt.includes(clicked);
       if (!covers || verbAt.length === 0) continue;
-      const verbPlace = verbAt.includes(clicked) ? clicked : verbAt[0]!;
+      // Words between the verb at `i` and the rest. The negation belongs to
+      // the verb (`слова никому не давал`), so it doesn't count.
+      const gapAt = (i: number): number => {
+        const negationBetween =
+          i > at.at(-1)! + 1 && m.tokens[i - 1]!.key === m.negation;
+        return (
+          (i < at[0]! ? at[0]! - i - 1 : i - at.at(-1)! - 1) -
+          (negationBetween ? 1 : 0)
+        );
+      };
+      // The clicked verb, or else in German the first (it comes before the
+      // rest) and elsewhere the nearest (`дал ему и дал тебе слово`).
+      const verbPlace = verbAt.includes(clicked)
+        ? clicked
+        : m.bracket
+          ? verbAt[0]!
+          : verbAt.reduce((best, i) => (gapAt(i) < gapAt(best) ? i : best));
       // A verb after the rest stands next to it (`ums Leben kam`), which
       // the contiguous match covers. One far after it is another verb's.
       if (
@@ -363,13 +522,10 @@ const matchPhrase = (
       ) {
         continue;
       }
-      // Elsewhere at most one word comes between (`miało to miejsce`), so
-      // `jest to się w dupie` isn't `być w dupie`.
-      const gap =
-        verbPlace < at[0]!
-          ? at[0]! - verbPlace - 1
-          : verbPlace - at.at(-1)! - 1;
-      if (!m.bracket && gap > MAX_GAP) continue;
+      // Elsewhere only a few words come between (`miało to miejsce`,
+      // `MAX_GAPS`), so `jest to się w dupie` isn't `być w dupie`.
+      const gap = gapAt(verbPlace);
+      if (!m.bracket && gap > m.maxGap) continue;
       const placed = all.map((p) =>
         p === verb ? verbPlace : at[rest.indexOf(p)]!,
       );
@@ -377,14 +533,46 @@ const matchPhrase = (
         phrase,
         contiguous: false,
         exact: exactCount(m, phrase, placed),
+        placed,
       };
     }
   }
   return undefined;
 };
 
+/**
+ * How `phrase` covers the context word `clicked` (`placePhrase`). Failing
+ * that, with a negated verb, whose object may then stand in the genitive
+ * (`не имеет значения` for `иметь значение`): the phrase's other words may be
+ * in any form, as long as the verb the match uses is the negated one.
+ */
+const matchPhrase = (
+  m: Matcher,
+  phrase: Phrase,
+  clicked: number,
+): PhraseMatch | undefined => {
+  const plain = placePhrase(m, phrase, clicked);
+  if (plain !== undefined || m.negation === undefined || !phrase.verb) {
+    return plain;
+  }
+  const match = placePhrase({ ...m, negated: true }, phrase, clicked);
+  if (match === undefined) return undefined;
+  const verbs = phrase.tokens.flatMap((word, p) =>
+    m.info(word).verbLemma ? [p] : [],
+  );
+  return verbs.some((p) => negatedAt(m, match.placed[p]!)) ? match : undefined;
+};
+
 /** Words allowed between a verb and the rest of its phrase, outside German. */
 const MAX_GAP = 1;
+
+/**
+ * Languages that allow more (`MAX_GAP`). Russian often puts an object and an
+ * adverb between the verb and the rest (`дашь мне честное слово`, `держать
+ * все время ухо востро`); in Polish two words let in as many literal readings
+ * as idioms (`jesteśmy u Mikołaja w domu` isn't `być w domu`).
+ */
+const MAX_GAPS: Readonly<Record<string, number>> = { ru: 2 };
 
 /** Phrases kept per lookup, longest first. */
 const MAX_PHRASES = 3;
@@ -424,7 +612,11 @@ export const phraseEntryIds = (
     tokens,
     info,
     reflexives: REFLEXIVES[locale],
+    maxGap: MAX_GAPS[locale] ?? MAX_GAP,
+    negation: NEGATIONS[locale],
+    negated: false,
     bracket: BRACKET.has(locale),
+    hyphenWords: HYPHEN_WORDS.has(locale),
     available,
   };
   const matches = new Map<Phrase, PhraseMatch>();
@@ -446,6 +638,153 @@ export const phraseEntryIds = (
     .sort(rank)
     .slice(0, MAX_PHRASES)
     .flatMap((match) => match.phrase.entryIds);
+  return [...new Set(ids)];
+};
+
+/** Most spellings tried for one run of hyphen-joined parts. */
+const MAX_SPELLINGS = 32;
+
+/** Dictionary forms an affix must start or end, after a hyphen, to count as one. */
+const MIN_HYPHEN_AFFIX_FORMS = 3;
+
+const affixIndexes = new WeakMap<DictionaryDb, ReadonlySet<string>>();
+
+/**
+ * Affixes that attach with a hyphen (`-то`, `-нибудь`, `экс-`), read from the
+ * dictionary's hyphenated forms: `-то` ends many (`кто-то`, `где-то`), while
+ * the suffixes `-ак` and `-е` end none. Built once per file, on first use.
+ */
+const hyphenAffixes = (db: DictionaryDb): ReadonlySet<string> => {
+  const cached = affixIndexes.get(db);
+  if (cached !== undefined) return cached;
+  const counts = new Map<string, number>();
+  const rows = db.$client
+    .query<{ form: string }, []>(
+      "SELECT DISTINCT form FROM forms WHERE instr(form, '-') > 1",
+    )
+    .all();
+  for (const { form } of rows) {
+    const parts = form.split("-");
+    if (parts.some((part) => part === "")) continue;
+    for (const affix of [`${parts[0]}-`, `-${parts.at(-1)}`]) {
+      counts.set(affix, (counts.get(affix) ?? 0) + 1);
+    }
+  }
+  const affixes = new Set(
+    [...counts].flatMap(([affix, n]) =>
+      n >= MIN_HYPHEN_AFFIX_FORMS ? [affix] : [],
+    ),
+  );
+  affixIndexes.set(db, affixes);
+  return affixes;
+};
+
+type Rows = (key: string, wordClass?: CaseClass) => ReadonlyArray<FormRow>;
+
+/**
+ * Ways to write the hyphen-joined `parts` as a form: as written first, then
+ * with parts replaced by their lemmas, for words that inflect inside but
+ * whose inflected forms the dictionary lacks (`одним-единственным` for
+ * `один-единственный`, `всех-всех` for `все-все`). The first readings of the
+ * first parts are kept when there are more than `MAX_SPELLINGS`.
+ */
+const spellings = (
+  rows: Rows,
+  parts: ReadonlyArray<Token>,
+): ReadonlyArray<string> => {
+  let out: Array<Array<string>> = [[]];
+  for (const part of parts) {
+    const lemmas = rows(part.key)
+      .map((row) => lookupKey(row.lemma))
+      .filter((lemma) => !lemma.includes(" "));
+    const readings = [...new Set([part.key, ...lemmas])];
+    out = out
+      .flatMap((prefix) => readings.map((reading) => [...prefix, reading]))
+      .slice(0, MAX_SPELLINGS);
+  }
+  return out.map((words) => words.join("-"));
+};
+
+/**
+ * Entry ids of the hyphen-joined word the context word at `clicked` is part
+ * of (`first`..`last`): the longest run of its parts that is a form, around
+ * the clicked part (`кого-нибудь` for `кто-нибудь`), as written or with its
+ * parts as lemmas (`spellings`). With none, the clicked part's hyphen affix
+ * (`-то`, `-ка`, `экс-`, see `hyphenAffixes`), so `сказал-то` still explains
+ * `то`, but only beside dictionary words: `-е` in `1990-е` or `environment-е`
+ * is an ending.
+ */
+const hyphenWordIds = (
+  db: DictionaryDb,
+  rows: Rows,
+  tokens: ReadonlyArray<Token>,
+  first: number,
+  last: number,
+  clicked: number,
+): ReadonlyArray<number> => {
+  for (let length = last - first + 1; length >= 2; length--) {
+    const from = Math.max(first, clicked - length + 1);
+    const to = Math.min(clicked, last - length + 1);
+    for (let start = from; start <= to; start++) {
+      const parts = tokens.slice(start, start + length);
+      for (const spelling of spellings(rows, parts)) {
+        const found = rows(spelling, parts[0]!.caseClass);
+        if (found.length > 0) return found.map((row) => row.id);
+      }
+    }
+  }
+  const others = tokens
+    .slice(first, last + 1)
+    .filter((_, i) => first + i !== clicked);
+  if (others.some((token) => rows(token.key).length === 0)) return [];
+  const key = tokens[clicked]!.key;
+  const affixes = hyphenAffixes(db);
+  return [
+    ...(clicked > first ? [`-${key}`] : []),
+    ...(clicked < last ? [`${key}-`] : []),
+  ]
+    .filter((affix) => affixes.has(affix))
+    .flatMap((affix) => rows(affix).map((row) => row.id));
+};
+
+/**
+ * Entry ids of the hyphen-joined word `word` is part of in `context`, in
+ * languages that write words that way (`HYPHEN_WORDS`): `что` or `нибудь` in
+ * `что-нибудь`. The client doesn't say which occurrence was clicked, so
+ * every occurrence must be part of a hyphen-joined word that has entries:
+ * not `восток` in `на восток и северо-восток`, nor `веб` in
+ * `веб-разработчиков ... веб-сайтов`. Then each one's entries count
+ * (`по-русски, по-немецки`).
+ */
+export const hyphenEntryIds = (
+  db: DictionaryDb,
+  word: string,
+  context: string,
+  locale: string,
+): ReadonlyArray<number> => {
+  if (!HYPHEN_WORDS.has(locale)) return [];
+  const tokens = tokenize(context, locale);
+  const cache = new Map<string, ReadonlyArray<FormRow>>();
+  const rows: Rows = (key, wordClass = CaseClass.Capitalised) => {
+    const cacheKey = `${wordClass}${key}`;
+    let found = cache.get(cacheKey);
+    if (found === undefined) {
+      found = formRows(db, key, wordClass);
+      cache.set(cacheKey, found);
+    }
+    return found;
+  };
+  const ids: Array<number> = [];
+  for (const clicked of positionsOf(tokens, word, locale)) {
+    let first = clicked;
+    let last = clicked;
+    while (tokens[first]!.joinedBefore) first--;
+    while (tokens[last + 1]?.joinedBefore === true) last++;
+    if (first === last) return [];
+    const here = hyphenWordIds(db, rows, tokens, first, last, clicked);
+    if (here.length === 0) return [];
+    ids.push(...here);
+  }
   return [...new Set(ids)];
 };
 
