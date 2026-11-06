@@ -96,7 +96,7 @@ One change per iteration:
 3. **Run both benchmarks.** No type or variant may fall by more than noise, about 1 point, without an explanation.
 4. **Diff the corpus:** collect again (`../corpus/eval/collect.ts`, or `replay.ts` and `diff.ts`), and list every word whose popover changed, with an English gloss of each side. A fresh subagent classifies each change as better, worse or same, with a reason. Every "worse" needs an explanation or a fix.
 5. **Review the code** with a fresh subagent that gets only the diff and the problem it solves. It checks for correctness and overfitting: special cases shaped around the example, word lists, rules that only work on the benchmark.
-6. **Accept or revert.** If accepted, add two or three hand-written unit tests on an in-memory dictionary (see `apps/server/src/dictionary/context.test.ts`): one case the rule fixes and one nearby case it must not break. Never turn benchmark cases into unit tests: some are wrong, and data updates would break them.
+6. **Accept or revert.** If accepted, add two or three hand-written unit tests on an in-memory dictionary (next to the feature, in its `<feature>.<lang>.test.ts`, e.g. `apps/server/src/lookup/features/phrases/phrases.ru.test.ts`; the words go in the language's fixture, `apps/server/src/lookup/testing/<language>.ts`): one case the rule fixes and one nearby case it must not break. Never turn benchmark cases into unit tests: some are wrong, and data updates would break them.
 7. **Log** the iteration in the profile: the change, benchmark numbers before and after, and what got worse.
 
 Run the judge after a group of accepted changes, not every iteration.

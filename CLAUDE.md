@@ -27,6 +27,8 @@ Prefer `effect/unstable/httpapi` and `effect/unstable/http`. Sign `/v1/get-meta`
 
 Use Vitest + `@effect/vitest` (`it.effect`, `layer(...)`, `HttpApiTest`), not `bun:test`.
 
+Lookup code is split by feature (`apps/server/src/lookup/features/`), not by language; a language turns features on in its `language.toml`. Tests sit next to their feature, one file per language where the cases are language-specific (`phrases.ru.test.ts`), on the in-memory dictionaries in `apps/server/src/lookup/testing/<language>.ts`.
+
 ```sh
 bun run test
 ```
