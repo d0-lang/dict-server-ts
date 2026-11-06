@@ -57,7 +57,7 @@ ihm	PRON	him, to him | it, to it (for a masculine or neuter noun)
 seiner	PRON	of him, of it (genitive)
 sie	PRON	she | her (object) | it (for a feminine noun) | they | them (object)
 Sie	PRON	you (formal, singular or plural)
-ihr	PRON	you (plural, informal) | her, to her (dative of sie, "she")
+ihr	PRON	you (plural, informal) | her, to her (dative of sie, "she") | it, to it (for a feminine noun: "die Photosynthese und alle, die von ihr abhängen", photosynthesis and everything that depends on it)
 ihrer	PRON	of her, of them (genitive)
 Ihrer	PRON	of you (formal, genitive)
 ihnen	PRON	them, to them
@@ -202,8 +202,122 @@ ins	ADP	into the, to the (in das: "ins Kino", to the cinema)
 zum	ADP	to the, for the (zu dem: "zum Bahnhof", to the station; "zum Beispiel", for example) | as of, on (with a date: "zum 1. Mai", as of 1 May) | as (a role: "zum Präsidenten gewählt", elected president)
 zur	ADP	to the, for the (zu der: "zur Schule", to school) | as (a role: "zur Vorsitzenden berufen", appointed chair)
 vom	ADP	from the, of the, by the (von dem)
-beim	ADP	at the, near the, while (bei dem: "beim Arzt", at the doctor's; "beim Essen", while eating)
+beim	ADP	at the, near the, while (bei dem: "beim Arzt", at the doctor's; "beim Essen", while eating) | with, in the case of ("beim neuen Modell", with the new model)
 ans	ADP	to the, onto the (an das)
 aufs	ADP	onto the, on the (auf das)
 übers	ADP	over the, about the (über das)
 fürs	ADP	for the (für das)
+
+## Forms of sein, haben and werden
+# Past and subjunctive forms a reader can't connect to their tense by
+# themselves: Wiktionary's entry only says "to be". The protocol has no
+# inflection tables, so these are entries of their own.
+war	AUX	was ("es war kalt", it was cold) | had (past perfect with verbs of motion and change: "er war gegangen", he had gone)
+warst	AUX	were (du: "du warst dort", you were there) | had (past perfect: "du warst gekommen", you had come)
+waren	AUX	were ("wir waren müde", we were tired) | had (past perfect: "sie waren gekommen", they had come)
+wart	AUX	were (ihr) | had (past perfect)
+wäre	AUX	would be ("das wäre schön", that would be nice) | were (in a condition: "wenn ich reich wäre", if I were rich) | would have (with verbs of motion and change: "er wäre gekommen", he would have come)
+wärst	AUX	would be, were (du) | would have (with verbs of motion and change)
+wären	AUX	would be, were (wir, sie, Sie: "das wären zwei Euro", that would be two euros) | would have (with verbs of motion and change)
+wärt	AUX	would be, were (ihr) | would have (with verbs of motion and change)
+sei	AUX	is, be (reported speech: "er sagt, er sei krank", he says he is ill) | be! (command: "sei still!", be quiet!) | let ... be ("es sei denn", unless)
+seien	AUX	are, be (reported speech, plural: "sie seien zufrieden", they are said to be satisfied) | let us be ("seien wir ehrlich", let's be honest)
+gewesen	AUX	been ("ich bin dort gewesen", I have been there)
+hatte	AUX	had ("ich hatte keine Zeit", I had no time) | had (past perfect: "sie hatte gegessen", she had eaten)
+hattest	AUX	had (du) | had (past perfect)
+hatten	AUX	had (wir, sie, Sie) | had (past perfect: "wir hatten gewartet", we had waited)
+hattet	AUX	had (ihr) | had (past perfect)
+hätte	AUX	would have ("ich hätte gern einen Kaffee", I would like a coffee; "das hätte ich nicht gedacht", I wouldn't have thought so) | had (in a condition: "wenn ich Zeit hätte", if I had time) | could have, should have (with a modal: "er hätte kommen können", he could have come)
+hättest	AUX	would have, had (du) | could have, should have (with a modal)
+hätten	AUX	would have, had (wir, sie, Sie) | could have, should have (with a modal)
+hättet	AUX	would have, had (ihr) | could have, should have (with a modal)
+gehabt	AUX	had ("ich habe Glück gehabt", I was lucky)
+wurde	AUX	was, became (past: "es wurde dunkel", it became dark) | was (passive: "das Haus wurde gebaut", the house was built)
+wurdest	AUX	were, became (du) | were (passive)
+wurden	AUX	were, became (wir, sie, Sie) | were (passive: "sie wurden gewählt", they were elected)
+wurdet	AUX	were, became (ihr) | were (passive)
+würde	AUX	would ("ich würde gern kommen", I would like to come; "das würde helfen", that would help)
+würdest	AUX	would (du: "würdest du mir helfen?", would you help me?)
+würden	AUX	would (wir, sie, Sie: "würden Sie bitte...", would you please...)
+würdet	AUX	would (ihr)
+worden	AUX	been (passive perfect: "es ist gebaut worden", it has been built)
+geworden	AUX	become ("es ist kalt geworden", it has become cold)
+
+## Past and subjunctive forms of the modal verbs
+konnte	AUX	could, was able to (past: "ich konnte nicht schlafen", I couldn't sleep)
+konnten	AUX	could, were able to (past)
+könnte	AUX	could, might ("das könnte stimmen", that could be true; "könnte ich...?", could I...?)
+könnten	AUX	could, might (wir, sie, Sie: "könnten Sie mir helfen?", could you help me?)
+musste	AUX	had to (past: "ich musste gehen", I had to go)
+mussten	AUX	had to (past)
+müsste	AUX	would have to, ought to, should ("das müsste reichen", that should be enough)
+müssten	AUX	would have to, ought to, should
+sollte	AUX	should, ought to ("du solltest schlafen", you should sleep) | was supposed to (past: "er sollte kommen", he was supposed to come) | should, if (in a condition: "sollte es regnen", should it rain)
+sollten	AUX	should, ought to | were supposed to (past)
+solltest	AUX	should, ought to (du)
+wollte	AUX	wanted to (past: "ich wollte dich anrufen", I wanted to call you) | would like to (polite: "ich wollte fragen, ob...", I wanted to ask whether...)
+wollten	AUX	wanted to (past)
+durfte	AUX	was allowed to (past)
+durften	AUX	were allowed to (past)
+dürfte	AUX	would be allowed to | is likely to, probably ("das dürfte reichen", that should probably be enough)
+dürften	AUX	would be allowed to | are likely to, probably
+möchte	AUX	would like (to) ("ich möchte einen Kaffee", I would like a coffee; "ich möchte gehen", I would like to go)
+möchten	AUX	would like (to) (wir, sie, Sie: "möchten Sie etwas trinken?", would you like something to drink?)
+möchtest	AUX	would like (to) (du)
+mochte	AUX	liked (past of mögen: "ich mochte ihn", I liked him)
+
+## Units and abbreviations
+# The dump spells these as other words (KG "basement", KM "base rent"), or
+# not at all.
+g	NOUN	g, gram (symbol: "200 g Mehl", 200 grams of flour)
+kg	NOUN	kg, kilogram (symbol)
+mg	NOUN	mg, milligram (symbol)
+km	NOUN	km, kilometre (symbol: "10 km", ten kilometres)
+m	NOUN	m, metre (symbol: "100 m", a hundred metres)
+cm	NOUN	cm, centimetre (symbol)
+mm	NOUN	mm, millimetre (symbol)
+ml	NOUN	ml, millilitre (symbol)
+min	NOUN	min, minute(s) (abbreviation of Minute)
+Abs	NOUN	paragraph, subsection (abbreviation of Absatz, in laws: "Art. 20 Abs. 1", Article 20(1))
+TL	NOUN	tsp, teaspoon (abbreviation of Teelöffel, in recipes: "1 TL Salz", 1 tsp salt)
+EL	NOUN	tbsp, tablespoon (abbreviation of Esslöffel, in recipes: "2 EL Öl", 2 tbsp oil)
+ca.	ADV	about, approximately (abbreviation of circa: "ca. 20 Minuten", about 20 minutes)
+
+## Set phrases English Wiktionary lacks
+zur Zeit	ADV	at the moment, currently (also written zurzeit) | at the time of, in the days of (+ genitive: "zur Zeit Goethes", in Goethe's time)
+zum Ausdruck bringen	VERB	to express, to voice ("seine Sorge zum Ausdruck bringen", to express one's concern)
+zum Ausdruck kommen	VERB	to be expressed, to show ("darin kommt seine Haltung zum Ausdruck", his attitude shows in this)
+zur Verfügung stehen	VERB	to be available ("es stehen zwei Räume zur Verfügung", two rooms are available)
+zur Verfügung stellen	VERB	to make available, to provide
+in Höhe von	ADP	amounting to, in the amount of ("eine Strafe in Höhe von 500 Euro", a fine of 500 euros)
+in Form von	ADP	in the form of
+ins Spiel kommen	VERB	to come into play, to become involved
+ins Gespräch kommen	VERB	to get talking, to get into conversation
+an Bedeutung gewinnen	VERB	to gain in importance
+an Bedeutung verlieren	VERB	to lose importance
+auf den Markt bringen	VERB	to bring onto the market, to launch
+auf den Markt kommen	VERB	to come onto the market, to be launched
+allen voran	ADV	above all, first and foremost, leading the way
+im Handel	ADV	on the market, in the shops ("im Handel erhältlich", available in shops)
+im Laufe	ADP	in the course of, during (+ genitive: "im Laufe der Zeit", over time; "im Laufe des Tages", during the day)
+im Verlauf	ADP	in the course of (+ genitive or von: "im Verlauf von 18 Jahren", over 18 years)
+im Falle	ADP	in the event of, in case of (+ genitive: "im Falle eines Unfalls", in the event of an accident)
+im Fall	ADP	in the event of, in case of (+ genitive or von)
+außer Kraft setzen	VERB	to repeal, to annul, to suspend (a law or rule)
+außer Kraft treten	VERB	to cease to be in force, to lapse
+daran liegen	VERB	to be due to, to be because of ("das liegt daran, dass...", that's because...)
+
+## Words with a sense Wiktionary lacks
+nach	ADP	after, past (time: "nach dem Essen", after the meal) | to, towards (places and directions: "nach Berlin", to Berlin; "nach Hause", home) | after, behind (in sequence: "nach Ihnen!", after you!) | according to, by (also after the noun: "meiner Meinung nach", in my opinion) | like, of (with riechen, schmecken, klingen, aussehen: "es riecht nach Rauch", it smells of smoke) | for, about (with Frage, fragen, suchen, Sehnsucht: "die Frage nach dem Sinn", the question of the meaning; "nach dem Weg fragen", to ask the way)
+davon	ADV	from it, from that, off it (place or source: "weit davon entfernt", far from it) | of it, of them (part of a whole: "jeder davon", each of them; "zwei davon", two of them) | about it, of it (with hören, wissen, sprechen: "ich habe davon gehört", I've heard of it) | from that, as a result ("davon wird man müde", that makes you tired)
+relativ	ADV	relatively, fairly ("relativ deutlich", fairly clearly)
+wesentlich	ADV	considerably, much (with a comparative: "wesentlich weniger", considerably fewer) | essentially, substantially
+super	ADV	great, really well (colloquial: "das schmeckt super", that tastes great; "super als Beilage", great as a side dish) | very, really (before an adjective: "super simpel", really simple)
+
+## Declined forms of weiter "further"
+# Wiktionary has weiter only as an adverb, so these were forms of weit "wide".
+weitere	ADJ	further, additional, other ("weitere Informationen", further information; "eine weitere Frage", another question)
+weiteren	ADJ	further, additional, other ("im weiteren Verlauf", in the further course; "einen weiteren Versuch", another attempt)
+weiterer	ADJ	further, additional, another ("ein weiterer Punkt", another point)
+weiteres	ADJ	further, additional, another ("ein weiteres Jahr", another year) | ohne Weiteres: readily, without further ado
+weiterem	ADJ	further, additional, another ("mit weiterem Zubehör", with further accessories)

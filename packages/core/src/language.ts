@@ -54,10 +54,24 @@ const Import = doc(
     participleDeclension: Schema.optionalKey(
       doc(
         Schema.Struct({
+          tags: orDefault(
+            doc(
+              strings,
+              "The tags a table's participle row has, all of them (Polish: the masculine singular adjectival participle; German: any participle).",
+            ),
+            ["adjectival", "participle", "masculine", "singular"],
+          ),
           ending: Schema.String,
           endings: strings,
+          onlyNew: orDefault(
+            doc(
+              Schema.Boolean,
+              'Add a declined form only where no other entry has it, so a participle Wiktionary lists as an adjective keeps its forms (German `bestehende` stays `bestehend`\'s). Off where those adjectives carry only figurative senses and the verb is needed (Polish `zniszczony` "beat-up" for `zniszczonych` "destroyed").',
+            ),
+            false,
+          ),
         }),
-        "Adjectival participles decline like adjectives, but verb tables list only their nominatives (`wymagany`). A masculine singular participle that ends in `ending` also gets its stem with each of `endings` as forms of the verb (`wymaganego`, `wymaganej`).",
+        "Adjectival participles decline like adjectives, but verb tables list only one form (`wymagany`, `ausgelegt`). A participle row with all of `tags` that ends in `ending` also gets its stem with each of `endings` as forms of the verb (`wymaganego`, `wymaganej`; `ausgelegte`, `ausgelegten`).",
       ),
     ),
     stressedLemmas: orDefault(
@@ -122,6 +136,20 @@ const Context = doc(
       doc(
         strings,
         "Words that make a verb reflexive (`się` in `bawić się`). In a verb phrase they may stand on either side of the verb, apart from it, though they are no content word (`Dobrze się bawię`).",
+      ),
+      [],
+    ),
+    capitalNouns: orDefault(
+      doc(
+        Schema.Boolean,
+        "Nouns are written with a capital letter (German), so a capitalised word of two or more letters inside a sentence ranks entries with a capitalised lemma first (`In wenigen Tagen`: `der Tag` before `tagen`).",
+      ),
+      false,
+    ),
+    nominalizers: orDefault(
+      doc(
+        strings,
+        "With `capitalNouns`: words after which a capitalised infinitive is likely the verb used as a noun (`zum Binden`, `das Tragen`), so the verb keeps its place among the capitalised lemmas.",
       ),
       [],
     ),

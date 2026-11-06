@@ -10,6 +10,12 @@ target = "en"
 # not tags on German senses.
 historicalStages = []
 standardPronNotes = []
+# Participles decline like adjectives, but tables list them undeclined:
+# ausgelegt also gives ausgelegte, ausgelegten, ausgelegtem, ausgelegter,
+# ausgelegtes (vorspringend likewise: vorspringende).
+# Only where no other entry has the form: Wiktionary lists many participles
+# as adjectives (bestehend "existing"), whose own tables already have them.
+participleDeclension = { tags = ["participle"], ending = "", endings = ["e", "en", "em", "er", "es"], onlyNew = true }
 
 [context]
 # The rest of a verb phrase goes to the end of the clause (`Er nimmt an der
@@ -23,6 +29,24 @@ separableVerbs = true
 # Words that may follow the clause's last word without punctuation, so the
 # bracket and a separable particle can end there (`rief an und ging`).
 clauseConjunctions = ["und", "oder", "aber", "sondern", "denn", "sowie", "bzw"]
+
+# Nouns are written with a capital letter, so a capitalised word inside a
+# sentence is a noun (or a name): `In wenigen Tagen` gets `der Tag` before the
+# verb `tagen`. Polish and Russian leave it off: there a capital inside a
+# sentence often starts a multi-word name (`Pałac Saski`), where a surname
+# entry would come first.
+capitalNouns = true
+# A capitalised infinitive after these is usually the verb used as a noun
+# (`zum Binden`, `das Tragen`, `ihr Schaffen`), so the verb stays on top with
+# the nouns rather than below them (`die Binde`): both may be meant. After
+# other words it is usually a plural (`in wenigen Tagen`, `7 Teilen`).
+nominalizers = [
+  "zum", "beim", "vom", "am", "im", "ins", "aufs", "fürs", "ums", "übers",
+  "das", "dem", "des", "durch",
+  "mein", "dein", "sein", "ihr", "unser", "euer",
+  "meinem", "deinem", "seinem", "ihrem", "unserem", "eurem",
+  "meines", "deines", "seines", "ihres", "unseres", "eures",
+]
 
 [headword]
 # Learners learn a noun with its article: der Hund, die See, das Band. Plural-

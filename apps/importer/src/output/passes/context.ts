@@ -1,4 +1,5 @@
 import type { Database, Statement } from "bun:sqlite";
+import type { Degree } from "../../transform/rules.ts";
 import type { DerivedSense } from "../../transform/transform.ts";
 import type { WriterCounts } from "../writer.ts";
 
@@ -19,11 +20,16 @@ export type WriterContext = {
   /** Whether `key` is the lemma of an entry. */
   readonly hasEntry: (key: string) => boolean;
   readonly verbalNouns: ReadonlyArray<{ form: string; entryId: number }>;
+  /** Declined participles, indexed only where no other entry has the form. */
+  readonly participleForms: ReadonlyArray<{ form: string; entryId: number }>;
   /** entry id -> gloss -> its derived sense */
   readonly derivedByEntry: ReadonlyMap<
     number,
     ReadonlyMap<string, DerivedSense>
   >;
-  /** entry id -> forms its table tags comparative or superlative */
-  readonly degreeFormsByEntry: ReadonlyMap<number, ReadonlySet<string>>;
+  /** entry id -> forms its table tags comparative or superlative -> the degree, if only one */
+  readonly degreeFormsByEntry: ReadonlyMap<
+    number,
+    ReadonlyMap<string, Degree | undefined>
+  >;
 };

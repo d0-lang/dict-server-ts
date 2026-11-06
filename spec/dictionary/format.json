@@ -30,7 +30,8 @@
     "Inflection": 1,
     "FormOf": 2,
     "Abbreviation": 3,
-    "LetterVariant": 4
+    "LetterVariant": 4,
+    "Degree": 5
   },
   "sourcePos": {
     "grammar": "grammar",

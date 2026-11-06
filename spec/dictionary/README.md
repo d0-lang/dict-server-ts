@@ -33,6 +33,7 @@ One SQLite file per language pair, `data/<source>_<target>.sqlite` (e.g. `data/r
   - `FormOf`: a separate "X is a form of Y" entry pointing at the lemma.
   - `Abbreviation`: an abbreviation without its period (`bzw` → `bzw.`).
   - `LetterVariant`: a form spelled another common way: an optional letter written plainly (`все` for `всё`), or an abbreviation without its spaces (`z.B.`).
+  - `Degree`: a declined comparative or superlative that isn't its base plus an ending (`größte`, `beste`, `jüngeren`), on the entry for that degree (`größten`, `besten`, `jünger`). The form is also an `Inflection` of the base, which ranks first.
 
 ## Normalization
 

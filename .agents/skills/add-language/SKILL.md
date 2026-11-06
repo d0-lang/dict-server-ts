@@ -1,6 +1,6 @@
 ---
 name: add-language
-description: Add a language pair to the dictionary, or improve one. Tier 1 makes it usable (language.toml, import, profile, grammar file) until the corpus judge passes the gates, where every common grammar word must be understood. Tier 2 makes it great (multi-word entries, compounds, language-specific rules), hill-climbed against a context benchmark and a segments benchmark. Use only when asked to add or improve a language, because generation and judging use a lot of tokens.
+description: Add a language pair to the dictionary, or improve one. Tier 1 makes it usable (language.toml, import, profile, grammar file) until the corpus judge passes the gates (97.5% of common grammar words understood). Tier 2 makes it great (multi-word entries, compounds, language-specific rules), hill-climbed against a context benchmark and a segments benchmark. Use only when asked to add or improve a language, because generation and judging use a lot of tokens.
 ---
 
 # Add a language
@@ -79,7 +79,7 @@ The corpus repo is private because many texts are under copyright. Never copy it
 | The profile and the iteration log | `languages/<lang>/profile.md` |
 | The context benchmark's verified cases | `languages/<lang>/gold/context.jsonl`. Generated sentences, not corpus text, so they belong in the repo |
 | Benchmark results per run | `apps/server/eval/out/<lang>/bench/<run>/` (ignored by git) |
-| Collections, samples, verdicts, overrides | `../corpus/eval/out/<lang>/` (ignored by git: big, and made from the texts) |
+| Collections, samples, verdicts, false positives | `../corpus/eval/out/<lang>/` (ignored by git: big, and made from the texts) |
 | A lookup rule | the feature it belongs to in `apps/server/src/lookup/features/` (phrases, hyphen-joined words, abbreviations, separable verbs, compounds), or a new feature file |
 | An import rule | `apps/importer/src/transform/` (per entry) or `apps/importer/src/output/passes/` (after the whole dump) |
 | Unit tests | next to the feature, in `<feature>.<lang>.test.ts`, on the in-memory dictionary in `apps/server/src/lookup/testing/<language>.ts` |
@@ -142,9 +142,11 @@ bun eval/score.ts --dir eval/out/<lang>/<run>/gate
 
 | Gate | Needs |
 |---|---|
-| Common grammar words | 100% understood |
-| Common content words | 95% |
-| Random words | 90% |
+| Common grammar words | 97.5% understood |
+| Common content words | 92.5% |
+| Random words | 87.5% |
+
+The judge itself is noisy: re-judging the same German popovers from scratch moved a gate by about a point. So the gates leave that much room rather than asking for 100%.
 
 A beginner meets the common words first, so they mustn't get lost there. You read every failing common word yourself (or a stronger model does), and so does the user, if they read the language:
 
@@ -155,10 +157,10 @@ A beginner meets the common words first, so they mustn't get lost there. You rea
   - abbreviations;
   - endings after numbers;
   - set phrases English Wiktionary lacks (`в принципе`, `за счёт`, `по словам`), which go in the grammar file as phrase lines for a reader to review.
-- **Not the word's own entry's job:** add it to `../corpus/eval/out/<lang>/overrides.jsonl` with the reason, after the user approves it (or, with no user, list it in the report for them). Overrides are listed in every report. Approved Russian examples:
-  - the meaning comes from a governing verb or idiom the word is only part of (`относиться к`, `ни перед чем не`);
-  - a plural read as its singular (`тысячи`);
-  - comparatives shown as "comparative degree of хороший: good", which is how the dictionary labels them.
+- **Not a miss:** a word whose meaning here comes from another word the reader can click is understood when its popover gives its own meaning (`mit` in `mit … rechnen`: the reader clicks `rechnen`). The judge prompt says so.
+- **Not counted:** foreign words, names and transcription slips (the judge's `foreign_word`, `name` and `transcription_error`), and words inside URLs (`logo.de`). `score.ts` lists them: skim the list for a real miss with a wrong label.
+- **A false positive** (the judge's error: the meaning is there, or another word carries it): add it to `../corpus/eval/out/<lang>/false-positives.jsonl` with the reason (`{"word", "sentence", "reason", "by"}`). It then doesn't count, and every report lists it. Never mark a real miss to pass a gate. When false positives of one kind pile up, fix the judge prompt instead. Russian examples: a plural read as its singular (`тысячи`); comparatives shown as "comparative degree of хороший: good", which is how the dictionary labels them.
+- **Tier 2, not tier 1:** a phrase the matcher can't place yet (a verb phrase whose rest is an adverb, coordination, long gaps), and senses English Wiktionary lacks (the hand-patch list). Tier 1 is the popover giving the word its own meaning.
 
 ### 5. Iterate on tier 1
 
@@ -270,6 +272,6 @@ Write an HTML report in `docs/` (Russian's is `docs/ru-report.html`). It contain
 - the baseline and final benchmarks per type;
 - the accepted rules, with their unit tests;
 - what got worse, and why it stays;
-- the overrides and the hand-patch list.
+- the false positives and the hand-patch list.
 
 Quote only dictionary phrases and generated sentences, never corpus text.

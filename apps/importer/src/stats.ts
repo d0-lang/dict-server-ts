@@ -35,6 +35,10 @@ export type ImportStats = {
   readonly degreeMerged: number;
   /** Comparative-only entries spelled like a plain form of their base, left to the base. */
   readonly degreeDropped: number;
+  /** Irregular declined comparatives and superlatives that also reach their degree entry (`größte` -> `größten`). */
+  readonly degreeForms: number;
+  /** Declined participles indexed where no other entry had the form (`ausgelegte`). */
+  readonly participleForms: number;
   readonly seeLinks: number;
   /** Entries from `languages/<lang>/grammar.tsv`. */
   readonly grammarEntries: number;

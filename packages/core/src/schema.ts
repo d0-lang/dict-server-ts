@@ -138,6 +138,12 @@ export const FormSource = {
    * `optionalLetters`), or an abbreviation without its spaces (`z.B.`)
    */
   LetterVariant: 4,
+  /**
+   * a declined comparative or superlative that isn't its base plus an ending
+   * (`größte`, `beste`, `jüngeren`), on the entry for that degree; it stays a
+   * form of the base too, which comes first
+   */
+  Degree: 5,
 } as const;
 export type FormSource = (typeof FormSource)[keyof typeof FormSource];
 

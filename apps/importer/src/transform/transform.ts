@@ -21,6 +21,7 @@ import {
   keepForm,
   skipSense,
   synonymTargets,
+  type Degree,
   type SkippedSenseReason,
 } from "./rules.ts";
 import type {
@@ -54,12 +55,28 @@ export type ImportEntry = {
   readonly derived: ReadonlyArray<DerivedSense>;
   /** Normalized verbal nouns from the table, used only if they have no entry. */
   readonly verbalNouns: ReadonlyArray<string>;
-  /** Normalized forms the table only ever tags comparative or superlative (`besser`; not `neuer`, also a plain form of `neu`). */
-  readonly degreeForms?: ReadonlyArray<string>;
+  /**
+   * Declined forms of the table's participles, with
+   * `participleDeclension.onlyNew`: used only where no other entry has the
+   * form, so `bestehende` stays `bestehend`'s.
+   */
+  readonly participleForms?: ReadonlyArray<string>;
+  /**
+   * Normalized forms the table only ever tags comparative or superlative
+   * (`besser`; not `neuer`, also a plain form of `neu`), with that degree when
+   * the table gives only one (`größere` comparative, `größte` superlative).
+   */
+  readonly degreeForms?: ReadonlyArray<DegreeForm>;
   /** The headword's grammar as a UD feature string (`Gender=Masc`), for nouns and verbs. */
   readonly features?: string;
   /** For a reflexive entry (`bawić się`), the verb it belongs to (`bawić`). */
   readonly reflexiveOf?: string;
+};
+
+/** A form a table tags comparative or superlative, and which of the two, if only one. */
+export type DegreeForm = {
+  readonly form: string;
+  readonly degree?: Degree;
 };
 
 /** A sense like "diminutive of kotek", which needs the meaning of its base. */
@@ -306,14 +323,19 @@ const classifySense = (
   return { kind: "gloss", gloss };
 };
 
-/** Normalized forms to index for a lemma, and how many raw forms were dropped. */
+/** Normalized forms to index for a lemma, declined participles apart, and how many raw forms were dropped. */
 const collectForms = (
   rules: LanguageRules,
   lemma: string,
   rawForms: ReadonlyArray<WiktextractForm>,
-): { readonly forms: ReadonlyArray<string>; readonly dropped: number } => {
+): {
+  readonly forms: ReadonlyArray<string>;
+  readonly participles: ReadonlyArray<string>;
+  readonly dropped: number;
+} => {
   const lemmaKey = lookupKey(lemma);
   const forms = new Set<string>();
+  const participles = new Set<string>();
   let dropped = 0;
   for (const form of rawForms) {
     if (!keepForm(rules, lemma, form)) {
@@ -323,18 +345,22 @@ const collectForms = (
     const key = lookupKey(form.form);
     if (key !== lemmaKey) forms.add(key);
     for (const declined of participleForms(rules, key, form.tags ?? [])) {
-      forms.add(declined);
+      (rules.participleDeclension?.onlyNew ? participles : forms).add(declined);
     }
   }
-  return { forms: [...forms], dropped };
+  return {
+    forms: [...forms],
+    participles: [...participles].filter(
+      (form) => !forms.has(form) && form !== lemmaKey,
+    ),
+    dropped,
+  };
 };
 
-const PARTICIPLE_TAGS = ["adjectival", "participle", "masculine", "singular"];
-
 /**
- * The declined forms of an adjectival participle the table lists in the
- * masculine nominative only (`wymagany` -> `wymaganego`, `wymaganej`), for a
- * language with `participleDeclension`.
+ * The declined forms of an adjectival participle the table lists in one form
+ * only (`wymagany` -> `wymaganego`, `wymaganej`; `ausgelegt` ->
+ * `ausgelegte`), for a language with `participleDeclension`.
  */
 const participleForms = (
   rules: LanguageRules,
@@ -344,7 +370,7 @@ const participleForms = (
   const declension = rules.participleDeclension;
   if (
     declension === undefined ||
-    !PARTICIPLE_TAGS.every((tag) => tags.includes(tag)) ||
+    !declension.tags.every((tag) => tags.includes(tag)) ||
     !key.endsWith(declension.ending) ||
     /\s/u.test(key)
   ) {
@@ -358,18 +384,28 @@ const isDegreeForm = (form: WiktextractForm): boolean =>
   form.tags?.some((tag) => tag === "comparative" || tag === "superlative") ??
   false;
 
-/** Forms the table only ever tags comparative or superlative. */
+/** Forms the table only ever tags comparative or superlative, with the degree when only one. */
 const degreeOnlyForms = (
   forms: ReadonlyArray<WiktextractForm>,
-): ReadonlyArray<string> => {
+): ReadonlyArray<DegreeForm> => {
   const plain = new Set(
     forms
       .filter((form) => !isDegreeForm(form))
       .map((form) => lookupKey(form.form)),
   );
-  return [
-    ...new Set(forms.filter(isDegreeForm).map((form) => lookupKey(form.form))),
-  ].filter((form) => !plain.has(form));
+  const degrees = new Map<string, Set<Degree>>();
+  for (const form of forms.filter(isDegreeForm)) {
+    const key = lookupKey(form.form);
+    if (plain.has(key)) continue;
+    const found = degrees.get(key) ?? new Set<Degree>();
+    for (const tag of form.tags ?? []) {
+      if (tag === "comparative" || tag === "superlative") found.add(tag);
+    }
+    degrees.set(key, found);
+  }
+  return [...degrees].map(([form, found]) =>
+    found.size === 1 ? { form, degree: [...found][0]! } : { form },
+  );
 };
 
 /**
@@ -516,7 +552,11 @@ export const transformEntry = (
     }
   }
 
-  const { forms, dropped } = collectForms(rules, lemma, raw.forms ?? []);
+  const { forms, participles, dropped } = collectForms(
+    rules,
+    lemma,
+    raw.forms ?? [],
+  );
   // `man` on the headword line of `Mann` ("obsolete"): the variant points here
   // only if it turns out to be no word of its own.
   for (const form of raw.forms ?? []) {
@@ -555,6 +595,7 @@ export const transformEntry = (
       .filter(isVerbalNounForm)
       .map((form) => lookupKey(form.form)),
     degreeForms: degreeOnlyForms(raw.forms ?? []),
+    ...(participles.length > 0 ? { participleForms: participles } : {}),
     ...(features !== undefined ? { features } : {}),
     ...(particle !== undefined ? { reflexiveOf: shownLemma } : {}),
   });

@@ -96,23 +96,34 @@ export const skipSense = (
  * tags can't tell these apart (`feminine` is also on inflections). All glosses
  * are English, so the list holds across languages. Comparatives and superlatives
  * count too: a reader of `лучше` or `besser` needs "comparative of good", not
- * the base word's entry alone. Any other opening is a form:
+ * the base word's entry alone. So do causatives: "causative of liegen: to
+ * lay" is what `legen` means. Any other opening is a form:
  * a word missing from this list redirects to its target, it doesn't lose data.
  * An optional first word covers qualifiers ("endearing diminutive of").
  */
 const OWN_ENTRY_OPENING =
-  /^(?:\S+\s+)?(?:(?:female|male) equivalent|diminutive|augmentative|verbal noun|agent noun|frequentative|iterative|singulative|abbreviation|initialism|acronym|clipping|ellipsis|(?:comparative|superlative)(?: degree)?) of\b/i;
+  /^(?:\S+\s+)?(?:(?:female|male) equivalent|diminutive|augmentative|verbal noun|agent noun|frequentative|iterative|causative|singulative|abbreviation|initialism|acronym|clipping|ellipsis|(?:comparative|superlative)(?: degree)?) of\b/i;
 
 export const isOwnEntryGloss = (gloss: string): boolean =>
   OWN_ENTRY_OPENING.test(gloss);
 
-const DEGREE_OPENING = /^(?:\S+\s+)?(?:comparative|superlative)(?: degree)? of\s+([^\s(:;,]+)/i;
+const DEGREE_OPENING =
+  /^(?:\S+\s+)?(comparative|superlative)(?: degree)? of\s+([^\s(:;,]+)/i;
+
+/** A comparative or a superlative. */
+export type Degree = "comparative" | "superlative";
 
 /** A comparative or superlative sense ("comparative degree of хоро́ший"). */
-export const isDegreeGloss = (gloss: string): boolean => DEGREE_OPENING.test(gloss);
+export const isDegreeGloss = (gloss: string): boolean =>
+  DEGREE_OPENING.test(gloss);
 
 /** The word a comparative or superlative gloss names (`хоро́ший`), if it is one. */
-export const degreeBase = (gloss: string): string | undefined => gloss.match(DEGREE_OPENING)?.[1];
+export const degreeBase = (gloss: string): string | undefined =>
+  gloss.match(DEGREE_OPENING)?.[2];
+
+/** Which degree a comparative or superlative gloss names. */
+export const degreeOf = (gloss: string): Degree | undefined =>
+  gloss.match(DEGREE_OPENING)?.[1]?.toLowerCase() as Degree | undefined;
 
 /** Senses that only refer to another word: not copied onto derived words. */
 export const isPointerGloss = (gloss: string): boolean =>

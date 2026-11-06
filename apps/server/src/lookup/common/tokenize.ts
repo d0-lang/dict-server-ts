@@ -146,6 +146,55 @@ export const positionsOf = (
   return clicked === undefined ? all : [clicked];
 };
 
+/** What can come before a sentence's first word inside the context: its end, or an opening quote. */
+const SENTENCE_START = /[.!?:…„“"«»‹›]/u;
+
+/**
+ * The clicked word is capitalised, and the context shows it inside a
+ * sentence rather than at the start of one (or of a quote), so the capital is
+ * the word's own. Every occurrence must be, when the click is ambiguous. A
+ * single letter (`Vitamin A`) says nothing.
+ */
+export const capitalisedInside = (
+  context: string,
+  tokens: ReadonlyArray<Token>,
+  positions: ReadonlyArray<number>,
+): boolean =>
+  positions.length > 0 &&
+  positions.every(
+    (i) =>
+      i > 0 &&
+      tokens[i]!.caseClass === CaseClass.Capitalised &&
+      [...tokens[i]!.key].length > 1 &&
+      !SENTENCE_START.test(context.slice(tokens[i - 1]!.end, tokens[i]!.start)),
+  );
+
+/** Every occurrence follows, in its clause, one of `words` (`zum Binden`). */
+export const preceded = (
+  tokens: ReadonlyArray<Token>,
+  positions: ReadonlyArray<number>,
+  words: ReadonlySet<string>,
+): boolean =>
+  positions.length > 0 &&
+  positions.every(
+    (i) => i > 0 && !tokens[i]!.breakBefore && words.has(tokens[i - 1]!.key),
+  );
+
+/** Every occurrence is followed, in its clause, by a capitalised word (`der Deutschen Bahn`). */
+export const capitalisedNext = (
+  tokens: ReadonlyArray<Token>,
+  positions: ReadonlyArray<number>,
+): boolean =>
+  positions.length > 0 &&
+  positions.every((i) => {
+    const next = tokens[i + 1];
+    return (
+      next !== undefined &&
+      !next.breakBefore &&
+      next.caseClass === CaseClass.Capitalised
+    );
+  });
+
 /**
  * The word at `i` ends its clause, where a separated particle stands: a
  * clause break or one of `conjunctions` follows it.

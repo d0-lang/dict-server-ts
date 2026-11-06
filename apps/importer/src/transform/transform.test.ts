@@ -291,6 +291,30 @@ describe("transformEntry", () => {
     assert.deepStrictEqual(later.entry?.derived, []);
   });
 
+  it("keeps a causative's meaning instead of linking it to its base", () => {
+    const lay = transformEntry(
+      de,
+      entry({
+        word: "legen",
+        lang_code: "de",
+        pos: "verb",
+        senses: [
+          {
+            glosses: ["causative of liegen: to lay; to put, place"],
+            tags: ["causative", "form-of", "transitive"],
+            form_of: [{ word: "liegen" }],
+          },
+          { glosses: ["to castrate"] },
+        ],
+      }),
+    );
+    assert.deepStrictEqual(translations(lay), [
+      ["causative of liegen: to lay; to put, place"],
+      ["to castrate"],
+    ]);
+    assert.deepStrictEqual(lay.formOf, []);
+  });
+
   it("still links an inflected form of a comparative to it", () => {
     const result = transformEntry(
       pl,
@@ -776,5 +800,44 @@ describe("transformEntry", () => {
       ["wymagany", "wymagana", "wymaganego", "wymaganej", "wymaganą"],
     );
     assert.notInclude([...(result.entry?.forms ?? [])], "wymaganaego");
+  });
+
+  it("declines German participles, which tables list undeclined", () => {
+    const result = transformEntry(
+      de,
+      entry({
+        word: "auslegen",
+        lang_code: "de",
+        pos: "verb",
+        forms: [
+          {
+            form: "ausgelegt",
+            tags: ["participle", "past"],
+            source: "conjugation",
+          },
+          {
+            form: "auslegend",
+            tags: ["participle", "present"],
+            source: "conjugation",
+          },
+          {
+            form: "legte aus",
+            tags: ["first-person", "preterite", "singular"],
+            source: "conjugation",
+          },
+        ],
+        senses: [{ glosses: ["to lay out"] }],
+      }),
+    );
+    const forms = [...(result.entry?.participleForms ?? [])];
+    assert.includeMembers(forms, [
+      "ausgelegte",
+      "ausgelegten",
+      "ausgelegtem",
+      "ausgelegter",
+      "ausgelegtes",
+      "auslegende",
+    ]);
+    assert.notInclude(forms, "legte ause");
   });
 });

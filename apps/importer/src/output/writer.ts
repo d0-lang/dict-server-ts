@@ -2,13 +2,14 @@ import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import { caseClass, lookupKey } from "@dict/core/lookupKey";
 import { FormSource, GRAMMAR_SOURCE_POS } from "@dict/core/schema";
 import type { GrammarEntry } from "../grammar.ts";
+import type { Degree } from "../transform/rules.ts";
 import type {
   DerivedSense,
   FormOfLink,
   ImportEntry,
 } from "../transform/transform.ts";
 import type { WriterContext } from "./passes/context.ts";
-import { settleDegreeEntries } from "./passes/degrees.ts";
+import { addDegreeForms, settleDegreeEntries } from "./passes/degrees.ts";
 import { copyDerivedMeanings } from "./passes/derived.ts";
 import { dropUnreachedEntries, replaceGrammarWords } from "./passes/grammar.ts";
 import {
@@ -16,6 +17,7 @@ import {
   followLinkChains,
   resolveFormOf,
 } from "./passes/links.ts";
+import { addParticipleForms } from "./passes/participles.ts";
 import { resolveSee } from "./passes/see.ts";
 import {
   addAbbreviations,
@@ -41,6 +43,10 @@ export type WriterCounts = {
   degreeMerged: number;
   /** comparative-only entries spelled like a plain form of their base, left to the base */
   degreeDropped: number;
+  /** irregular declined comparatives and superlatives that also reach their degree entry */
+  degreeForms: number;
+  /** declined participles indexed, where no other entry had the form */
+  participleForms: number;
   /** `see` targets that have an entry */
   seeLinks: number;
   /** entries from the language's grammar file */
@@ -128,6 +134,8 @@ export const makeWriter = (
     derivedBare: 0,
     degreeMerged: 0,
     degreeDropped: 0,
+    degreeForms: 0,
+    participleForms: 0,
     seeLinks: 0,
     grammarEntries: 0,
     grammarReplaced: 0,
@@ -139,10 +147,11 @@ export const makeWriter = (
   const byKey = new Map<string, EntryState>();
   const historicalEntries: Array<ImportEntry> = [];
   const verbalNouns: Array<{ form: string; entryId: number }> = [];
+  const participleForms: Array<{ form: string; entryId: number }> = [];
   /** entry id -> gloss -> its derived sense */
   const derivedByEntry = new Map<number, Map<string, DerivedSense>>();
   /** entry id -> forms its table tags comparative or superlative */
-  const degreeFormsByEntry = new Map<number, Set<string>>();
+  const degreeFormsByEntry = new Map<number, Map<string, Degree | undefined>>();
 
   /** word + pos + etymology -> the grammar of its last line that had any */
   const lastFeatures = new Map<string, string>();
@@ -243,10 +252,23 @@ export const makeWriter = (
     for (const form of entry.verbalNouns) {
       verbalNouns.push({ form, entryId: state.id });
     }
+    for (const form of entry.participleForms ?? []) {
+      participleForms.push({ form, entryId: state.id });
+    }
     if ((entry.degreeForms?.length ?? 0) > 0) {
-      const degree = degreeFormsByEntry.get(state.id) ?? new Set<string>();
-      for (const form of entry.degreeForms!) degree.add(form);
-      degreeFormsByEntry.set(state.id, degree);
+      const degrees =
+        degreeFormsByEntry.get(state.id) ??
+        new Map<string, Degree | undefined>();
+      for (const { form, degree } of entry.degreeForms!) {
+        // Lines of one word that disagree on the degree name neither.
+        degrees.set(
+          form,
+          degrees.has(form) && degrees.get(form) !== degree
+            ? undefined
+            : degree,
+        );
+      }
+      degreeFormsByEntry.set(state.id, degrees);
     }
     if (entry.derived.length > 0) {
       const senses = derivedByEntry.get(state.id) ?? new Map();
@@ -335,6 +357,7 @@ export const makeWriter = (
     optionalLetters,
     hasEntry,
     verbalNouns,
+    participleForms,
     derivedByEntry,
     degreeFormsByEntry,
   };
@@ -352,6 +375,9 @@ export const makeWriter = (
     resolveSee(ctx);
     const unresolved = countUnresolvedLinks(ctx);
     const added = formOfFallback ? resolveFormOf(ctx) : 0;
+    // After the form-of links, which add a table's forms to its base too.
+    addDegreeForms(ctx);
+    addParticipleForms(ctx);
     sqlite.run("DROP TABLE form_of_pending");
     // Then the steps that need every form in place.
     sqlite.transaction(() => {

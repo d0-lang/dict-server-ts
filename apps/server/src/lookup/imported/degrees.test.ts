@@ -170,4 +170,109 @@ describe("importWiktextract", () => {
         assert.strictEqual(stats.degreeDropped, 1);
       }).pipe(Effect.scoped),
   );
+
+  it.effect(
+    "gives declined comparatives and superlatives to their degree's entry",
+    () =>
+      Effect.gen(function* () {
+        const dir = yield* tempDir;
+        const input = join(dir, "de.jsonl");
+        const degreeOf = (word: string, degree: string, base: string) =>
+          JSON.stringify({
+            word,
+            pos: "adj",
+            lang_code: "de",
+            senses: [
+              {
+                glosses: [`${degree} degree of ${base}`],
+                tags: [degree, "form-of"],
+                form_of: [{ word: base }],
+              },
+            ],
+          });
+        yield* Effect.promise(() =>
+          writeFile(
+            input,
+            [
+              JSON.stringify({
+                word: "groß",
+                pos: "adj",
+                lang_code: "de",
+                senses: [{ glosses: ["big"] }],
+                forms: [
+                  {
+                    form: "große",
+                    tags: ["strong", "nominative", "feminine", "singular"],
+                    source: "declension",
+                  },
+                  { form: "größer", tags: ["comparative"] },
+                  {
+                    form: "größere",
+                    tags: [
+                      "comparative",
+                      "strong",
+                      "nominative",
+                      "feminine",
+                      "singular",
+                    ],
+                    source: "declension",
+                  },
+                  {
+                    form: "größte",
+                    tags: ["superlative", "weak", "nominative", "singular"],
+                    source: "declension",
+                  },
+                  // tagged with both degrees: neither entry gets it
+                  {
+                    form: "größtere",
+                    tags: ["comparative"],
+                    source: "declension",
+                  },
+                  {
+                    form: "größtere",
+                    tags: ["superlative"],
+                    source: "declension",
+                  },
+                ],
+              }),
+              degreeOf("größer", "comparative", "groß"),
+              degreeOf("größten", "superlative", "groß"),
+              JSON.stringify({
+                word: "schnell",
+                pos: "adj",
+                lang_code: "de",
+                senses: [{ glosses: ["fast"] }],
+                forms: [
+                  {
+                    form: "schnellste",
+                    tags: ["superlative", "weak", "nominative", "singular"],
+                    source: "declension",
+                  },
+                ],
+              }),
+              degreeOf("schnellsten", "superlative", "schnell"),
+            ].join("\n"),
+          ),
+        );
+        const out = join(dir, "de_en.sqlite");
+        const stats = yield* importWiktextract({
+          lang: "de",
+          input,
+          out,
+          grammar: [],
+        });
+        const db = yield* openDictionary(out);
+        const lemmas = (word: string) =>
+          findEntriesByForm(db, word).map((e) => e.lemma);
+        // irregular: the base, then the degree's entry
+        assert.deepStrictEqual(lemmas("größere"), ["groß", "größer"]);
+        assert.deepStrictEqual(lemmas("größte"), ["groß", "größten"]);
+        // regular (the base plus an ending): the base alone
+        assert.deepStrictEqual(lemmas("schnellste"), ["schnell"]);
+        // plain forms, and forms with both degrees, stay with the base
+        assert.deepStrictEqual(lemmas("große"), ["groß"]);
+        assert.deepStrictEqual(lemmas("größtere"), ["groß"]);
+        assert.strictEqual(stats.degreeForms, 2);
+      }).pipe(Effect.scoped),
+  );
 });

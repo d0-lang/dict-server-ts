@@ -12,7 +12,15 @@ import {
   type LookupResult,
 } from "./common/entries.ts";
 import { findEntriesWithCompounds } from "./features/compounds/lookup.ts";
-import { type ContextHit, matchStrings, tokenize } from "./common/tokenize.ts";
+import {
+  capitalisedInside,
+  capitalisedNext,
+  preceded,
+  type ContextHit,
+  matchStrings,
+  positionsOf,
+  tokenize,
+} from "./common/tokenize.ts";
 import { articleLookup, presentResult } from "./headword.ts";
 
 /**
@@ -48,8 +56,22 @@ const contextLookup = (
   context?: string,
   at?: number,
 ): LookupResult => {
-  const base = findEntriesWithCompounds(db, word, compoundRules(language));
-  if (context === undefined || context.trim() === "") return base;
+  if (context === undefined || context.trim() === "") {
+    return findEntriesWithCompounds(db, word, compoundRules(language));
+  }
+  // The features' token indexes are into this same tokenization.
+  const tokens = tokenize(context, language.code);
+  const clicked = positionsOf(tokens, word, language.code, { context, at });
+  const capitalInside =
+    language.context.capitalNouns &&
+    capitalisedInside(context, tokens, clicked);
+  const base = findEntriesWithCompounds(db, word, compoundRules(language), {
+    capitalInside,
+    capitalNext: capitalInside && capitalisedNext(tokens, clicked),
+    nominalized:
+      capitalInside &&
+      preceded(tokens, clicked, new Set(language.context.nominalizers)),
+  });
 
   const among = (hits: ReadonlyArray<ContextHit>) => (hit: ContextHit) =>
     hits.some((other) => other.id === hit.id);
@@ -75,8 +97,6 @@ const contextLookup = (
     ...hyphenHits,
     ...separableHits,
   ];
-  // The features' token indexes are into this same tokenization.
-  const tokens = tokenize(context, language.code);
   const seen = new Set<string>();
   const first = dropLiteralPointers(
     loadEntries(

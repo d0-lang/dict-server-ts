@@ -45,8 +45,10 @@ export type LanguageRules = {
   readonly stressedLemmas?: boolean;
   /** Declined forms of adjectival participles, which tables list in the nominative only. */
   readonly participleDeclension?: {
+    readonly tags: ReadonlyArray<string>;
     readonly ending: string;
     readonly endings: ReadonlyArray<string>;
+    readonly onlyNew: boolean;
   };
   /** Reflexive senses become an entry with the particle before or after the lemma (`bawić się`). */
   readonly reflexive?: "before" | "after";

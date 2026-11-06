@@ -71,6 +71,13 @@
         "participleDeclension": {
           "type": "object",
           "properties": {
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "The tags a table's participle row has, all of them (Polish: the masculine singular adjectival participle; German: any participle)."
+            },
             "ending": {
               "type": "string"
             },
@@ -79,6 +86,10 @@
               "items": {
                 "type": "string"
               }
+            },
+            "onlyNew": {
+              "type": "boolean",
+              "description": "Add a declined form only where no other entry has it, so a participle Wiktionary lists as an adjective keeps its forms (German `bestehende` stays `bestehend`'s). Off where those adjectives carry only figurative senses and the verb is needed (Polish `zniszczony` \"beat-up\" for `zniszczonych` \"destroyed\")."
             }
           },
           "required": [
@@ -86,7 +97,7 @@
             "endings"
           ],
           "additionalProperties": false,
-          "description": "Adjectival participles decline like adjectives, but verb tables list only their nominatives (`wymagany`). A masculine singular participle that ends in `ending` also gets its stem with each of `endings` as forms of the verb (`wymaganego`, `wymaganej`)."
+          "description": "Adjectival participles decline like adjectives, but verb tables list only one form (`wymagany`, `ausgelegt`). A participle row with all of `tags` that ends in `ending` also gets its stem with each of `endings` as forms of the verb (`wymaganego`, `wymaganej`; `ausgelegte`, `ausgelegten`)."
         },
         "stressedLemmas": {
           "type": "boolean",
@@ -141,6 +152,17 @@
             "type": "string"
           },
           "description": "Words that make a verb reflexive (`się` in `bawić się`). In a verb phrase they may stand on either side of the verb, apart from it, though they are no content word (`Dobrze się bawię`)."
+        },
+        "capitalNouns": {
+          "type": "boolean",
+          "description": "Nouns are written with a capital letter (German), so a capitalised word of two or more letters inside a sentence ranks entries with a capitalised lemma first (`In wenigen Tagen`: `der Tag` before `tagen`)."
+        },
+        "nominalizers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "With `capitalNouns`: words after which a capitalised infinitive is likely the verb used as a noun (`zum Binden`, `das Tragen`), so the verb keeps its place among the capitalised lemmas."
         },
         "abbreviationLeads": {
           "type": "array",

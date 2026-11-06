@@ -48,8 +48,13 @@ export const findEntriesWithCompounds = (
   db: DictionaryDb,
   word: string,
   rules: CompoundRules | undefined,
+  capitals: {
+    readonly capitalInside?: boolean;
+    readonly capitalNext?: boolean;
+    readonly nominalized?: boolean;
+  } = {},
 ): LookupResult => {
-  const direct = findEntriesByForm(db, word);
+  const direct = findEntriesByForm(db, word, capitals);
   if (direct.length > 0 || rules === undefined) return { entries: direct };
   // Tables don't list a name's genitive (`Dortmunds`), which would split
   // into nonsense (`Dort` + `Mund`).

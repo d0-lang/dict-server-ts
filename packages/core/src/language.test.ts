@@ -26,6 +26,8 @@ describe("language records", () => {
       clauseConjunctions: [],
       abbreviationLeads: [],
       reflexiveParticles: [],
+      capitalNouns: false,
+      nominalizers: [],
     });
     assert.isUndefined(language.compounds);
     assert.deepStrictEqual(language.headword, {
