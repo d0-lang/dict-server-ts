@@ -188,6 +188,8 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     historicalEntries: writer.counts.historicalEntries,
     derivedCopied: writer.counts.derivedCopied,
     derivedBare: writer.counts.derivedBare,
+    degreeMerged: writer.counts.degreeMerged,
+    degreeDropped: writer.counts.degreeDropped,
     seeLinks: writer.counts.seeLinks,
     grammarEntries: writer.counts.grammarEntries,
     grammarReplaced: writer.counts.grammarReplaced,

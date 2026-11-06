@@ -1,3 +1,4 @@
+import { GRAMMAR_SOURCE_POS } from "../importer/grammar.ts";
 import type { DictionaryDb } from "./DictionaryDb.ts";
 import { caseClass, lookupKey } from "./lookupKey.ts";
 import { CaseClass, FormSource, type UdPos } from "./schema.ts";
@@ -20,6 +21,8 @@ export type Token = {
   readonly breakBefore: boolean;
   /** Only a hyphen stands between this word and the one before (`что-нибудь`). */
   readonly joinedBefore: boolean;
+  /** Only a period, and at most one space, stands between this word and the one before (`т.д.`, `z. B.`). */
+  readonly dottedBefore: boolean;
   /** Only a comma stands between this word and the one before. */
   readonly commaBefore: boolean;
 };
@@ -29,6 +32,17 @@ const CLAUSE_BREAK = /[.!?;:,()[\]{}"„“”«»‹›–—]/u;
 
 /** A hyphen joining two words with no space, which the segmenter splits apart. */
 const JOINING_HYPHEN = /^[-\u2010\u2011]$/u;
+
+/** A period inside an abbreviation (`т.д.`, `z. B.`): with no space, or one. */
+const ABBREVIATION_PERIOD = /^\. ?$/u;
+
+/**
+ * A period between letters, where browsers' word segmenters split a word and
+ * the server's (Bun's) doesn't: Chromium sends `т` for a click on `т.д.`, and
+ * `lenta` for `lenta.ru`. Splitting here too keeps the context's words the
+ * client's words.
+ */
+const INNER_PERIOD = /(?<=\p{L})\.(?=\p{L})/u;
 
 const segmenters = new Map<string, Intl.Segmenter>();
 const segmenterFor = (locale: string): Intl.Segmenter => {
@@ -48,12 +62,24 @@ export const tokenize = (
   const tokens: Array<Token> = [];
   let clause = 0;
   let between = "";
-  for (const { segment, isWordLike } of segmenterFor(locale).segment(text)) {
+  // A period inside a word (`comp.os.minix`, `т.д`) splits it, but ends no clause:
+  // `kündigte es in comp.os.minix an` keeps its particle.
+  const segments = [...segmenterFor(locale).segment(text)].flatMap(({ segment, isWordLike }) =>
+    isWordLike && INNER_PERIOD.test(segment)
+      ? segment.split(INNER_PERIOD).flatMap((piece, i) => [
+          ...(i > 0 ? [{ segment: ".", isWordLike: false, inner: true }] : []),
+          { segment: piece, isWordLike: true, inner: false },
+        ])
+      : [{ segment, isWordLike: isWordLike === true, inner: false }],
+  );
+  let innerOnly = true;
+  for (const { segment, isWordLike, inner } of segments) {
     if (!isWordLike) {
       between += segment;
+      innerOnly &&= inner;
       continue;
     }
-    const breakBefore = tokens.length > 0 && CLAUSE_BREAK.test(between);
+    const breakBefore = tokens.length > 0 && !(innerOnly && between !== "") && CLAUSE_BREAK.test(between);
     if (breakBefore) clause++;
     tokens.push({
       key: lookupKey(segment),
@@ -61,9 +87,11 @@ export const tokenize = (
       clause,
       breakBefore,
       joinedBefore: tokens.length > 0 && JOINING_HYPHEN.test(between),
+      dottedBefore: tokens.length > 0 && ABBREVIATION_PERIOD.test(between),
       commaBefore: tokens.length > 0 && between.trim() === ",",
     });
     between = "";
+    innerOnly = true;
   }
   return tokens;
 };
@@ -711,8 +739,9 @@ const spellings = (
  * the clicked part (`кого-нибудь` for `кто-нибудь`), as written or with its
  * parts as lemmas (`spellings`). With none, the clicked part's hyphen affix
  * (`-то`, `-ка`, `экс-`, see `hyphenAffixes`), so `сказал-то` still explains
- * `то`, but only beside dictionary words: `-е` in `1990-е` or `environment-е`
- * is an ending.
+ * `то`, but only beside dictionary words: `-е` in `environment-е` is an ending.
+ * After a number, the part is an ending the grammar file explains (`-е` in
+ * `1990-е`, `-го` in `3-го`), if it lists one.
  */
 const hyphenWordIds = (
   db: DictionaryDb,
@@ -733,6 +762,10 @@ const hyphenWordIds = (
       }
     }
   }
+  // An ending written after a number (`3-го`, `1990-х`): the grammar file's ending.
+  if (clicked > first && /^\p{N}+$/u.test(tokens[clicked - 1]!.key)) {
+    return grammarIds(db, `-${tokens[clicked]!.key}`);
+  }
   const others = tokens
     .slice(first, last + 1)
     .filter((_, i) => first + i !== clicked);
@@ -744,7 +777,11 @@ const hyphenWordIds = (
     ...(clicked < last ? [`${key}-`] : []),
   ]
     .filter((affix) => affixes.has(affix))
-    .flatMap((affix) => rows(affix).map((row) => row.id));
+    .flatMap((affix) => {
+      // The grammar file's endings are for numbers (`3-ой`), not for `о-ой`.
+      const endings = new Set(grammarIds(db, affix));
+      return rows(affix).flatMap((row) => (endings.has(row.id) ? [] : [row.id]));
+    });
 };
 
 /**
@@ -784,6 +821,87 @@ export const hyphenEntryIds = (
     const here = hyphenWordIds(db, rows, tokens, first, last, clicked);
     if (here.length === 0) return [];
     ids.push(...here);
+  }
+  return [...new Set(ids)];
+};
+
+/** Entry ids of the grammar file's lines for `form` (`-го`), and no others. */
+const grammarIds = (db: DictionaryDb, form: string): ReadonlyArray<number> =>
+  db.$client
+    .query<{ id: number }, [string]>(
+      `SELECT e.id AS id FROM forms f JOIN entries e ON e.id = f.entry_id
+       WHERE f.form = ?1 AND e.source_pos = '${GRAMMAR_SOURCE_POS}' ORDER BY e.id`,
+    )
+    .all(form)
+    .map((row) => row.id);
+
+/** Words that may stand before an abbreviation as part of it (`и т. д.`, `и т. п.`). */
+const ABBREVIATION_LEADS: ReadonlySet<string> = new Set(["и"]);
+
+/**
+ * Ways to write the dotted run of `parts` as a form, longest first: with the
+ * word before it when that can belong to it (`и т. д.`), then alone; spaced
+ * and unspaced (both are indexed), with the final period and without.
+ */
+const abbreviationSpellings = (
+  parts: ReadonlyArray<string>,
+  lead: string | undefined,
+): ReadonlyArray<string> =>
+  [...(lead !== undefined ? [`${lead} `] : []), ""].flatMap((before) =>
+    [". ", "."].flatMap((joiner) => {
+      const run = parts.join(joiner);
+      return [`${before}${run}.`, `${before}${run}`];
+    }),
+  );
+
+/**
+ * Entry ids of the abbreviation the context word `word` is a piece of, in
+ * any language: `т` or `д` in `т.д.` (browsers send the piece alone),
+ * `z` in `z.B.`. The pieces are the run of words joined by a period and at
+ * most one space. As with hyphenated words, the client doesn't say which
+ * occurrence was clicked, so every occurrence must be a piece of an
+ * abbreviation the dictionary has.
+ */
+export const abbreviationEntryIds = (
+  db: DictionaryDb,
+  word: string,
+  context: string,
+  locale: string,
+): ReadonlyArray<number> => {
+  const tokens = tokenize(context, locale);
+  const ids: Array<number> = [];
+  for (const clicked of positionsOf(tokens, word, locale)) {
+    let first = clicked;
+    let last = clicked;
+    while (tokens[first]!.dottedBefore) first--;
+    while (tokens[last + 1]?.dottedBefore === true) last++;
+    if (first === last) return [];
+    // The longest run around the clicked piece that is a form: a period and a
+    // space also end a sentence, so `т.д. лежали` holds `т. д.`.
+    let found: ReadonlyArray<FormRow> | undefined;
+    for (let length = last - first + 1; length >= 2 && found === undefined; length--) {
+      for (let start = Math.max(first, clicked - length + 1); start <= Math.min(clicked, last - length + 1); start++) {
+        const parts = tokens.slice(start, start + length).map((token) => token.key);
+        const before = tokens[start - 1];
+        const lead =
+          before !== undefined && !tokens[start]!.dottedBefore && !tokens[start]!.breakBefore && ABBREVIATION_LEADS.has(before.key)
+            ? before.key
+            : undefined;
+        found = abbreviationSpellings(parts, lead)
+          .map((spelling) => formRows(db, lookupKey(spelling)))
+          .find((rows) => rows.length > 0);
+        if (found !== undefined) break;
+      }
+    }
+    if (found === undefined) return [];
+    // One entry per spelling written with or without spaces (`и т. д.`, `и т.д.`).
+    const spellings = new Set<string>();
+    for (const row of found) {
+      const spelling = lookupKey(row.lemma).replace(/\s+/g, "");
+      if (spellings.has(spelling)) continue;
+      spellings.add(spelling);
+      ids.push(row.id);
+    }
   }
   return [...new Set(ids)];
 };

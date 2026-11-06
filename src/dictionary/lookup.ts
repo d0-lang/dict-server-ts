@@ -1,5 +1,6 @@
 import { compoundRules } from "./compounds.ts";
 import {
+  abbreviationEntryIds,
   hyphenEntryIds,
   phraseEntryIds,
   separableEntryIds,
@@ -16,14 +17,16 @@ import {
 /** Languages whose verbs leave a particle at the end of the clause. */
 const SEPARABLE: ReadonlySet<string> = new Set(["de"]);
 
+/** Entries that read the same: same lemma (spacing aside: `и т. д.`, `и т.д.`), part of speech and senses. */
 const entryId = (entry: LookupEntry) =>
-  JSON.stringify([entry.lemma.toLowerCase(), entry.pos, entry.senses]);
+  JSON.stringify([entry.lemma.toLowerCase().replace(/\s+/g, ""), entry.pos, entry.senses]);
 
 /**
  * A `/v1/lookup` result. With `context`, the entries that match it come
- * first: the phrases the word is part of there, then the hyphen-joined word
- * it is part of (`что` in `что-нибудь`), then the separable verb it belongs
- * to, then the word's own entries (and their segments, re-indexed).
+ * first: the phrases the word is part of there, then the abbreviation it is a
+ * piece of (`т` in `т.д.`), then the hyphen-joined word it is part of (`что`
+ * in `что-нибудь`), then the separable verb it belongs to, then the word's
+ * own entries (and their segments, re-indexed).
  * An own entry already shown that way is dropped.
  */
 export const lookupWord = (
@@ -37,17 +40,26 @@ export const lookupWord = (
   if (context === undefined || context.trim() === "") return base;
 
   const phraseIds = phraseEntryIds(db, word, context, lang);
-  const hyphenIds = hyphenEntryIds(db, word, context, lang).filter(
+  const abbreviationIds = abbreviationEntryIds(db, word, context, lang).filter(
     (id) => !phraseIds.includes(id),
+  );
+  const hyphenIds = hyphenEntryIds(db, word, context, lang).filter(
+    (id) => !phraseIds.includes(id) && !abbreviationIds.includes(id),
   );
   const separableIds = SEPARABLE.has(lang)
     ? separableEntryIds(db, word, context, lang).filter(
         (id) => !phraseIds.includes(id),
       )
     : [];
+  const seen = new Set<string>();
   const first = dropLiteralPointers(
-    loadEntries(db, [...phraseIds, ...hyphenIds, ...separableIds]),
-  );
+    loadEntries(db, [...phraseIds, ...abbreviationIds, ...hyphenIds, ...separableIds]),
+  ).filter((entry) => {
+    const id = entryId(entry);
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
   if (first.length === 0) return base;
 
   const shown = new Set(first.map(entryId));

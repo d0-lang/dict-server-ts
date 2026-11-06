@@ -8,6 +8,10 @@
 # Write ё where the word has it: the importer also indexes the е spelling.
 # A phrase with its own entry (так себе, тем более) is left to that entry,
 # which lookups show first when the sentence contains it.
+# A line with a content part of speech (здесь ADV) replaces Wiktionary's entry
+# of that part of speech for the word; X lines (endings) only add.
+# Irregular forms a reader can't connect to their base get lines of their own
+# (был "was", будет "will be"): the protocol has no inflection tables.
 # See src/importer/grammar.ts.
 
 ## Personal pronouns
@@ -155,7 +159,7 @@
 
 ## Interrogatives and relatives
 кто	PRON	who | whoever, anyone who ("кто хочет", whoever wants) | (colloquial) someone ("если кто придёт", if someone comes)
-кого́	PRON	whom, who (genitive or accusative: "кого ты видел?", who did you see?)
+кого́	PRON	whom, who (genitive or accusative: "кого ты видел?", who did you see?) | anyone (with ни or не: "ни у кого нет", nobody has)
 кому́	PRON	to whom, who (dative: "кому ты звонил?", who did you call?)
 кем	PRON	(by, with) whom (instrumental: "с кем?", with whom?; "кем ты работаешь?", what do you do for a living?)
 ком	PRON	whom (prepositional: "о ком?", about whom?)
@@ -163,7 +167,7 @@
 что	SCONJ	that ("я знаю, что ...", I know that ...)
 чего́	PRON	what (genitive: "чего ты хочешь?", what do you want?; "для чего?", what for?) | (colloquial) why ("чего ты молчишь?", why are you silent?)
 чему́	PRON	(to) what (dative: "к чему?", what for?; "чему ты рад?", what are you happy about?)
-чем	PRON	(with) what (instrumental: "чем ты занят?", what are you doing?; "с чем?", with what?)
+чем	PRON	what (instrumental: "чем ты занят?", what are you doing?; "с чем?", with what?; "перед чем", before what)
 чем	SCONJ	than ("лучше, чем ...", better than ...) | "чем ..., тем ...", the more ..., the more ... | rather than ("чем ждать", rather than wait)
 чём	PRON	what (prepositional: "о чём?", about what?; "в чём дело?", what's the matter?)
 кото́рый	PRON	which, who, that (relative; masculine; nominative, or accusative of a thing) | which (in questions: "который час?", what time is it?)
@@ -199,7 +203,9 @@
 само́	PRON	itself (stresses the thing: "дверь открылась сама", the door opened by itself)
 са́ми	PRON	themselves, ourselves, yourselves (stresses the people: "мы сами", we ourselves)
 самого́	PRON	himself, itself (genitive or accusative) | the very ("с самого утра", since early morning)
+са́мой	DET	the most (feminine genitive, dative, instrumental or prepositional of самый: "самой красивой", the most beautiful) | the very ("с самой весны", since the very spring)
 само́й	PRON	herself (genitive, dative, instrumental or prepositional)
+вся́кие	DET	all sorts of, various ("всякие вещи", all sorts of things) | any, every
 самому́	PRON	himself, to himself (dative)
 сами́м	PRON	himself (instrumental); themselves (dative)
 сами́х	PRON	themselves (genitive, accusative or prepositional)
@@ -216,7 +222,7 @@
 # Each sense names the case the noun after it takes.
 в	ADP	in, at (+ prepositional, where: "в доме", in the house; "в мае", in May) | into, to (+ accusative, where to: "в Москву", to Moscow) | at (+ accusative, time: "в пять часов", at five o'clock; "в среду", on Wednesday)
 во	ADP	in, into (form of в before some consonant clusters: "во дворе", in the yard; "во время", during)
-на	ADP	on, at (+ prepositional, where: "на столе", on the table; "на работе", at work) | onto, to (+ accusative, where to: "на юг", to the south) | for (+ accusative, a time or purpose: "на неделю", for a week)
+на	ADP	on, at (+ prepositional, where: "на столе", on the table; "на работе", at work) | onto, to (+ accusative, where to: "на юг", to the south) | for (+ accusative, a time or purpose: "на неделю", for a week) | at, for, on (+ accusative, after verbs: "смотреть на", look at; "надеяться на", hope for)
 с	ADP	with (+ instrumental: "с другом", with a friend) | from, off, since (+ genitive: "с работы", from work; "с утра", since the morning) | about (+ accusative, size: "с километр", about a kilometre)
 со	ADP	with, from (form of с before some consonant clusters: "со мной", with me)
 к	ADP	to, towards (+ dative: "к врачу", to the doctor) | by (+ dative, a time: "к пяти", by five)
@@ -226,15 +232,15 @@
 обо	ADP	about (form of о before мне, всём, всех: "обо мне", about me)
 у	ADP	at, by (+ genitive: "у окна", by the window; "у друга", at a friend's) | has (+ genitive: "у меня есть", I have; "у него нет", he hasn't got)
 из	ADP	from, out of (+ genitive: "из дома", out of the house; "из России", from Russia) | of (+ genitive, made of or one of: "из дерева", of wood; "один из нас", one of us)
-от	ADP	from (+ genitive: "от друга", from a friend; "далеко от", far from) | against, for (+ genitive, protection or cure: "лекарство от кашля", cough medicine) | because of (+ genitive: "от страха", from fear)
+от	ADP	from (+ genitive: "от друга", from a friend; "далеко от", far from) | of, to (+ genitive, with words of place: "сбоку от", beside; "справа от", to the right of) | against, for (+ genitive, protection or cure: "лекарство от кашля", cough medicine) | because of (+ genitive: "от страха", from fear)
 до	ADP	until, till, before (+ genitive: "до утра", until morning; "до войны", before the war) | to, as far as (+ genitive: "до центра", to the centre)
-по	ADP	along, around, across (+ dative: "по улице", along the street; "по городу", around the city) | by, on (+ dative, means or channel: "по телефону", on the phone) | in, on (+ dative, subject: "специалист по истории", a history specialist) | each, apiece (with numbers: "по два", two each)
+по	ADP	along, around, across (+ dative: "по улице", along the street; "по городу", around the city) | by, on (+ dative, means or channel: "по телефону", on the phone) | according to (+ dative: "по плану", according to the plan; "по словам", according to; "по данным", according to the data) | in, on (+ dative, subject: "специалист по истории", a history specialist) | each, apiece (with numbers: "по два", two each)
 за	ADP	behind, beyond (+ instrumental, where; + accusative, where to: "за домом", behind the house) | for (+ accusative: "спасибо за помощь", thanks for the help) | in, within (+ accusative, time taken: "за час", in an hour) | to get, for (+ instrumental: "пошёл за хлебом", went for bread)
 под	ADP	under, below (+ instrumental, where; + accusative, where to: "под столом", under the table) | near (+ instrumental: "под Москвой", near Moscow) | towards (+ accusative, time: "под утро", towards morning)
 над	ADP	over, above (+ instrumental: "над городом", over the city) | on (+ instrumental, working on: "работать над проектом", work on a project)
 пе́ред	ADP	in front of (+ instrumental: "перед домом", in front of the house) | before (+ instrumental, time: "перед обедом", before lunch)
 при	ADP	in the presence of, by (+ prepositional: "при всех", in front of everyone) | under, during, in the time of (+ prepositional: "при Петре", under Peter the Great) | with, given (+ prepositional: "при желании", if you want)
-без	ADP	without (+ genitive: "без сахара", without sugar) | to (+ genitive, telling the time: "без пяти три", five to three)
+без	ADP	without (+ genitive: "без сахара", without sugar) | less, minus (+ genitive, in amounts: "пять лет без месяца", five years less a month) | to (+ genitive, telling the time: "без пяти три", five to three)
 для	ADP	for (+ genitive: "для тебя", for you; "для работы", for work)
 че́рез	ADP	through, across (+ accusative: "через лес", through the forest) | in, after (+ accusative, time: "через час", in an hour) | via, by way of (+ accusative)
 про	ADP	about (+ accusative, colloquial: "фильм про войну", a film about the war)
@@ -242,3 +248,78 @@
 ра́ди	ADP	for the sake of (+ genitive: "ради детей", for the children's sake)
 кро́ме	ADP	except, apart from (+ genitive: "все, кроме него", everyone except him) | besides, in addition to (+ genitive)
 среди́	ADP	among, in the middle of (+ genitive: "среди друзей", among friends)
+
+## Forms of быть and мочь
+был	AUX	was (past of быть, masculine: "он был дома", he was at home; "был построен", was built)
+была́	AUX	was (past of быть, feminine: "она была дома", she was at home; "была создана", was created)
+бы́ло	AUX	was, it was (past of быть, neuter: "там было тихо", it was quiet there; "было построено", was built) | there was, there were ("было много людей", there were many people)
+бы́ло	PART	nearly, was about to (with a past verb: "я было начал", I was about to start)
+бы́ли	AUX	were (past of быть, plural: "мы были дома", we were at home; "были построены", were built)
+бу́ду	AUX	I will be | I will (with an infinitive: "я буду читать", I will read)
+бу́дешь	AUX	you will be | you will (with an infinitive: "будешь читать", you will read)
+бу́дет	AUX	will be ("завтра будет дождь", it will rain tomorrow) | will (with an infinitive: "он будет работать", he will work) | there will be | be (with пусть: "пусть будет так", let it be so; "пусть он будет царём", let him be king)
+бу́дем	AUX	we will be | we will (with an infinitive: "будем работать", we will work) | let's ("будем надеяться", let's hope)
+бу́дете	AUX	you will be | you will (with an infinitive: "будете работать", you will work)
+бу́дут	AUX	they will be | they will (with an infinitive: "будут работать", they will work; "будут построены", will be built)
+мог	AUX	could, was able to (past of мочь, masculine: "он не мог спать", he couldn't sleep) | could, might (with бы: "мог бы", could, might)
+могла́	AUX	could, was able to (past of мочь, feminine)
+могло́	AUX	could (past of мочь, neuter: "могло быть хуже", it could have been worse)
+могли́	AUX	could, were able to (past of мочь, plural)
+
+## Adverbs with a sense Wiktionary lacks
+здесь	ADV	here | in this case, in this respect ("здесь важно другое", what matters here is something else)
+давно́	ADV	long ago | for a long time (with a present verb: "давно живёт здесь", has lived here for a long time)
+во́все	ADV	at all (with не: "вовсе не", not at all) | even, outright ("и вовсе", and even)
+
+## Abbreviations
+млн.	NUM	million (abbreviation of миллион: "5 млн", 5 million)
+тыс.	NUM	thousand (abbreviation of тысяча: "23 тыс. км", 23 thousand km)
+трлн.	NUM	trillion (abbreviation of триллион)
+
+## Endings written after a number (3-й, 1990-х)
+-й	X	-th, ordinal ending after a number (masculine: "99-й год", the 99th year)
+-я	X	-th, ordinal ending after a number (feminine: "3-я", third)
+-е	X	-th, ordinal ending after a number (neuter: "3-е место", third place) | -s, a decade ("1990-е", the 1990s)
+-ый	X	-th, ordinal ending after a number (masculine: "3-ый", third)
+-ой	X	-th, ordinal ending after a number (feminine genitive, dative, instrumental or prepositional: "3-ой", of the third)
+-го	X	-th, ordinal ending after a number (genitive: "3-го тура", of the third round; "5-го мая", on the 5th of May)
+-му	X	-th, ordinal ending after a number (dative: "к 3-му", by the third)
+-м	X	-th, ordinal ending after a number (instrumental or prepositional: "в 3-м туре", in the third round; "в 1990-м", in 1990)
+-ю	X	-th, ordinal ending after a number (feminine accusative: "на 3-ю", onto the third)
+-х	X	ending after a number, plural (genitive or prepositional: "1990-х", of the 1990s; "в 1990-х", in the 1990s)
+-ми	X	ending after a number, plural (instrumental: "1990-ми", the 1990s)
+
+## Set phrases English Wiktionary lacks (hand patches; the context rules match them like any phrase)
+не то́лько	CCONJ	not only ("не только ..., но и ...", not only ..., but also ...)
+в при́нципе	ADV	in principle, basically, generally speaking
+за счёт	ADP	at the expense of, thanks to, by means of (+ genitive: "за счёт экономии", thanks to savings)
+в отли́чие от	ADP	unlike, in contrast to (+ genitive: "в отличие от брата", unlike his brother)
+в зави́симости от	ADP	depending on (+ genitive)
+как ми́нимум	ADV	at least
+как ма́ксимум	ADV	at most
+по слова́м	ADP	according to (+ genitive: "по словам врача", according to the doctor)
+по мне́нию	ADP	in the opinion of, according to (+ genitive: "по мнению экспертов", in the experts' opinion)
+по фа́кту	ADV	in fact, actually (colloquial) | on, upon (+ genitive: "по факту оплаты", upon payment)
+с друго́й стороны́	ADV	on the other hand
+для того́ что́бы	SCONJ	in order to, so that
+из-за того́ что	SCONJ	because, due to the fact that
+и без того́	ADV	already, as it is ("и без того сложно", hard enough as it is)
+не ме́нее	ADV	at least, no less than ("не менее десяти", at least ten)
+не ме́ньше	ADV	at least, no fewer than
+под руко́й	ADV	at hand, within reach
+под ви́дом	ADP	under the guise of, disguised as (+ genitive)
+на ба́зе	ADP	based on, at, on the basis of (+ genitive: "на базе университета", at the university)
+на сего́дня	ADV	for today | as of today, at present
+кста́ти говоря́	ADV	by the way, incidentally
+куда́ там	INTJ	no way!, far from it!
+по плечу́	ADV	within one's ability, manageable ("мне это по плечу", I can manage it)
+в о́ба	ADV	closely, sharply (with смотреть, глядеть: "смотреть в оба", to keep one's eyes open)
+речь идёт о	X	it's about, the matter concerns ("речь идёт о деньгах", it's about money)
+речь шла о	X	it was about, the matter concerned
+хрен его́ зна́ет	INTJ	who knows, no idea (vulgar)
+представля́ть собо́й	VERB	to be, to constitute ("это представляет собой ...", this is ...)
+включа́ть в себя́	VERB	to include, to comprise
+получи́ть распростране́ние	VERB	to become widespread, to spread
+вы́йти в фина́л	VERB	to reach the final
+попа́сть под маши́ну	VERB	to be hit by a car
+встать на свои́ места́	VERB	to fall into place

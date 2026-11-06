@@ -28,7 +28,9 @@ export type GrammarEntry = {
  * Parts of speech the file owns for the words it lists: Wiktionary's entries
  * with these are dropped for those words, so `ihr` no longer reaches `sein`
  * through the possessive table. Nouns, verbs and other content words stay
- * (`sein` the verb, `je` "eats").
+ * (`sein` the verb, `je` "eats"), unless the file lists the word with that
+ * part of speech too: then its line replaces Wiktionary's (`здесь ADV`, for a
+ * sense Wiktionary lacks). `X` lines, such as endings, only add.
  */
 export const GRAMMAR_POS: ReadonlySet<UdPos> = new Set([
   "DET",

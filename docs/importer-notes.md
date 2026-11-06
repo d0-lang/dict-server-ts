@@ -44,7 +44,7 @@ Findings, not decisions. 1,000 items judged by Haiku at medium effort (`eval/out
 
 ## Lookup eval, first run (2026-11-02)
 
-Findings, not decisions. See `eval/README.md`. Haiku judged 200 words in context from the `dict-corpus` repo, and the verified points were checked against the dump: 79.5% Clear, 23 Buried, 14 Misleading, 4 No help.
+Findings, not decisions. See `eval/README.md` in the corpus repo. Haiku judged 200 words in context from the `dict-corpus` repo, and the verified points were checked against the dump: 79.5% Clear, 23 Buried, 14 Misleading, 4 No help.
 
 - Fixed phrases cause half of the Misleading and No help results (9 of 18). The entries usually exist (`po prostu`, `od razu`, `w miarę`, `przede wszystkim`) but a click only sends one word, so the 8,642 multi-word entries are mostly unreachable. Verb phrases also have no inflected forms: `wejść w życie` exists, `wszedł w życie` doesn't.
 - Order and noise cause 21 of the 23 Buried results, e.g. `mam` -> `mama`, `rządem` -> row, then government.

@@ -82,6 +82,8 @@ const german = dictionary([
   ["Sie", "PRON"],
   ["eigentlich", "ADV"],
   ["wie heißen Sie", "X", [], ["what is your name?"], "phrase"],
+  ["z. B.", "ADV", ["z.B."], ["for example"]],
+  ["Obst", "NOUN"],
 ]);
 
 const polish = dictionary([
@@ -176,6 +178,21 @@ const russian = dictionary([
   ["ранг", "NOUN"],
   ["восток", "NOUN"],
   ["северо-восток", "NOUN"],
+  ["го", "NOUN", [], ["go (board game)"]],
+  ["-го", "X", [], ["-th (after a number)"], "grammar"],
+  ["тур", "NOUN", ["тура"]],
+  ["и", "CCONJ"],
+  ["т", "NOUN", [], ["ton"]],
+  ["д", "NOUN"],
+  ["и т. д.", "X", ["и т.д."], ["etc."]],
+  ["и т.д.", "X", ["и т. д."], ["etc."]],
+  ["о", "INTJ"],
+  ["ой", "INTJ", [], ["oh!"]],
+  ["-ой", "X", [], ["-th (after a number)"], "grammar"],
+  // `-ой` ends enough hyphenated forms to count as a hyphen affix
+  ["ай-ой", "INTJ"],
+  ["эй-ой", "INTJ"],
+  ["ух-ой", "INTJ"],
 ]);
 
 const lemmas = (
@@ -186,6 +203,21 @@ const lemmas = (
 ) => lookupWord(db, pair, word, context).entries.map((entry) => entry.lemma);
 
 describe("tokenize", () => {
+  it("splits a word at a period between letters, as browsers do", () => {
+    const tokens = tokenize("груши и т.д. лежали", "ru");
+    assert.deepStrictEqual(
+      tokens.map((token) => [token.key, token.dottedBefore]),
+      [
+        ["груши", false],
+        ["и", false],
+        ["т", false],
+        ["д", true],
+        // a period and a space, as after any abbreviation: the lookup decides
+        ["лежали", true],
+      ],
+    );
+  });
+
   it("normalizes words and splits clauses at punctuation", () => {
     const tokens = tokenize("Er ruft an, weil es eilt.", "de");
     assert.deepStrictEqual(
@@ -228,6 +260,13 @@ describe("lookup with context", () => {
     assert.deepStrictEqual(lemmas(german, "de_en", "statt", context), [
       "stattfinden",
       "statt",
+    ]);
+  });
+
+  it("keeps a separable verb together across a word with periods inside", () => {
+    assert.deepStrictEqual(lemmas(german, "de_en", "fand", "Er fand in comp.os.minix statt."), [
+      "stattfinden",
+      "finden",
     ]);
   });
 
@@ -395,6 +434,27 @@ describe("lookup with context", () => {
       lemmas(russian, "ru_en", "е", "Это было в 1990-е годы."),
       ["е"],
     );
+  });
+
+  it("explains an ending after a number with the grammar file's line", () => {
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "го", "В матче 3-го тура выиграли гости."),
+      ["-го", "го"],
+    );
+    // not without the number
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "го", "Они играли в го."), ["го"]);
+    // nor as the hyphen affix of a word that isn't a number
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "ой", "О-ой, какие!"), ["ой"]);
+  });
+
+  it("joins the pieces of an abbreviation a browser splits at its periods", () => {
+    for (const context of ["Яблоки, груши и т.д. лежали на столе.", "Яблоки, груши и т. д. лежали на столе."]) {
+      assert.deepStrictEqual(lemmas(russian, "ru_en", "т", context), ["и т. д.", "т"]);
+      assert.deepStrictEqual(lemmas(russian, "ru_en", "д", context), ["и т. д.", "д"]);
+    }
+    assert.deepStrictEqual(lemmas(german, "de_en", "z", "Obst, z.B. Äpfel."), ["z. B."]);
+    // an initial before a name isn't an abbreviation the dictionary has
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "т", "Т.Голикова: добрый день!"), ["т"]);
   });
 
   it("leaves a word as it is when it also stands alone in the context", () => {

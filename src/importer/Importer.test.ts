@@ -191,9 +191,11 @@ describe("importWiktextract", () => {
       assert.deepStrictEqual(senses("kotosio"), [
         ["kotosio", "diminutive of kotoś"],
       ]);
-      // word with no entry: its form, and its table, reach the final word
-      assert.deepStrictEqual(senses("tańsi"), [["tani", "cheap"]]);
-      assert.deepStrictEqual(senses("tańsza"), [["tani", "cheap"]]);
+      // a comparative is a word of its own, with its base's meaning; its forms,
+      // and its table, reach it
+      assert.deepStrictEqual(senses("tańszy"), [["tańszy", "comparative degree of tani: cheap"]]);
+      assert.deepStrictEqual(senses("tańsi"), senses("tańszy"));
+      assert.deepStrictEqual(senses("tańsza"), senses("tańszy"));
       // historical-only word survives, with its forms
       assert.deepStrictEqual(senses("księcia"), [["książę", "prince"]]);
       // several etymologies: all of them are copied
@@ -530,6 +532,142 @@ describe("importWiktextract", () => {
       assert.deepStrictEqual(senses("sein"), [
         ["sein/DET", "his, its"],
         ["sein/VERB", "to be"],
+      ]);
+    }).pipe(Effect.scoped),
+  );
+
+  it.effect("puts a word's own senses before its comparative ones", () =>
+    Effect.gen(function* () {
+      const dir = yield* tempDir;
+      const input = join(dir, "pl.jsonl");
+      const line = (word: string, pos: string, senses: ReadonlyArray<object>, extra = {}) =>
+        JSON.stringify({ word, pos, lang_code: "pl", senses, ...extra });
+      const comparative = (base: string) => ({
+        glosses: [`comparative degree of ${base}`],
+        tags: ["comparative", "form-of"],
+        form_of: [{ word: base }],
+      });
+      yield* Effect.promise(() =>
+        writeFile(
+          input,
+          [
+            line("późno", "adv", [{ glosses: ["late"] }, { glosses: ["at a late hour"] }]),
+            // one line, own sense after the comparative one
+            line("później", "adv", [comparative("późno"), { glosses: ["later, afterwards"] }]),
+            line("dobrze", "adv", [{ glosses: ["well"] }]),
+            // two lines: the comparative alone, then the word's own sense
+            line("lepiej", "adv", [comparative("dobrze")]),
+            line("lepiej", "adv", [{ glosses: ["rather"] }], { etymology_number: 2 }),
+            // a comparative that says what it means, before the word's own sense
+            line("dalej", "adv", [{ glosses: ["comparative degree of daleko: further"], tags: ["comparative", "form-of"], form_of: [{ word: "daleko" }] }, { glosses: ["and so on"] }]),
+          ].join("\n"),
+        ),
+      );
+      const out = join(dir, "pl_en.sqlite");
+      const stats = yield* importWiktextract({ lang: "pl", input, out, grammar: [] });
+      const db = yield* openDictionary(out);
+      const senses = (word: string) =>
+        findEntriesByForm(db, word).map((e) => [e.lemma, ...e.senses.map((s) => s.translations[0])]);
+      // every meaning of the base, after the word's own
+      assert.deepStrictEqual(senses("później"), [
+        ["później", "later, afterwards", "comparative degree of późno: late", "comparative degree of późno: at a late hour"],
+      ]);
+      assert.deepStrictEqual(senses("lepiej"), [["lepiej", "rather", "comparative degree of dobrze: well"]]);
+      assert.deepStrictEqual(senses("dalej"), [["dalej", "and so on", "comparative degree of daleko: further"]]);
+      assert.strictEqual(stats.degreeMerged, 1);
+    }).pipe(Effect.scoped),
+  );
+
+  it.effect("leaves a comparative spelled like a plain form of its base to the base", () =>
+    Effect.gen(function* () {
+      const dir = yield* tempDir;
+      const input = join(dir, "de.jsonl");
+      const comparative = (word: string, base: string, extra = {}) =>
+        JSON.stringify({
+          word,
+          pos: "adj",
+          lang_code: "de",
+          senses: [{ glosses: [`comparative degree of ${base}`], tags: ["comparative", "form-of"], form_of: [{ word: base }] }],
+          ...extra,
+        });
+      yield* Effect.promise(() =>
+        writeFile(
+          input,
+          [
+            JSON.stringify({
+              word: "neu",
+              pos: "adj",
+              lang_code: "de",
+              senses: [{ glosses: ["new"] }],
+              forms: [
+                { form: "neuer", tags: ["comparative"] },
+                { form: "neuer", tags: ["strong", "nominative", "masculine", "singular"], source: "declension" },
+                { form: "neue", tags: ["strong", "nominative", "feminine", "singular"], source: "declension" },
+              ],
+            }),
+            comparative("neuer", "neu", { forms: [{ form: "neueren", source: "declension" }] }),
+            JSON.stringify({ word: "gut", pos: "adj", lang_code: "de", senses: [{ glosses: ["good"] }] }),
+            comparative("besser", "gut"),
+          ].join("\n"),
+        ),
+      );
+      const out = join(dir, "de_en.sqlite");
+      const stats = yield* importWiktextract({ lang: "de", input, out, grammar: [] });
+      const db = yield* openDictionary(out);
+      const senses = (word: string) =>
+        findEntriesByForm(db, word).map((e) => [e.lemma, ...e.senses.map((s) => s.translations[0])]);
+      // `ein neuer Film`: the plain form of `neu`, as before; its table goes along
+      assert.deepStrictEqual(senses("neuer"), [["neu", "new"]]);
+      assert.deepStrictEqual(senses("neueren"), [["neu", "new"]]);
+      // `besser` is no form of `gut`, so it keeps an entry of its own
+      assert.deepStrictEqual(senses("besser"), [["besser", "comparative degree of gut: good"]]);
+      assert.strictEqual(stats.degreeDropped, 1);
+    }).pipe(Effect.scoped),
+  );
+
+  it.effect("lets a grammar line replace a content word of the same part of speech", () =>
+    Effect.gen(function* () {
+      const dir = yield* tempDir;
+      const input = join(dir, "ru.jsonl");
+      const line = (word: string, pos: string, gloss: string) =>
+        JSON.stringify({ word, pos, lang_code: "ru", senses: [{ glosses: [gloss] }] });
+      yield* Effect.promise(() =>
+        writeFile(
+          input,
+          [
+            line("здесь", "adv", "here"),
+            line("всё", "adv", "still"),
+            line("-го", "suffix", "on (a date)"),
+          ].join("\n"),
+        ),
+      );
+      const out = join(dir, "ru_en.sqlite");
+      yield* importWiktextract({
+        lang: "ru",
+        input,
+        out,
+        grammar: [
+          { lemma: "здесь", pos: "ADV", senses: ["here", "in this case"] },
+          { lemma: "всё", pos: "PRON", senses: ["everything"] },
+          { lemma: "-го", pos: "X", senses: ["-th (after a number)"] },
+        ],
+      });
+      const db = yield* openDictionary(out);
+      const senses = (word: string) =>
+        findEntriesByForm(db, word)
+          .map((e) => [`${e.lemma}/${e.pos}`, ...e.senses.map((s) => s.translations[0])])
+          .sort();
+      // the line replaces Wiktionary's adverb instead of repeating "here"
+      assert.deepStrictEqual(senses("здесь"), [["здесь/ADV", "here", "in this case"]]);
+      // a part of speech the file doesn't give the word stays
+      assert.deepStrictEqual(senses("всё"), [
+        ["всё/ADV", "still"],
+        ["всё/PRON", "everything"],
+      ]);
+      // an `X` line only adds
+      assert.deepStrictEqual(senses("-го"), [
+        ["-го/X", "-th (after a number)"],
+        ["-го/X", "on (a date)"],
       ]);
     }).pipe(Effect.scoped),
   );

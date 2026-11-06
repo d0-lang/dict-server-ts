@@ -31,6 +31,10 @@ export type ImportStats = {
   readonly historicalEntries: number;
   readonly derivedCopied: number;
   readonly derivedBare: number;
+  /** Comparative-only entries folded into the same word's other entry. */
+  readonly degreeMerged: number;
+  /** Comparative-only entries spelled like a plain form of their base, left to the base. */
+  readonly degreeDropped: number;
   readonly seeLinks: number;
   /** Entries from `grammar/<lang>.tsv`. */
   readonly grammarEntries: number;

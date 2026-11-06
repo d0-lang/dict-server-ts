@@ -49,6 +49,8 @@ export type ImportEntry = {
   readonly derived: ReadonlyArray<DerivedSense>;
   /** Normalized verbal nouns from the table, used only if they have no entry. */
   readonly verbalNouns: ReadonlyArray<string>;
+  /** Normalized forms the table only ever tags comparative or superlative (`besser`; not `neuer`, also a plain form of `neu`). */
+  readonly degreeForms?: ReadonlyArray<string>;
 };
 
 /** A sense like "diminutive of kotek", which needs the meaning of its base. */
@@ -313,6 +315,15 @@ const collectForms = (
   return { forms: [...forms], dropped };
 };
 
+const isDegreeForm = (form: WiktextractForm): boolean =>
+  form.tags?.some((tag) => tag === "comparative" || tag === "superlative") ?? false;
+
+/** Forms the table only ever tags comparative or superlative. */
+const degreeOnlyForms = (forms: ReadonlyArray<WiktextractForm>): ReadonlyArray<string> => {
+  const plain = new Set(forms.filter((form) => !isDegreeForm(form)).map((form) => lookupKey(form.form)));
+  return [...new Set(forms.filter(isDegreeForm).map((form) => lookupKey(form.form)))].filter((form) => !plain.has(form));
+};
+
 /** Pure mapping of one wiktextract line (already known to be `rules.code`). */
 export const transformEntry = (
   rules: LanguageRules,
@@ -422,6 +433,7 @@ export const transformEntry = (
     verbalNouns: (raw.forms ?? [])
       .filter(isVerbalNounForm)
       .map((form) => lookupKey(form.form)),
+    degreeForms: degreeOnlyForms(raw.forms ?? []),
   });
 
   if (senses.groups.size === 0) {

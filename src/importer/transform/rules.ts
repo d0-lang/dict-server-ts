@@ -94,15 +94,25 @@ export const skipSense = (
  * Gloss openings of `form-of` / `alt-of` senses that describe a word of its own
  * rather than a grammatical form of another word. Matched on the text because
  * tags can't tell these apart (`feminine` is also on inflections). All glosses
- * are English, so the list holds across languages. Any other opening is a form:
+ * are English, so the list holds across languages. Comparatives and superlatives
+ * count too: a reader of `лучше` or `besser` needs "comparative of good", not
+ * the base word's entry alone. Any other opening is a form:
  * a word missing from this list redirects to its target, it doesn't lose data.
  * An optional first word covers qualifiers ("endearing diminutive of").
  */
 const OWN_ENTRY_OPENING =
-  /^(?:\S+\s+)?(?:(?:female|male) equivalent|diminutive|augmentative|verbal noun|agent noun|frequentative|iterative|singulative|abbreviation|initialism|acronym|clipping|ellipsis) of\b/i;
+  /^(?:\S+\s+)?(?:(?:female|male) equivalent|diminutive|augmentative|verbal noun|agent noun|frequentative|iterative|singulative|abbreviation|initialism|acronym|clipping|ellipsis|(?:comparative|superlative)(?: degree)?) of\b/i;
 
 export const isOwnEntryGloss = (gloss: string): boolean =>
   OWN_ENTRY_OPENING.test(gloss);
+
+const DEGREE_OPENING = /^(?:\S+\s+)?(?:comparative|superlative)(?: degree)? of\s+([^\s(:;,]+)/i;
+
+/** A comparative or superlative sense ("comparative degree of хоро́ший"). */
+export const isDegreeGloss = (gloss: string): boolean => DEGREE_OPENING.test(gloss);
+
+/** The word a comparative or superlative gloss names (`хоро́ший`), if it is one. */
+export const degreeBase = (gloss: string): string | undefined => gloss.match(DEGREE_OPENING)?.[1];
 
 /** Senses that only refer to another word: not copied onto derived words. */
 export const isPointerGloss = (gloss: string): boolean =>

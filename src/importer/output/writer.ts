@@ -6,7 +6,7 @@ import {
   GRAMMAR_SOURCE_POS,
   type GrammarEntry,
 } from "../grammar.ts";
-import { isPointerGloss } from "../transform/rules.ts";
+import { degreeBase, isDegreeGloss, isPointerGloss } from "../transform/rules.ts";
 import type {
   DerivedSense,
   FormOfLink,
@@ -30,6 +30,10 @@ export type WriterCounts = {
   derivedCopied: number;
   /** derived senses left as a bare gloss, because no meaning was found */
   derivedBare: number;
+  /** comparative-only entries folded into the same word's other entry */
+  degreeMerged: number;
+  /** comparative-only entries spelled like a plain form of their base, left to the base */
+  degreeDropped: number;
   /** `see` targets that have an entry */
   seeLinks: number;
   /** entries from the language's grammar file */
@@ -113,6 +117,8 @@ export const makeWriter = (
     historicalEntries: 0,
     derivedCopied: 0,
     derivedBare: 0,
+    degreeMerged: 0,
+    degreeDropped: 0,
     seeLinks: 0,
     grammarEntries: 0,
     grammarReplaced: 0,
@@ -126,6 +132,8 @@ export const makeWriter = (
   const verbalNouns: Array<{ form: string; entryId: number }> = [];
   /** entry id -> gloss -> its derived sense */
   const derivedByEntry = new Map<number, Map<string, DerivedSense>>();
+  /** entry id -> forms its table tags comparative or superlative */
+  const degreeFormsByEntry = new Map<number, Set<string>>();
 
   const writeEntry = (entry: ImportEntry) => {
     const key = `${entry.lemma}\u0000${entry.sourcePos}\u0000${entry.etymology}`;
@@ -171,6 +179,11 @@ export const makeWriter = (
     for (const form of entry.verbalNouns) {
       verbalNouns.push({ form, entryId: state.id });
     }
+    if ((entry.degreeForms?.length ?? 0) > 0) {
+      const degree = degreeFormsByEntry.get(state.id) ?? new Set<string>();
+      for (const form of entry.degreeForms!) degree.add(form);
+      degreeFormsByEntry.set(state.id, degree);
+    }
     if (entry.derived.length > 0) {
       const senses = derivedByEntry.get(state.id) ?? new Map();
       for (const sense of entry.derived) senses.set(sense.gloss, sense);
@@ -200,7 +213,12 @@ export const makeWriter = (
     }
   })();
 
-  /** A word in the grammar file shows none of Wiktionary's grammar-word entries. */
+  /**
+   * A word in the grammar file shows none of Wiktionary's grammar-word entries,
+   * nor its entries with a part of speech the file gives that word (`здесь ADV`
+   * replaces Wiktionary's adverb `здесь`; `всё`, listed as a pronoun and a
+   * determiner, keeps its adverb "still"). `X` lines (endings like `-го`) only add.
+   */
   const replaceGrammarWords = () => {
     counts.grammarReplaced = sqlite.run(
       `DELETE FROM forms
@@ -211,7 +229,14 @@ export const makeWriter = (
        AND entry_id IN (
          SELECT id FROM entries
          WHERE source_pos <> '${GRAMMAR_SOURCE_POS}'
-           AND pos IN (${[...GRAMMAR_POS].map((p) => `'${p}'`).join(", ")})
+           AND (
+             pos IN (${[...GRAMMAR_POS].map((p) => `'${p}'`).join(", ")})
+             OR (pos <> 'X' AND pos IN (
+               SELECT g.pos FROM forms gf JOIN entries g ON g.id = gf.entry_id
+               WHERE gf.source = ${FormSource.Lemma} AND g.source_pos = '${GRAMMAR_SOURCE_POS}'
+                 AND gf.form = forms.form
+             ))
+           )
        )`,
     ).changes;
   };
@@ -435,11 +460,20 @@ export const makeWriter = (
         }
         counts.derivedCopied++;
         const prefix = gloss.replace(/[\s.,;:]+$/, "");
+        // Every meaning of the base, comparatives too: its first is often not
+        // the one meant (`крупнейших` "largest", not "coarsest").
         return meanings.map((meaning) => ({
           translations: [`${prefix}: ${meaning}`],
           see: null,
         }));
       });
+      // The word's own senses before its comparative ones (`później` "later"
+      // before "comparative of późno").
+      const ownFirst = [
+        ...rows.filter((row) => !isDegreeGloss(row.translations[0]!)),
+        ...rows.filter((row) => isDegreeGloss(row.translations[0]!)),
+      ];
+      rows.splice(0, rows.length, ...ownFirst);
       const seen = new Set<string>();
       return {
         entryId,
@@ -462,6 +496,95 @@ export const makeWriter = (
           insertSense.run(entryId, idx, JSON.stringify(translations), see);
           counts.senses++;
         });
+      }
+    })();
+  };
+
+  /**
+   * Entries that are only a comparative or superlative (`лучше` "comparative
+   * degree of хороший", `neuer` "comparative degree of neu"):
+   * - spelled like a plain form of their base (`neuer` is also `neu`'s strong
+   *   masculine), they go back to being forms of the base: `ein neuer Film`
+   *   is "new" far more often than "newer";
+   * - otherwise, when the word has another entry with the same part of speech
+   *   (`лучше` "rather", `короче` "in other words"), their senses go after
+   *   that entry's, so a word's own meanings come first.
+   * Their forms go with them. The emptied entries are dropped with the others
+   * no form reaches.
+   */
+  const settleDegreeEntries = () => {
+    const sensesOf = sqlite.query<{ translations: string; see: string | null }, [number]>(
+      "SELECT translations, see FROM senses WHERE entry_id = ? ORDER BY idx",
+    );
+    const headOf = sqlite.query<{ lemma: string; pos: string }, [number]>("SELECT lemma, pos FROM entries WHERE id = ?");
+    const lemmaEntries = sqlite.query<{ id: number; pos: string }, [string]>(
+      `SELECT e.id, e.pos FROM forms f JOIN entries e ON e.id = f.entry_id
+       WHERE f.form = ? AND f.source = ${FormSource.Lemma} AND e.source_pos <> '${GRAMMAR_SOURCE_POS}' ORDER BY e.id`,
+    );
+    const hasInflection = sqlite.query<{ n: number }, [string, number]>(
+      `SELECT count(*) AS n FROM forms WHERE form = ? AND entry_id = ? AND source = ${FormSource.Inflection}`,
+    );
+    const moveForms = sqlite.prepare(
+      `UPDATE OR IGNORE forms SET entry_id = ?1, source = ${FormSource.Inflection} WHERE entry_id = ?2`,
+    );
+    const dropForms = sqlite.prepare("DELETE FROM forms WHERE entry_id = ?");
+    const nextIdx = sqlite.query<{ n: number }, [number]>("SELECT count(*) AS n FROM senses WHERE entry_id = ?");
+    const isDegreeOnly = (id: number) => {
+      const senses = sensesOf.all(id);
+      return senses.length > 0 && senses.every((row) => isDegreeGloss((JSON.parse(row.translations) as Array<string>)[0]!));
+    };
+
+    const candidates = sqlite
+      .query<{ id: number }, []>(
+        `SELECT DISTINCT entry_id AS id FROM senses
+         WHERE translations LIKE '%comparative%of%' OR translations LIKE '%superlative%of%' ORDER BY entry_id`,
+      )
+      .all()
+      .map((row) => row.id);
+    const deleteSenses = sqlite.prepare("DELETE FROM senses WHERE entry_id = ?");
+    sqlite.transaction(() => {
+      for (const id of candidates) {
+        if (!isDegreeOnly(id)) {
+          // A word with its own senses too (`дальше` "furthermore", `eher` "rather"): those first.
+          const rows = sensesOf.all(id);
+          const degree = (row: (typeof rows)[number]) => isDegreeGloss((JSON.parse(row.translations) as Array<string>)[0]!);
+          const ordered = [...rows.filter((row) => !degree(row)), ...rows.filter(degree)];
+          if (ordered.some((row, i) => row !== rows[i])) {
+            deleteSenses.run(id);
+            ordered.forEach((row, idx) => insertSense.run(id, idx, row.translations, row.see));
+          }
+          continue;
+        }
+        const head = headOf.get(id)!;
+        const key = lookupKey(head.lemma);
+        const senses = sensesOf.all(id);
+        const bases = [
+          ...new Set(
+            senses.flatMap((row) => {
+              const base = degreeBase((JSON.parse(row.translations) as Array<string>)[0]!);
+              return base === undefined ? [] : [lookupKey(base)];
+            }),
+          ),
+        ];
+        const plainFormOf = bases
+          .flatMap((base) => lemmaEntries.all(base))
+          .find((base) => hasInflection.get(key, base.id)!.n > 0 && !(degreeFormsByEntry.get(base.id)?.has(key) ?? false));
+        if (plainFormOf !== undefined) {
+          moveForms.run(plainFormOf.id, id);
+          dropForms.run(id);
+          counts.degreeDropped++;
+          continue;
+        }
+        const other = lemmaEntries.all(key).find((entry) => entry.id !== id && entry.pos === head.pos && !isDegreeOnly(entry.id));
+        if (other === undefined) continue;
+        let idx = nextIdx.get(other.id)!.n;
+        for (const row of senses) {
+          insertSense.run(other.id, idx++, row.translations, row.see);
+          counts.senses++;
+        }
+        moveForms.run(other.id, id);
+        dropForms.run(id);
+        counts.degreeMerged++;
       }
     })();
   };
@@ -563,6 +686,7 @@ export const makeWriter = (
     restoreHistoricalEntries();
     followLinkChains();
     copyDerivedMeanings();
+    settleDegreeEntries();
     resolveSee();
     const unresolved = countUnresolvedLinks();
     const added = formOfFallback ? resolveFormOf() : 0;

@@ -7,7 +7,7 @@ description: Add a language pair to the dictionary, or improve one systematicall
 
 Run this from the root of the server repo. You are the developer agent: you define the language's profile and phrase types, write the rules, and decide what to accept. Subagents generate, verify and review. A person who reads the language is optional. Most languages won't have one, so every step must work without them, and their review is used where it exists.
 
-`eval/README.md` and the `lookup-eval` skill explain the judge, which this skill uses at milestones.
+The judge and the corpus tools live in the corpus repo: `../corpus/eval/README.md` and its `lookup-eval` skill (`../corpus/.agents/skills/lookup-eval/SKILL.md`) explain them. This skill uses the judge at milestones.
 
 ## Requirements
 
@@ -85,7 +85,7 @@ If a reader of the language is available, ask them to review the profile now. Ot
 ## Phase 3: Baseline
 
 1. Run both benchmarks and record them in the profile's log.
-2. Run the `lookup-eval` skill on 1,000 corpus items. It asks before spending tokens.
+2. Run the `lookup-eval` skill (in `../corpus`) on 1,000 corpus items. It asks before spending tokens.
 
 ## Phase 4: Hill-climb
 
@@ -94,7 +94,7 @@ One change per iteration:
 1. **Pick** the largest loss: the worst type and variant in the context benchmark, the most common segment mismatch, or the largest judge failure category.
 2. **Diagnose** with failing cases, and change a setting or a rule. Prefer general rules to word lists.
 3. **Run both benchmarks.** No type or variant may fall by more than noise, about 1 point, without an explanation.
-4. **Diff the corpus:** collect again, and list every word whose popover changed, with an English gloss of each side. A fresh subagent classifies each change as better, worse or same, with a reason. Every "worse" needs an explanation or a fix.
+4. **Diff the corpus:** collect again (`../corpus/eval/collect.ts`, or `replay.ts` and `diff.ts`), and list every word whose popover changed, with an English gloss of each side. A fresh subagent classifies each change as better, worse or same, with a reason. Every "worse" needs an explanation or a fix.
 5. **Review the code** with a fresh subagent that gets only the diff and the problem it solves. It checks for correctness and overfitting: special cases shaped around the example, word lists, rules that only work on the benchmark.
 6. **Accept or revert.** If accepted, add two or three hand-written unit tests on an in-memory dictionary (see `src/dictionary/context.test.ts`): one case the rule fixes and one nearby case it must not break. Never turn benchmark cases into unit tests: some are wrong, and data updates would break them.
 7. **Log** the iteration in the profile: the change, benchmark numbers before and after, and what got worse.

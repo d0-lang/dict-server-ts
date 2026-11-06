@@ -224,23 +224,83 @@ describe("transformEntry", () => {
     const result = transformEntry(
       pl,
       entry({
-        word: "tańszy",
+        word: "taniego",
         pos: "adj",
         senses: [
           {
-            glosses: ["comparative degree of tani"],
-            tags: ["form-of", "comparative"],
+            glosses: ["genitive masculine singular of tani"],
+            tags: ["form-of", "genitive", "masculine", "singular"],
             form_of: [{ word: "tani" }],
           },
         ],
-        forms: [{ form: "tańsi", source: "declension" }],
+        forms: [{ form: "taniemu", source: "declension" }],
       }),
     );
     assert.strictEqual(result.entry, undefined);
     assert.deepStrictEqual(result.formOf, [
-      { form: "tańszy", lemma: "tani", sourcePos: "adj" },
-      { form: "tańsi", lemma: "tani", sourcePos: "adj" },
+      { form: "taniego", lemma: "tani", sourcePos: "adj" },
+      { form: "taniemu", lemma: "tani", sourcePos: "adj" },
     ]);
+  });
+
+  it("gives comparatives and superlatives an entry of their own", () => {
+    // A bare one gets its base word's meaning copied in, like a diminutive.
+    const better = transformEntry(
+      ru,
+      entry({
+        word: "лучше",
+        lang_code: "ru",
+        pos: "adv",
+        senses: [
+          {
+            glosses: ["comparative degree of хоро́ший (xoróšij)"],
+            tags: ["comparative", "form-of"],
+            form_of: [{ word: "хоро́ший" }],
+          },
+        ],
+      }),
+    );
+    assert.deepStrictEqual(translations(better), [["comparative degree of хоро́ший (xoróšij)"]]);
+    assert.deepStrictEqual(better.entry?.derived[0]?.bases, ["хороший"]);
+    assert.deepStrictEqual(better.formOf, []);
+
+    // One that already says what it means keeps that, and copies nothing.
+    const later = transformEntry(
+      ru,
+      entry({
+        word: "позже",
+        lang_code: "ru",
+        pos: "adv",
+        senses: [
+          {
+            glosses: ["comparative degree of по́здний (pózdnij): later, afterwards"],
+            tags: ["comparative", "form-of"],
+            form_of: [{ word: "по́здний" }],
+          },
+        ],
+      }),
+    );
+    assert.deepStrictEqual(translations(later), [["comparative degree of по́здний (pózdnij): later, afterwards"]]);
+    assert.deepStrictEqual(later.entry?.derived, []);
+  });
+
+  it("still links an inflected form of a comparative to it", () => {
+    const result = transformEntry(
+      pl,
+      entry({
+        word: "tańszego",
+        pos: "adj",
+        senses: [
+          {
+            glosses: ["genitive masculine singular of tańszy"],
+            tags: ["form-of", "genitive", "masculine", "singular"],
+            form_of: [{ word: "tańszy" }],
+          },
+        ],
+      }),
+    );
+    assert.strictEqual(result.entry, undefined);
+    assert.deepStrictEqual(result.formOf.map((link) => link.lemma), ["tańszy"]);
   });
 
   it("offers historical senses only as a last-resort entry", () => {
