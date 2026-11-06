@@ -1,16 +1,27 @@
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import { caseClass, lookupKey } from "@dict/core/lookupKey";
 import { FormSource, GRAMMAR_SOURCE_POS } from "@dict/core/schema";
-import { GRAMMAR_POS, type GrammarEntry } from "../grammar.ts";
-import { degreeBase, isDegreeGloss, isPointerGloss } from "../transform/rules.ts";
+import type { GrammarEntry } from "../grammar.ts";
 import type {
   DerivedSense,
   FormOfLink,
   ImportEntry,
 } from "../transform/transform.ts";
-
-/** How many steps to follow from a word to the word that has an entry or meaning. */
-const MAX_CHAIN_STEPS = 3;
+import type { WriterContext } from "./passes/context.ts";
+import { settleDegreeEntries } from "./passes/degrees.ts";
+import { copyDerivedMeanings } from "./passes/derived.ts";
+import { dropUnreachedEntries, replaceGrammarWords } from "./passes/grammar.ts";
+import {
+  countUnresolvedLinks,
+  followLinkChains,
+  resolveFormOf,
+} from "./passes/links.ts";
+import { resolveSee } from "./passes/see.ts";
+import {
+  addAbbreviations,
+  addLetterVariants,
+  addUnspacedAbbreviations,
+} from "./passes/spellings.ts";
 
 export type WriterCounts = {
   entries: number;
@@ -209,99 +220,6 @@ export const makeWriter = (
     }
   })();
 
-  /**
-   * A word in the grammar file shows none of Wiktionary's grammar-word entries,
-   * nor its entries with a part of speech the file gives that word (`здесь ADV`
-   * replaces Wiktionary's adverb `здесь`; `всё`, listed as a pronoun and a
-   * determiner, keeps its adverb "still"). `X` lines (endings like `-го`) only add.
-   */
-  const replaceGrammarWords = () => {
-    counts.grammarReplaced = sqlite.run(
-      `DELETE FROM forms
-       WHERE form IN (
-         SELECT f.form FROM forms f JOIN entries e ON e.id = f.entry_id
-         WHERE f.source = ${FormSource.Lemma} AND e.source_pos = '${GRAMMAR_SOURCE_POS}'
-       )
-       AND entry_id IN (
-         SELECT id FROM entries
-         WHERE source_pos <> '${GRAMMAR_SOURCE_POS}'
-           AND (
-             pos IN (${[...GRAMMAR_POS].map((p) => `'${p}'`).join(", ")})
-             OR (pos <> 'X' AND pos IN (
-               SELECT g.pos FROM forms gf JOIN entries g ON g.id = gf.entry_id
-               WHERE gf.source = ${FormSource.Lemma} AND g.source_pos = '${GRAMMAR_SOURCE_POS}'
-                 AND gf.form = forms.form
-             ))
-           )
-       )`,
-    ).changes;
-  };
-
-  /** Entries no form reaches any more (Wiktionary's replaced grammar words). */
-  const dropUnreachedEntries = () => {
-    const unreached = `NOT IN (SELECT entry_id FROM forms)`;
-    counts.senses -= sqlite.run(
-      `DELETE FROM senses WHERE entry_id ${unreached}`,
-    ).changes;
-    counts.pronunciations -= sqlite.run(
-      `DELETE FROM pronunciations WHERE entry_id ${unreached}`,
-    ).changes;
-    counts.entries -= sqlite.run(
-      `DELETE FROM entries WHERE id ${unreached}`,
-    ).changes;
-  };
-
-  /**
-   * `z.B.` -> `z. B.`, `ж.д.` -> `ж. д.`: texts often write an abbreviation
-   * without the spaces after its periods, and then the segmenter keeps it as
-   * one word. Lemma rows only, like `addAbbreviations`, so no table cell gets
-   * one. Before `addAbbreviations`, so `ж.д` (the period dropped) reaches it
-   * too.
-   */
-  const addUnspacedAbbreviations = () => {
-    counts.unspacedAbbreviations = sqlite.run(
-      `INSERT OR IGNORE INTO forms (form, entry_id, source)
-       SELECT replace(form, '. ', '.'), entry_id, ${FormSource.LetterVariant} FROM forms
-       WHERE source = ${FormSource.Lemma} AND instr(form, '. ') > 0 AND form LIKE '%_.'`,
-    ).changes;
-  };
-
-  /**
-   * `bzw` -> `bzw.`: tokenizers drop the period that belongs to an
-   * abbreviation. Only for spellings with no other row, decided before any is
-   * added, so `c` reaches every lemma `c.` when it reaches nothing else.
-   */
-  const addAbbreviations = () => {
-    sqlite.run(`CREATE TEMP TABLE abbreviations AS
-      SELECT substr(form, 1, length(form) - 1) AS bare, entry_id FROM forms
-      WHERE source IN (${FormSource.Lemma}, ${FormSource.LetterVariant}) AND form LIKE '%_.'
-        AND instr(form, ' ') = 0
-        AND NOT EXISTS (
-          SELECT 1 FROM forms other WHERE other.form = substr(forms.form, 1, length(forms.form) - 1)
-        )`);
-    counts.abbreviations = sqlite.run(
-      `INSERT OR IGNORE INTO forms (form, entry_id, source)
-       SELECT bare, entry_id, ${FormSource.Abbreviation} FROM abbreviations`,
-    ).changes;
-    sqlite.run("DROP TABLE abbreviations");
-  };
-
-  /**
-   * `все` -> `всё`: texts often write an optional letter plainly. Runs last,
-   * so every form, phrase and abbreviation row gets its variant; the primary
-   * key keeps a form already spelled that way.
-   */
-  const addLetterVariants = () => {
-    for (const [letter, plain] of optionalLetters) {
-      counts.letterVariants += sqlite.run(
-        `INSERT OR IGNORE INTO forms (form, entry_id, source)
-         SELECT replace(form, ?1, ?2), entry_id, ${FormSource.LetterVariant} FROM forms
-         WHERE instr(form, ?1) > 0`,
-        [letter, plain],
-      ).changes;
-    }
-  };
-
   const writeLinks = (links: ReadonlyArray<FormOfLink>) => {
     for (const link of links) {
       counts.formOfLinks += insertPending.run(
@@ -348,329 +266,17 @@ export const makeWriter = (
     counts.historicalEntries = missing.length;
   });
 
-  /** `tańsi -> tańszy` and `tańszy -> tani` also give `tańsi -> tani`. */
-  const followLinkChains = () => {
-    for (let step = 1; step < MAX_CHAIN_STEPS; step++) {
-      const added = sqlite.run(
-        `INSERT OR IGNORE INTO form_of_pending (form, lemma, source_pos, pointer, marked)
-         SELECT p.form, q.lemma, p.source_pos, max(p.pointer, q.pointer), max(p.marked, q.marked)
-         FROM form_of_pending p
-         JOIN form_of_pending q ON q.form = p.lemma
-         WHERE q.lemma <> p.form
-           AND NOT EXISTS (
-             SELECT 1 FROM forms f
-             WHERE f.form = p.lemma AND f.source = ${FormSource.Lemma}
-           )`,
-      ).changes;
-      if (added === 0) break;
-    }
-  };
-
-  /**
-   * Add the base's meaning to each derived sense: same part of speech first,
-   * then any, following chains (`koteczek` -> `kotek` -> `kot`). Every result
-   * is worked out from the glosses as they were written, before any is
-   * replaced, so processing order can't change it.
-   */
-  const copyDerivedMeanings = () => {
-    const entriesOf = sqlite.query<
-      { id: number; source_pos: string },
-      [string, number]
-    >(
-      `SELECT e.id, e.source_pos FROM forms f JOIN entries e ON e.id = f.entry_id
-       WHERE f.form = ? AND f.source = ? ORDER BY e.id`,
-    );
-    const sensesOf = (id: number) =>
-      sqlite
-        .query<{ translations: string; see: string | null }, [number]>(
-          "SELECT translations, see FROM senses WHERE entry_id = ? ORDER BY idx",
-        )
-        .all(id)
-        .map((row) => ({
-          translations: JSON.parse(row.translations) as Array<string>,
-          see: row.see,
-        }));
-    const linkTargets = sqlite.query<{ lemma: string }, [string]>(
-      "SELECT lemma FROM form_of_pending WHERE form = ?",
-    );
-
-    const meaningsOf = (
-      word: string,
-      sourcePos: string,
-      seen: ReadonlySet<string>,
-    ): ReadonlyArray<string> => {
-      if (seen.has(word) || seen.size >= MAX_CHAIN_STEPS) return [];
-      const visited = new Set(seen).add(word);
-      const follow = (bases: ReadonlyArray<string>) => {
-        for (const base of bases) {
-          const found = meaningsOf(base, sourcePos, visited);
-          if (found.length > 0) return found;
-        }
-        return [];
-      };
-
-      const all = entriesOf.all(word, FormSource.Lemma);
-      if (all.length === 0) {
-        return follow(linkTargets.all(word).map((row) => row.lemma));
-      }
-      const samePos = all.filter((e) => e.source_pos === sourcePos);
-      const otherPos = all.filter((e) => e.source_pos !== sourcePos);
-      for (const group of [samePos, otherPos]) {
-        const meanings = group.flatMap((entry) =>
-          sensesOf(entry.id).flatMap(({ translations }) => {
-            if (derivedByEntry.get(entry.id)?.has(translations[0]!)) return [];
-            const meaning = translations
-              .filter((gloss) => !isPointerGloss(gloss))
-              .join("; ");
-            return meaning === "" ? [] : [meaning];
-          }),
-        );
-        if (meanings.length > 0) return [...new Set(meanings)];
-        const viaChain = follow(
-          group.flatMap((entry) =>
-            [...(derivedByEntry.get(entry.id)?.values() ?? [])].flatMap(
-              (sense) => sense.bases,
-            ),
-          ),
-        );
-        if (viaChain.length > 0) return viaChain;
-      }
-      return [];
-    };
-
-    const sourcePosOf = sqlite.query<{ source_pos: string }, [number]>(
-      "SELECT source_pos FROM entries WHERE id = ?",
-    );
-    const rewrites = [...derivedByEntry].map(([entryId, derived]) => {
-      const sourcePos = sourcePosOf.get(entryId)!.source_pos;
-      const rows = sensesOf(entryId).flatMap((row) => {
-        const gloss = row.translations[0]!;
-        const sense = derived.get(gloss);
-        if (sense === undefined) return [row];
-        const meanings = sense.bases.flatMap((base) =>
-          meaningsOf(base, sourcePos, new Set()),
-        );
-        if (meanings.length === 0) {
-          counts.derivedBare++;
-          return [row];
-        }
-        counts.derivedCopied++;
-        const prefix = gloss.replace(/[\s.,;:]+$/, "");
-        // Every meaning of the base, comparatives too: its first is often not
-        // the one meant (`крупнейших` "largest", not "coarsest").
-        return meanings.map((meaning) => ({
-          translations: [`${prefix}: ${meaning}`],
-          see: null,
-        }));
-      });
-      // The word's own senses before its comparative ones (`później` "later"
-      // before "comparative of późno").
-      const ownFirst = [
-        ...rows.filter((row) => !isDegreeGloss(row.translations[0]!)),
-        ...rows.filter((row) => isDegreeGloss(row.translations[0]!)),
-      ];
-      rows.splice(0, rows.length, ...ownFirst);
-      const seen = new Set<string>();
-      return {
-        entryId,
-        rows: rows.filter(({ translations }) => {
-          const key = translations.join("\u0000");
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        }),
-      };
-    });
-
-    const deleteSenses = sqlite.prepare(
-      "DELETE FROM senses WHERE entry_id = ?",
-    );
-    sqlite.transaction(() => {
-      for (const { entryId, rows } of rewrites) {
-        counts.senses -= deleteSenses.run(entryId).changes;
-        rows.forEach(({ translations, see }, idx) => {
-          insertSense.run(entryId, idx, JSON.stringify(translations), see);
-          counts.senses++;
-        });
-      }
-    })();
-  };
-
-  /**
-   * Entries that are only a comparative or superlative (`лучше` "comparative
-   * degree of хороший", `neuer` "comparative degree of neu"):
-   * - spelled like a plain form of their base (`neuer` is also `neu`'s strong
-   *   masculine), they go back to being forms of the base: `ein neuer Film`
-   *   is "new" far more often than "newer";
-   * - otherwise, when the word has another entry with the same part of speech
-   *   (`лучше` "rather", `короче` "in other words"), their senses go after
-   *   that entry's, so a word's own meanings come first.
-   * Their forms go with them. The emptied entries are dropped with the others
-   * no form reaches.
-   */
-  const settleDegreeEntries = () => {
-    const sensesOf = sqlite.query<{ translations: string; see: string | null }, [number]>(
-      "SELECT translations, see FROM senses WHERE entry_id = ? ORDER BY idx",
-    );
-    const headOf = sqlite.query<{ lemma: string; pos: string }, [number]>("SELECT lemma, pos FROM entries WHERE id = ?");
-    const lemmaEntries = sqlite.query<{ id: number; pos: string }, [string]>(
-      `SELECT e.id, e.pos FROM forms f JOIN entries e ON e.id = f.entry_id
-       WHERE f.form = ? AND f.source = ${FormSource.Lemma} AND e.source_pos <> '${GRAMMAR_SOURCE_POS}' ORDER BY e.id`,
-    );
-    const hasInflection = sqlite.query<{ n: number }, [string, number]>(
-      `SELECT count(*) AS n FROM forms WHERE form = ? AND entry_id = ? AND source = ${FormSource.Inflection}`,
-    );
-    const moveForms = sqlite.prepare(
-      `UPDATE OR IGNORE forms SET entry_id = ?1, source = ${FormSource.Inflection} WHERE entry_id = ?2`,
-    );
-    const dropForms = sqlite.prepare("DELETE FROM forms WHERE entry_id = ?");
-    const nextIdx = sqlite.query<{ n: number }, [number]>("SELECT count(*) AS n FROM senses WHERE entry_id = ?");
-    const isDegreeOnly = (id: number) => {
-      const senses = sensesOf.all(id);
-      return senses.length > 0 && senses.every((row) => isDegreeGloss((JSON.parse(row.translations) as Array<string>)[0]!));
-    };
-
-    const candidates = sqlite
-      .query<{ id: number }, []>(
-        `SELECT DISTINCT entry_id AS id FROM senses
-         WHERE translations LIKE '%comparative%of%' OR translations LIKE '%superlative%of%' ORDER BY entry_id`,
-      )
-      .all()
-      .map((row) => row.id);
-    const deleteSenses = sqlite.prepare("DELETE FROM senses WHERE entry_id = ?");
-    sqlite.transaction(() => {
-      for (const id of candidates) {
-        if (!isDegreeOnly(id)) {
-          // A word with its own senses too (`дальше` "furthermore", `eher` "rather"): those first.
-          const rows = sensesOf.all(id);
-          const degree = (row: (typeof rows)[number]) => isDegreeGloss((JSON.parse(row.translations) as Array<string>)[0]!);
-          const ordered = [...rows.filter((row) => !degree(row)), ...rows.filter(degree)];
-          if (ordered.some((row, i) => row !== rows[i])) {
-            deleteSenses.run(id);
-            ordered.forEach((row, idx) => insertSense.run(id, idx, row.translations, row.see));
-          }
-          continue;
-        }
-        const head = headOf.get(id)!;
-        const key = lookupKey(head.lemma);
-        const senses = sensesOf.all(id);
-        const bases = [
-          ...new Set(
-            senses.flatMap((row) => {
-              const base = degreeBase((JSON.parse(row.translations) as Array<string>)[0]!);
-              return base === undefined ? [] : [lookupKey(base)];
-            }),
-          ),
-        ];
-        const plainFormOf = bases
-          .flatMap((base) => lemmaEntries.all(base))
-          .find((base) => hasInflection.get(key, base.id)!.n > 0 && !(degreeFormsByEntry.get(base.id)?.has(key) ?? false));
-        if (plainFormOf !== undefined) {
-          moveForms.run(plainFormOf.id, id);
-          dropForms.run(id);
-          counts.degreeDropped++;
-          continue;
-        }
-        const other = lemmaEntries.all(key).find((entry) => entry.id !== id && entry.pos === head.pos && !isDegreeOnly(entry.id));
-        if (other === undefined) continue;
-        let idx = nextIdx.get(other.id)!.n;
-        for (const row of senses) {
-          insertSense.run(other.id, idx++, row.translations, row.see);
-          counts.senses++;
-        }
-        moveForms.run(other.id, id);
-        dropForms.run(id);
-        counts.degreeMerged++;
-      }
-    })();
-  };
-
-  /** Keep only `see` targets that have an entry, now that all entries exist. */
-  const resolveSee = sqlite.transaction(() => {
-    const update = sqlite.prepare(
-      "UPDATE senses SET see = ? WHERE entry_id = ? AND idx = ?",
-    );
-    const rows = sqlite
-      .query<{ entry_id: number; idx: number; see: string }, []>(
-        "SELECT entry_id, idx, see FROM senses WHERE see IS NOT NULL",
-      )
-      .all();
-    for (const row of rows) {
-      const see = (JSON.parse(row.see) as Array<string>).filter((word) =>
-        hasEntry(lookupKey(word)),
-      );
-      update.run(
-        see.length > 0 ? JSON.stringify(see) : null,
-        row.entry_id,
-        row.idx,
-      );
-      counts.seeLinks += see.length;
-    }
-  });
-
-  /** Words with a link, directly or through a chain, to no entry in this file. */
-  const countUnresolvedLinks = (): number =>
-    sqlite
-      .query<{ n: number }, []>(
-        `SELECT count(DISTINCT p.form) AS n FROM form_of_pending p
-         WHERE NOT EXISTS (
-           SELECT 1 FROM form_of_pending p2
-           JOIN forms f ON f.form = p2.lemma AND f.source = ${FormSource.Lemma}
-           WHERE p2.form = p.form
-         )`,
-      )
-      .get()?.n ?? 0;
-
-  /**
-   * Turn staged links into `forms` rows; returns how many were added. A link
-   * resolves to the entries whose lemma matches and whose source pos is the
-   * link's pos; if the lemma has no entry with that pos, to all its entries.
-   * Rows already present (the usual case: the form is in the lemma's table)
-   * are ignored by the primary key, so `changes` is exactly the number of rows
-   * the fallback added. Pointer links only take the same pos, and skip a form
-   * that already reaches the lemma, so `prostu` doesn't add `prosty` the noun
-   * next to the adjective. Marked links (obsolete or dialect spellings)
-   * resolve last, and only for forms that reached no entry any other way.
-   */
-  const resolveFormOf = (): number => {
-    sqlite.transaction(() => {
-      for (const { form, entryId } of verbalNouns) {
-        if (!hasEntry(form)) insertForm.run(form, entryId, FormSource.FormOf);
-      }
-    })();
-    const resolveLinks = (where: string) =>
-      sqlite.run(
-        `INSERT OR IGNORE INTO forms (form, entry_id, source)
-         SELECT p.form, f.entry_id, ${FormSource.FormOf}
-         FROM form_of_pending p
-         JOIN forms f ON f.form = p.lemma AND f.source = ${FormSource.Lemma}
-         JOIN entries e ON e.id = f.entry_id
-         WHERE ${where} AND ((p.pointer = 0 AND (
-             e.source_pos = p.source_pos
-             OR NOT EXISTS (
-               SELECT 1 FROM forms f2 JOIN entries e2 ON e2.id = f2.entry_id
-               WHERE f2.form = p.lemma AND f2.source = ${FormSource.Lemma}
-                 AND e2.source_pos = p.source_pos
-             )
-           ))
-           OR (p.pointer = 1 AND e.source_pos = p.source_pos AND NOT EXISTS (
-             SELECT 1 FROM forms reached
-             JOIN forms target ON target.entry_id = reached.entry_id
-             WHERE reached.form = p.form
-               AND target.form = p.lemma AND target.source = ${FormSource.Lemma}
-           )))`,
-      ).changes;
-    let added = resolveLinks("p.marked = 0");
-    // Decided before any marked row is added, so a word with two marked
-    // spellings gets both targets.
-    sqlite.run(`CREATE TEMP TABLE unreached AS
-      SELECT DISTINCT form FROM form_of_pending p
-      WHERE p.marked = 1 AND NOT EXISTS (SELECT 1 FROM forms f WHERE f.form = p.form)`);
-    added += resolveLinks(
-      "p.marked = 1 AND p.form IN (SELECT form FROM unreached)",
-    );
-    sqlite.run("DROP TABLE unreached");
-    return added;
+  /** What the passes in `passes/` work with. */
+  const ctx: WriterContext = {
+    sqlite,
+    counts,
+    insertSense,
+    insertForm,
+    optionalLetters,
+    hasEntry,
+    verbalNouns,
+    derivedByEntry,
+    degreeFormsByEntry,
   };
 
   /**
@@ -680,20 +286,20 @@ export const makeWriter = (
   const finish = (formOfFallback: boolean): FormOfResult => {
     // Words that depend on others, which may come later in the dump.
     restoreHistoricalEntries();
-    followLinkChains();
-    copyDerivedMeanings();
-    settleDegreeEntries();
-    resolveSee();
-    const unresolved = countUnresolvedLinks();
-    const added = formOfFallback ? resolveFormOf() : 0;
+    followLinkChains(ctx);
+    copyDerivedMeanings(ctx);
+    settleDegreeEntries(ctx);
+    resolveSee(ctx);
+    const unresolved = countUnresolvedLinks(ctx);
+    const added = formOfFallback ? resolveFormOf(ctx) : 0;
     sqlite.run("DROP TABLE form_of_pending");
     // Then the steps that need every form in place.
     sqlite.transaction(() => {
-      replaceGrammarWords();
-      dropUnreachedEntries();
-      addUnspacedAbbreviations();
-      addAbbreviations();
-      addLetterVariants();
+      replaceGrammarWords(ctx);
+      dropUnreachedEntries(ctx);
+      addUnspacedAbbreviations(ctx);
+      addAbbreviations(ctx);
+      addLetterVariants(ctx);
     })();
     return { added, unresolved };
   };
