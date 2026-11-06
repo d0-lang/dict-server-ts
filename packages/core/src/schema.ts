@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   integer,
   primaryKey,
@@ -9,8 +11,10 @@ import {
  * One SQLite file per language pair (e.g. `data/pl_en.sqlite`), all with this
  * exact schema. The server opens one connection + Drizzle instance per file.
  *
- * Bump `SCHEMA_VERSION` whenever the DDL below changes; files are rebuilt by
- * the importer, not migrated. It is stored as `PRAGMA user_version`.
+ * Bump `SCHEMA_VERSION` whenever the DDL (`spec/dictionary/schema.sql`) or what
+ * the rows mean changes; files are rebuilt by the importer, not migrated. It
+ * is stored as `PRAGMA user_version`. The constants here are mirrored in
+ * `spec/dictionary/format.json` (checked by `format.test.ts`).
  */
 export const SCHEMA_VERSION = 3;
 
@@ -149,48 +153,19 @@ export const forms = sqliteTable(
 );
 
 /**
- * DDL kept by hand (instead of drizzle-kit migrations) because the files are
- * write-once build artifacts and we want `WITHOUT ROWID` tables: the composite
- * primary key *is* the table, so `forms` needs no second index and stays small.
- * `schema.test.ts` checks this matches the Drizzle tables above.
+ * The DDL, kept by hand in `spec/dictionary/schema.sql` so that it is data any
+ * implementation can read. `schema.test.ts` checks it matches the Drizzle
+ * tables above. Read on demand: only the importer creates files.
  */
-export const DDL = `
-CREATE TABLE meta (
-  key   TEXT PRIMARY KEY,
-  value TEXT NOT NULL
-) WITHOUT ROWID;
-
-CREATE TABLE entries (
-  id         INTEGER PRIMARY KEY,
-  lemma      TEXT NOT NULL,
-  pos        TEXT NOT NULL,
-  source_pos TEXT NOT NULL,
-  etymology  INTEGER NOT NULL,
-  case_class INTEGER NOT NULL
+export const SCHEMA_SQL = join(
+  import.meta.dirname,
+  "..",
+  "..",
+  "..",
+  "spec",
+  "dictionary",
+  "schema.sql",
 );
-
-CREATE TABLE senses (
-  entry_id     INTEGER NOT NULL,
-  idx          INTEGER NOT NULL,
-  translations TEXT NOT NULL,
-  see          TEXT,
-  PRIMARY KEY (entry_id, idx)
-) WITHOUT ROWID;
-
-CREATE TABLE pronunciations (
-  entry_id INTEGER NOT NULL,
-  idx      INTEGER NOT NULL,
-  kind     TEXT NOT NULL CHECK (kind IN ('ipa', 'audio', 'reading')),
-  value    TEXT NOT NULL,
-  PRIMARY KEY (entry_id, idx)
-) WITHOUT ROWID;
-
-CREATE TABLE forms (
-  form     TEXT NOT NULL,
-  entry_id INTEGER NOT NULL,
-  source   INTEGER NOT NULL,
-  PRIMARY KEY (form, entry_id)
-) WITHOUT ROWID;
-`;
+export const readDDL = (): string => readFileSync(SCHEMA_SQL, "utf8");
 
 export const schema = { meta, entries, senses, pronunciations, forms };

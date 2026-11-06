@@ -1,0 +1,15 @@
+{"word": "соба́ки", "key": "собаки", "caseClass": "Lower", "note": "stress marks dropped from Cyrillic words"}
+{"word": "всѐ", "key": "все", "caseClass": "Lower", "note": "NFC writes е + grave as one letter, ѐ"}
+{"word": "Йо́гурт", "key": "йогурт", "caseClass": "Capitalised", "note": "й keeps its mark"}
+{"word": "всё", "key": "всё", "caseClass": "Lower", "note": "ё keeps its mark"}
+{"word": "Kraków", "key": "kraków", "caseClass": "Capitalised", "note": "accents outside Cyrillic are kept"}
+{"word": "café", "key": "café", "caseClass": "Lower", "note": "decomposed input is normalized to NFC"}
+{"word": "łza", "key": "łza", "caseClass": "Lower", "note": "ł and l are different letters"}
+{"word": " Hund ", "key": "hund", "caseClass": "Capitalised", "note": "trimmed"}
+{"word": "oder", "key": "oder", "caseClass": "Lower"}
+{"word": "Oder", "key": "oder", "caseClass": "Capitalised"}
+{"word": "EU", "key": "eu", "caseClass": "AllCaps", "note": "two or more letters, all uppercase"}
+{"word": "A", "key": "a", "caseClass": "Capitalised", "note": "one letter is never AllCaps"}
+{"word": "z.B.", "key": "z.b.", "caseClass": "Lower"}
+{"word": "3-го", "key": "3-го", "caseClass": "Lower", "note": "only letters count: the first letter is lowercase"}
+{"word": "1990", "key": "1990", "caseClass": "Capitalised", "note": "no letters"}

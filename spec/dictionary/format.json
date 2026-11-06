@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 3,
+  "udPos": [
+    "ADJ",
+    "ADP",
+    "ADV",
+    "AUX",
+    "CCONJ",
+    "DET",
+    "INTJ",
+    "NOUN",
+    "NUM",
+    "PART",
+    "PRON",
+    "PROPN",
+    "PUNCT",
+    "SCONJ",
+    "SYM",
+    "VERB",
+    "X"
+  ],
+  "pronKinds": ["ipa", "audio", "reading"],
+  "caseClass": {
+    "Lower": 0,
+    "Capitalised": 1,
+    "AllCaps": 2
+  },
+  "formSource": {
+    "Lemma": 0,
+    "Inflection": 1,
+    "FormOf": 2,
+    "Abbreviation": 3,
+    "LetterVariant": 4
+  },
+  "sourcePos": {
+    "grammar": "grammar",
+    "letterName": "letter-name"
+  },
+  "metaKeys": [
+    "schema_version",
+    "pair",
+    "lang_code",
+    "source",
+    "imported_at",
+    "limit",
+    "form_of_fallback",
+    "entries",
+    "forms"
+  ]
+}

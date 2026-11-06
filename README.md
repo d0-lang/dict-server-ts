@@ -7,6 +7,7 @@ Bun + Effect 4 dictionary protocol PoC: the HTTP server and the importer that bu
 | `apps/server` (`@dict/server`) | the HTTP API, lookups, sentence context, compound splitting; `eval/` holds the context and segments benchmarks |
 | `apps/importer` (`@dict/importer`) | builds `data/<pair>.sqlite` from a wiktextract dump |
 | `packages/core` (`@dict/core`) | the dictionary file format both share: schema, `lookupKey`, opening and creating files |
+| `spec/dictionary/` | the dictionary file format as data, for any implementation: `schema.sql`, `format.json`, `lookupKey` test vectors |
 | `languages/<lang>/` | per-language data: `grammar.tsv`, the profile (`profile.md`), benchmark gold data |
 | `data/` | dictionary files, raw dumps and the identity key (gitignored) |
 
@@ -82,4 +83,4 @@ With `context`, the entries matching the sentence come first (`apps/server/src/d
 
 The phrase index is built at startup, about 0.5 s for German. A lookup with context takes about 0.7 ms on average for German and 0.35 ms for Polish, against 0.2 ms without.
 
-Bump `SCHEMA_VERSION` in `packages/core/src/schema.ts` when the schema changes; it is stored as `PRAGMA user_version`, and `openDictionary` refuses files built for another version.
+The format is described in `spec/dictionary/README.md`. Bump `SCHEMA_VERSION` (in `packages/core/src/schema.ts` and `spec/dictionary/format.json`) when the schema changes; it is stored as `PRAGMA user_version`, and `openDictionary` refuses files built for another version.

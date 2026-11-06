@@ -1,7 +1,7 @@
 import { Database } from "bun:sqlite";
 import { drizzle, type BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { Effect, Schema } from "effect";
-import { DDL, SCHEMA_VERSION, schema } from "./schema.ts";
+import { readDDL, SCHEMA_VERSION, schema } from "./schema.ts";
 
 /** Drizzle handle for one `<pair>.sqlite` file. Each language file gets its own. */
 export type DictionaryDb = BunSQLiteDatabase<typeof schema> & {
@@ -30,7 +30,7 @@ export const createDictionaryFile = (path: string): DictionaryDb => {
   client.run("PRAGMA synchronous = OFF");
   client.run("PRAGMA temp_store = FILE");
   client.run("PRAGMA cache_size = -200000"); // ~200 MB page cache
-  client.run(DDL);
+  client.run(readDDL());
   client.run(`PRAGMA user_version = ${SCHEMA_VERSION}`);
   return wrap(client);
 };

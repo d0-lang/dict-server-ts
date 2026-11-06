@@ -1,12 +1,12 @@
 import { assert, describe, it } from "@effect/vitest";
 import { Database } from "bun:sqlite";
 import { getTableConfig } from "drizzle-orm/sqlite-core";
-import { DDL, schema } from "./schema.ts";
+import { readDDL, schema } from "./schema.ts";
 
 describe("dictionary schema", () => {
   it("hand-written DDL matches the Drizzle tables", () => {
     const db = new Database(":memory:");
-    db.run(DDL);
+    db.run(readDDL());
     for (const table of Object.values(schema)) {
       const config = getTableConfig(table);
       const actual = db
