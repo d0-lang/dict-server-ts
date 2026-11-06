@@ -9,6 +9,10 @@ target = "en"
 # wiktextract splits "Middle Polish" into the tags "Middle" and "Polish".
 historicalStages = [["Middle", "Polish"], ["Old", "Polish"]]
 standardPronNotes = ["normal speech", "prescriptive"]
+# Learners learn reflexive verbs as words of their own: bawić "to amuse",
+# bawić się "to play". Senses labelled "reflexive with się" (or sobie) become
+# their own entry, bawić się, with the verb's forms.
+reflexive = "after"
 
 [context]
 # Negation puts the verb's object in the genitive (`mieć znaczenie` -> `nie ma
@@ -16,3 +20,6 @@ standardPronNotes = ["normal speech", "prescriptive"]
 # form. The gap stays 1: two words let in as many literal readings as idioms
 # (`jesteśmy u Mikołaja w domu` isn't `być w domu`).
 negation = "nie"
+# A reflexive verb's particle (bawić się) often stands before the verb, and
+# apart from it: "Dobrze się bawię", "Bardzo się dziś bawiliśmy".
+reflexiveParticles = ["się", "sobie"]

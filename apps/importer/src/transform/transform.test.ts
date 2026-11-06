@@ -642,4 +642,98 @@ describe("transformEntry", () => {
       }),
     );
   });
+
+  it("gives a verb's reflexive senses an entry of their own (`bawić się`)", () => {
+    const bawic = transformEntry(
+      pl,
+      entry({
+        word: "bawić",
+        pos: "verb",
+        forms: [
+          { form: "bawię", tags: ["first-person", "singular", "present"] },
+        ],
+        senses: [
+          {
+            glosses: ["to amuse"],
+            raw_glosses: ["(transitive) to amuse"],
+            tags: ["transitive"],
+          },
+          {
+            glosses: ["to play"],
+            raw_glosses: ["(reflexive with się) to play"],
+            tags: ["reflexive"],
+          },
+          {
+            glosses: ["to imagine"],
+            raw_glosses: ["(reflexive with sobie) to imagine"],
+            tags: ["reflexive"],
+          },
+          // a bare tag doesn't say which particle, so the sense stays with the verb
+          {
+            glosses: ["to ask"],
+            raw_glosses: ["(transitive) to ask"],
+            tags: ["reflexive"],
+          },
+        ],
+      }),
+    );
+    assert.deepStrictEqual(translations(bawic), [["to amuse"], ["to ask"]]);
+    assert.deepStrictEqual(
+      bawic.reflexiveEntries?.map((e) => [
+        e.lemma,
+        e.senses.map((s) => s.translations),
+      ]),
+      [
+        ["bawić się", [["to play"]]],
+        ["bawić sobie", [["to imagine"]]],
+      ],
+    );
+    // found by the verb's forms, the verb itself included
+    assert.deepStrictEqual(bawic.reflexiveEntries?.[0]?.forms, [
+      "bawić",
+      ...bawic.entry!.forms,
+    ]);
+  });
+
+  it("makes a verb that is only reflexive one entry with its particle (`bać się`)", () => {
+    const bac = transformEntry(
+      pl,
+      entry({
+        word: "bać",
+        pos: "verb",
+        senses: [
+          {
+            glosses: ["to fear"],
+            raw_glosses: ["(reflexive with się) to fear"],
+            tags: ["reflexive"],
+          },
+        ],
+      }),
+    );
+    assert.isUndefined(bac.entry);
+    assert.deepStrictEqual(
+      bac.reflexiveEntries?.map((e) => e.lemma),
+      ["bać się"],
+    );
+  });
+
+  it("leaves reflexive senses with the verb in a language without the setting", () => {
+    const result = transformEntry(
+      de,
+      entry({
+        word: "freuen",
+        pos: "verb",
+        lang_code: "de",
+        senses: [
+          {
+            glosses: ["to be glad"],
+            raw_glosses: ["(reflexive with sich) to be glad"],
+            tags: ["reflexive"],
+          },
+        ],
+      }),
+    );
+    assert.deepStrictEqual(translations(result), [["to be glad"]]);
+    assert.isUndefined(result.reflexiveEntries);
+  });
 });

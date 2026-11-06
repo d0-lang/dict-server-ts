@@ -23,4 +23,12 @@ export const polish = dictionary([
   ["móc", "VERB", ["może"]],
   ["może być", "INTJ"],
   ["gorzki", "ADJ"],
+  ["bawić", "VERB", ["bawię", "bawiliśmy"], ["to amuse"]],
+  // a reflexive verb, found by the verb's forms (as the importer makes it)
+  ["bawić się", "VERB", ["bawić", "bawię", "bawiliśmy"], ["to play"]],
+  ["się", "PRON", [], ["oneself"]],
+  ["dobrze", "ADV"],
+  ["bardzo", "ADV"],
+  ["dziś", "ADV"],
+  ["dziecko", "NOUN", ["dzieci"]],
 ]);

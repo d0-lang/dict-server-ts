@@ -354,4 +354,89 @@ describe("importWiktextract", () => {
         );
       }).pipe(Effect.scoped),
   );
+
+  it.effect(
+    "gives reflexive verbs their own entry, which explains their verbal noun",
+    () =>
+      Effect.gen(function* () {
+        const dir = yield* tempDir;
+        const input = join(dir, "pl.jsonl");
+        const out = join(dir, "pl_en.sqlite");
+        const reflexive = (gloss: string) => ({
+          glosses: [gloss],
+          raw_glosses: [`(reflexive with się) ${gloss}`],
+          tags: ["reflexive"],
+        });
+        const line = (
+          word: string,
+          pos: string,
+          senses: ReadonlyArray<object>,
+          extra: object = {},
+        ) => JSON.stringify({ word, pos, lang_code: "pl", senses, ...extra });
+        yield* Effect.promise(() =>
+          writeFile(
+            input,
+            [
+              line("wydarzenie", "noun", [
+                {
+                  glosses: ["verbal noun of wydarzyć"],
+                  tags: ["form-of"],
+                  form_of: [{ word: "wydarzyć" }],
+                },
+              ]),
+              // only reflexive: wydarzyć się
+              line("wydarzyć", "verb", [reflexive("to happen")]),
+              // the conjugation is on the reflexive line only
+              line("zakręcać", "verb", [{ glosses: ["to turn off"] }]),
+              line("zakręcać", "verb", [reflexive("to spin")], {
+                forms: [
+                  {
+                    form: "zakręcamy",
+                    tags: ["first-person", "plural", "present"],
+                    source: "conjugation",
+                  },
+                ],
+              }),
+              line("bawić", "verb", [
+                {
+                  glosses: ["to amuse"],
+                  raw_glosses: ["(transitive) to amuse"],
+                },
+                reflexive("to play"),
+                // the plain verb means this too
+                {
+                  glosses: ["to guard"],
+                  raw_glosses: ["(transitive, reflexive with się) to guard"],
+                  tags: ["reflexive", "transitive"],
+                },
+              ]),
+            ].join("\n"),
+          ),
+        );
+        yield* importWiktextract({ lang: "pl", input, out, grammar: [] });
+        const db = yield* openDictionary(out);
+        assert.deepStrictEqual(lemmas(db, "bawić"), [
+          "bawić/VERB",
+          "bawić się/VERB",
+        ]);
+        assert.deepStrictEqual(
+          findEntriesByForm(db, "bawić").map((e) =>
+            e.senses.map((s) => s.translations[0]),
+          ),
+          [["to amuse", "to guard"], ["to play"]],
+        );
+        assert.deepStrictEqual(lemmas(db, "wydarzyć"), ["wydarzyć się/VERB"]);
+        // a verb and its reflexive entry share their forms
+        assert.deepStrictEqual(lemmas(db, "zakręcamy"), [
+          "zakręcać/VERB",
+          "zakręcać się/VERB",
+        ]);
+        assert.deepStrictEqual(
+          findEntriesByForm(db, "wydarzenie")[0]?.senses.map(
+            (s) => s.translations[0],
+          ),
+          ["verbal noun of wydarzyć: to happen"],
+        );
+      }),
+  );
 });

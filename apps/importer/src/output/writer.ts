@@ -83,6 +83,8 @@ export const makeWriter = (
   db: DictionaryDb,
   grammar: ReadonlyArray<GrammarEntry>,
   optionalLetters: ReadonlyArray<readonly [string, string]> = [],
+  /** The language has reflexive entries (`bawić się`), which share their verb's forms. */
+  reflexive = false,
 ) => {
   const sqlite = db.$client;
   sqlite.run(`CREATE TEMP TABLE form_of_pending (
@@ -157,6 +159,40 @@ export const makeWriter = (
     return entry.features ?? lastFeatures.get(word);
   };
 
+  /** verb + pos + etymology + grammar -> the forms its lines list, and its entries */
+  const verbForms = new Map<string, { forms: Set<string>; ids: Set<number> }>();
+
+  /**
+   * A verb and its reflexive entries (`zakręcać`, `zakręcać się`) share the
+   * forms any of their lines lists: wiktextract may give the table on the
+   * reflexive line only. Grammar keeps them apart, as for other entries.
+   */
+  const shareForms = (
+    entry: ImportEntry,
+    id: number,
+    features: string | undefined,
+  ) => {
+    const key = `${entry.reflexiveOf ?? entry.lemma}\u0000${entry.sourcePos}\u0000${entry.etymology}\u0000${features ?? ""}`;
+    let group = verbForms.get(key);
+    if (group === undefined) {
+      group = { forms: new Set(), ids: new Set() };
+      verbForms.set(key, group);
+    }
+    if (!group.ids.has(id)) {
+      for (const form of group.forms) {
+        insertForm.run(form, id, FormSource.Inflection);
+      }
+      group.ids.add(id);
+    }
+    for (const form of entry.forms) {
+      if (group.forms.has(form)) continue;
+      group.forms.add(form);
+      for (const other of group.ids) {
+        insertForm.run(form, other, FormSource.Inflection);
+      }
+    }
+  };
+
   const writeEntry = (entry: ImportEntry) => {
     const features = grammarOf(entry);
     const key = `${entry.lemma}\u0000${entry.sourcePos}\u0000${entry.etymology}\u0000${features ?? ""}`;
@@ -197,8 +233,12 @@ export const makeWriter = (
       state.prons.add(k);
       counts.pronunciations++;
     }
-    for (const form of entry.forms) {
-      insertForm.run(form, state.id, FormSource.Inflection);
+    if (reflexive && entry.pos === "VERB") {
+      shareForms(entry, state.id, features);
+    } else {
+      for (const form of entry.forms) {
+        insertForm.run(form, state.id, FormSource.Inflection);
+      }
     }
     for (const form of entry.verbalNouns) {
       verbalNouns.push({ form, entryId: state.id });
@@ -255,11 +295,13 @@ export const makeWriter = (
       items: ReadonlyArray<{
         readonly entry: ImportEntry | undefined;
         readonly historicalEntry?: ImportEntry;
+        readonly reflexiveEntries?: ReadonlyArray<ImportEntry>;
         readonly formOf: ReadonlyArray<FormOfLink>;
       }>,
     ) => {
       for (const item of items) {
         if (item.entry !== undefined) writeEntry(item.entry);
+        for (const entry of item.reflexiveEntries ?? []) writeEntry(entry);
         if (item.historicalEntry !== undefined) {
           historicalEntries.push(item.historicalEntry);
         }

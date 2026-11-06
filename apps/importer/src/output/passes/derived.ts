@@ -22,6 +22,17 @@ export const copyDerivedMeanings = ({
     `SELECT e.id, e.source_pos FROM forms f JOIN entries e ON e.id = f.entry_id
      WHERE f.form = ? AND f.source = ? ORDER BY e.id`,
   );
+  // A verb that only exists as reflexive (`wydarzyć się`) still explains its
+  // verbal noun (`wydarzenie`): its entry has the bare verb as a form.
+  const reflexiveOf = sqlite.query<
+    { id: number; source_pos: string },
+    [string, number]
+  >(
+    `SELECT e.id, e.source_pos FROM forms f JOIN entries e ON e.id = f.entry_id
+     WHERE f.form = ?1 AND f.source = ?2
+       AND (e.lemma LIKE ?1 || ' %' OR e.lemma LIKE '% ' || ?1)
+     ORDER BY e.id`,
+  );
   const sensesOf = (id: number) =>
     sqlite
       .query<{ translations: string; see: string | null }, [number]>(
@@ -51,7 +62,9 @@ export const copyDerivedMeanings = ({
       return [];
     };
 
-    const all = entriesOf.all(word, FormSource.Lemma);
+    const own = entriesOf.all(word, FormSource.Lemma);
+    const all =
+      own.length > 0 ? own : reflexiveOf.all(word, FormSource.Inflection);
     if (all.length === 0) {
       return follow(linkTargets.all(word).map((row) => row.lemma));
     }

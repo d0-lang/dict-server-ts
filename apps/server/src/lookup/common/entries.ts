@@ -100,8 +100,11 @@ const dropRedundantSynonyms = (
  *    the letter И".
  * 3. Spelling: the entry whose own lemma is this form (`forms.source` =
  *    lemma) before the entries it is a form of, so the noun `Frage` comes
- *    before the verb `fragen`. A form reached only with an optional letter
- *    written plainly comes last (`все` gives `весь` before `всё`).
+ *    before the verb `fragen`. For one word, an entry of several words it is a
+ *    form of comes after one of a single word (`bawię` gives `bawić` before
+ *    `bawić się`); context puts the second first when the sentence has `się`.
+ *    A form reached only with an optional letter written plainly comes last
+ *    (`все` gives `весь` before `всё`).
  * 4. Import order (`entries.id`): grammar-file entries, then the dump's order.
  */
 const rankedIds = (
@@ -123,6 +126,7 @@ const rankedIds = (
          END,
          e.source_pos IN ('character', 'letter-name'),
          f.source <> ${FormSource.Lemma},
+         instr(?1, ' ') = 0 AND instr(e.lemma, ' ') > 0,
          f.source = ${FormSource.LetterVariant},
          e.id`,
     )

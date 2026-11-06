@@ -45,6 +45,12 @@ const Import = doc(
       ),
       [],
     ),
+    reflexive: Schema.optionalKey(
+      doc(
+        Schema.Literals(["before", "after"]),
+        "Senses Wiktionary labels `reflexive with <particle>` become an entry of their own, with the particle before or after the lemma (`after`: Polish `bawić się`, `wyobrażać sobie`). Learners learn these as words of their own.",
+      ),
+    ),
     stressedLemmas: orDefault(
       doc(
         Schema.Boolean,
@@ -100,6 +106,13 @@ const Context = doc(
       doc(
         strings,
         "Conjunctions that end a clause without punctuation, where the verb bracket and separable verbs look for the clause's end.",
+      ),
+      [],
+    ),
+    reflexiveParticles: orDefault(
+      doc(
+        strings,
+        "Words that make a verb reflexive (`się` in `bawić się`). In a verb phrase they may stand on either side of the verb, apart from it, though they are no content word (`Dobrze się bawię`).",
       ),
       [],
     ),

@@ -43,6 +43,8 @@ export type LanguageRules = {
    * match unstressed text, since `lookupKey` drops the marks.
    */
   readonly stressedLemmas?: boolean;
+  /** Reflexive senses become an entry with the particle before or after the lemma (`bawić się`). */
+  readonly reflexive?: "before" | "after";
 };
 
 /**

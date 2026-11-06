@@ -74,7 +74,9 @@ export const topParentGlosses = (tally: Tally, limit = 15) =>
     .map(([gloss, words]) => ({ gloss, words }));
 
 export const tallyResult = (tally: Tally, result: TransformResult) => {
-  if (result.entry === undefined) tally.linesWithoutEntry++;
+  if (result.entry === undefined && result.reflexiveEntries === undefined) {
+    tally.linesWithoutEntry++;
+  }
   tally.skippedSenses.archaic += result.skippedSenses.archaic;
   tally.skippedSenses.historicalStage +=
     result.skippedSenses["historical-stage"];

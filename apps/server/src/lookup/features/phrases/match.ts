@@ -36,6 +36,8 @@ type Matcher = {
   readonly hyphenWords: boolean;
   /** Conjunctions that end a clause (`context.clauseConjunctions`). */
   readonly conjunctions: ReadonlySet<string>;
+  /** Particles of reflexive verbs (`context.reflexiveParticles`). */
+  readonly reflexiveParticles: ReadonlySet<string>;
   /** Every context word and its lemmas: a phrase with a word outside it can't match. */
   readonly available: ReadonlySet<string>;
 };
@@ -223,11 +225,14 @@ const placePhrase = (
       const at = rest.map((_, offset) => start + offset);
       if (at.some((i) => m.tokens[i]?.clause !== clause)) continue;
       if (!runMatches(m, phrase, rest, start)) continue;
+      // The rest needs a content word, or a reflexive verb's particle
+      // (`się` of `bawić się`), which stands apart from its verb.
       if (
         !at.some((i) => {
           const token = m.tokens[i]!;
           return m.info(token.key, token.caseClass).content;
-        })
+        }) &&
+        !at.every((i) => m.reflexiveParticles.has(m.tokens[i]!.key))
       ) {
         continue;
       }

@@ -9,6 +9,7 @@ type ContextRules = {
   readonly hyphenWords: boolean;
   readonly conjunctions: ReadonlySet<string>;
   readonly abbreviationLeads: ReadonlySet<string>;
+  readonly reflexiveParticles: ReadonlySet<string>;
 };
 
 const rulesByLanguage = new WeakMap<Language, ContextRules>();
@@ -26,6 +27,7 @@ export const contextRules = (language: Language): ContextRules => {
     hyphenWords: context.hyphenWords,
     conjunctions: new Set(context.clauseConjunctions),
     abbreviationLeads: new Set(context.abbreviationLeads),
+    reflexiveParticles: new Set(context.reflexiveParticles),
   };
   rulesByLanguage.set(language, rules);
   return rules;

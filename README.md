@@ -72,6 +72,7 @@ What gets imported:
 - spellings with a usage label (obsolete, dialectal, poetic, ...), from alt-of senses or the headword line, only point at their standard word when they reach nothing else, so obsolete `für` ("alternative form of vor") doesn't add `vor` to `für`
 - table rows that aren't forms of the word are dropped: German verb tables list the perfect auxiliary (`haben`, `sein`)
 - an abbreviation is also found without its period (`bzw` -> `bzw.`), which tokenizers drop, when that spelling reaches nothing else
+- with `[import] reflexive` (Polish), senses Wiktionary labels "reflexive with się" (or `sobie`) become an entry of their own, `bawić się` "to play" next to `bawić` "to amuse", found by the verb's forms; a sentence with `się` near the verb puts it first (`[context] reflexiveParticles`)
 
 A lookup answers with headwords, as the protocol defines them (`apps/server/src/lookup/headword.ts`): the stored lemma with its article where the language has `[headword] articles` (`der Hund`, `der/das Bonbon`), the grammar features as `labels` elsewhere (`соба́ка` `f`, `anim`), and entries with the same headword merged. Entries whose grammar differs stay apart (`der See` "lake", `die See` "sea"); the importer already splits them. `see` links name their targets' headwords, and a lookup of such a headword with its article (`der See`) finds it.
 

@@ -39,4 +39,24 @@ describe("lookup with context", () => {
       ["być"],
     );
   });
+
+  it("puts a reflexive verb first when its particle stands near, before or after", () => {
+    assert.deepStrictEqual(
+      lemmas(polish, "pl_en", "bawię", "Dobrze się bawię."),
+      ["bawić się", "bawić"],
+    );
+    assert.deepStrictEqual(
+      lemmas(polish, "pl_en", "bawiliśmy", "Bardzo się dziś bawiliśmy."),
+      ["bawić się", "bawić"],
+    );
+    assert.deepStrictEqual(
+      lemmas(polish, "pl_en", "się", "Dobrze się bawię.")[0],
+      "bawić się",
+    );
+    // without the particle, the verb's own entry comes first
+    assert.deepStrictEqual(lemmas(polish, "pl_en", "bawię", "Bawię dzieci."), [
+      "bawić",
+      "bawić się",
+    ]);
+  });
 });

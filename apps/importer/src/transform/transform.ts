@@ -58,6 +58,8 @@ export type ImportEntry = {
   readonly degreeForms?: ReadonlyArray<string>;
   /** The headword's grammar as a UD feature string (`Gender=Masc`), for nouns and verbs. */
   readonly features?: string;
+  /** For a reflexive entry (`bawić się`), the verb it belongs to (`bawić`). */
+  readonly reflexiveOf?: string;
 };
 
 /** A sense like "diminutive of kotek", which needs the meaning of its base. */
@@ -100,6 +102,8 @@ export type TransformResult = {
    * only senses belong to a historical stage (`książę`).
    */
   readonly historicalEntry?: ImportEntry;
+  /** The word's reflexive senses as entries of their own (`bawić się`), for `rules.reflexive`. */
+  readonly reflexiveEntries?: ReadonlyArray<ImportEntry>;
   readonly formOf: ReadonlyArray<FormOfLink>;
   /** Distinct parent glosses of this line, to spot new templates across words. */
   readonly parentGlosses: ReadonlyArray<string>;
@@ -372,6 +376,21 @@ const lineFeatures = (
   );
 };
 
+const VALENCY = /\b(?:transitive|intransitive|ambitransitive|ditransitive)\b/u;
+
+/**
+ * The particle of a sense Wiktionary labels "(reflexive with się, ...)":
+ * `się`, `sobie`. Undefined for other senses, and for a bare `reflexive`
+ * tag, which doesn't say which particle.
+ */
+const reflexiveParticle = (sense: WiktextractSense): string | undefined => {
+  const label = /^\(([^)]*)\)/u.exec(sense.raw_glosses?.[0] ?? "")?.[1];
+  // "(transitive, reflexive with się) to guard": the plain verb means it too.
+  return label === undefined || VALENCY.test(label)
+    ? undefined
+    : /(?:^|,\s*)reflexive with (\p{L}+)(?:,|$)/u.exec(label)?.[1];
+};
+
 /** Pure mapping of one wiktextract line (already known to be `rules.code`). */
 export const transformEntry = (
   rules: LanguageRules,
@@ -393,9 +412,27 @@ export const transformEntry = (
   const historicalSenses = makeSenseGroups();
   const parentGlosses = new Set<string>();
   const derived: Array<DerivedSense> = [];
+  /** particle -> the reflexive senses with it, as an entry of their own */
+  const reflexive = new Map<
+    string,
+    { senses: ReturnType<typeof makeSenseGroups>; derived: Array<DerivedSense> }
+  >();
 
   for (const sense of raw.senses ?? []) {
     const outcome = classifySense(rules, lemma, sense);
+    const particle =
+      rules.reflexive === undefined ? undefined : reflexiveParticle(sense);
+    let own = { senses, derived };
+    if (
+      particle !== undefined &&
+      (outcome.kind === "gloss" || outcome.kind === "derived")
+    ) {
+      own = reflexive.get(particle) ?? {
+        senses: makeSenseGroups(),
+        derived: [],
+      };
+      reflexive.set(particle, own);
+    }
     switch (outcome.kind) {
       case "skip": {
         skippedSenses[outcome.reason]++;
@@ -408,9 +445,9 @@ export const transformEntry = (
         break;
       }
       case "derived": {
-        senses.add([outcome.gloss]);
+        own.senses.add([outcome.gloss]);
         const bases = outcome.bases.filter((b) => b !== "" && b !== lemmaKey);
-        if (bases.length > 0) derived.push({ gloss: outcome.gloss, bases });
+        if (bases.length > 0) own.derived.push({ gloss: outcome.gloss, bases });
         break;
       }
       case "link":
@@ -440,7 +477,7 @@ export const transformEntry = (
           }
         }
         path.slice(0, -1).forEach((parent) => parentGlosses.add(parent));
-        senses.add(
+        own.senses.add(
           path,
           synonymTargets(rules, outcome.gloss, sense.links ?? []).filter(
             (word) => lookupKey(word) !== lemmaKey,
@@ -470,23 +507,38 @@ export const transformEntry = (
   const makeEntry = (
     entrySenses: ReadonlyArray<ImportSense>,
     derivedSenses: ReadonlyArray<DerivedSense>,
+    particle?: string,
   ): ImportEntry => ({
-    lemma: shownLemma,
+    lemma:
+      particle === undefined
+        ? shownLemma
+        : rules.reflexive === "before"
+          ? `${particle} ${shownLemma}`
+          : `${shownLemma} ${particle}`,
     pos: toUdPos(raw.pos),
     sourcePos: isLetterName(lemma, entrySenses) ? LETTER_NAME_POS : raw.pos,
     etymology: toEtymology(raw.etymology_number),
     senses: entrySenses,
     pronunciations: pickPronunciations(rules, raw.sounds ?? []),
-    forms,
+    // A reflexive entry is found by the verb's forms, the verb itself included.
+    forms: particle === undefined ? forms : [...new Set([lemmaKey, ...forms])],
     derived: derivedSenses,
     verbalNouns: (raw.forms ?? [])
       .filter(isVerbalNounForm)
       .map((form) => lookupKey(form.form)),
     degreeForms: degreeOnlyForms(raw.forms ?? []),
     ...(features !== undefined ? { features } : {}),
+    ...(particle !== undefined ? { reflexiveOf: shownLemma } : {}),
   });
 
-  if (senses.groups.size === 0) {
+  const reflexiveEntries = [...reflexive].flatMap(([particle, own]) =>
+    own.senses.groups.size > 0
+      ? [makeEntry(own.senses.senses(), own.derived, particle)]
+      : [],
+  );
+  const withReflexive = reflexiveEntries.length > 0 ? { reflexiveEntries } : {};
+
+  if (senses.groups.size === 0 && reflexiveEntries.length === 0) {
     // No entry here, so this word's table belongs to the word it points at.
     const targets = new Map(dedupeLinks(formOf).map((l) => [l.lemma, l]));
     const tableLinks = forms.flatMap((form) =>
@@ -508,7 +560,9 @@ export const transformEntry = (
 
   const links = dedupeLinks(formOf);
   return {
-    entry: makeEntry(senses.senses(), derived),
+    entry:
+      senses.groups.size > 0 ? makeEntry(senses.senses(), derived) : undefined,
+    ...withReflexive,
     formOf: links,
     parentGlosses: [...parentGlosses],
     skippedSenses,

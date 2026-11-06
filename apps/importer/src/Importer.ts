@@ -121,7 +121,12 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     try: () => options.grammar ?? loadGrammar(rules.code),
     catch: importFailure("cannot read the grammar file"),
   });
-  const writer = makeWriter(db, grammar, rules.optionalLetters);
+  const writer = makeWriter(
+    db,
+    grammar,
+    rules.optionalLetters,
+    rules.reflexive !== undefined,
+  );
   const tally = makeTally();
 
   const logProgress = () =>
