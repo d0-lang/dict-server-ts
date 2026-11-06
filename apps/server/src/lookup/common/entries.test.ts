@@ -31,7 +31,7 @@ const ranked = (
 ) => {
   const db = createDictionaryFile(":memory:");
   rows.forEach(([lemma, pos, sourcePos, form, source], i) => {
-    db.$client.run("INSERT OR IGNORE INTO entries VALUES (?, ?, ?, ?, 0, ?)", [
+    db.$client.run("INSERT OR IGNORE INTO entries VALUES (?, ?, ?, ?, 0, ?, NULL)", [
       i + 1,
       lemma,
       pos,

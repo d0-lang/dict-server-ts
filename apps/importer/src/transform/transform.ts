@@ -1,3 +1,8 @@
+import {
+  featuresOfTags,
+  FEATURE_POS,
+  formatFeatures,
+} from "@dict/core/features";
 import { cleanWord, lookupKey } from "@dict/core/lookupKey";
 import type { PronKind, UdPos } from "@dict/core/schema";
 import { isHistorical, type LanguageRules } from "./languages.ts";
@@ -51,6 +56,8 @@ export type ImportEntry = {
   readonly verbalNouns: ReadonlyArray<string>;
   /** Normalized forms the table only ever tags comparative or superlative (`besser`; not `neuer`, also a plain form of `neu`). */
   readonly degreeForms?: ReadonlyArray<string>;
+  /** The headword's grammar as a UD feature string (`Gender=Masc`), for nouns and verbs. */
+  readonly features?: string;
 };
 
 /** A sense like "diminutive of kotek", which needs the meaning of its base. */
@@ -316,12 +323,53 @@ const collectForms = (
 };
 
 const isDegreeForm = (form: WiktextractForm): boolean =>
-  form.tags?.some((tag) => tag === "comparative" || tag === "superlative") ?? false;
+  form.tags?.some((tag) => tag === "comparative" || tag === "superlative") ??
+  false;
 
 /** Forms the table only ever tags comparative or superlative. */
-const degreeOnlyForms = (forms: ReadonlyArray<WiktextractForm>): ReadonlyArray<string> => {
-  const plain = new Set(forms.filter((form) => !isDegreeForm(form)).map((form) => lookupKey(form.form)));
-  return [...new Set(forms.filter(isDegreeForm).map((form) => lookupKey(form.form)))].filter((form) => !plain.has(form));
+const degreeOnlyForms = (
+  forms: ReadonlyArray<WiktextractForm>,
+): ReadonlyArray<string> => {
+  const plain = new Set(
+    forms
+      .filter((form) => !isDegreeForm(form))
+      .map((form) => lookupKey(form.form)),
+  );
+  return [
+    ...new Set(forms.filter(isDegreeForm).map((form) => lookupKey(form.form))),
+  ].filter((form) => !plain.has(form));
+};
+
+/**
+ * The grammar of a noun or verb line: what the word's own tags, its canonical
+ * form's tags (Russian) and the tags every sense shares (German, Polish) say.
+ * A tag on only some senses describes those senses, not the word (`Apfel` is
+ * not plural-only because one sense is).
+ */
+const lineFeatures = (
+  raw: WiktextractEntry,
+  pos: UdPos,
+): string | undefined => {
+  if (!FEATURE_POS.has(pos)) return undefined;
+  const senses = (raw.senses ?? []).filter(
+    (sense) =>
+      !sense.tags?.includes("form-of") && !sense.tags?.includes("alt-of"),
+  );
+  const shared = senses.reduce<ReadonlySet<string> | undefined>(
+    (common, sense) => {
+      const tags = new Set(sense.tags ?? []);
+      return common === undefined
+        ? tags
+        : new Set([...common].filter((tag) => tags.has(tag)));
+    },
+    undefined,
+  );
+  const canonical = (raw.forms ?? [])
+    .filter((form) => form.tags?.includes("canonical"))
+    .flatMap((form) => form.tags ?? []);
+  return formatFeatures(
+    featuresOfTags([...(raw.tags ?? []), ...canonical, ...(shared ?? [])]),
+  );
 };
 
 /** Pure mapping of one wiktextract line (already known to be `rules.code`). */
@@ -418,6 +466,7 @@ export const transformEntry = (
       });
     }
   }
+  const features = lineFeatures(raw, toUdPos(raw.pos));
   const makeEntry = (
     entrySenses: ReadonlyArray<ImportSense>,
     derivedSenses: ReadonlyArray<DerivedSense>,
@@ -434,6 +483,7 @@ export const transformEntry = (
       .filter(isVerbalNounForm)
       .map((form) => lookupKey(form.form)),
     degreeForms: degreeOnlyForms(raw.forms ?? []),
+    ...(features !== undefined ? { features } : {}),
   });
 
   if (senses.groups.size === 0) {
@@ -481,7 +531,10 @@ const stressedLemma = (
   for (const form of forms) {
     if (!(form.tags ?? []).includes("canonical")) continue;
     const written = cleanWord(form.form);
-    const plain = written.normalize("NFD").replace(STRESS_MARKS, "").normalize("NFC");
+    const plain = written
+      .normalize("NFD")
+      .replace(STRESS_MARKS, "")
+      .normalize("NFC");
     if (plain === lemma && written !== lemma) return written;
   }
   return lemma;
@@ -501,8 +554,7 @@ const isLetterName = (
   lemma: string,
   senses: ReadonlyArray<ImportSense>,
 ): boolean =>
-  [...lemma].length === 1 &&
-  LETTER_NAME.test(senses[0]?.translations[0] ?? "");
+  [...lemma].length === 1 && LETTER_NAME.test(senses[0]?.translations[0] ?? "");
 
 /** How weak a link is: a pointer or a marked spelling is weaker than a plain link. */
 const weakness = (link: FormOfLink): number =>

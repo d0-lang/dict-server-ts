@@ -590,4 +590,56 @@ describe("transformEntry", () => {
     );
     assert.deepStrictEqual(result.entry?.forms, ["fiel"]);
   });
+
+  it("reads a noun's or verb's grammar wherever the language puts it", () => {
+    const features = (patch: Partial<WiktextractEntry>, rules = pl) =>
+      transformEntry(rules, entry(patch)).entry?.features;
+    // German and Polish: on every sense
+    assert.strictEqual(
+      features(
+        {
+          word: "See",
+          lang_code: "de",
+          senses: [
+            { glosses: ["sea, ocean"], tags: ["feminine", "singular-only"] },
+            { glosses: ["swell"], tags: ["feminine"] },
+          ],
+        },
+        de,
+      ),
+      "Gender=Fem",
+    );
+    // Russian: on the canonical form
+    assert.strictEqual(
+      features(
+        {
+          word: "сделать",
+          pos: "verb",
+          lang_code: "ru",
+          forms: [{ form: "сде́лать", tags: ["canonical", "perfective"] }],
+          senses: [{ glosses: ["to do"] }],
+        },
+        ru,
+      ),
+      "Aspect=Perf",
+    );
+    // a tag on only some senses describes them, not the word
+    assert.isUndefined(
+      features({
+        word: "jabłko",
+        senses: [
+          { glosses: ["apple"] },
+          { glosses: ["apples"], tags: ["plural-only"] },
+        ],
+      }),
+    );
+    // names get no grammar
+    assert.isUndefined(
+      features({
+        word: "Czech",
+        pos: "name",
+        senses: [{ glosses: ["a surname"], tags: ["masculine"] }],
+      }),
+    );
+  });
 });

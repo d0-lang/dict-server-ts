@@ -6,6 +6,7 @@ One SQLite file per language pair, `data/<source>_<target>.sqlite` (e.g. `data/r
 |---|---|
 | `schema.sql` | The DDL, run as is on an empty file |
 | `format.json` | The schema version, and the codes stored in the integer and text columns |
+| `features.json` | The grammar features an entry can have, and the wiktextract tags that give them |
 | `lookup-key.jsonl` | Test vectors for the two normalizations every reader and writer must share: `lookupKey` and `caseClass` |
 
 `packages/core` mirrors these files in TypeScript, and its tests fail when the two drift apart.
@@ -23,6 +24,7 @@ One SQLite file per language pair, `data/<source>_<target>.sqlite` (e.g. `data/r
   - `source_pos`: the raw wiktextract part of speech (`noun`, `name`, `phrase`, …), or one of the importer's own values in `sourcePos`: `grammar` marks entries from a language's hand-written `languages/<lang>/grammar.tsv`, and `letter-name` marks entries that name a letter.
   - `etymology`: wiktextract's etymology number, 0 when the word has one etymology.
   - `case_class`: `caseClass` of the lemma (see below).
+  - `features`: the headword's grammar as a Universal Dependencies feature string, names sorted, several values of one feature joined by a comma (`Animacy=Anim|Gender=Fem`, `Aspect=Imp,Perf`), or null. Only nouns and verbs have them; `features.json` lists the names and values. Lines of the source that differ in them are different words (`See` with `Gender=Masc` "lake" and with `Gender=Fem` "sea") and get separate entries.
 - **`senses`**: ordered by `idx` within an entry. `translations` is a JSON array of strings and is never empty. `see` is a JSON array of words that have entries, or null.
 - **`pronunciations`**: ordered by `idx`, with `kind` from `pronKinds`. `ipa` and `audio` rows become the protocol's `pron.ipa[]` and `pron.audio[]`. An entry has at most one `reading`.
 - **`forms`**: the deinflection index, `lookupKey(surface form) → entry`. The lemma itself is a row too, so a lookup is one primary-key prefix scan. `source` is a code from `formSource`:

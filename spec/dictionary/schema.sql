@@ -16,7 +16,8 @@ CREATE TABLE entries (
   pos        TEXT NOT NULL,
   source_pos TEXT NOT NULL,
   etymology  INTEGER NOT NULL,
-  case_class INTEGER NOT NULL
+  case_class INTEGER NOT NULL,
+  features   TEXT
 );
 
 CREATE TABLE senses (

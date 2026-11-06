@@ -34,7 +34,7 @@ export const dictionary = (words: ReadonlyArray<Word>): DictionaryDb => {
   words.forEach(
     ([lemma, pos, forms = [], glosses = [`[${lemma}]`], sourcePos = ""], i) => {
       const id = i + 1;
-      db.$client.run("INSERT INTO entries VALUES (?, ?, ?, ?, 0, ?)", [
+      db.$client.run("INSERT INTO entries VALUES (?, ?, ?, ?, 0, ?, NULL)", [
         id,
         lemma,
         pos,

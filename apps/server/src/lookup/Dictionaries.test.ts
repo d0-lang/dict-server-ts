@@ -24,7 +24,8 @@ describe("Dictionaries", () => {
         const dictionaries = yield* Dictionaries;
         assert.deepStrictEqual(
           dictionaries.lookup("pl_en", "PSA").entries.map((e) => e.lemma),
-          ["pies"],
+          // the dog (animate) and the chaff stick (inanimate) are two words
+          ["pies", "pies"],
         );
         assert.deepStrictEqual(dictionaries.lookup("pl_en", "nope"), {
           entries: [],

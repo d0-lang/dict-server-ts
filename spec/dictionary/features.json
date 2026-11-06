@@ -1,0 +1,21 @@
+{
+  "features": {
+    "Gender": ["Masc", "Fem", "Neut", "Com"],
+    "Animacy": ["Anim", "Inan"],
+    "Aspect": ["Imp", "Perf"],
+    "Number": ["Ptan"]
+  },
+  "pos": ["NOUN", "VERB"],
+  "tags": {
+    "masculine": ["Gender", "Masc"],
+    "feminine": ["Gender", "Fem"],
+    "neuter": ["Gender", "Neut"],
+    "common": ["Gender", "Com"],
+    "animate": ["Animacy", "Anim"],
+    "animal-not-person": ["Animacy", "Anim"],
+    "inanimate": ["Animacy", "Inan"],
+    "imperfective": ["Aspect", "Imp"],
+    "perfective": ["Aspect", "Perf"],
+    "plural-only": ["Number", "Ptan"]
+  }
+}

@@ -16,7 +16,7 @@ import {
  * is stored as `PRAGMA user_version`. The constants here are mirrored in
  * `spec/dictionary/format.json` (checked by `format.test.ts`).
  */
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 /** Universal Dependencies part-of-speech tags (https://universaldependencies.org/u/pos/). */
 export const UD_POS = [
@@ -77,6 +77,11 @@ export const entries = sqliteTable("entries", {
   etymology: integer("etymology").notNull(),
   /** `CaseClass` of the lemma, which lookups rank by. */
   caseClass: integer("case_class").$type<CaseClass>().notNull(),
+  /**
+   * Grammar for the headword as a UD feature string (`Gender=Masc`, see
+   * `features.ts`), or null. Entries that differ in it are different words.
+   */
+  features: text("features"),
 });
 
 /**

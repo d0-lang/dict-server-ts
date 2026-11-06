@@ -52,8 +52,10 @@ describe("importWiktextract", () => {
 
       assert.strictEqual(stats.linesScanned, 18);
       assert.strictEqual(stats.languageLines, 17); // the English line is dropped
-      assert.strictEqual(stats.entries, 11);
-      assert.strictEqual(stats.mergedLines, 3); // pies x3, robić x2 -> one entry each
+      assert.strictEqual(stats.entries, 12);
+      // pies x3: the dog and its untagged "cop" line merge, the inanimate
+      // "chaff stick" is another word; robić x2 -> one entry
+      assert.strictEqual(stats.mergedLines, 2);
       assert.strictEqual(stats.linesWithoutEntry, 3); // domu, człowieki, kolera
       assert.strictEqual(stats.forms.formOf, 1);
       assert.strictEqual(stats.skippedSenses.archaic, 1);
@@ -61,7 +63,22 @@ describe("importWiktextract", () => {
       const db = yield* openDictionary(out);
       // inflection tables
       assert.deepStrictEqual(lemmas(db, "domu"), ["dom/NOUN"]);
-      assert.deepStrictEqual(lemmas(db, "PSA"), ["pies/NOUN"]);
+      // the dog and the inanimate "chaff stick" decline differently: two words
+      assert.deepStrictEqual(lemmas(db, "PSA"), ["pies/NOUN", "pies/NOUN"]);
+      assert.deepStrictEqual(
+        db.$client
+          .query<{ features: string | null }, []>(
+            "SELECT features FROM entries WHERE lemma IN ('pies', 'robić', 'dobry') ORDER BY id",
+          )
+          .all()
+          .map((row) => row.features),
+        [
+          "Animacy=Anim|Gender=Masc",
+          "Animacy=Inan|Gender=Masc",
+          null, // adjectives have no features
+          "Aspect=Imp",
+        ],
+      );
       assert.deepStrictEqual(lemmas(db, "robiłem"), ["robić/VERB"]);
       assert.deepStrictEqual(lemmas(db, "lepszy"), ["dobry/ADJ"]);
       // one entry per etymology, in source order
@@ -112,7 +129,7 @@ describe("importWiktextract", () => {
         formOfFallback: false,
         batchSize: 3,
       });
-      assert.strictEqual(stats.entries, 11);
+      assert.strictEqual(stats.entries, 12);
       assert.strictEqual(stats.forms.formOf, 0);
 
       const db = new Database(out, { readonly: true });
@@ -154,7 +171,7 @@ describe("importWiktextract", () => {
         out,
         force: true,
       });
-      assert.strictEqual(stats.entries, 11);
+      assert.strictEqual(stats.entries, 12);
     }).pipe(Effect.scoped),
   );
 

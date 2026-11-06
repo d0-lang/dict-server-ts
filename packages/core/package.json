@@ -7,7 +7,8 @@
     "./schema": "./src/schema.ts",
     "./lookupKey": "./src/lookupKey.ts",
     "./DictionaryDb": "./src/DictionaryDb.ts",
-    "./language": "./src/language.ts"
+    "./language": "./src/language.ts",
+    "./features": "./src/features.ts"
   },
   "dependencies": {
     "drizzle-orm": "0.45.4",

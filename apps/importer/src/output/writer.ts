@@ -95,7 +95,7 @@ export const makeWriter = (
   ) WITHOUT ROWID`);
 
   const insertEntry = sqlite.prepare(
-    "INSERT INTO entries (id, lemma, pos, source_pos, etymology, case_class) VALUES (?, ?, ?, ?, ?, ?)",
+    "INSERT INTO entries (id, lemma, pos, source_pos, etymology, case_class, features) VALUES (?, ?, ?, ?, ?, ?, ?)",
   );
   const insertSense = sqlite.prepare(
     "INSERT INTO senses (entry_id, idx, translations, see) VALUES (?, ?, ?, ?)",
@@ -142,8 +142,24 @@ export const makeWriter = (
   /** entry id -> forms its table tags comparative or superlative */
   const degreeFormsByEntry = new Map<number, Set<string>>();
 
+  /** word + pos + etymology -> the grammar of its last line that had any */
+  const lastFeatures = new Map<string, string>();
+
+  /**
+   * Lines with the same word, part of speech and etymology are one entry,
+   * unless their grammar differs: `See` m "lake" and `See` f "sea" are two
+   * words. A line without grammar continues the last one that had it, since
+   * wiktextract splits some entries over several lines.
+   */
+  const grammarOf = (entry: ImportEntry): string | undefined => {
+    const word = `${entry.lemma}\u0000${entry.sourcePos}\u0000${entry.etymology}`;
+    if (entry.features !== undefined) lastFeatures.set(word, entry.features);
+    return entry.features ?? lastFeatures.get(word);
+  };
+
   const writeEntry = (entry: ImportEntry) => {
-    const key = `${entry.lemma}\u0000${entry.sourcePos}\u0000${entry.etymology}`;
+    const features = grammarOf(entry);
+    const key = `${entry.lemma}\u0000${entry.sourcePos}\u0000${entry.etymology}\u0000${features ?? ""}`;
     let state = byKey.get(key);
     if (state === undefined) {
       state = { id: ++lastId, glosses: new Set(), prons: new Set() };
@@ -156,6 +172,7 @@ export const makeWriter = (
         entry.sourcePos,
         entry.etymology,
         caseClass(entry.lemma),
+        features ?? null,
       );
       insertForm.run(lookupKey(entry.lemma), state.id, FormSource.Lemma);
     } else {
@@ -209,6 +226,7 @@ export const makeWriter = (
         GRAMMAR_SOURCE_POS,
         0,
         caseClass(entry.lemma),
+        null,
       );
       insertForm.run(lookupKey(entry.lemma), id, FormSource.Lemma);
       entry.senses.forEach((sense, idx) => {

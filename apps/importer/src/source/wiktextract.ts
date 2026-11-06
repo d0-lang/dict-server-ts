@@ -49,6 +49,8 @@ export const WiktextractEntry = Schema.Struct({
   word: Schema.String,
   pos: Schema.String,
   lang_code: Schema.String,
+  /** Tags of the whole word; most languages put its gender on the senses instead. */
+  tags: Tags,
   etymology_number: Schema.optionalKey(
     Schema.Union([Schema.Number, Schema.String]),
   ),
