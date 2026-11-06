@@ -62,7 +62,9 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
             nonce: headers["x-nonce"],
             languages: [...config.languages],
             verification_urls: [...config.verificationUrls],
-            ...(config.context ? { features: ["context"] } : {}),
+            ...(config.context
+              ? { features: ["context", "context-match"] }
+              : {}),
             ...(legal !== undefined ? { legal } : {}),
           }),
         ).pipe(Effect.orDie),

@@ -158,3 +158,39 @@ export const endsClause = (
   const next = tokens[i + 1];
   return next === undefined || next.breakBefore || conjunctions.has(next.key);
 };
+
+/** An entry the context adds, and the context words (token indexes) it covers. */
+export type ContextHit = {
+  readonly id: number;
+  readonly tokens: ReadonlyArray<number>;
+};
+
+/** `hits` with each entry once, at its first hit. */
+export const uniqueHits = (
+  hits: ReadonlyArray<ContextHit>,
+): ReadonlyArray<ContextHit> => {
+  const seen = new Set<number>();
+  return hits.filter((hit) => !seen.has(hit.id) && seen.add(hit.id));
+};
+
+/**
+ * The protocol's `match`: the covered words as runs of `context` as sent,
+ * a run being words next to each other with what stands between them
+ * (`ухо востро`, `кого-нибудь`), in order.
+ */
+export const matchStrings = (
+  context: string,
+  tokens: ReadonlyArray<Token>,
+  covered: ReadonlyArray<number>,
+): ReadonlyArray<string> => {
+  const sorted = [...new Set(covered)].sort((a, b) => a - b);
+  const runs: Array<[number, number]> = [];
+  for (const i of sorted) {
+    const last = runs.at(-1);
+    if (last !== undefined && last[1] === i - 1) last[1] = i;
+    else runs.push([i, i]);
+  }
+  return runs.map(([from, to]) =>
+    context.slice(tokens[from]!.start, tokens[to]!.end),
+  );
+};

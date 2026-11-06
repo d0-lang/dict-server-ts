@@ -43,6 +43,8 @@ export const LookupEntry = Schema.Struct({
       see: Schema.optionalKey(Schema.Array(Schema.String)),
     }),
   ),
+  /** The parts of `context` an entry the context adds covers (`context-match`). */
+  match: Schema.optionalKey(Schema.Array(Schema.String)),
 });
 export type LookupEntry = typeof LookupEntry.Type;
 

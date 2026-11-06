@@ -3,7 +3,12 @@ import type { Language } from "@dict/core/language";
 import { lookupKey } from "@dict/core/lookupKey";
 import { contextRules } from "../common/contextRules.ts";
 import { type FormRow, formRows } from "../common/forms.ts";
-import { positionsOf, tokenize } from "../common/tokenize.ts";
+import {
+  positionsOf,
+  tokenize,
+  type ContextHit,
+  uniqueHits,
+} from "../common/tokenize.ts";
 
 /**
  * Ways to write the dotted run of `parts` as a form, longest first: with the
@@ -36,11 +41,11 @@ export const abbreviationEntryIds = (
   context: string,
   language: Language,
   at?: number,
-): ReadonlyArray<number> => {
+): ReadonlyArray<ContextHit> => {
   const locale = language.code;
   const leads = contextRules(language).abbreviationLeads;
   const tokens = tokenize(context, locale);
-  const ids: Array<number> = [];
+  const hits: Array<ContextHit> = [];
   for (const clicked of positionsOf(tokens, word, locale, { context, at })) {
     let first = clicked;
     let last = clicked;
@@ -50,6 +55,7 @@ export const abbreviationEntryIds = (
     // The longest run around the clicked piece that is a form: a period and a
     // space also end a sentence, so `т.д. лежали` holds `т. д.`.
     let found: ReadonlyArray<FormRow> | undefined;
+    let covered: ReadonlyArray<number> = [];
     for (
       let length = last - first + 1;
       length >= 2 && found === undefined;
@@ -74,7 +80,13 @@ export const abbreviationEntryIds = (
         found = abbreviationSpellings(parts, lead)
           .map((spelling) => formRows(db, lookupKey(spelling)))
           .find((rows) => rows.length > 0);
-        if (found !== undefined) break;
+        if (found !== undefined) {
+          covered = Array.from(
+            { length: length + (lead !== undefined ? 1 : 0) },
+            (_, k) => start - (lead !== undefined ? 1 : 0) + k,
+          );
+          break;
+        }
       }
     }
     if (found === undefined) return [];
@@ -84,8 +96,8 @@ export const abbreviationEntryIds = (
       const spelling = lookupKey(row.lemma).replace(/\s+/g, "");
       if (spellings.has(spelling)) continue;
       spellings.add(spelling);
-      ids.push(row.id);
+      hits.push({ id: row.id, tokens: covered });
     }
   }
-  return [...new Set(ids)];
+  return uniqueHits(hits);
 };

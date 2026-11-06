@@ -3,7 +3,13 @@ import type { Language } from "@dict/core/language";
 import { lookupKey } from "@dict/core/lookupKey";
 import { CaseClass } from "@dict/core/schema";
 import { type FormRow, formRows, grammarIds } from "../common/forms.ts";
-import { positionsOf, type Token, tokenize } from "../common/tokenize.ts";
+import {
+  positionsOf,
+  type Token,
+  tokenize,
+  type ContextHit,
+  uniqueHits,
+} from "../common/tokenize.ts";
 
 /** Most spellings tried for one run of hyphen-joined parts. */
 const MAX_SPELLINGS = 32;
@@ -86,7 +92,9 @@ const hyphenWordIds = (
   first: number,
   last: number,
   clicked: number,
-): ReadonlyArray<number> => {
+): ReadonlyArray<ContextHit> => {
+  const at = (ids: ReadonlyArray<number>, covered: ReadonlyArray<number>) =>
+    ids.map((id) => ({ id, tokens: covered }));
   for (let length = last - first + 1; length >= 2; length--) {
     const from = Math.max(first, clicked - length + 1);
     const to = Math.min(clicked, last - length + 1);
@@ -94,13 +102,18 @@ const hyphenWordIds = (
       const parts = tokens.slice(start, start + length);
       for (const spelling of spellings(rows, parts)) {
         const found = rows(spelling, parts[0]!.caseClass);
-        if (found.length > 0) return found.map((row) => row.id);
+        if (found.length > 0) {
+          return at(
+            found.map((row) => row.id),
+            Array.from({ length }, (_, k) => start + k),
+          );
+        }
       }
     }
   }
   // An ending written after a number (`3-го`, `1990-х`): the grammar file's ending.
   if (clicked > first && /^\p{N}+$/u.test(tokens[clicked - 1]!.key)) {
-    return grammarIds(db, `-${tokens[clicked]!.key}`);
+    return at(grammarIds(db, `-${tokens[clicked]!.key}`), [clicked]);
   }
   const others = tokens
     .slice(first, last + 1)
@@ -108,7 +121,7 @@ const hyphenWordIds = (
   if (others.some((token) => rows(token.key).length === 0)) return [];
   const key = tokens[clicked]!.key;
   const affixes = hyphenAffixes(db);
-  return [
+  const affixIds = [
     ...(clicked > first ? [`-${key}`] : []),
     ...(clicked < last ? [`${key}-`] : []),
   ]
@@ -120,6 +133,7 @@ const hyphenWordIds = (
         endings.has(row.id) ? [] : [row.id],
       );
     });
+  return at(affixIds, [clicked]);
 };
 
 /**
@@ -137,7 +151,7 @@ export const hyphenEntryIds = (
   context: string,
   language: Language,
   at?: number,
-): ReadonlyArray<number> => {
+): ReadonlyArray<ContextHit> => {
   if (!language.context.hyphenWords) return [];
   const locale = language.code;
   const tokens = tokenize(context, locale);
@@ -151,7 +165,7 @@ export const hyphenEntryIds = (
     }
     return found;
   };
-  const ids: Array<number> = [];
+  const hits: Array<ContextHit> = [];
   for (const clicked of positionsOf(tokens, word, locale, { context, at })) {
     let first = clicked;
     let last = clicked;
@@ -160,7 +174,7 @@ export const hyphenEntryIds = (
     if (first === last) return [];
     const here = hyphenWordIds(db, rows, tokens, first, last, clicked);
     if (here.length === 0) return [];
-    ids.push(...here);
+    hits.push(...here);
   }
-  return [...new Set(ids)];
+  return uniqueHits(hits);
 };

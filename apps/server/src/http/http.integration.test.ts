@@ -72,6 +72,7 @@ describe("HTTP API", () => {
     assert.deepStrictEqual(parsed.languages, ["de_en"]);
     assert.deepStrictEqual((parsed as { features?: Array<string> }).features, [
       "context",
+      "context-match",
     ]);
 
     const keyResponse = await handler(

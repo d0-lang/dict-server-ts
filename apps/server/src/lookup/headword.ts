@@ -126,6 +126,7 @@ export const presentResult = (
     lemma: string;
     pos: LookupEntry["pos"];
     labels: ReadonlyArray<string>;
+    match: ReadonlyArray<string> | undefined;
     ipa: Array<string>;
     audio: Array<string>;
     reading: string | undefined;
@@ -135,11 +136,13 @@ export const presentResult = (
   const newIndex = new Map<number, number>();
   result.entries.forEach((entry, i) => {
     const head = headwordOf(language, entry.lemma, entry.pos, entry.features);
+    // A context entry stays apart from an own entry with the same headword.
     const key = JSON.stringify([
       head.lemma,
       entry.pos,
       head.labels,
       segmentOf.get(i),
+      entry.match,
     ]);
     let at = indexOf.get(key);
     if (at === undefined) {
@@ -149,6 +152,7 @@ export const presentResult = (
         lemma: head.lemma,
         pos: entry.pos,
         labels: head.labels,
+        match: entry.match,
         ipa: [],
         audio: [],
         reading: undefined,
@@ -188,6 +192,7 @@ export const presentResult = (
       ...(entry.labels.length > 0 ? { labels: entry.labels } : {}),
       ...(Object.keys(pron).length > 0 ? { pron } : {}),
       senses: entry.senses,
+      ...(entry.match !== undefined ? { match: entry.match } : {}),
     };
   });
   const segments = result.segments?.map((segment) => {

@@ -12,6 +12,7 @@ import {
   type LookupResult,
 } from "./common/entries.ts";
 import { findEntriesWithCompounds } from "./features/compounds/lookup.ts";
+import { type ContextHit, matchStrings, tokenize } from "./common/tokenize.ts";
 import { articleLookup, presentResult } from "./headword.ts";
 
 /**
@@ -50,30 +51,41 @@ const contextLookup = (
   const base = findEntriesWithCompounds(db, word, compoundRules(language));
   if (context === undefined || context.trim() === "") return base;
 
-  const phraseIds = phraseEntryIds(db, word, context, language, at);
-  const abbreviationIds = abbreviationEntryIds(
+  const among = (hits: ReadonlyArray<ContextHit>) => (hit: ContextHit) =>
+    hits.some((other) => other.id === hit.id);
+  const phraseHits = phraseEntryIds(db, word, context, language, at);
+  const abbreviationHits = abbreviationEntryIds(
     db,
     word,
     context,
     language,
     at,
-  ).filter((id) => !phraseIds.includes(id));
-  const hyphenIds = hyphenEntryIds(db, word, context, language, at).filter(
-    (id) => !phraseIds.includes(id) && !abbreviationIds.includes(id),
+  ).filter((hit) => !among(phraseHits)(hit));
+  const hyphenHits = hyphenEntryIds(db, word, context, language, at).filter(
+    (hit) => !among(phraseHits)(hit) && !among(abbreviationHits)(hit),
   );
-  const separableIds = language.context.separableVerbs
+  const separableHits = language.context.separableVerbs
     ? separableEntryIds(db, word, context, language, at).filter(
-        (id) => !phraseIds.includes(id),
+        (hit) => !among(phraseHits)(hit),
       )
     : [];
+  const hits = [
+    ...phraseHits,
+    ...abbreviationHits,
+    ...hyphenHits,
+    ...separableHits,
+  ];
+  // The features' token indexes are into this same tokenization.
+  const tokens = tokenize(context, language.code);
   const seen = new Set<string>();
   const first = dropLiteralPointers(
-    loadEntries(db, [
-      ...phraseIds,
-      ...abbreviationIds,
-      ...hyphenIds,
-      ...separableIds,
-    ]),
+    loadEntries(
+      db,
+      hits.map((hit) => hit.id),
+    ).map((entry, i) => ({
+      ...entry,
+      match: matchStrings(context, tokens, hits[i]!.tokens),
+    })),
   ).filter((entry) => {
     const id = entryId(entry);
     if (seen.has(id)) return false;

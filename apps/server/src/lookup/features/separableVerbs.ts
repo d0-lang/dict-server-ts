@@ -3,7 +3,13 @@ import type { Language } from "@dict/core/language";
 import { lookupKey } from "@dict/core/lookupKey";
 import { contextRules } from "../common/contextRules.ts";
 import { formRows } from "../common/forms.ts";
-import { endsClause, positionsOf, tokenize } from "../common/tokenize.ts";
+import {
+  endsClause,
+  positionsOf,
+  tokenize,
+  type ContextHit,
+  uniqueHits,
+} from "../common/tokenize.ts";
 
 /** Verb entries of `particle` + `verb`, joined (`statt` + `fand`) or as a two-word form (`rief an`). */
 const separableIds = (
@@ -37,18 +43,20 @@ export const separableEntryIds = (
   context: string,
   language: Language,
   at?: number,
-): ReadonlyArray<number> => {
+): ReadonlyArray<ContextHit> => {
   const locale = language.code;
   const { conjunctions } = contextRules(language);
   const tokens = tokenize(context, locale);
-  const ids: Array<number> = [];
+  const hits: Array<ContextHit> = [];
+  const add = (ids: ReadonlyArray<number>, verb: number, particle: number) =>
+    hits.push(...ids.map((id) => ({ id, tokens: [verb, particle] })));
   for (const clicked of positionsOf(tokens, word, locale, { context, at })) {
     const { key, clause } = tokens[clicked]!;
     // The clicked word is the verb: its particle ends the clause.
     for (let j = clicked + 1; j < tokens.length; j++) {
       if (tokens[j]!.clause !== clause) break;
       if (endsClause(tokens, j, conjunctions)) {
-        ids.push(...separableIds(db, key, tokens[j]!.key));
+        add(separableIds(db, key, tokens[j]!.key), clicked, j);
         break;
       }
     }
@@ -58,11 +66,11 @@ export const separableEntryIds = (
         if (tokens[j]!.clause !== clause) break;
         const found = separableIds(db, tokens[j]!.key, key);
         if (found.length > 0) {
-          ids.push(...found);
+          add(found, j, clicked);
           break;
         }
       }
     }
   }
-  return [...new Set(ids)];
+  return uniqueHits(hits);
 };

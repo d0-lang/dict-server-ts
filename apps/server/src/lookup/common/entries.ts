@@ -21,6 +21,8 @@ export type LookupEntry = {
   readonly pos: UdPos;
   readonly features?: string;
   readonly labels?: ReadonlyArray<string>;
+  /** For an entry the context adds: the parts of `context` it covers. */
+  readonly match?: ReadonlyArray<string>;
   readonly pron?: {
     readonly ipa?: ReadonlyArray<string>;
     readonly audio?: ReadonlyArray<string>;

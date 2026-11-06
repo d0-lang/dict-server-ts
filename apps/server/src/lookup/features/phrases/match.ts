@@ -8,6 +8,8 @@ import {
   positionsOf,
   type Token,
   tokenize,
+  type ContextHit,
+  uniqueHits,
 } from "../../common/tokenize.ts";
 import { type Phrase, phraseIndex } from "./phraseIndex.ts";
 
@@ -317,7 +319,7 @@ export const phraseEntryIds = (
   context: string,
   language: Language,
   at?: number,
-): ReadonlyArray<number> => {
+): ReadonlyArray<ContextHit> => {
   const locale = language.code;
   const tokens = tokenize(context, locale);
   const positions = positionsOf(tokens, word, locale, { context, at });
@@ -351,11 +353,14 @@ export const phraseEntryIds = (
       }
     }
   }
-  const ids = [...matches.values()]
-    .sort(rank)
-    .slice(0, MAX_PHRASES)
-    .flatMap((match) => match.phrase.entryIds);
-  return [...new Set(ids)];
+  return uniqueHits(
+    [...matches.values()]
+      .sort(rank)
+      .slice(0, MAX_PHRASES)
+      .flatMap((match) =>
+        match.phrase.entryIds.map((id) => ({ id, tokens: match.placed })),
+      ),
+  );
 };
 
 const rank = (a: PhraseMatch, b: PhraseMatch): number =>

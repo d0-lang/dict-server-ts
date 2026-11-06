@@ -20,6 +20,7 @@ describe("lookup with context", () => {
       lemma: "w tym",
       pos: "ADP",
       senses: [{ translations: ["including"] }],
+      match: ["w tym"],
     });
   });
 
