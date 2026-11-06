@@ -16,6 +16,9 @@ export type Token = {
   readonly dottedBefore: boolean;
   /** Only a comma stands between this word and the one before. */
   readonly commaBefore: boolean;
+  /** Where the word starts and ends in the text, as UTF-16 indexes. */
+  readonly start: number;
+  readonly end: number;
 };
 
 /** Punctuation that ends a clause. A period also ends abbreviations, which only costs a missed match. */
@@ -70,7 +73,10 @@ export const tokenize = (
         : [{ segment, isWordLike: isWordLike === true, inner: false }],
   );
   let innerOnly = true;
+  let offset = 0;
   for (const { segment, isWordLike, inner } of segments) {
+    const start = offset;
+    offset += segment.length;
     if (!isWordLike) {
       between += segment;
       innerOnly &&= inner;
@@ -89,6 +95,8 @@ export const tokenize = (
       joinedBefore: tokens.length > 0 && JOINING_HYPHEN.test(between),
       dottedBefore: tokens.length > 0 && ABBREVIATION_PERIOD.test(between),
       commaBefore: tokens.length > 0 && between.trim() === ",",
+      start,
+      end: offset,
     });
     between = "";
     innerOnly = true;
@@ -96,15 +104,46 @@ export const tokenize = (
   return tokens;
 };
 
-/** Context words equal to `word`; a word the client sent with spaces is not looked for. */
+/** Where the client clicked: the context as sent, and `at` from the protocol. */
+export type Click = {
+  readonly context: string;
+  /** Which copy of the word in `context` was clicked, from 1. */
+  readonly at?: number;
+};
+
+/**
+ * Where the `at`-th copy of `word` starts in `context`: copies are counted
+ * left to right without overlap, on the string as sent, as the protocol says.
+ */
+const copyStart = (context: string, word: string, at: number): number => {
+  let start = -word.length;
+  for (let n = 0; n < at; n++) {
+    start = context.indexOf(word, start + word.length);
+    if (start < 0) return -1;
+  }
+  return start;
+};
+
+/**
+ * Context words equal to `word`; a word the client sent with spaces is not
+ * looked for. With `at`, only the clicked one, if `at` points at such a word;
+ * an `at` that points elsewhere is ignored.
+ */
 export const positionsOf = (
   tokens: ReadonlyArray<Token>,
   word: string,
   locale: string,
+  click?: Click,
 ): ReadonlyArray<number> => {
   const own = tokenize(word, locale);
   if (own.length !== 1) return [];
-  return tokens.flatMap((token, i) => (token.key === own[0]!.key ? [i] : []));
+  const all = tokens.flatMap((token, i) =>
+    token.key === own[0]!.key ? [i] : [],
+  );
+  if (click?.at === undefined || word === "") return all;
+  const start = copyStart(click.context, word, click.at);
+  const clicked = all.find((i) => tokens[i]!.start === start);
+  return clicked === undefined ? all : [clicked];
 };
 
 /**

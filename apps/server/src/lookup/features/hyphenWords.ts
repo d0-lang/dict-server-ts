@@ -125,8 +125,8 @@ const hyphenWordIds = (
 /**
  * Entry ids of the hyphen-joined word `word` is part of in `context`, in
  * languages that write words that way (`context.hyphenWords`): `что` or `нибудь` in
- * `что-нибудь`. The client doesn't say which occurrence was clicked, so
- * every occurrence must be part of a hyphen-joined word that has entries:
+ * `что-нибудь`. Without `at`, the client doesn't say which occurrence was
+ * clicked, so every occurrence must be part of a hyphen-joined word that has entries:
  * not `восток` in `на восток и северо-восток`, nor `веб` in
  * `веб-разработчиков ... веб-сайтов`. Then each one's entries count
  * (`по-русски, по-немецки`).
@@ -136,6 +136,7 @@ export const hyphenEntryIds = (
   word: string,
   context: string,
   language: Language,
+  at?: number,
 ): ReadonlyArray<number> => {
   if (!language.context.hyphenWords) return [];
   const locale = language.code;
@@ -151,7 +152,7 @@ export const hyphenEntryIds = (
     return found;
   };
   const ids: Array<number> = [];
-  for (const clicked of positionsOf(tokens, word, locale)) {
+  for (const clicked of positionsOf(tokens, word, locale, { context, at })) {
     let first = clicked;
     let last = clicked;
     while (tokens[first]!.joinedBefore) first--;

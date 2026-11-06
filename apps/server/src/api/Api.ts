@@ -34,6 +34,8 @@ export class DictApi extends HttpApiGroup.make("dict")
         lang: Schema.optionalKey(Schema.String),
         // The sentence around `word`. Never logged: the logger drops the query string.
         context: Schema.optionalKey(Schema.String),
+        // Which copy of `word` in `context` was clicked, from 1.
+        at: Schema.optionalKey(Schema.String),
       },
       success: LookupResponse,
       error: LookupError,

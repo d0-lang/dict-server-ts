@@ -12,11 +12,15 @@ import type { LookupBody } from "../domain/schemas.ts";
 export class Dictionaries extends Context.Service<
   Dictionaries,
   {
-    /** `context` is the sentence around `word`, when the client sent one. */
+    /**
+     * `context` is the sentence around `word`, when the client sent one, and
+     * `at` which copy of `word` in it was clicked.
+     */
     readonly lookup: (
       pair: string,
       word: string,
       context?: string,
+      at?: number,
     ) => LookupBody;
   }
 >()("server/dictionary/Dictionaries") {
@@ -44,11 +48,11 @@ export class Dictionaries extends Context.Service<
           files.set(pair, { db, language });
         }
         return Dictionaries.of({
-          lookup: (pair, word, sentence) => {
+          lookup: (pair, word, sentence, at) => {
             const file = files.get(pair);
             return file === undefined
               ? { entries: [] }
-              : lookupWord(file.db, file.language, word, sentence);
+              : lookupWord(file.db, file.language, word, sentence, at);
           },
         });
       }),

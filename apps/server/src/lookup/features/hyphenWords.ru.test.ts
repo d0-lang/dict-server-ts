@@ -60,4 +60,19 @@ describe("lookup with context", () => {
       ["восток"],
     );
   });
+
+  it("joins the clicked part only, when the client says which one (`at`)", () => {
+    const context = "Шли на восток и северо-восток.";
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "восток", context, 1), [
+      "восток",
+    ]);
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "восток", context, 2), [
+      "северо-восток",
+      "восток",
+    ]);
+    // an `at` past the last copy is ignored
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "восток", context, 3), [
+      "восток",
+    ]);
+  });
 });

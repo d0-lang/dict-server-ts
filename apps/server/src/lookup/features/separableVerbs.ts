@@ -36,12 +36,13 @@ export const separableEntryIds = (
   word: string,
   context: string,
   language: Language,
+  at?: number,
 ): ReadonlyArray<number> => {
   const locale = language.code;
   const { conjunctions } = contextRules(language);
   const tokens = tokenize(context, locale);
   const ids: Array<number> = [];
-  for (const clicked of positionsOf(tokens, word, locale)) {
+  for (const clicked of positionsOf(tokens, word, locale, { context, at })) {
     const { key, clause } = tokens[clicked]!;
     // The clicked word is the verb: its particle ends the clause.
     for (let j = clicked + 1; j < tokens.length; j++) {

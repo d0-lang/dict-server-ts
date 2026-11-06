@@ -81,7 +81,8 @@ export const lemmas = (
   pair: string,
   word: string,
   context?: string,
+  at?: number,
 ) =>
-  lookupWord(db, languageOf(pair), word, context).entries.map(
+  lookupWord(db, languageOf(pair), word, context, at).entries.map(
     (entry) => entry.lemma,
   );

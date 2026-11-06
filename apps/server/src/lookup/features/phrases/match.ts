@@ -316,10 +316,11 @@ export const phraseEntryIds = (
   word: string,
   context: string,
   language: Language,
+  at?: number,
 ): ReadonlyArray<number> => {
   const locale = language.code;
   const tokens = tokenize(context, locale);
-  const positions = positionsOf(tokens, word, locale);
+  const positions = positionsOf(tokens, word, locale, { context, at });
   if (positions.length === 0) return [];
   const index = phraseIndex(db, language);
   const info = tokenInfos(db);

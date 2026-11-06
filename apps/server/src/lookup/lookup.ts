@@ -45,22 +45,24 @@ const contextLookup = (
   language: Language,
   word: string,
   context?: string,
+  at?: number,
 ): LookupResult => {
   const base = findEntriesWithCompounds(db, word, compoundRules(language));
   if (context === undefined || context.trim() === "") return base;
 
-  const phraseIds = phraseEntryIds(db, word, context, language);
+  const phraseIds = phraseEntryIds(db, word, context, language, at);
   const abbreviationIds = abbreviationEntryIds(
     db,
     word,
     context,
     language,
+    at,
   ).filter((id) => !phraseIds.includes(id));
-  const hyphenIds = hyphenEntryIds(db, word, context, language).filter(
+  const hyphenIds = hyphenEntryIds(db, word, context, language, at).filter(
     (id) => !phraseIds.includes(id) && !abbreviationIds.includes(id),
   );
   const separableIds = language.context.separableVerbs
-    ? separableEntryIds(db, word, context, language).filter(
+    ? separableEntryIds(db, word, context, language, at).filter(
         (id) => !phraseIds.includes(id),
       )
     : [];
@@ -112,6 +114,7 @@ export const lookupWord = (
   language: Language,
   word: string,
   context?: string,
+  at?: number,
 ): LookupResult => {
   const article = articleLookup(language, word);
   if (article !== undefined) {
@@ -125,6 +128,6 @@ export const lookupWord = (
   return presentResult(
     db,
     language,
-    contextLookup(db, language, word, context),
+    contextLookup(db, language, word, context, at),
   );
 };

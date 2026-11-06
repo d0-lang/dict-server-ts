@@ -77,12 +77,19 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
                     query.lang,
                     query.word,
                     config.context ? query.context : undefined,
+                    config.context ? clickedCopy(query.at) : undefined,
                   ),
                 ),
               ),
     });
   }),
 );
+
+/** `at` as a number; anything but a positive integer is ignored, as if it weren't sent. */
+const clickedCopy = (at: string | undefined): number | undefined => {
+  const n = at === undefined ? NaN : Number(at);
+  return Number.isInteger(n) && n > 0 ? n : undefined;
+};
 
 /** In-memory handlers for tests: a stub dictionary and `de_en`, whatever is in `data/`. */
 export const DictHandlersMemory = DictHandlersNoDeps.pipe(

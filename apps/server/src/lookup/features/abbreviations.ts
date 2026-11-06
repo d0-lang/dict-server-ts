@@ -26,21 +26,22 @@ const abbreviationSpellings = (
  * any language (with the word before it when that is one of the language's
  * `context.abbreviationLeads`): `т` or `д` in `т.д.` (browsers send the piece alone),
  * `z` in `z.B.`. The pieces are the run of words joined by a period and at
- * most one space. As with hyphenated words, the client doesn't say which
- * occurrence was clicked, so every occurrence must be a piece of an
- * abbreviation the dictionary has.
+ * most one space. As with hyphenated words, without `at` the client
+ * doesn't say which occurrence was clicked, so every occurrence must be a
+ * piece of an abbreviation the dictionary has.
  */
 export const abbreviationEntryIds = (
   db: DictionaryDb,
   word: string,
   context: string,
   language: Language,
+  at?: number,
 ): ReadonlyArray<number> => {
   const locale = language.code;
   const leads = contextRules(language).abbreviationLeads;
   const tokens = tokenize(context, locale);
   const ids: Array<number> = [];
-  for (const clicked of positionsOf(tokens, word, locale)) {
+  for (const clicked of positionsOf(tokens, word, locale, { context, at })) {
     let first = clicked;
     let last = clicked;
     while (tokens[first]!.dottedBefore) first--;
