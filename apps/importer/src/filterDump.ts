@@ -9,7 +9,7 @@ import { parseLine } from "./source/wiktextract.ts";
 const BATCH_LINES = 1000;
 
 export type FilterOptions = {
-  /** wiktextract `lang_code`, must be configured in `languages.ts` */
+  /** wiktextract `lang_code`; needs `languages/<lang>/language.toml` */
   readonly lang: string;
   /** local path or http(s) URL; `.gz` is decompressed while streaming */
   readonly input: string;

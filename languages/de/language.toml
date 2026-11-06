@@ -1,0 +1,31 @@
+#:schema ../../spec/language.schema.json
+# German. Settings left out take their defaults (spec/language.schema.json).
+
+code = "de"
+name = "German"
+target = "en"
+
+[import]
+# Middle and Old High German are separate languages in the dump (gmh, goh),
+# not tags on German senses.
+historicalStages = []
+standardPronNotes = []
+
+[context]
+# The rest of a verb phrase goes to the end of the clause (`Er nimmt an der
+# Sitzung teil`), so a verb phrase's words may stand apart in German order.
+verbBracket = true
+# Reflexive pronouns a phrase's `sich` stands for.
+reflexives = ["sich", "mich", "dich", "uns", "euch", "mir", "dir"]
+
+[context.separable]
+# Separable verbs: the finite verb with its particle at the end of the clause
+# (`Er fand gestern statt` -> `stattfinden`). These words may follow a
+# clause-final particle without punctuation.
+conjunctions = ["und", "oder", "aber", "sondern", "denn", "sowie", "bzw"]
+
+[compounds]
+# Compounds are written as one word (`Gemüse|s|fonds`); a word without an
+# entry is split into known parts. Linking elements, tried in order; "" is a
+# plain join.
+linkers = ["", "s", "es", "n", "en", "er", "e", "ens"]

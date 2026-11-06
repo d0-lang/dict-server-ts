@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { LANGUAGES_DIR } from "@dict/core/language";
 import { cleanWord } from "@dict/core/lookupKey";
 import { UD_POS, type UdPos } from "@dict/core/schema";
 
@@ -71,15 +72,6 @@ export const parseGrammarFile = (
     return [{ lemma, pos: pos as UdPos, senses }];
   });
 };
-
-/** The repo's `languages/` directory: one folder per language. */
-export const LANGUAGES_DIR = join(
-  import.meta.dirname,
-  "..",
-  "..",
-  "..",
-  "languages",
-);
 
 /** The grammar entries of a language; none when it has no file. */
 export const loadGrammar = (

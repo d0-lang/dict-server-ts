@@ -1,0 +1,45 @@
+#:schema ../../spec/language.schema.json
+# Russian. Settings left out take their defaults (spec/language.schema.json).
+# The profile and iteration log are in profile.md.
+
+code = "ru"
+name = "Russian"
+target = "en"
+# Wiktionary writes ё; most texts write е (`все` for `всё`). Every form with ё
+# is also indexed with е, and compound stems may be written without it.
+optionalLetters = [["ё", "е"]]
+
+[import]
+# Old East Slavic is a separate language in the dump (orv).
+historicalStages = []
+standardPronNotes = []
+# Only 29 tables: the shared pronoun table and a Braille chart that gives
+# `азбука Брайля` every letter (`в`, `и`) as a form.
+untrustedFormTags = ["error-unrecognized-form"]
+# Russian stress is unpredictable, and learners need it to say the word.
+stressedLemmas = true
+
+[context]
+# Hyphen-joined words (`что-нибудь`, `по-русски`, `какого-то`): the segmenter
+# splits them, so with context the parts are joined back into one word.
+hyphenWords = true
+# Negation puts the verb's object in the genitive (`иметь значение` -> `не
+# имеет значения`).
+negation = "не"
+# Russian often puts an object and an adverb between the verb and the rest
+# (`дашь мне честное слово`, `держать все время ухо востро`).
+maxGap = 2
+
+[compounds]
+# Not `и`: it joins only numbers (`пяти|этажный`, a plain join of the
+# genitive), and as a linker it misreads `дож|и|мать`.
+linkers = ["", "о", "е"]
+# Modifiers are stems: `нефть` -> `нефт|е|газовый`, `новый` -> `нов|о|греческий`.
+stemEndings = ["ый", "ий", "ой", "а", "я", "о", "е", "ы", "и", "ь", "й"]
+# A verb form is a head only as a participle (`лес|о|обрабатывающий`), so with
+# one of these adjective endings (a reflexive `ся` after them is added in code).
+adjectiveEndings = [
+  "ый", "ий", "ой", "ая", "яя", "ое", "ее", "ые", "ие",
+  "ого", "его", "ому", "ему", "ым", "им", "ых", "их", "ую", "юю", "ей",
+  "ыми", "ими",
+]

@@ -1,11 +1,12 @@
 import { assert, describe, it } from "@effect/vitest";
-import { LANGUAGES } from "./languages.ts";
+import { readLanguage } from "@dict/core/language";
+import { importRules } from "./languages.ts";
 import { transformEntry } from "./transform.ts";
 import type { WiktextractEntry } from "../source/wiktextract.ts";
 
-const pl = LANGUAGES.pl!;
-const de = LANGUAGES.de!;
-const ru = LANGUAGES.ru!;
+const pl = importRules(readLanguage("pl"));
+const de = importRules(readLanguage("de"));
+const ru = importRules(readLanguage("ru"));
 
 const entry = (patch: Partial<WiktextractEntry>): WiktextractEntry => ({
   word: "lapis",
@@ -260,7 +261,9 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(better), [["comparative degree of хоро́ший (xoróšij)"]]);
+    assert.deepStrictEqual(translations(better), [
+      ["comparative degree of хоро́ший (xoróšij)"],
+    ]);
     assert.deepStrictEqual(better.entry?.derived[0]?.bases, ["хороший"]);
     assert.deepStrictEqual(better.formOf, []);
 
@@ -273,14 +276,18 @@ describe("transformEntry", () => {
         pos: "adv",
         senses: [
           {
-            glosses: ["comparative degree of по́здний (pózdnij): later, afterwards"],
+            glosses: [
+              "comparative degree of по́здний (pózdnij): later, afterwards",
+            ],
             tags: ["comparative", "form-of"],
             form_of: [{ word: "по́здний" }],
           },
         ],
       }),
     );
-    assert.deepStrictEqual(translations(later), [["comparative degree of по́здний (pózdnij): later, afterwards"]]);
+    assert.deepStrictEqual(translations(later), [
+      ["comparative degree of по́здний (pózdnij): later, afterwards"],
+    ]);
     assert.deepStrictEqual(later.entry?.derived, []);
   });
 
@@ -300,7 +307,10 @@ describe("transformEntry", () => {
       }),
     );
     assert.strictEqual(result.entry, undefined);
-    assert.deepStrictEqual(result.formOf.map((link) => link.lemma), ["tańszy"]);
+    assert.deepStrictEqual(
+      result.formOf.map((link) => link.lemma),
+      ["tańszy"],
+    );
   });
 
   it("offers historical senses only as a last-resort entry", () => {

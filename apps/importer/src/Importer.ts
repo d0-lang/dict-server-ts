@@ -19,8 +19,9 @@ import {
   type ImportStats,
   type Tally,
 } from "./stats.ts";
+import { languageCodes, loadLanguage } from "@dict/core/language";
 import {
-  LANGUAGES,
+  importRules,
   languagePair,
   type LanguageRules,
 } from "./transform/languages.ts";
@@ -36,7 +37,7 @@ export const RAW_DUMP_URL =
 const DEFAULT_BATCH_SIZE = 1000;
 
 export type ImportOptions = {
-  /** wiktextract `lang_code`, must be configured in `languages.ts` */
+  /** wiktextract `lang_code`; needs `languages/<lang>/language.toml` */
   readonly lang: string;
   /** local path or http(s) URL; `.gz` is decompressed while streaming */
   readonly input: string;
@@ -56,17 +57,23 @@ export type ImportOptions = {
   readonly grammar?: ReadonlyArray<GrammarEntry>;
 };
 
+/** The import rules of `lang`, from `languages/<lang>/language.toml`. */
 export const languageRules = (
   lang: string,
 ): Effect.Effect<LanguageRules, ImportError> => {
-  const rules = LANGUAGES[lang];
-  return rules === undefined
-    ? Effect.fail(
-        new ImportError({
-          message: `no import rules for "${lang}" (known: ${Object.keys(LANGUAGES).join(", ")})`,
-        }),
+  const known = languageCodes();
+  return known.includes(lang)
+    ? loadLanguage(lang).pipe(
+        Effect.map(importRules),
+        Effect.mapError(
+          (e) => new ImportError({ message: `${e.file}: ${e.message}` }),
+        ),
       )
-    : Effect.succeed(rules);
+    : Effect.fail(
+        new ImportError({
+          message: `no import rules for "${lang}" (known: ${known.join(", ")})`,
+        }),
+      );
 };
 
 /** Entries of one language from the input, counting every line read. */

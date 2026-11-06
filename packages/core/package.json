@@ -6,7 +6,8 @@
   "exports": {
     "./schema": "./src/schema.ts",
     "./lookupKey": "./src/lookupKey.ts",
-    "./DictionaryDb": "./src/DictionaryDb.ts"
+    "./DictionaryDb": "./src/DictionaryDb.ts",
+    "./language": "./src/language.ts"
   },
   "dependencies": {
     "drizzle-orm": "0.45.4",

@@ -1,0 +1,18 @@
+#:schema ../../spec/language.schema.json
+# Polish. Settings left out take their defaults (spec/language.schema.json).
+
+code = "pl"
+name = "Polish"
+target = "en"
+
+[import]
+# wiktextract splits "Middle Polish" into the tags "Middle" and "Polish".
+historicalStages = [["Middle", "Polish"], ["Old", "Polish"]]
+standardPronNotes = ["normal speech", "prescriptive"]
+
+[context]
+# Negation puts the verb's object in the genitive (`mieć znaczenie` -> `nie ma
+# znaczenia`), so a negated verb phrase is matched with its other words in any
+# form. The gap stays 1: two words let in as many literal readings as idioms
+# (`jesteśmy u Mikołaja w domu` isn't `być w domu`).
+negation = "nie"

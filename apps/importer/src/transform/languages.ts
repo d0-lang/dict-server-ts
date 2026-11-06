@@ -1,5 +1,8 @@
+import type { Language } from "@dict/core/language";
+
 /**
- * Per-language import rules; rules shared by every language are in `rules.ts`.
+ * Per-language import rules, read from `languages/<lang>/language.toml`
+ * (`importRules`); rules shared by every language are in `rules.ts`.
  *
  * `rules.ts` and `pos.ts` were written against Polish data, so check them on a
  * real extract when adding a language too.
@@ -43,45 +46,16 @@ export type LanguageRules = {
 };
 
 /**
- * Supported source languages. To add one, add its rules here and check its
- * data (historical-stage tags, pronunciation notes) on a real extract first.
+ * The import rules of a language record (`languages/<lang>/language.toml`),
+ * flat, as the transform reads them.
  */
-export const LANGUAGES: Readonly<Record<string, LanguageRules>> = {
-  pl: {
-    code: "pl",
-    name: "Polish",
-    target: "en",
-    historicalStages: [
-      ["Middle", "Polish"],
-      ["Old", "Polish"],
-    ],
-    standardPronNotes: ["normal speech", "prescriptive"],
-  },
-  de: {
-    code: "de",
-    name: "German",
-    target: "en",
-    // Middle and Old High German are separate languages in the dump (gmh, goh),
-    // not tags on German senses.
-    historicalStages: [],
-    standardPronNotes: [],
-  },
-  ru: {
-    code: "ru",
-    name: "Russian",
-    target: "en",
-    // Old East Slavic is a separate language in the dump (orv).
-    historicalStages: [],
-    standardPronNotes: [],
-    // Wiktionary writes ё; most texts write е (`все` for `всё`).
-    optionalLetters: [["ё", "е"]],
-    // Only 29 tables: the shared pronoun table and a Braille chart that gives
-    // `азбука Брайля` every letter (`в`, `и`) as a form.
-    untrustedFormTags: ["error-unrecognized-form"],
-    // Russian stress is unpredictable, and learners need it to say the word.
-    stressedLemmas: true,
-  },
-};
+export const importRules = (language: Language): LanguageRules => ({
+  code: language.code,
+  name: language.name,
+  target: language.target,
+  ...language.import,
+  optionalLetters: language.optionalLetters,
+});
 
 export const languagePair = (rules: LanguageRules): string =>
   `${rules.code}_${rules.target}`;
