@@ -1,0 +1,15 @@
+{
+  "name": "@dict/server",
+  "description": "The dictionary HTTP server (see ../../../Protocol.md).",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@dict/core": "workspace:*",
+    "@effect/platform-node": "4.0.5",
+    "drizzle-orm": "0.45.4",
+    "effect": "4.0.5"
+  },
+  "devDependencies": {
+    "@dict/importer": "workspace:*"
+  }
+}

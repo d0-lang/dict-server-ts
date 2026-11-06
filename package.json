@@ -1,14 +1,20 @@
 {
-  "name": "server",
-  "module": "src/index.ts",
+  "name": "dict-server",
   "type": "module",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "bun --hot src/index.ts",
-    "start": "bun src/index.ts",
+    "dev": "bun --hot apps/server/src/index.ts",
+    "start": "bun apps/server/src/index.ts",
     "test": "bun --bun run vitest run",
-    "import": "bun src/importer/cli.ts",
-    "filter": "bun src/importer/filterCli.ts",
+    "typecheck": "tsc --noEmit -p .",
+    "import": "bun apps/importer/src/cli.ts",
+    "filter": "bun apps/importer/src/filterCli.ts",
+    "bench:context": "bun apps/server/eval/context-bench.ts",
+    "bench:segments": "bun apps/server/eval/segments-bench.ts",
     "format": "prettier --write ."
   },
   "devDependencies": {
@@ -19,10 +25,5 @@
   },
   "peerDependencies": {
     "typescript": "^7"
-  },
-  "dependencies": {
-    "@effect/platform-node": "4.0.5",
-    "drizzle-orm": "0.45.4",
-    "effect": "4.0.5"
   }
 }

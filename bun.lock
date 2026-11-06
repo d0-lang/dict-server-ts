@@ -4,11 +4,6 @@
   "workspaces": {
     "": {
       "name": "server",
-      "dependencies": {
-        "@effect/platform-node": "4.0.5",
-        "drizzle-orm": "0.45.4",
-        "effect": "4.0.5",
-      },
       "devDependencies": {
         "@effect/vitest": "4.0.5",
         "@types/bun": "latest",
@@ -19,8 +14,41 @@
         "typescript": "^7",
       },
     },
+    "apps/importer": {
+      "name": "@dict/importer",
+      "dependencies": {
+        "@dict/core": "workspace:*",
+        "@effect/platform-node": "4.0.5",
+        "effect": "4.0.5",
+      },
+    },
+    "apps/server": {
+      "name": "@dict/server",
+      "dependencies": {
+        "@dict/core": "workspace:*",
+        "@effect/platform-node": "4.0.5",
+        "drizzle-orm": "0.45.4",
+        "effect": "4.0.5",
+      },
+      "devDependencies": {
+        "@dict/importer": "workspace:*",
+      },
+    },
+    "packages/core": {
+      "name": "@dict/core",
+      "dependencies": {
+        "drizzle-orm": "0.45.4",
+        "effect": "4.0.5",
+      },
+    },
   },
   "packages": {
+    "@dict/core": ["@dict/core@workspace:packages/core"],
+
+    "@dict/importer": ["@dict/importer@workspace:apps/importer"],
+
+    "@dict/server": ["@dict/server@workspace:apps/server"],
+
     "@effect/platform-node": ["@effect/platform-node@4.0.5", "", { "dependencies": { "@effect/platform-node-shared": "^4.0.5", "undici": "^8.11.2" }, "peerDependencies": { "effect": "^4.0.5", "redis": ">=5.0.0 <7.0.0" } }, "sha512-v4KD5fWvEUa4QmWFpZFbBsRhmfnTP6ETCME2r9ifyXVDPjhfpxpTZl41prjgQFMqZBHdWWCl7YC5ImbXv5ui5g=="],
 
     "@effect/platform-node-shared": ["@effect/platform-node-shared@4.0.5", "", { "dependencies": { "@types/ws": "^8.18.2", "ws": "^8.22.0" }, "peerDependencies": { "effect": "^4.0.5" } }, "sha512-a8rCdEkfZBGe9C6bsIjxVZuRp73svIyK5IHwHdDAVsvZXjrbkxusfI+rZ8WlX31RP1mKizwI/E72GQTNfdMWHw=="],

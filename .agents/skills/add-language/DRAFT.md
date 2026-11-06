@@ -30,10 +30,10 @@ Variety matters more than size. Common words are ranked by how many different st
 
 | File | What it holds |
 |---|---|
-| `docs/languages/<lang>.md` | The profile (quirks, settings, decisions) and the iteration log |
-| `src/importer/grammar/<lang>.tsv` | Written by hand: grammar words, irregular forms, abbreviations, and set phrases English Wiktionary lacks |
+| `languages/<lang>/profile.md` | The profile (quirks, settings, decisions) and the iteration log |
+| `languages/<lang>/grammar.tsv` | Written by hand: grammar words, irregular forms, abbreviations, and set phrases English Wiktionary lacks |
 | `../corpus/eval/out/<lang>/` | Collections, samples, verdicts, overrides (ignored by git: big, and made from the texts) |
-| `eval/gold/<lang>/context.jsonl` | Tier 2's context benchmark (generated sentences, so it can be in the repo) |
+| `languages/<lang>/gold/context.jsonl` | Tier 2's context benchmark (generated sentences, so it can be in the repo) |
 
 ## Tier 1: usable
 
@@ -43,7 +43,7 @@ Variety matters more than size. Common words are ranked by how many different st
 
 ### 2. Profile
 
-Write `docs/languages/<lang>.md`. Base every point on counts from the dictionary file and the corpus. Every point ends in a decision: fixed (how), a data gap (goes to the hand-patch list), or not relevant (why). Don't keep findings that lead nowhere.
+Write `languages/<lang>/profile.md`. Base every point on counts from the dictionary file and the corpus. Every point ends in a decision: fixed (how), a data gap (goes to the hand-patch list), or not relevant (why). Don't keep findings that lead nowhere.
 
 Check at least:
 

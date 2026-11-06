@@ -20,11 +20,11 @@ The judge and the corpus tools live in the corpus repo: `../corpus/eval/README.m
 
 | File | What it holds |
 |---|---|
-| `docs/languages/<lang>.md` | The profile (quirks, phrase types, settings) and the iteration log |
-| `eval/gold/<lang>/context.jsonl` | The context benchmark's verified cases. Generated sentences, not corpus text, so they belong in the repo |
-| `eval/out/<lang>/bench/<run>/` | Benchmark results per run: scores, per-case pass/fail, flips against the previous run |
+| `languages/<lang>/profile.md` | The profile (quirks, phrase types, settings) and the iteration log |
+| `languages/<lang>/gold/context.jsonl` | The context benchmark's verified cases. Generated sentences, not corpus text, so they belong in the repo |
+| `apps/server/eval/out/<lang>/bench/<run>/` | Benchmark results per run: scores, per-case pass/fail, flips against the previous run |
 
-The benchmark scripts are `eval/context-bench.ts` and `eval/segments-bench.ts`. If they don't exist yet, write them first, language-independent, and use German and Polish to check them (see Calibration).
+The benchmark scripts are `apps/server/eval/context-bench.ts` and `apps/server/eval/segments-bench.ts` (`bun run bench:context`, `bun run bench:segments`, from the repo root). If they don't exist yet, write them first, language-independent, and use German and Polish to check them (see Calibration).
 
 ## Phase 0: Import and smoke test
 
@@ -34,7 +34,7 @@ The benchmark scripts are `eval/context-bench.ts` and `eval/segments-bench.ts`. 
 
 ## Phase 1: Profile
 
-Write `docs/languages/<lang>.md`. Base every answer on counts from the dictionary file and the corpus, with your language knowledge as interpretation, not as the source.
+Write `languages/<lang>/profile.md`. Base every answer on counts from the dictionary file and the corpus, with your language knowledge as interpretation, not as the source.
 
 **Quirks checklist.** Answer each item with evidence (counts, examples), or "not relevant" with a reason:
 
@@ -74,7 +74,7 @@ If a reader of the language is available, ask them to review the profile now. Ot
    `word` is the clicked word, written as in the sentence. `expect` is `phrase` or `not-phrase`.
 3. **Verify** each finished batch in a fresh subagent that doesn't see `expect`. Per case it answers: is `lemma` used in this sentence in the dictionary entry's meaning (give it the entry's senses), and is the sentence natural? Keep the cases where the verifier agrees with `expect` and calls the sentence natural.
 4. **Check disagreement** per type and variant. Above about 20%, the type or variant is unclear or can't be expressed naturally. Fix its definition and regenerate, rather than keep the survivors.
-5. **Save** to `eval/gold/<lang>/context.jsonl`.
+5. **Save** to `languages/<lang>/gold/context.jsonl`.
 
 `context-bench.ts` runs every case through the lookup with the sentence as `context`, against the real dictionary file. A positive passes when an entry with `lemma` comes before the word's own entries. A negative passes when no entry with `lemma` appears. It reports, per type and variant, recall on positives, false positives on negatives, and the case ids that flipped since the previous run.
 
@@ -96,7 +96,7 @@ One change per iteration:
 3. **Run both benchmarks.** No type or variant may fall by more than noise, about 1 point, without an explanation.
 4. **Diff the corpus:** collect again (`../corpus/eval/collect.ts`, or `replay.ts` and `diff.ts`), and list every word whose popover changed, with an English gloss of each side. A fresh subagent classifies each change as better, worse or same, with a reason. Every "worse" needs an explanation or a fix.
 5. **Review the code** with a fresh subagent that gets only the diff and the problem it solves. It checks for correctness and overfitting: special cases shaped around the example, word lists, rules that only work on the benchmark.
-6. **Accept or revert.** If accepted, add two or three hand-written unit tests on an in-memory dictionary (see `src/dictionary/context.test.ts`): one case the rule fixes and one nearby case it must not break. Never turn benchmark cases into unit tests: some are wrong, and data updates would break them.
+6. **Accept or revert.** If accepted, add two or three hand-written unit tests on an in-memory dictionary (see `apps/server/src/dictionary/context.test.ts`): one case the rule fixes and one nearby case it must not break. Never turn benchmark cases into unit tests: some are wrong, and data updates would break them.
 7. **Log** the iteration in the profile: the change, benchmark numbers before and after, and what got worse.
 
 Run the judge after a group of accepted changes, not every iteration.

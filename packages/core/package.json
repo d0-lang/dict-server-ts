@@ -1,0 +1,15 @@
+{
+  "name": "@dict/core",
+  "description": "The dictionary file format shared by the importer and the server: schema, lookup keys, opening and creating files.",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./schema": "./src/schema.ts",
+    "./lookupKey": "./src/lookupKey.ts",
+    "./DictionaryDb": "./src/DictionaryDb.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.4",
+    "effect": "4.0.5"
+  }
+}

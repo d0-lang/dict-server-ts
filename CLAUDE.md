@@ -1,21 +1,25 @@
 Default to Bun for install, run, and TypeScript. Use Effect 4 APIs from the `effect` package — HTTP and Schema live there, not in the old `@effect/platform` HTTP stack.
 
+## Layout
+
+Bun workspaces: `apps/server` (`@dict/server`), `apps/importer` (`@dict/importer`), `packages/core` (`@dict/core`, the dictionary file format both share). The importer and the server import each other only through `@dict/core` (the server's tests may use the importer); `boundaries.test.ts` enforces it. Per-language data lives in `languages/<lang>/`.
+
 ## Bun
 
 - `bun <file>` instead of `node`
 - `bun install` instead of npm/yarn/pnpm
-- `bun --hot src/index.ts` for the HTTP server
+- `bun run dev` (`bun --hot apps/server/src/index.ts`) for the HTTP server; run every script from the repo root
 - Bun loads `.env` automatically
 
 Do not add Express or Hono. Serve with `HttpRouter.toWebHandler` + `Bun.serve`.
 
 ## Effect 4
 
-Read the docs shipped with the installed package before inventing APIs:
+Read the docs shipped with the installed package before inventing APIs (installs are per workspace, so the package is under `apps/server/node_modules/effect/`):
 
-- `node_modules/effect/AGENTS.md` — coding style (`Effect.fn`, services, Layers, Schema)
-- `node_modules/effect/ai-docs/src/51_http-server/` — HttpApi, handlers, `toWebHandler`, `HttpApiTest`
-- `node_modules/effect/ai-docs/src/09_testing/` — `@effect/vitest`
+- `apps/server/node_modules/effect/AGENTS.md` — coding style (`Effect.fn`, services, Layers, Schema)
+- `apps/server/node_modules/effect/ai-docs/src/51_http-server/` — HttpApi, handlers, `toWebHandler`, `HttpApiTest`
+- `apps/server/node_modules/effect/ai-docs/src/09_testing/` — `@effect/vitest`
 
 Prefer `effect/unstable/httpapi` and `effect/unstable/http`. Sign `/v1/get-meta` over the **exact JSON body bytes** (do not re-serialize after signing).
 

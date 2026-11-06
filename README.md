@@ -1,6 +1,16 @@
 # server
 
-Bun + Effect 4 dictionary protocol PoC.
+Bun + Effect 4 dictionary protocol PoC: the HTTP server and the importer that builds its dictionaries, as Bun workspaces.
+
+| Path | What |
+|---|---|
+| `apps/server` (`@dict/server`) | the HTTP API, lookups, sentence context, compound splitting; `eval/` holds the context and segments benchmarks |
+| `apps/importer` (`@dict/importer`) | builds `data/<pair>.sqlite` from a wiktextract dump |
+| `packages/core` (`@dict/core`) | the dictionary file format both share: schema, `lookupKey`, opening and creating files |
+| `languages/<lang>/` | per-language data: `grammar.tsv`, the profile (`profile.md`), benchmark gold data |
+| `data/` | dictionary files, raw dumps and the identity key (gitignored) |
+
+The importer and the server only share `@dict/core`; `boundaries.test.ts` fails on any other import between them (the server's tests may use the importer to build dictionaries). Run every script from the repo root: `data/` and `.env` are read from the working directory.
 
 ```bash
 bun install
@@ -26,7 +36,7 @@ bun run test
 
 ## Importing a dictionary
 
-Each language pair is one SQLite file, `data/<lang>_en.sqlite` (e.g. `data/pl_en.sqlite`), built from the [wiktextract](https://github.com/tatuylonen/wiktextract) extract of the English Wiktionary published on [kaikki.org](https://kaikki.org/dictionary/rawdata.html). All files share one schema (`src/dictionary/schema.ts`); the server opens one Drizzle instance per file.
+Each language pair is one SQLite file, `data/<lang>_en.sqlite` (e.g. `data/pl_en.sqlite`), built from the [wiktextract](https://github.com/tatuylonen/wiktextract) extract of the English Wiktionary published on [kaikki.org](https://kaikki.org/dictionary/rawdata.html). All files share one schema (`packages/core/src/schema.ts`); the server opens one Drizzle instance per file.
 
 ```bash
 # stream the raw all-language dump (~3 GB .gz) straight from kaikki.org, keep Polish
@@ -37,7 +47,7 @@ curl -LO https://kaikki.org/dictionary/raw-wiktextract-data.jsonl.gz
 bun run import --lang pl --input raw-wiktextract-data.jsonl.gz --out data/pl_en.sqlite
 ```
 
-Flags: `--lang` (default `pl`; `pl` and `de` have rules, in `src/importer/transform/languages.ts`), `--input` (path or URL, default the raw dump URL), `--out` (default `data/<lang>_en.sqlite`), `--force` (overwrite `--out` if it exists; without it the import stops before doing any work), `--no-form-of-fallback`, `--limit <n>` (stop after n lines of the language, for samples). The file is built as `<out>.tmp` and renamed when the import succeeds, so a running server never sees a half-written file. A JSON summary (counts, size, time) is printed at the end.
+Flags: `--lang` (default `pl`; `pl` and `de` have rules, in `apps/importer/src/transform/languages.ts`), `--input` (path or URL, default the raw dump URL), `--out` (default `data/<lang>_en.sqlite`), `--force` (overwrite `--out` if it exists; without it the import stops before doing any work), `--no-form-of-fallback`, `--limit <n>` (stop after n lines of the language, for samples). The file is built as `<out>.tmp` and renamed when the import succeeds, so a running server never sees a half-written file. A JSON summary (counts, size, time) is printed at the end.
 
 To avoid scanning the whole dump on every run, copy one language's lines into their own file and import that (`data/` is gitignored):
 
@@ -54,7 +64,7 @@ What gets imported:
 - senses: the most specific gloss of each sense; archaic senses and the language's historical stages (Middle/Old Polish) are skipped (see the last point below)
 - pronunciation: standard IPA (regional variants only when nothing else exists) and `upload.wikimedia.org` audio URLs
 - `forms`: every form from the lemma's inflection table plus the lemma itself, normalized (NFC, lowercase, diacritics kept); template rows, multi-word analytic forms and related words (diminutives, aspect partners, ...) are dropped. The `(form, entry_id)` primary key deduplicates
-- grammar words (articles, pronouns, possessives, contractions) come from a hand-written file, `src/importer/grammar/<lang>.tsv`, because Wiktionary only redirects their forms (`des` -> `der`, Polish `mi` -> `ja` "I"). Each line is one word as written, a UD part of speech and its senses. For a word in the file, Wiktionary's determiner, pronoun, preposition, conjunction, particle and auxiliary entries are dropped; its nouns, verbs and other content words stay. The file's entries are written first
+- grammar words (articles, pronouns, possessives, contractions) come from a hand-written file, `languages/<lang>/grammar.tsv`, because Wiktionary only redirects their forms (`des` -> `der`, Polish `mi` -> `ja` "I"). Each line is one word as written, a UD part of speech and its senses. For a word in the file, Wiktionary's determiner, pronoun, preposition, conjunction, particle and auxiliary entries are dropped; its nouns, verbs and other content words stay. The file's entries are written first
 - form-of / alt-of senses that are grammar or spelling ("domu: genitive singular of dom") never become entries; they add `form -> lemma` rows when the lemma exists and the form was missing from its table. A word with no entry also passes on its own table, following chains, so `tańsi` (from the table of `tańszy`, comparative of `tani`) returns `tani` (turn all of this off with `--no-form-of-fallback`)
 - derived words and abbreviations get their own entry, recognised by the gloss opening (`isOwnEntryGloss` in `rules.ts`). A gloss that only names its base gets the base's meanings, one sense each ("diminutive of bal: log"): same part of speech first, following chains, skipping `synonym of` senses, and every etymology when the base has several. If nothing is found, the bare gloss stays
 - a word whose only senses are historical keeps them, if it has no other entry
@@ -62,9 +72,9 @@ What gets imported:
 - table rows that aren't forms of the word are dropped: German verb tables list the perfect auxiliary (`haben`, `sein`)
 - an abbreviation is also found without its period (`bzw` -> `bzw.`), which tokenizers drop, when that spelling reaches nothing else
 
-Lookups rank entries in one query, using what the import stored: first by case (a lowercase word shows lowercase lemmas first, so `oder` gives "or" before the river `Oder`; acronyms go last unless the word is all caps), then the entry whose lemma is the word itself before the words it is a form of (`Frage` before `fragen`), then import order. For German, a word with no entry is split into known parts (`Gemüsefonds` -> `Gemüse` + `Fond`, linking `-s-`, `-n-`, `-en-`, ... allowed) and their entries are returned in reading order (`src/dictionary/compounds.ts`), with `segments` that slice the word as sent (`Schifffahrt` | `s` | `geschichte`). If normalizing changed the word's length (decomposed accents, spaces around it), the entries come without segments.
+Lookups rank entries in one query, using what the import stored: first by case (a lowercase word shows lowercase lemmas first, so `oder` gives "or" before the river `Oder`; acronyms go last unless the word is all caps), then the entry whose lemma is the word itself before the words it is a form of (`Frage` before `fragen`), then import order. For German, a word with no entry is split into known parts (`Gemüsefonds` -> `Gemüse` + `Fond`, linking `-s-`, `-n-`, `-en-`, ... allowed) and their entries are returned in reading order (`apps/server/src/dictionary/compounds.ts`), with `segments` that slice the word as sent (`Schifffahrt` | `s` | `geschichte`). If normalizing changed the word's length (decomposed accents, spaces around it), the entries come without segments.
 
-With `context`, the entries matching the sentence come first (`src/dictionary/context.ts`):
+With `context`, the entries matching the sentence come first (`apps/server/src/dictionary/context.ts`):
 
 - phrases the word is part of: multi-word forms of multi-word entries, all in a row (`vor allem`, `Stanów Zjednoczonych`). Only a verb phrase's verb may be inflected (`miało miejsce` -> `mieć miejsce`) or stand apart from the rest in its clause (`tritt morgen in Kraft`). In German it must come first, and the rest must end the clause, so `ist an` in `Er ist an der Uni` isn't `an sein`. Longest phrase first, at most three
 - German separable verbs: the clicked verb with the particle that ends its clause, or the clicked particle with the nearest verb before it, when particle + verb is a form of a verb starting with that particle (`fand ... statt` -> `stattfinden`; `geht mit ihr` stays `gehen`)
@@ -72,4 +82,4 @@ With `context`, the entries matching the sentence come first (`src/dictionary/co
 
 The phrase index is built at startup, about 0.5 s for German. A lookup with context takes about 0.7 ms on average for German and 0.35 ms for Polish, against 0.2 ms without.
 
-Bump `SCHEMA_VERSION` in `src/dictionary/schema.ts` when the schema changes; it is stored as `PRAGMA user_version`, and `openDictionary` refuses files built for another version.
+Bump `SCHEMA_VERSION` in `packages/core/src/schema.ts` when the schema changes; it is stored as `PRAGMA user_version`, and `openDictionary` refuses files built for another version.

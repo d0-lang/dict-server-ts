@@ -1,0 +1,15 @@
+{
+  "name": "@dict/importer",
+  "description": "Builds data/<pair>.sqlite from a wiktextract dump.",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./Importer": "./src/Importer.ts",
+    "./fixtures": "./src/fixtures.ts"
+  },
+  "dependencies": {
+    "@dict/core": "workspace:*",
+    "@effect/platform-node": "4.0.5",
+    "effect": "4.0.5"
+  }
+}

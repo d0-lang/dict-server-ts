@@ -3,4 +3,9 @@
 !package.json
 !bun.lock
 !tsconfig.json
-!src
+!packages/core/package.json
+!packages/core/src
+!apps/importer/package.json
+!apps/server/package.json
+!apps/server/src
+**/*.test.ts
