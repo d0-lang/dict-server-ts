@@ -68,13 +68,18 @@ export const tokenize = (
   let between = "";
   // A period inside a word (`comp.os.minix`, `т.д`) splits it, but ends no clause:
   // `kündigte es in comp.os.minix an` keeps its particle.
-  const segments = [...segmenterFor(locale).segment(text)].flatMap(({ segment, isWordLike }) =>
-    isWordLike && INNER_PERIOD.test(segment)
-      ? segment.split(INNER_PERIOD).flatMap((piece, i) => [
-          ...(i > 0 ? [{ segment: ".", isWordLike: false, inner: true }] : []),
-          { segment: piece, isWordLike: true, inner: false },
-        ])
-      : [{ segment, isWordLike: isWordLike === true, inner: false }],
+  const segments = [...segmenterFor(locale).segment(text)].flatMap(
+    ({ segment, isWordLike }) =>
+      isWordLike && INNER_PERIOD.test(segment)
+        ? segment
+            .split(INNER_PERIOD)
+            .flatMap((piece, i) => [
+              ...(i > 0
+                ? [{ segment: ".", isWordLike: false, inner: true }]
+                : []),
+              { segment: piece, isWordLike: true, inner: false },
+            ])
+        : [{ segment, isWordLike: isWordLike === true, inner: false }],
   );
   let innerOnly = true;
   for (const { segment, isWordLike, inner } of segments) {
@@ -83,7 +88,10 @@ export const tokenize = (
       innerOnly &&= inner;
       continue;
     }
-    const breakBefore = tokens.length > 0 && !(innerOnly && between !== "") && CLAUSE_BREAK.test(between);
+    const breakBefore =
+      tokens.length > 0 &&
+      !(innerOnly && between !== "") &&
+      CLAUSE_BREAK.test(between);
     if (breakBefore) clause++;
     tokens.push({
       key: lookupKey(segment),
@@ -784,7 +792,9 @@ const hyphenWordIds = (
     .flatMap((affix) => {
       // The grammar file's endings are for numbers (`3-ой`), not for `о-ой`.
       const endings = new Set(grammarIds(db, affix));
-      return rows(affix).flatMap((row) => (endings.has(row.id) ? [] : [row.id]));
+      return rows(affix).flatMap((row) =>
+        endings.has(row.id) ? [] : [row.id],
+      );
     });
 };
 
@@ -883,12 +893,25 @@ export const abbreviationEntryIds = (
     // The longest run around the clicked piece that is a form: a period and a
     // space also end a sentence, so `т.д. лежали` holds `т. д.`.
     let found: ReadonlyArray<FormRow> | undefined;
-    for (let length = last - first + 1; length >= 2 && found === undefined; length--) {
-      for (let start = Math.max(first, clicked - length + 1); start <= Math.min(clicked, last - length + 1); start++) {
-        const parts = tokens.slice(start, start + length).map((token) => token.key);
+    for (
+      let length = last - first + 1;
+      length >= 2 && found === undefined;
+      length--
+    ) {
+      for (
+        let start = Math.max(first, clicked - length + 1);
+        start <= Math.min(clicked, last - length + 1);
+        start++
+      ) {
+        const parts = tokens
+          .slice(start, start + length)
+          .map((token) => token.key);
         const before = tokens[start - 1];
         const lead =
-          before !== undefined && !tokens[start]!.dottedBefore && !tokens[start]!.breakBefore && ABBREVIATION_LEADS.has(before.key)
+          before !== undefined &&
+          !tokens[start]!.dottedBefore &&
+          !tokens[start]!.breakBefore &&
+          ABBREVIATION_LEADS.has(before.key)
             ? before.key
             : undefined;
         found = abbreviationSpellings(parts, lead)

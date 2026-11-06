@@ -1,6 +1,9 @@
 import { assert, describe, it } from "@effect/vitest";
 import { tokenize } from "./context.ts";
-import { createDictionaryFile, type DictionaryDb } from "@dict/core/DictionaryDb";
+import {
+  createDictionaryFile,
+  type DictionaryDb,
+} from "@dict/core/DictionaryDb";
 import { lookupWord } from "./lookup.ts";
 import { caseClass, lookupKey } from "@dict/core/lookupKey";
 import { surfaceSlices } from "./queries.ts";
@@ -264,10 +267,10 @@ describe("lookup with context", () => {
   });
 
   it("keeps a separable verb together across a word with periods inside", () => {
-    assert.deepStrictEqual(lemmas(german, "de_en", "fand", "Er fand in comp.os.minix statt."), [
-      "stattfinden",
-      "finden",
-    ]);
+    assert.deepStrictEqual(
+      lemmas(german, "de_en", "fand", "Er fand in comp.os.minix statt."),
+      ["stattfinden", "finden"],
+    );
   });
 
   it("only takes a particle at the end of its clause", () => {
@@ -442,19 +445,37 @@ describe("lookup with context", () => {
       ["-го", "го"],
     );
     // not without the number
-    assert.deepStrictEqual(lemmas(russian, "ru_en", "го", "Они играли в го."), ["го"]);
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "го", "Они играли в го."), [
+      "го",
+    ]);
     // nor as the hyphen affix of a word that isn't a number
-    assert.deepStrictEqual(lemmas(russian, "ru_en", "ой", "О-ой, какие!"), ["ой"]);
+    assert.deepStrictEqual(lemmas(russian, "ru_en", "ой", "О-ой, какие!"), [
+      "ой",
+    ]);
   });
 
   it("joins the pieces of an abbreviation a browser splits at its periods", () => {
-    for (const context of ["Яблоки, груши и т.д. лежали на столе.", "Яблоки, груши и т. д. лежали на столе."]) {
-      assert.deepStrictEqual(lemmas(russian, "ru_en", "т", context), ["и т. д.", "т"]);
-      assert.deepStrictEqual(lemmas(russian, "ru_en", "д", context), ["и т. д.", "д"]);
+    for (const context of [
+      "Яблоки, груши и т.д. лежали на столе.",
+      "Яблоки, груши и т. д. лежали на столе.",
+    ]) {
+      assert.deepStrictEqual(lemmas(russian, "ru_en", "т", context), [
+        "и т. д.",
+        "т",
+      ]);
+      assert.deepStrictEqual(lemmas(russian, "ru_en", "д", context), [
+        "и т. д.",
+        "д",
+      ]);
     }
-    assert.deepStrictEqual(lemmas(german, "de_en", "z", "Obst, z.B. Äpfel."), ["z. B."]);
+    assert.deepStrictEqual(lemmas(german, "de_en", "z", "Obst, z.B. Äpfel."), [
+      "z. B.",
+    ]);
     // an initial before a name isn't an abbreviation the dictionary has
-    assert.deepStrictEqual(lemmas(russian, "ru_en", "т", "Т.Голикова: добрый день!"), ["т"]);
+    assert.deepStrictEqual(
+      lemmas(russian, "ru_en", "т", "Т.Голикова: добрый день!"),
+      ["т"],
+    );
   });
 
   it("leaves a word as it is when it also stands alone in the context", () => {

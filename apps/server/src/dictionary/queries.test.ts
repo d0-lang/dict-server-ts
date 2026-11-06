@@ -19,7 +19,13 @@ describe("caseClass", () => {
 
 const ranked = (
   rows: ReadonlyArray<
-    readonly [lemma: string, pos: string, sourcePos: string, form: string, source: number]
+    readonly [
+      lemma: string,
+      pos: string,
+      sourcePos: string,
+      form: string,
+      source: number,
+    ]
   >,
   word: string,
 ) => {
@@ -38,7 +44,9 @@ const ranked = (
     ]);
     db.$client.run("INSERT INTO forms VALUES (?, ?, ?)", [form, i + 1, source]);
   });
-  return findEntriesByForm(db, word).map((entry) => entry.senses[0]!.translations[0]);
+  return findEntriesByForm(db, word).map(
+    (entry) => entry.senses[0]!.translations[0],
+  );
 };
 
 describe("findEntriesByForm ranking", () => {

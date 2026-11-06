@@ -14,7 +14,14 @@
  */
 import { Database } from "bun:sqlite";
 import { drizzle } from "drizzle-orm/bun-sqlite";
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
@@ -46,13 +53,23 @@ export type CaseResult = {
   readonly top: ReadonlyArray<string>;
 };
 
-type Score = { positives: number; recall: number; negatives: number; falsePositives: number };
+type Score = {
+  positives: number;
+  recall: number;
+  negatives: number;
+  falsePositives: number;
+};
 
 const openDb = (path: string): DictionaryDb => {
   const client = new Database(path, { readonly: true, strict: true });
-  const version = client.query<{ user_version: number }, []>("PRAGMA user_version").get()?.user_version;
-  if (version !== SCHEMA_VERSION) throw new Error(`${path}: schema ${version}, expected ${SCHEMA_VERSION}`);
-  return Object.assign(drizzle({ client, schema }), { $client: client }) as DictionaryDb;
+  const version = client
+    .query<{ user_version: number }, []>("PRAGMA user_version")
+    .get()?.user_version;
+  if (version !== SCHEMA_VERSION)
+    throw new Error(`${path}: schema ${version}, expected ${SCHEMA_VERSION}`);
+  return Object.assign(drizzle({ client, schema }), {
+    $client: client,
+  }) as DictionaryDb;
 };
 
 /** Runs one case; exported so a test can check the pass rule on a tiny dictionary. */
@@ -77,17 +94,29 @@ export const clickedWord = (c: ContextCase, lang: string): string => {
 /** An abbreviation is one lemma with or without spaces after its periods (`п.п.`, `п. п.`). */
 const lemmaKey = (lemma: string) => lookupKey(lemma).replace(/\.\s+/g, ".");
 
-export const runCase = (db: DictionaryDb, pair: string, c: ContextCase): CaseResult => {
+export const runCase = (
+  db: DictionaryDb,
+  pair: string,
+  c: ContextCase,
+): CaseResult => {
   const target = lemmaKey(c.lemma);
   const isTarget = (lemma: string) => lemmaKey(lemma) === target;
   const word = clickedWord(c, pair.split("_")[0]!);
   const withContext = lookupWord(db, pair, word, c.sentence).entries;
-  const own = lookupWord(db, pair, word).entries.filter((e) => !isTarget(e.lemma));
-  const ownIds = new Set(own.map((e) => JSON.stringify([e.lemma, e.pos, e.senses])));
+  const own = lookupWord(db, pair, word).entries.filter(
+    (e) => !isTarget(e.lemma),
+  );
+  const ownIds = new Set(
+    own.map((e) => JSON.stringify([e.lemma, e.pos, e.senses])),
+  );
   const rank = withContext.findIndex((e) => isTarget(e.lemma));
-  const firstOwn = withContext.findIndex((e) => ownIds.has(JSON.stringify([e.lemma, e.pos, e.senses])));
+  const firstOwn = withContext.findIndex((e) =>
+    ownIds.has(JSON.stringify([e.lemma, e.pos, e.senses])),
+  );
   const pass =
-    c.expect === "phrase" ? rank >= 0 && (firstOwn < 0 || rank < firstOwn) : rank < 0;
+    c.expect === "phrase"
+      ? rank >= 0 && (firstOwn < 0 || rank < firstOwn)
+      : rank < 0;
   return {
     id: c.id,
     type: c.type,
@@ -102,7 +131,8 @@ export const runCase = (db: DictionaryDb, pair: string, c: ContextCase): CaseRes
 const score = (results: ReadonlyArray<CaseResult>): Score => {
   const pos = results.filter((r) => r.expect === "phrase");
   const neg = results.filter((r) => r.expect === "not-phrase");
-  const pct = (n: number, d: number) => (d === 0 ? 0 : Math.round((1000 * n) / d) / 10);
+  const pct = (n: number, d: number) =>
+    d === 0 ? 0 : Math.round((1000 * n) / d) / 10;
   return {
     positives: pos.length,
     recall: pct(pos.filter((r) => r.pass).length, pos.length),
@@ -127,10 +157,24 @@ if (import.meta.main) {
       db: { type: "string" },
     },
   });
-  if (!values.lang || !values.run) throw new Error("Usage: context-bench --lang <lang> --run <name> [--base <run>]");
+  if (!values.lang || !values.run)
+    throw new Error(
+      "Usage: context-bench --lang <lang> --run <name> [--base <run>]",
+    );
   const lang = values.lang;
   const pair = `${lang}_en`;
-  const gold = values.gold ?? join(import.meta.dirname, "..", "..", "..", "languages", lang, "gold", "context.jsonl");
+  const gold =
+    values.gold ??
+    join(
+      import.meta.dirname,
+      "..",
+      "..",
+      "..",
+      "languages",
+      lang,
+      "gold",
+      "context.jsonl",
+    );
   const cases: Array<ContextCase> = readFileSync(gold, "utf8")
     .split("\n")
     .filter((line) => line.trim() !== "")
@@ -143,22 +187,38 @@ if (import.meta.main) {
   mkdirSync(outDir, { recursive: true });
   const scores = {
     all: score(results),
-    byType: Object.fromEntries(groupBy(results, (r) => r.type).map(([k, rs]) => [k, score(rs)])),
+    byType: Object.fromEntries(
+      groupBy(results, (r) => r.type).map(([k, rs]) => [k, score(rs)]),
+    ),
     byVariant: Object.fromEntries(
-      groupBy(results, (r) => `${r.type}/${r.variant}`).map(([k, rs]) => [k, score(rs)]),
+      groupBy(results, (r) => `${r.type}/${r.variant}`).map(([k, rs]) => [
+        k,
+        score(rs),
+      ]),
     ),
   };
   writeFileSync(join(outDir, "scores.json"), JSON.stringify(scores, null, 2));
-  writeFileSync(join(outDir, "cases.jsonl"), results.map((r) => JSON.stringify(r)).join("\n") + "\n");
+  writeFileSync(
+    join(outDir, "cases.jsonl"),
+    results.map((r) => JSON.stringify(r)).join("\n") + "\n",
+  );
 
   // The base run: named, or the newest other run that has cases.
   const others = existsSync(benchDir)
     ? readdirSync(benchDir)
-        .filter((d) => d !== values.run && existsSync(join(benchDir, d, "cases.jsonl")))
-        .sort((a, b) => statSync(join(benchDir, b)).mtimeMs - statSync(join(benchDir, a)).mtimeMs)
+        .filter(
+          (d) =>
+            d !== values.run && existsSync(join(benchDir, d, "cases.jsonl")),
+        )
+        .sort(
+          (a, b) =>
+            statSync(join(benchDir, b)).mtimeMs -
+            statSync(join(benchDir, a)).mtimeMs,
+        )
     : [];
   const base = values.base ?? others[0];
-  let flips: { base: string; fixed: Array<string>; broken: Array<string> } | undefined;
+  let flips:
+    { base: string; fixed: Array<string>; broken: Array<string> } | undefined;
   if (base !== undefined) {
     const before = new Map<string, boolean>(
       readFileSync(join(benchDir, base, "cases.jsonl"), "utf8")
@@ -171,8 +231,12 @@ if (import.meta.main) {
     );
     flips = {
       base,
-      fixed: results.filter((r) => before.get(r.id) === false && r.pass).map((r) => r.id),
-      broken: results.filter((r) => before.get(r.id) === true && !r.pass).map((r) => r.id),
+      fixed: results
+        .filter((r) => before.get(r.id) === false && r.pass)
+        .map((r) => r.id),
+      broken: results
+        .filter((r) => before.get(r.id) === true && !r.pass)
+        .map((r) => r.id),
     };
     writeFileSync(join(outDir, "flips.json"), JSON.stringify(flips, null, 2));
   }
@@ -183,5 +247,9 @@ if (import.meta.main) {
   for (const [k, s] of Object.entries(scores.byType)) console.log(row(k, s));
   console.log("");
   for (const [k, s] of Object.entries(scores.byVariant)) console.log(row(k, s));
-  if (flips) console.log(`\nagainst ${flips.base}: ${flips.fixed.length} fixed, ${flips.broken.length} broken`, flips.broken.slice(0, 20));
+  if (flips)
+    console.log(
+      `\nagainst ${flips.base}: ${flips.fixed.length} fixed, ${flips.broken.length} broken`,
+      flips.broken.slice(0, 20),
+    );
 }

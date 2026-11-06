@@ -19,7 +19,11 @@ const SEPARABLE: ReadonlySet<string> = new Set(["de"]);
 
 /** Entries that read the same: same lemma (spacing aside: `и т. д.`, `и т.д.`), part of speech and senses. */
 const entryId = (entry: LookupEntry) =>
-  JSON.stringify([entry.lemma.toLowerCase().replace(/\s+/g, ""), entry.pos, entry.senses]);
+  JSON.stringify([
+    entry.lemma.toLowerCase().replace(/\s+/g, ""),
+    entry.pos,
+    entry.senses,
+  ]);
 
 /**
  * A `/v1/lookup` result. With `context`, the entries that match it come
@@ -53,7 +57,12 @@ export const lookupWord = (
     : [];
   const seen = new Set<string>();
   const first = dropLiteralPointers(
-    loadEntries(db, [...phraseIds, ...abbreviationIds, ...hyphenIds, ...separableIds]),
+    loadEntries(db, [
+      ...phraseIds,
+      ...abbreviationIds,
+      ...hyphenIds,
+      ...separableIds,
+    ]),
   ).filter((entry) => {
     const id = entryId(entry);
     if (seen.has(id)) return false;
