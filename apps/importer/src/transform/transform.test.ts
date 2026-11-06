@@ -736,4 +736,45 @@ describe("transformEntry", () => {
     assert.deepStrictEqual(translations(result), [["to be glad"]]);
     assert.isUndefined(result.reflexiveEntries);
   });
+
+  it("declines the adjectival participles a verb's table lists in the nominative", () => {
+    const result = transformEntry(
+      pl,
+      entry({
+        word: "wymagać",
+        pos: "verb",
+        forms: [
+          {
+            form: "wymagany",
+            tags: [
+              "adjectival",
+              "masculine",
+              "participle",
+              "passive",
+              "singular",
+            ],
+            source: "conjugation",
+          },
+          // only the masculine singular is declined from
+          {
+            form: "wymagana",
+            tags: [
+              "adjectival",
+              "feminine",
+              "participle",
+              "passive",
+              "singular",
+            ],
+            source: "conjugation",
+          },
+        ],
+        senses: [{ glosses: ["to require"] }],
+      }),
+    );
+    assert.includeMembers(
+      [...(result.entry?.forms ?? [])],
+      ["wymagany", "wymagana", "wymaganego", "wymaganej", "wymaganą"],
+    );
+    assert.notInclude([...(result.entry?.forms ?? [])], "wymaganaego");
+  });
 });

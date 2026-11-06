@@ -322,8 +322,36 @@ const collectForms = (
     }
     const key = lookupKey(form.form);
     if (key !== lemmaKey) forms.add(key);
+    for (const declined of participleForms(rules, key, form.tags ?? [])) {
+      forms.add(declined);
+    }
   }
   return { forms: [...forms], dropped };
+};
+
+const PARTICIPLE_TAGS = ["adjectival", "participle", "masculine", "singular"];
+
+/**
+ * The declined forms of an adjectival participle the table lists in the
+ * masculine nominative only (`wymagany` -> `wymaganego`, `wymaganej`), for a
+ * language with `participleDeclension`.
+ */
+const participleForms = (
+  rules: LanguageRules,
+  key: string,
+  tags: ReadonlyArray<string>,
+): ReadonlyArray<string> => {
+  const declension = rules.participleDeclension;
+  if (
+    declension === undefined ||
+    !PARTICIPLE_TAGS.every((tag) => tags.includes(tag)) ||
+    !key.endsWith(declension.ending) ||
+    /\s/u.test(key)
+  ) {
+    return [];
+  }
+  const stem = key.slice(0, key.length - declension.ending.length);
+  return declension.endings.map((ending) => stem + ending);
 };
 
 const isDegreeForm = (form: WiktextractForm): boolean =>

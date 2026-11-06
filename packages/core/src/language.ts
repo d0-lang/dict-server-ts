@@ -51,6 +51,15 @@ const Import = doc(
         "Senses Wiktionary labels `reflexive with <particle>` become an entry of their own, with the particle before or after the lemma (`after`: Polish `bawić się`, `wyobrażać sobie`). Learners learn these as words of their own.",
       ),
     ),
+    participleDeclension: Schema.optionalKey(
+      doc(
+        Schema.Struct({
+          ending: Schema.String,
+          endings: strings,
+        }),
+        "Adjectival participles decline like adjectives, but verb tables list only their nominatives (`wymagany`). A masculine singular participle that ends in `ending` also gets its stem with each of `endings` as forms of the verb (`wymaganego`, `wymaganej`).",
+      ),
+    ),
     stressedLemmas: orDefault(
       doc(
         Schema.Boolean,

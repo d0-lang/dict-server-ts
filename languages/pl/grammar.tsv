@@ -232,3 +232,81 @@ kimś	PRON	someone (instrumental or locative)
 sam	DET	alone, by oneself | himself, myself, yourself (emphatic: "sam to zrobiłem", I did it myself) | the very ("sam środek", the very middle)
 sama	DET	alone, by herself | herself, myself (emphatic) | the very
 samo	DET	alone, by itself | the same ("to samo", the same thing)
+
+## Conjunctions the dump lacks (wiktextract has no Polish line for i)
+i	CCONJ	and ("ty i ja", you and I; "i tak dalej", and so on) | too, also, even ("i on to wie", even he knows it)
+
+## Conditional particles
+by	PART	would (conditional: "fajnie by było", it would be nice; "co by było", what would happen)
+by	SCONJ	in order to, so that ("przyszedł, by pomóc", he came to help)
+bym	PART	I would (conditional, on the verb or apart from it: "zrobiłbym", I would do; "chętnie bym poszedł", I would gladly go) | so that I (in żebym, abym)
+byś	PART	you would (conditional, singular: "mógłbyś", could you) | so that you (in żebyś, abyś)
+byśmy	PART	we would (conditional: "moglibyśmy", we could; "byśmy wszystko wyrzucili", we would throw everything away) | so that we (in żebyśmy, abyśmy)
+byście	PART	you would (conditional, plural) | so that you (plural, in żebyście, abyście)
+
+## Forms of być
+# Irregular forms a reader can't connect to "to be" by themselves: the protocol
+# has no inflection tables.
+jestem	AUX	I am ("jestem w domu", I'm at home)
+jesteś	AUX	you are (singular)
+jest	AUX	is ("on jest w domu", he is at home) | there is ("jest problem", there is a problem)
+jesteśmy	AUX	we are
+jesteście	AUX	you are (plural)
+są	AUX	are ("oni są w domu", they are at home) | there are
+był	AUX	was (masculine: "był w domu", he was at home; "był zbudowany", was built) | there was ("był problem", there was a problem)
+była	AUX	was (feminine) | there was
+było	AUX	was, it was (neuter: "było zimno", it was cold) | there was, there were ("było dużo ludzi", there were many people)
+byli	AUX	were (men or mixed groups)
+były	AUX	were (women, children, animals or things)
+będę	AUX	I will be | I will (future: "będę czytać", I will read)
+będziesz	AUX	you will be | you will (future)
+będzie	AUX	will be ("jutro będzie padać", it will rain tomorrow) | will (future: "będzie pracował", he will work) | there will be
+będziemy	AUX	we will be | we will (future)
+będziecie	AUX	you will be (plural) | you will (future)
+będą	AUX	they will be | they will (future)
+byłby	AUX	would be (masculine: "byłby szczęśliwy", he would be happy)
+byłaby	AUX	would be (feminine)
+byłoby	AUX	would be, it would be ("byłoby lepiej", it would be better)
+byliby	AUX	would be (men or mixed groups)
+byłyby	AUX	would be (women, children, animals or things)
+będąc	AUX	being ("będąc w domu", being at home; while one was)
+
+## Connectives and intensifiers with a sense Wiktionary lacks
+czyli	PART	that is, i.e., in other words ("dwa, czyli para", two, i.e. a pair) | so, which means (a conclusion or the next step: "czyli teraz dodajemy", so now we add)
+w tym	ADP	in this, in that (locative: "w tym roku", this year; "w tym odcinku", in this episode) | including ("pięć osób, w tym dzieci", five people, including children)
+w sensie	PART	in the sense of, as in | I mean, like (colloquial filler: "w sensie, że...", I mean...)
+mega	ADV	very, really (colloquial: "mega niskie", very low) | awesome, great (as a reply)
+super	ADV	very, really (colloquial: "super nowoczesny", super-modern) | great, excellently (as a reply: "Super!", great!)
+
+## Units and abbreviations
+m	NOUN	m, metre (symbol: "10 m", ten metres; "m kw.", square metres)
+cm	NOUN	cm, centimetre (symbol)
+g	NOUN	g, gram (symbol: "100 g", 100 grams)
+kg	NOUN	kg, kilogram (symbol)
+ok	ADV	about, approximately (abbreviation of około: "ok. 50 osób", about 50 people) | OK, okay (colloquial)
+CO2	NOUN	CO₂, carbon dioxide
+
+## Hesitation and backchannel sounds
+yyy	INTJ	uh, um (hesitation in speech)
+mhm	INTJ	uh-huh, mm-hmm (agreement, listening)
+e	INTJ	eh, um (hesitation, at the start of a sentence: "E, nie wiem", um, I don't know) | hey! (calling someone's attention)
+
+## Set phrases English Wiktionary lacks (hand patches; the context rules match them like any phrase)
+za dużo	ADV	too much, too many
+za mało	ADV	too little, too few
+nie wolno	ADV	it is not allowed, one must not ("nie wolno palić", no smoking)
+pod postacią	ADP	in the form of (+ genitive)
+nie później niż	ADV	no later than
+mieć dosyć	VERB	to have had enough, to be fed up ("mam dosyć", I've had enough)
+dojść do	VERB	to happen, to take place ("doszło do wypadku", there was an accident) | to reach, to come to ("dojść do wniosku", to come to a conclusion)
+dochodzić do	VERB	to happen, to take place ("dochodzi do konfliktów", conflicts arise) | to reach, to come to
+podjąć decyzję	VERB	to make a decision
+podejmować decyzję	VERB	to make decisions, to decide
+zrobić zdjęcie	VERB	to take a photo
+robić zdjęcie	VERB	to take a photo, to take photos
+by było	X	it would be (conditional: "fajnie by było", it would be nice)
+można było	X	one could, it was possible ("można było zobaczyć", one could see)
+można będzie	X	one will be able to, it will be possible
+jak wiadomo	ADV	as is known, as everyone knows
+w związku z tym	ADV	therefore, in view of this
+w związku z czym	ADV	therefore, for this reason

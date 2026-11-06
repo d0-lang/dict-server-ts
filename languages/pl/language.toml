@@ -13,6 +13,10 @@ standardPronNotes = ["normal speech", "prescriptive"]
 # bawić się "to play". Senses labelled "reflexive with się" (or sobie) become
 # their own entry, bawić się, with the verb's forms.
 reflexive = "after"
+# Participles decline like adjectives, and tables list their nominatives only:
+# wymagany also gives wymaganego, wymaganej, wymaganemu, wymaganym, wymaganymi,
+# wymaganych, wymaganą (-ący likewise: należącej, dominującą).
+participleDeclension = { ending = "y", endings = ["ego", "ej", "emu", "ym", "ymi", "ych", "ą"] }
 
 [context]
 # Negation puts the verb's object in the genitive (`mieć znaczenie` -> `nie ma
