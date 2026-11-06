@@ -22,6 +22,8 @@ describe("language records", () => {
       hyphenWords: false,
       reflexives: [],
       maxGap: 1,
+      separableVerbs: false,
+      clauseConjunctions: [],
     });
     assert.isUndefined(language.compounds);
   });

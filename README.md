@@ -7,8 +7,8 @@ Bun + Effect 4 dictionary protocol PoC: the HTTP server and the importer that bu
 | `apps/server` (`@dict/server`) | the HTTP API, lookups, sentence context, compound splitting; `eval/` holds the context and segments benchmarks |
 | `apps/importer` (`@dict/importer`) | builds `data/<pair>.sqlite` from a wiktextract dump |
 | `packages/core` (`@dict/core`) | the dictionary file format both share: schema, `lookupKey`, opening and creating files |
-| `spec/dictionary/` | the dictionary file format as data, for any implementation: `schema.sql`, `format.json`, `lookupKey` test vectors |
-| `languages/<lang>/` | per-language data: `grammar.tsv`, the profile (`profile.md`), benchmark gold data |
+| `spec/` | what any implementation needs as data: the dictionary file format (`dictionary/`: `schema.sql`, `format.json`, `lookupKey` test vectors) and the language record's JSON Schema (`language.schema.json`, written by `bun run spec`) |
+| `languages/<lang>/` | per-language data: `language.toml` (the importer's and the server's settings; keys in `spec/language.schema.json`), `grammar.tsv`, the profile (`profile.md`), benchmark gold data |
 | `data/` | dictionary files, raw dumps and the identity key (gitignored) |
 
 The importer and the server only share `@dict/core`; `boundaries.test.ts` fails on any other import between them (the server's tests may use the importer to build dictionaries). Run every script from the repo root: `data/` and `.env` are read from the working directory.

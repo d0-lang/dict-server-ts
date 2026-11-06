@@ -3,6 +3,7 @@ import { AppConfig, DATA_DIR } from "../config.ts";
 import { compoundRules } from "./compounds.ts";
 import { phraseIndex } from "./context.ts";
 import { openDictionary, type DictionaryDb } from "@dict/core/DictionaryDb";
+import { pairLanguage, type Language } from "@dict/core/language";
 import { lookupWord } from "./lookup.ts";
 import { warmCompounds } from "./queries.ts";
 import type { LookupBody } from "../domain/schemas.ts";
@@ -20,7 +21,9 @@ export class Dictionaries extends Context.Service<
   }
 >()("server/dictionary/Dictionaries") {
   /**
-   * Opens `<dir>/<pair>.sqlite` for each listed pair; a missing file is fatal.
+   * Opens `<dir>/<pair>.sqlite` for each listed pair, with the source
+   * language's record (`languages/<lang>/language.toml`, defaults when there
+   * is none); a missing file or an invalid record is fatal.
    * With `context` on, the phrase index is built here, not on the first lookup.
    */
   static readonly layer = (dir = DATA_DIR) =>
@@ -28,20 +31,24 @@ export class Dictionaries extends Context.Service<
       Dictionaries,
       Effect.gen(function* () {
         const { languages, context } = yield* AppConfig;
-        const files = new Map<string, DictionaryDb>();
+        const files = new Map<
+          string,
+          { readonly db: DictionaryDb; readonly language: Language }
+        >();
         for (const pair of languages) {
           const db = yield* openDictionary(`${dir}/${pair}.sqlite`);
-          if (context) phraseIndex(db, pair.split("_")[0]!);
-          const rules = compoundRules(pair);
+          const language = yield* pairLanguage(pair);
+          if (context) phraseIndex(db, language);
+          const rules = compoundRules(language);
           if (rules !== undefined) warmCompounds(db, rules);
-          files.set(pair, db);
+          files.set(pair, { db, language });
         }
         return Dictionaries.of({
           lookup: (pair, word, sentence) => {
-            const db = files.get(pair);
-            return db === undefined
+            const file = files.get(pair);
+            return file === undefined
               ? { entries: [] }
-              : lookupWord(db, pair, word, sentence);
+              : lookupWord(file.db, file.language, word, sentence);
           },
         });
       }),

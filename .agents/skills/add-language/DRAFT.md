@@ -39,7 +39,7 @@ Variety matters more than size. Common words are ranked by how many different st
 
 ### 1. Import
 
-`bun run filter --lang <lang> …`, then `bun run import --lang <lang> …`. Start from the settings of the closest finished language (Ukrainian from Russian, Czech from Polish, Dutch from German) and check each one against the data.
+`bun run filter --lang <lang> …`, then `bun run import --lang <lang> …`. First write `languages/<lang>/language.toml` (the importer refuses a language without one), starting from the closest finished language's (Ukrainian from Russian, Czech from Polish, Dutch from German), and check each setting against the data. Keys and defaults are in `spec/language.schema.json`.
 
 ### 2. Profile
 

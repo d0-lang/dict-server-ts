@@ -23,6 +23,7 @@ import { drizzle } from "drizzle-orm/bun-sqlite";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
+import { readPairLanguage, type Language } from "@dict/core/language";
 import { compoundRules } from "../src/dictionary/compounds.ts";
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import { lookupKey } from "@dict/core/lookupKey";
@@ -94,10 +95,10 @@ export const segmentCases = (
 /** How the split of `c.word` compares with its etymology. */
 export const judgeSplit = (
   db: DictionaryDb,
-  pair: string,
+  language: Language,
   c: SegmentCase,
 ): { outcome: SegmentOutcome; split: string } => {
-  const rules = compoundRules(pair) ?? { linkers: [] };
+  const rules = compoundRules(language) ?? { linkers: [] };
   const result = compoundEntries(db, c.word, rules);
   const segments = result.segments;
   if (segments === undefined || result.entries.length === 0)
@@ -150,7 +151,8 @@ if (import.meta.main) {
   );
   if (values.sample !== undefined)
     cases = cases.slice(0, Number(values.sample));
-  const results = cases.map((c) => ({ ...c, ...judgeSplit(db, pair, c) }));
+  const language = readPairLanguage(pair);
+  const results = cases.map((c) => ({ ...c, ...judgeSplit(db, language, c) }));
   const counts: Record<SegmentOutcome, number> = {
     exact: 0,
     "combining-form": 0,

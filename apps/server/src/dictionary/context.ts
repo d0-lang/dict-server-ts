@@ -1,4 +1,5 @@
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
+import type { Language } from "@dict/core/language";
 import { caseClass, lookupKey } from "@dict/core/lookupKey";
 import {
   CaseClass,
@@ -217,7 +218,11 @@ const indexes = new WeakMap<DictionaryDb, PhraseIndex>();
  * and inflected rows like `Vereinigten Staaten`), indexed by its words. Built
  * once per file, on first use.
  */
-export const phraseIndex = (db: DictionaryDb, locale: string): PhraseIndex => {
+export const phraseIndex = (
+  db: DictionaryDb,
+  language: Language,
+): PhraseIndex => {
+  const locale = language.code;
   const cached = indexes.get(db);
   if (cached !== undefined) return cached;
   // Wiktionary files many verb idioms as untyped phrases (`стелить соломку`,
@@ -287,39 +292,45 @@ export const phraseIndex = (db: DictionaryDb, locale: string): PhraseIndex => {
   return index;
 };
 
-/** Languages that put the rest of a verb phrase at the end of the clause. */
-const BRACKET: ReadonlySet<string> = new Set(["de"]);
-
-/**
- * Languages that write some words as hyphen-joined parts (`что-нибудь`,
- * `по-русски`, `какого-то`). The segmenter splits them, so with context the
- * parts are joined back into one word, and a phrase can't use only one part.
- */
-const HYPHEN_WORDS: ReadonlySet<string> = new Set(["ru"]);
-
-/** Reflexive pronouns a phrase's `sich` stands for. */
-const REFLEXIVES: Readonly<Record<string, ReadonlySet<string>>> = {
-  de: new Set(["sich", "mich", "dich", "uns", "euch", "mir", "dir"]),
+/** A language's `[context]` settings, as the matcher reads them. */
+type ContextRules = {
+  readonly reflexives: ReadonlySet<string> | undefined;
+  readonly maxGap: number;
+  readonly negation: string | undefined;
+  readonly bracket: boolean;
+  readonly hyphenWords: boolean;
+  readonly conjunctions: ReadonlySet<string>;
 };
 
-/**
- * The particle that negates a verb, in languages where negation changes the
- * case of the verb's object: Russian and Polish put it in the genitive
- * (`иметь значение` → `не имеет значения`, `mieć znaczenie` → `nie ma
- * znaczenia`), so the phrase's own forms no longer match.
- */
-const NEGATIONS: Readonly<Record<string, string>> = {
-  ru: "не",
-  pl: "nie",
+const rulesByLanguage = new WeakMap<Language, ContextRules>();
+
+const contextRules = (language: Language): ContextRules => {
+  const cached = rulesByLanguage.get(language);
+  if (cached !== undefined) return cached;
+  const { context } = language;
+  const rules: ContextRules = {
+    reflexives:
+      context.reflexives.length > 0 ? new Set(context.reflexives) : undefined,
+    maxGap: context.maxGap,
+    negation: context.negation,
+    bracket: context.verbBracket,
+    hyphenWords: context.hyphenWords,
+    conjunctions: new Set(context.clauseConjunctions),
+  };
+  rulesByLanguage.set(language, rules);
+  return rules;
 };
+
+/** No conjunction ends a clause. */
+const NO_CONJUNCTIONS: ReadonlySet<string> = new Set();
 
 type Matcher = {
   readonly tokens: ReadonlyArray<Token>;
   readonly info: (key: string, wordClass?: CaseClass) => TokenInfo;
   readonly reflexives: ReadonlySet<string> | undefined;
-  /** Words allowed between a verb and the rest of its phrase (`MAX_GAPS`). */
+  /** Words allowed between a verb and the rest of its phrase (`context.maxGap`). */
   readonly maxGap: number;
-  /** This language's verb negation (`NEGATIONS`). */
+  /** This language's verb negation (`context.negation`). */
   readonly negation: string | undefined;
   /**
    * Trying the phrase with a negated verb (`matchPhrase`): its other words
@@ -332,8 +343,10 @@ type Matcher = {
    * the `ist an` row of `an sein` matches `Er ist an der Uni`.
    */
   readonly bracket: boolean;
-  /** Hyphen-joined parts are one word (`HYPHEN_WORDS`). */
+  /** Hyphen-joined parts are one word (`context.hyphenWords`). */
   readonly hyphenWords: boolean;
+  /** Conjunctions that end a clause (`context.clauseConjunctions`). */
+  readonly conjunctions: ReadonlySet<string>;
   /** Every context word and its lemmas: a phrase with a word outside it can't match. */
   readonly available: ReadonlySet<string>;
 };
@@ -488,7 +501,7 @@ const placePhrase = (
     if (
       phrase.interjection &&
       ((start > 0 && !m.tokens[start]!.breakBefore) ||
-        !endsClause(m.tokens, start + n - 1, false))
+        !endsClause(m.tokens, start + n - 1, NO_CONJUNCTIONS))
     ) {
       continue;
     }
@@ -497,7 +510,7 @@ const placePhrase = (
       m.bracket &&
       phrase.verbEntry &&
       !m.info(last).verbLemma &&
-      !endsClause(m.tokens, start + n - 1)
+      !endsClause(m.tokens, start + n - 1, m.conjunctions)
     ) {
       continue;
     }
@@ -558,12 +571,13 @@ const placePhrase = (
       // the contiguous match covers. One far after it is another verb's.
       if (
         m.bracket &&
-        (verbPlace > at[0]! || !endsClause(m.tokens, at.at(-1)!))
+        (verbPlace > at[0]! ||
+          !endsClause(m.tokens, at.at(-1)!, m.conjunctions))
       ) {
         continue;
       }
       // Elsewhere only a few words come between (`miało to miejsce`,
-      // `MAX_GAPS`), so `jest to się w dupie` isn't `być w dupie`.
+      // `context.maxGap`), so `jest to się w dupie` isn't `być w dupie`.
       const gap = gapAt(verbPlace);
       if (!m.bracket && gap > m.maxGap) continue;
       const placed = all.map((p) =>
@@ -603,17 +617,6 @@ const matchPhrase = (
   return verbs.some((p) => negatedAt(m, match.placed[p]!)) ? match : undefined;
 };
 
-/** Words allowed between a verb and the rest of its phrase, outside German. */
-const MAX_GAP = 1;
-
-/**
- * Languages that allow more (`MAX_GAP`). Russian often puts an object and an
- * adverb between the verb and the rest (`дашь мне честное слово`, `держать
- * все время ухо востро`); in Polish two words let in as many literal readings
- * as idioms (`jesteśmy u Mikołaja w domu` isn't `być w domu`).
- */
-const MAX_GAPS: Readonly<Record<string, number>> = { ru: 2 };
-
 /** Phrases kept per lookup, longest first. */
 const MAX_PHRASES = 3;
 
@@ -636,12 +639,13 @@ export const phraseEntryIds = (
   db: DictionaryDb,
   word: string,
   context: string,
-  locale: string,
+  language: Language,
 ): ReadonlyArray<number> => {
+  const locale = language.code;
   const tokens = tokenize(context, locale);
   const positions = positionsOf(tokens, word, locale);
   if (positions.length === 0) return [];
-  const index = phraseIndex(db, locale);
+  const index = phraseIndex(db, language);
   const info = tokenInfos(db);
   const available = new Set<string>();
   for (const token of tokens) {
@@ -651,12 +655,8 @@ export const phraseEntryIds = (
   const m: Matcher = {
     tokens,
     info,
-    reflexives: REFLEXIVES[locale],
-    maxGap: MAX_GAPS[locale] ?? MAX_GAP,
-    negation: NEGATIONS[locale],
+    ...contextRules(language),
     negated: false,
-    bracket: BRACKET.has(locale),
-    hyphenWords: HYPHEN_WORDS.has(locale),
     available,
   };
   const matches = new Map<Phrase, PhraseMatch>();
@@ -800,7 +800,7 @@ const hyphenWordIds = (
 
 /**
  * Entry ids of the hyphen-joined word `word` is part of in `context`, in
- * languages that write words that way (`HYPHEN_WORDS`): `что` or `нибудь` in
+ * languages that write words that way (`context.hyphenWords`): `что` or `нибудь` in
  * `что-нибудь`. The client doesn't say which occurrence was clicked, so
  * every occurrence must be part of a hyphen-joined word that has entries:
  * not `восток` in `на восток и северо-восток`, nor `веб` in
@@ -811,9 +811,10 @@ export const hyphenEntryIds = (
   db: DictionaryDb,
   word: string,
   context: string,
-  locale: string,
+  language: Language,
 ): ReadonlyArray<number> => {
-  if (!HYPHEN_WORDS.has(locale)) return [];
+  if (!language.context.hyphenWords) return [];
+  const locale = language.code;
   const tokens = tokenize(context, locale);
   const cache = new Map<string, ReadonlyArray<FormRow>>();
   const rows: Rows = (key, wordClass = CaseClass.Capitalised) => {
@@ -880,8 +881,9 @@ export const abbreviationEntryIds = (
   db: DictionaryDb,
   word: string,
   context: string,
-  locale: string,
+  language: Language,
 ): ReadonlyArray<number> => {
+  const locale = language.code;
   const tokens = tokenize(context, locale);
   const ids: Array<number> = [];
   for (const clicked of positionsOf(tokens, word, locale)) {
@@ -938,32 +940,17 @@ const rank = (a: PhraseMatch, b: PhraseMatch): number =>
   Number(b.contiguous) - Number(a.contiguous) ||
   b.exact - a.exact;
 
-/** Words that may follow a clause-final separable particle without punctuation. */
-const CONJUNCTIONS: ReadonlySet<string> = new Set([
-  "und",
-  "oder",
-  "aber",
-  "sondern",
-  "denn",
-  "sowie",
-  "bzw",
-]);
-
 /**
- * The word at `i` ends its clause, where a separated particle stands. A
- * conjunction counts as a clause break unless `conjunctions` is false.
+ * The word at `i` ends its clause, where a separated particle stands: a
+ * clause break or one of `conjunctions` follows it.
  */
 const endsClause = (
   tokens: ReadonlyArray<Token>,
   i: number,
-  conjunctions = true,
+  conjunctions: ReadonlySet<string>,
 ): boolean => {
   const next = tokens[i + 1];
-  return (
-    next === undefined ||
-    next.breakBefore ||
-    (conjunctions && CONJUNCTIONS.has(next.key))
-  );
+  return next === undefined || next.breakBefore || conjunctions.has(next.key);
 };
 
 /** Verb entries of `particle` + `verb`, joined (`statt` + `fand`) or as a two-word form (`rief an`). */
@@ -996,8 +983,10 @@ export const separableEntryIds = (
   db: DictionaryDb,
   word: string,
   context: string,
-  locale: string,
+  language: Language,
 ): ReadonlyArray<number> => {
+  const locale = language.code;
+  const { conjunctions } = contextRules(language);
   const tokens = tokenize(context, locale);
   const ids: Array<number> = [];
   for (const clicked of positionsOf(tokens, word, locale)) {
@@ -1005,13 +994,13 @@ export const separableEntryIds = (
     // The clicked word is the verb: its particle ends the clause.
     for (let j = clicked + 1; j < tokens.length; j++) {
       if (tokens[j]!.clause !== clause) break;
-      if (endsClause(tokens, j)) {
+      if (endsClause(tokens, j, conjunctions)) {
         ids.push(...separableIds(db, key, tokens[j]!.key));
         break;
       }
     }
     // The clicked word is the particle: the nearest verb before it that forms one.
-    if (endsClause(tokens, clicked)) {
+    if (endsClause(tokens, clicked, conjunctions)) {
       for (let j = clicked - 1; j >= 0; j--) {
         if (tokens[j]!.clause !== clause) break;
         const found = separableIds(db, tokens[j]!.key, key);

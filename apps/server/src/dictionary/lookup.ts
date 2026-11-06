@@ -6,6 +6,7 @@ import {
   separableEntryIds,
 } from "./context.ts";
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
+import type { Language } from "@dict/core/language";
 import {
   dropLiteralPointers,
   findEntriesWithCompounds,
@@ -13,9 +14,6 @@ import {
   type LookupEntry,
   type LookupResult,
 } from "./queries.ts";
-
-/** Languages whose verbs leave a particle at the end of the clause. */
-const SEPARABLE: ReadonlySet<string> = new Set(["de"]);
 
 /** Entries that read the same: same lemma (spacing aside: `и т. д.`, `и т.д.`), part of speech and senses. */
 const entryId = (entry: LookupEntry) =>
@@ -35,23 +33,25 @@ const entryId = (entry: LookupEntry) =>
  */
 export const lookupWord = (
   db: DictionaryDb,
-  pair: string,
+  language: Language,
   word: string,
   context?: string,
 ): LookupResult => {
-  const lang = pair.split("_")[0]!;
-  const base = findEntriesWithCompounds(db, word, compoundRules(pair));
+  const base = findEntriesWithCompounds(db, word, compoundRules(language));
   if (context === undefined || context.trim() === "") return base;
 
-  const phraseIds = phraseEntryIds(db, word, context, lang);
-  const abbreviationIds = abbreviationEntryIds(db, word, context, lang).filter(
-    (id) => !phraseIds.includes(id),
-  );
-  const hyphenIds = hyphenEntryIds(db, word, context, lang).filter(
+  const phraseIds = phraseEntryIds(db, word, context, language);
+  const abbreviationIds = abbreviationEntryIds(
+    db,
+    word,
+    context,
+    language,
+  ).filter((id) => !phraseIds.includes(id));
+  const hyphenIds = hyphenEntryIds(db, word, context, language).filter(
     (id) => !phraseIds.includes(id) && !abbreviationIds.includes(id),
   );
-  const separableIds = SEPARABLE.has(lang)
-    ? separableEntryIds(db, word, context, lang).filter(
+  const separableIds = language.context.separableVerbs
+    ? separableEntryIds(db, word, context, language).filter(
         (id) => !phraseIds.includes(id),
       )
     : [];

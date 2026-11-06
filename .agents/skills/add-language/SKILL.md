@@ -28,7 +28,7 @@ The benchmark scripts are `apps/server/eval/context-bench.ts` and `apps/server/e
 
 ## Phase 0: Import and smoke test
 
-1. Filter and import: `bun run filter --lang <lang> --input data/raw-wiktextract-data.jsonl --out data/raw/<lang>.jsonl`, then `bun run import --lang <lang> --input data/raw/<lang>.jsonl`.
+1. Write `languages/<lang>/language.toml`, starting from the closest finished language's (Ukrainian from Russian, Czech from Polish, Dutch from German); the importer refuses a language without one. Then filter and import: `bun run filter --lang <lang> --input data/raw-wiktextract-data.jsonl --out data/raw/<lang>.jsonl`, then `bun run import --lang <lang> --input data/raw/<lang>.jsonl`.
 2. Check normalisation against real text before anything else: diacritics that Wiktionary writes and texts don't (Russian stress marks), letter variants (`ё`/`е`), apostrophes, case rules (Turkish `İ/ı`, German nouns). If a common form doesn't match, fix `lookupKey` or the importer first, because every later number depends on it.
 3. Measure corpus coverage: the share of tokens with any entry, and the 50 most frequent words without one. Look at those 50 and classify the causes.
 
@@ -56,7 +56,7 @@ Write `languages/<lang>/profile.md`. Base every answer on counts from the dictio
 
 Report the share of sampled entries that fit no type. Above about 10%, a type is missing. Separable verbs are a type when the language has them.
 
-**Settings.** List the per-language settings the rules need (clause-bracket word order, separable verbs, reflexive pronouns, maximum gap, clause-ending conjunctions, compound linkers) and their values. Settings live in the code; the profile records why each value was chosen.
+**Settings.** List the per-language settings the rules need (clause-bracket word order, separable verbs, reflexive pronouns, maximum gap, clause-ending conjunctions, compound linkers) and their values. Settings live in `languages/<lang>/language.toml` (keys and defaults: `spec/language.schema.json`); the profile records why each value was chosen, and the TOML keeps a one-line comment per value.
 
 If a reader of the language is available, ask them to review the profile now. Otherwise, continue.
 

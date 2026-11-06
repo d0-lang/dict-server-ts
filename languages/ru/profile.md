@@ -127,14 +127,16 @@ Sample: 300 multi-word or hyphenated entries (`/tmp` working set; not in the rep
 
 ## Settings
 
+The values are in `language.toml` next to this file. Earlier sections and the iteration log name the TypeScript constants these replaced: `BRACKET` is `context.verbBracket`, `SEPARABLE` is `context.separableVerbs`, `HYPHEN_WORDS` is `context.hyphenWords`, `REFLEXIVES` is `context.reflexives`, `NEGATIONS` is `context.negation`, `MAX_GAPS` is `context.maxGap`, `CONJUNCTIONS` is `context.clauseConjunctions`, and `CompoundRules` is `[compounds]`.
+
 | Setting | Value | Why |
 |---|---|---|
 | Stress marks | dropped in `lookupKey` for Cyrillic words | 86% of forms are stressed, and text isn't |
 | `stressedLemmas` | on | the reader sees `соба́ка`; matching still ignores the marks |
 | `optionalLetters` | `ё` → `е` | 80k forms with `ё`; most text writes `е` |
 | `untrustedFormTags` | `error-unrecognized-form` | 29 misparsed tables; per language, because Polish depends on the tag |
-| Clause bracket (`BRACKET`) | off | Russian has no verb-final bracket |
-| Separable verbs (`SEPARABLE`) | off | prefixes are inseparable |
+| Clause bracket (`context.verbBracket`) | off | Russian has no verb-final bracket |
+| Separable verbs (`context.separableVerbs`) | off | prefixes are inseparable |
 | Reflexive pronouns | none | `-ся` is part of the verb; `себя` in phrases is fixed |
 | Maximum gap | 1 (current default), to measure | For multi-word verb entries only: how many words may stand between the verb and the rest (`имею это в виду` has one, `наводила на Передонова страх` has two). Free word order suggests 2; a larger gap matches more chance co-occurrences |
 | Clause-ending conjunctions | not used | only for the German bracket |

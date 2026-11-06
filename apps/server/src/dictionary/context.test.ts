@@ -5,9 +5,21 @@ import {
   type DictionaryDb,
 } from "@dict/core/DictionaryDb";
 import { lookupWord } from "./lookup.ts";
+import { readPairLanguage, type Language } from "@dict/core/language";
 import { caseClass, lookupKey } from "@dict/core/lookupKey";
 import { surfaceSlices } from "./queries.ts";
 import { FormSource, type UdPos } from "@dict/core/schema";
+
+/** The pair's language record, read once, as the server does at startup. */
+const languages = new Map<string, Language>();
+const languageOf = (pair: string): Language => {
+  let language = languages.get(pair);
+  if (language === undefined) {
+    language = readPairLanguage(pair);
+    languages.set(pair, language);
+  }
+  return language;
+};
 
 type Word = readonly [
   lemma: string,
@@ -203,7 +215,10 @@ const lemmas = (
   pair: string,
   word: string,
   context?: string,
-) => lookupWord(db, pair, word, context).entries.map((entry) => entry.lemma);
+) =>
+  lookupWord(db, languageOf(pair), word, context).entries.map(
+    (entry) => entry.lemma,
+  );
 
 describe("tokenize", () => {
   it("splits a word at a period between letters, as browsers do", () => {
@@ -396,7 +411,7 @@ describe("lookup with context", () => {
   it("leaves out a phrase's pointer to its literal reading", () => {
     const [phrase] = lookupWord(
       polish,
-      "pl_en",
+      languageOf("pl_en"),
       "tym",
       "Jesteś w tym fachowiec.",
     ).entries;
@@ -548,29 +563,34 @@ describe("lookup with context", () => {
 
 describe("segments", () => {
   it("splits a compound into parts as written", () => {
-    assert.deepStrictEqual(lookupWord(german, "de_en", "Gemüsefonds"), {
-      entries: [
-        {
-          lemma: "Gemüse",
-          pos: "NOUN",
-          senses: [{ translations: ["[Gemüse]"] }],
-        },
-        {
-          lemma: "Fonds",
-          pos: "NOUN",
-          senses: [{ translations: ["[Fonds]"] }],
-        },
-      ],
-      segments: [
-        { text: "Gemüse", entries: [0] },
-        { text: "fonds", entries: [1] },
-      ],
-    });
+    assert.deepStrictEqual(
+      lookupWord(german, languageOf("de_en"), "Gemüsefonds"),
+      {
+        entries: [
+          {
+            lemma: "Gemüse",
+            pos: "NOUN",
+            senses: [{ translations: ["[Gemüse]"] }],
+          },
+          {
+            lemma: "Fonds",
+            pos: "NOUN",
+            senses: [{ translations: ["[Fonds]"] }],
+          },
+        ],
+        segments: [
+          { text: "Gemüse", entries: [0] },
+          { text: "fonds", entries: [1] },
+        ],
+      },
+    );
   });
 
   it("splits a Russian compound into stems and a linker", () => {
     const parts = (word: string) =>
-      lookupWord(russian, "ru_en", word).segments?.map((s) => s.text);
+      lookupWord(russian, languageOf("ru_en"), word).segments?.map(
+        (s) => s.text,
+      );
     assert.deepStrictEqual(parts("лесонасаждения"), ["лес", "о", "насаждения"]);
     assert.deepStrictEqual(parts("нефтегазовая"), ["нефт", "е", "газовая"]);
     assert.deepStrictEqual(parts("киберкабаны"), ["кибер", "кабаны"]);
@@ -603,7 +623,7 @@ describe("segments", () => {
       ["Gastronomie", "NOUN"],
     ]);
     assert.deepStrictEqual(
-      lookupWord(db, "de_en", "Spitzengastronomie").segments,
+      lookupWord(db, languageOf("de_en"), "Spitzengastronomie").segments,
       [
         { text: "Spitze", entries: [0] },
         { text: "n" },
@@ -626,7 +646,7 @@ describe("segments", () => {
   it("reads a name's genitive as the name, not a compound", () => {
     assert.deepStrictEqual(lemmas(german, "de_en", "Dortmunds"), ["Dortmund"]);
     assert.strictEqual(
-      lookupWord(german, "de_en", "Dortmunds").segments,
+      lookupWord(german, languageOf("de_en"), "Dortmunds").segments,
       undefined,
     );
   });
@@ -640,7 +660,7 @@ describe("segments", () => {
     ]);
     const result = lookupWord(
       db,
-      "de_en",
+      languageOf("de_en"),
       "Gemüsefonds",
       "Wir Gemüsefonds kochen.",
     );

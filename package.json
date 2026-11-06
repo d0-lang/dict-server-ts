@@ -15,7 +15,8 @@
     "filter": "bun apps/importer/src/filterCli.ts",
     "bench:context": "bun apps/server/eval/context-bench.ts",
     "bench:segments": "bun apps/server/eval/segments-bench.ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "spec": "bun packages/core/scripts/spec.ts"
   },
   "devDependencies": {
     "@effect/vitest": "4.0.5",

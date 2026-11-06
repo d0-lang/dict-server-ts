@@ -17,12 +17,12 @@ standardPronNotes = []
 verbBracket = true
 # Reflexive pronouns a phrase's `sich` stands for.
 reflexives = ["sich", "mich", "dich", "uns", "euch", "mir", "dir"]
-
-[context.separable]
 # Separable verbs: the finite verb with its particle at the end of the clause
-# (`Er fand gestern statt` -> `stattfinden`). These words may follow a
-# clause-final particle without punctuation.
-conjunctions = ["und", "oder", "aber", "sondern", "denn", "sowie", "bzw"]
+# (`Er fand gestern statt` -> `stattfinden`), whichever of the two was clicked.
+separableVerbs = true
+# Words that may follow the clause's last word without punctuation, so the
+# bracket and a separable particle can end there (`rief an und ging`).
+clauseConjunctions = ["und", "oder", "aber", "sondern", "denn", "sowie", "bzw"]
 
 [compounds]
 # Compounds are written as one word (`Gemüse|s|fonds`); a word without an

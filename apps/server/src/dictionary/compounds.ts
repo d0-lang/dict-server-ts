@@ -1,3 +1,4 @@
+import type { Language } from "@dict/core/language";
 import type { UdPos } from "@dict/core/schema";
 
 /**
@@ -33,29 +34,25 @@ export type CompoundRules = {
   readonly adjectiveEndings?: ReadonlyArray<string>;
 };
 
-/** Compound rules by source language; a language without them doesn't split. */
-const COMPOUNDS: Readonly<Record<string, CompoundRules>> = {
-  de: { linkers: ["", "s", "es", "n", "en", "er", "e", "ens"] },
-  ru: {
-    // Not `и`: it joins only numbers (`пяти|этажный`, a plain join of the
-    // genitive), and as a linker it misreads `дож|и|мать`.
-    linkers: ["", "о", "е"],
-    stemEndings: ["ый", "ий", "ой", "а", "я", "о", "е", "ы", "и", "ь", "й"],
-    optionalLetters: [["ё", "е"]],
-    adjectiveEndings: [
-      ...["ый", "ий", "ой", "ая", "яя", "ое", "ее", "ые", "ие"],
-      ...["ого", "его", "ому", "ему", "ым", "им", "ых", "их", "ую", "юю", "ей"],
-      ...["ыми", "ими"],
-    ],
-  },
+const rulesByLanguage = new WeakMap<Language, CompoundRules | undefined>();
+
+/**
+ * The compound rules of a language record (its `[compounds]` section, with
+ * its `optionalLetters`); undefined when the language doesn't split. The
+ * object is kept per record, since the stem index is cached by it.
+ */
+export const compoundRules = (
+  language: Language,
+): CompoundRules | undefined => {
+  if (rulesByLanguage.has(language)) return rulesByLanguage.get(language);
+  const compounds = language.compounds;
+  const rules =
+    compounds === undefined
+      ? undefined
+      : { ...compounds, optionalLetters: language.optionalLetters };
+  rulesByLanguage.set(language, rules);
+  return rules;
 };
-
-export const compoundRules = (pair: string): CompoundRules | undefined =>
-  COMPOUNDS[pair.split("_")[0]!];
-
-export const compoundLinkers = (
-  pair: string,
-): ReadonlyArray<string> | undefined => compoundRules(pair)?.linkers;
 
 /** Shorter parts match too much by chance (`ei`, `en`). */
 export const MIN_PART = 3;

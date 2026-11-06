@@ -25,6 +25,7 @@ import {
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
+import { readPairLanguage, type Language } from "@dict/core/language";
 import { lookupWord } from "../src/dictionary/lookup.ts";
 import { lookupKey } from "@dict/core/lookupKey";
 import { SCHEMA_VERSION, schema } from "@dict/core/schema";
@@ -96,14 +97,14 @@ const lemmaKey = (lemma: string) => lookupKey(lemma).replace(/\.\s+/g, ".");
 
 export const runCase = (
   db: DictionaryDb,
-  pair: string,
+  language: Language,
   c: ContextCase,
 ): CaseResult => {
   const target = lemmaKey(c.lemma);
   const isTarget = (lemma: string) => lemmaKey(lemma) === target;
-  const word = clickedWord(c, pair.split("_")[0]!);
-  const withContext = lookupWord(db, pair, word, c.sentence).entries;
-  const own = lookupWord(db, pair, word).entries.filter(
+  const word = clickedWord(c, language.code);
+  const withContext = lookupWord(db, language, word, c.sentence).entries;
+  const own = lookupWord(db, language, word).entries.filter(
     (e) => !isTarget(e.lemma),
   );
   const ownIds = new Set(
@@ -180,7 +181,8 @@ if (import.meta.main) {
     .filter((line) => line.trim() !== "")
     .map((line) => JSON.parse(line));
   const db = openDb(values.db ?? `data/${pair}.sqlite`);
-  const results = cases.map((c) => runCase(db, pair, c));
+  const language = readPairLanguage(pair);
+  const results = cases.map((c) => runCase(db, language, c));
 
   const benchDir = join(import.meta.dirname, "out", lang, "bench");
   const outDir = join(benchDir, values.run);

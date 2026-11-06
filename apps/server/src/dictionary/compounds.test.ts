@@ -1,5 +1,8 @@
 import { assert, describe, it } from "@effect/vitest";
-import { compoundLinkers, splitCompound } from "./compounds.ts";
+import { readLanguage } from "@dict/core/language";
+import { compoundRules, splitCompound } from "./compounds.ts";
+
+const linkers = compoundRules(readLanguage("de"))!.linkers;
 
 const words = new Set([
   "gemüse",
@@ -13,11 +16,7 @@ const words = new Set([
   "hanse",
 ]);
 const pieces = (word: string) =>
-  splitCompound(
-    word,
-    (part) => (words.has(part) ? 2 : 0),
-    compoundLinkers("de_en")!,
-  );
+  splitCompound(word, (part) => (words.has(part) ? 2 : 0), linkers);
 const split = (word: string) =>
   pieces(word)
     ?.filter((piece) => piece.part)
@@ -70,7 +69,7 @@ describe("splitCompound", () => {
       splitCompound(
         word,
         (stem, linker) => scores[stem]?.[linker] ?? (scores[stem] ? 1 : 0),
-        compoundLinkers("de_en")!,
+        linkers,
       );
     assert.deepStrictEqual(scored("spitzengastronomie"), [
       { text: "spitze", part: true },
@@ -94,6 +93,6 @@ describe("splitCompound", () => {
   });
 
   it("only applies to compounding languages", () => {
-    assert.strictEqual(compoundLinkers("pl_en"), undefined);
+    assert.strictEqual(compoundRules(readLanguage("pl")), undefined);
   });
 });
