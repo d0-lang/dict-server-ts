@@ -29,6 +29,9 @@ negation = "не"
 # Russian often puts an object and an adverb between the verb and the rest
 # (`дашь мне честное слово`, `держать все время ухо востро`).
 maxGap = 2
+# A word that may stand before an abbreviation as part of it (`и т. д.`,
+# `и т. п.`).
+abbreviationLeads = ["и"]
 
 [compounds]
 # Not `и`: it joins only numbers (`пяти|этажный`, a plain join of the

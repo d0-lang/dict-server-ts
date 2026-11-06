@@ -300,6 +300,7 @@ type ContextRules = {
   readonly bracket: boolean;
   readonly hyphenWords: boolean;
   readonly conjunctions: ReadonlySet<string>;
+  readonly abbreviationLeads: ReadonlySet<string>;
 };
 
 const rulesByLanguage = new WeakMap<Language, ContextRules>();
@@ -316,6 +317,7 @@ const contextRules = (language: Language): ContextRules => {
     bracket: context.verbBracket,
     hyphenWords: context.hyphenWords,
     conjunctions: new Set(context.clauseConjunctions),
+    abbreviationLeads: new Set(context.abbreviationLeads),
   };
   rulesByLanguage.set(language, rules);
   return rules;
@@ -850,9 +852,6 @@ const grammarIds = (db: DictionaryDb, form: string): ReadonlyArray<number> =>
     .all(form)
     .map((row) => row.id);
 
-/** Words that may stand before an abbreviation as part of it (`и т. д.`, `и т. п.`). */
-const ABBREVIATION_LEADS: ReadonlySet<string> = new Set(["и"]);
-
 /**
  * Ways to write the dotted run of `parts` as a form, longest first: with the
  * word before it when that can belong to it (`и т. д.`), then alone; spaced
@@ -871,7 +870,8 @@ const abbreviationSpellings = (
 
 /**
  * Entry ids of the abbreviation the context word `word` is a piece of, in
- * any language: `т` or `д` in `т.д.` (browsers send the piece alone),
+ * any language (with the word before it when that is one of the language's
+ * `context.abbreviationLeads`): `т` or `д` in `т.д.` (browsers send the piece alone),
  * `z` in `z.B.`. The pieces are the run of words joined by a period and at
  * most one space. As with hyphenated words, the client doesn't say which
  * occurrence was clicked, so every occurrence must be a piece of an
@@ -884,6 +884,7 @@ export const abbreviationEntryIds = (
   language: Language,
 ): ReadonlyArray<number> => {
   const locale = language.code;
+  const leads = contextRules(language).abbreviationLeads;
   const tokens = tokenize(context, locale);
   const ids: Array<number> = [];
   for (const clicked of positionsOf(tokens, word, locale)) {
@@ -913,7 +914,7 @@ export const abbreviationEntryIds = (
           before !== undefined &&
           !tokens[start]!.dottedBefore &&
           !tokens[start]!.breakBefore &&
-          ABBREVIATION_LEADS.has(before.key)
+          leads.has(before.key)
             ? before.key
             : undefined;
         found = abbreviationSpellings(parts, lead)

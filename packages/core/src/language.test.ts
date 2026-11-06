@@ -24,6 +24,7 @@ describe("language records", () => {
       maxGap: 1,
       separableVerbs: false,
       clauseConjunctions: [],
+      abbreviationLeads: [],
     });
     assert.isUndefined(language.compounds);
   });

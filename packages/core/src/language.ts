@@ -103,6 +103,13 @@ const Context = doc(
       ),
       [],
     ),
+    abbreviationLeads: orDefault(
+      doc(
+        strings,
+        "Words that may stand before an abbreviation as part of it (`и` in `и т. д.`).",
+      ),
+      [],
+    ),
   }),
   "What the sentence around a word (`context`) adds to its lookup.",
 );

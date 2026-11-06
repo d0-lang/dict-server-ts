@@ -106,6 +106,13 @@
             "type": "string"
           },
           "description": "Conjunctions that end a clause without punctuation, where the verb bracket and separable verbs look for the clause's end."
+        },
+        "abbreviationLeads": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Words that may stand before an abbreviation as part of it (`и` in `и т. д.`)."
         }
       },
       "additionalProperties": false,
