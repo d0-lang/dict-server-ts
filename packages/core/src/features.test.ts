@@ -2,6 +2,7 @@ import { assert, describe, it } from "@effect/vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  FEATURE_LABELS,
   FEATURE_POS,
   FEATURE_TAGS,
   FEATURES,
@@ -30,6 +31,7 @@ describe("features", () => {
     assert.deepStrictEqual(spec.features, FEATURES);
     assert.deepStrictEqual(spec.pos, [...FEATURE_POS]);
     assert.deepStrictEqual(spec.tags, FEATURE_TAGS);
+    assert.deepStrictEqual(spec.labels, FEATURE_LABELS);
   });
 
   it("reads tags into a UD feature string and back", () => {

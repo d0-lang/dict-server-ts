@@ -10,10 +10,17 @@ import {
 } from "@dict/core/schema";
 import { asc, inArray } from "drizzle-orm";
 
-/** Entry in the shape of the protocol's `/v1/lookup` response. */
+/**
+ * Entry in the shape of the protocol's `/v1/lookup` response. Until
+ * `presentResult` turns it into a headword, `lemma` is the stored lemma and
+ * `features` its grammar (`Gender=Masc`); after, `lemma` is the headword and
+ * `labels` its grammar, and `features` is gone.
+ */
 export type LookupEntry = {
   readonly lemma: string;
   readonly pos: UdPos;
+  readonly features?: string;
+  readonly labels?: ReadonlyArray<string>;
   readonly pron?: {
     readonly ipa?: ReadonlyArray<string>;
     readonly audio?: ReadonlyArray<string>;
@@ -159,6 +166,7 @@ export const loadEntries = (
     return {
       lemma: head.lemma,
       pos: head.pos,
+      ...(head.features !== null ? { features: head.features } : {}),
       ...(Object.keys(pron).length > 0 ? { pron } : {}),
       senses: senseRows
         .filter((s) => s.entryId === id)

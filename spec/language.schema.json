@@ -148,6 +148,48 @@
       ],
       "additionalProperties": false,
       "description": "Compound splitting, for words without an entry. Leave the table out for no splitting."
+    },
+    "headword": {
+      "type": "object",
+      "properties": {
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "Gender",
+              "Animacy",
+              "Aspect",
+              "Number"
+            ]
+          },
+          "description": "Grammar features shown as labels next to the headword (`f`, `anim`, `pf`), in this order. Features an article already shows are left out."
+        },
+        "articles": {
+          "type": "object",
+          "properties": {
+            "Masc": {
+              "type": "string"
+            },
+            "Fem": {
+              "type": "string"
+            },
+            "Neut": {
+              "type": "string"
+            },
+            "Com": {
+              "type": "string"
+            },
+            "Ptan": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "description": "The article a noun's lemma starts with, by gender (`Ptan`: plural-only nouns), for languages whose learners learn nouns with it (German `der Hund`). Several genders give `der/das Bonbon`. The gender is then not a label."
+        }
+      },
+      "additionalProperties": false,
+      "description": "How the headword shows its grammar."
     }
   },
   "required": [

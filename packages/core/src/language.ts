@@ -114,6 +114,33 @@ const Context = doc(
   "What the sentence around a word (`context`) adds to its lookup.",
 );
 
+const FeatureName = Schema.Literals(["Gender", "Animacy", "Aspect", "Number"]);
+
+const Headword = doc(
+  Schema.Struct({
+    labels: orDefault(
+      doc(
+        Schema.Array(FeatureName),
+        "Grammar features shown as labels next to the headword (`f`, `anim`, `pf`), in this order. Features an article already shows are left out.",
+      ),
+      ["Gender", "Animacy", "Aspect", "Number"],
+    ),
+    articles: Schema.optionalKey(
+      doc(
+        Schema.Struct({
+          Masc: Schema.optionalKey(Schema.String),
+          Fem: Schema.optionalKey(Schema.String),
+          Neut: Schema.optionalKey(Schema.String),
+          Com: Schema.optionalKey(Schema.String),
+          Ptan: Schema.optionalKey(Schema.String),
+        }),
+        "The article a noun's lemma starts with, by gender (`Ptan`: plural-only nouns), for languages whose learners learn nouns with it (German `der Hund`). Several genders give `der/das Bonbon`. The gender is then not a label.",
+      ),
+    ),
+  }),
+  "How the headword shows its grammar.",
+);
+
 const Compounds = doc(
   Schema.Struct({
     linkers: doc(
@@ -160,6 +187,7 @@ export const Language = doc(
     import: orDefault(Import, {}),
     context: orDefault(Context, {}),
     compounds: Schema.optionalKey(Compounds),
+    headword: orDefault(Headword, {}),
   }),
   "A language record, languages/<code>/language.toml. Every key but code, name and target may be left out.",
 );

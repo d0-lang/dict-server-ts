@@ -12,6 +12,7 @@ import {
   type LookupResult,
 } from "./common/entries.ts";
 import { findEntriesWithCompounds } from "./features/compounds/lookup.ts";
+import { articleLookup, presentResult } from "./headword.ts";
 
 /**
  * A lookup: the word's own entries (`common/entries.ts`), or its parts when it
@@ -32,14 +33,14 @@ const entryId = (entry: LookupEntry) =>
   ]);
 
 /**
- * A `/v1/lookup` result. With `context`, the entries that match it come
+ * The entries for `word`, before they become headwords. With `context`, the entries that match it come
  * first: the phrases the word is part of there, then the abbreviation it is a
  * piece of (`т` in `т.д.`), then the hyphen-joined word it is part of (`что`
  * in `что-нибудь`), then the separable verb it belongs to, then the word's
  * own entries (and their segments, re-indexed).
  * An own entry already shown that way is dropped.
  */
-export const lookupWord = (
+const contextLookup = (
   db: DictionaryDb,
   language: Language,
   word: string,
@@ -99,4 +100,31 @@ export const lookupWord = (
     entries: [...first, ...rest],
     ...(segments !== undefined ? { segments } : {}),
   };
+};
+
+/**
+ * A `/v1/lookup` result, with headwords as the protocol sends them
+ * (`presentResult`). A headword with its article (`der See`, how `see` names
+ * it) finds the entries with that headword.
+ */
+export const lookupWord = (
+  db: DictionaryDb,
+  language: Language,
+  word: string,
+  context?: string,
+): LookupResult => {
+  const article = articleLookup(language, word);
+  if (article !== undefined) {
+    const found = presentResult(
+      db,
+      language,
+      findEntriesWithCompounds(db, article.word, compoundRules(language)),
+    ).entries.filter((entry) => entry.lemma === article.headword);
+    if (found.length > 0) return { entries: found };
+  }
+  return presentResult(
+    db,
+    language,
+    contextLookup(db, language, word, context),
+  );
 };

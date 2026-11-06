@@ -17,5 +17,16 @@
     "imperfective": ["Aspect", "Imp"],
     "perfective": ["Aspect", "Perf"],
     "plural-only": ["Number", "Ptan"]
+  },
+  "labels": {
+    "Masc": "m",
+    "Fem": "f",
+    "Neut": "n",
+    "Com": "c",
+    "Anim": "anim",
+    "Inan": "inan",
+    "Imp": "impf",
+    "Perf": "pf",
+    "Ptan": "pl"
   }
 }

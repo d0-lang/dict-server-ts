@@ -17,6 +17,19 @@ export const FEATURES = {
 export type FeatureName = keyof typeof FEATURES;
 export type Features = Partial<Record<FeatureName, ReadonlyArray<string>>>;
 
+/** The label each value shows as, the same for every language (Wiktionary's abbreviations). */
+export const FEATURE_LABELS: Readonly<Record<string, string>> = {
+  Masc: "m",
+  Fem: "f",
+  Neut: "n",
+  Com: "c",
+  Anim: "anim",
+  Inan: "inan",
+  Imp: "impf",
+  Perf: "pf",
+  Ptan: "pl",
+};
+
 /** Parts of speech that get features: names don't need grammar on the headword. */
 export const FEATURE_POS: ReadonlySet<UdPos> = new Set(["NOUN", "VERB"]);
 

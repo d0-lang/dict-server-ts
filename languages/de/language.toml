@@ -24,6 +24,11 @@ separableVerbs = true
 # bracket and a separable particle can end there (`rief an und ging`).
 clauseConjunctions = ["und", "oder", "aber", "sondern", "denn", "sowie", "bzw"]
 
+[headword]
+# Learners learn a noun with its article: der Hund, die See, das Band. Plural-
+# only nouns take die (die Leute).
+articles = { Masc = "der", Fem = "die", Neut = "das", Ptan = "die" }
+
 [compounds]
 # Compounds are written as one word (`Gemüse|s|fonds`); a word without an
 # entry is split into known parts. Linking elements, tried in order; "" is a

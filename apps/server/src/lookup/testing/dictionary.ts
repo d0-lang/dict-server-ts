@@ -26,20 +26,33 @@ export type Word = readonly [
   forms?: ReadonlyArray<string>,
   senses?: ReadonlyArray<string>,
   sourcePos?: string,
+  /** The headword's grammar as a UD feature string, such as `Gender=Masc`. */
+  features?: string,
 ];
 
 /** A dictionary; each sense is one gloss, by default the lemma in brackets. */
 export const dictionary = (words: ReadonlyArray<Word>): DictionaryDb => {
   const db = createDictionaryFile(":memory:");
   words.forEach(
-    ([lemma, pos, forms = [], glosses = [`[${lemma}]`], sourcePos = ""], i) => {
+    (
+      [
+        lemma,
+        pos,
+        forms = [],
+        glosses = [`[${lemma}]`],
+        sourcePos = "",
+        features,
+      ],
+      i,
+    ) => {
       const id = i + 1;
-      db.$client.run("INSERT INTO entries VALUES (?, ?, ?, ?, 0, ?, NULL)", [
+      db.$client.run("INSERT INTO entries VALUES (?, ?, ?, ?, 0, ?, ?)", [
         id,
         lemma,
         pos,
         sourcePos,
         caseClass(lemma),
+        features ?? null,
       ]);
       glosses.forEach((gloss, idx) =>
         db.$client.run("INSERT INTO senses VALUES (?, ?, ?, NULL)", [

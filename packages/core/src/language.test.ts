@@ -27,6 +27,9 @@ describe("language records", () => {
       abbreviationLeads: [],
     });
     assert.isUndefined(language.compounds);
+    assert.deepStrictEqual(language.headword, {
+      labels: ["Gender", "Animacy", "Aspect", "Number"],
+    });
   });
 
   it("rejects unknown keys", () => {

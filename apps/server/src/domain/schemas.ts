@@ -29,6 +29,7 @@ export class Meta extends Schema.Class<Meta>("server/domain/Meta")({
 export const LookupEntry = Schema.Struct({
   lemma: Schema.String,
   pos: Schema.String,
+  labels: Schema.optionalKey(Schema.Array(Schema.String)),
   pron: Schema.optionalKey(
     Schema.Struct({
       ipa: Schema.optionalKey(Schema.Array(Schema.String)),

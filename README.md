@@ -73,6 +73,8 @@ What gets imported:
 - table rows that aren't forms of the word are dropped: German verb tables list the perfect auxiliary (`haben`, `sein`)
 - an abbreviation is also found without its period (`bzw` -> `bzw.`), which tokenizers drop, when that spelling reaches nothing else
 
+A lookup answers with headwords, as the protocol defines them (`apps/server/src/lookup/headword.ts`): the stored lemma with its article where the language has `[headword] articles` (`der Hund`, `der/das Bonbon`), the grammar features as `labels` elsewhere (`соба́ка` `f`, `anim`), and entries with the same headword merged. Entries whose grammar differs stay apart (`der See` "lake", `die See` "sea"); the importer already splits them. `see` links name their targets' headwords, and a lookup of such a headword with its article (`der See`) finds it.
+
 Lookups rank entries in one query, using what the import stored: first by case (a lowercase word shows lowercase lemmas first, so `oder` gives "or" before the river `Oder`; acronyms go last unless the word is all caps), then the entry whose lemma is the word itself before the words it is a form of (`Frage` before `fragen`), then import order. For German, a word with no entry is split into known parts (`Gemüsefonds` -> `Gemüse` + `Fond`, linking `-s-`, `-n-`, `-en-`, ... allowed) and their entries are returned in reading order (`apps/server/src/lookup/features/compounds/`), with `segments` that slice the word as sent (`Schifffahrt` | `s` | `geschichte`). If normalizing changed the word's length (decomposed accents, spaces around it), the entries come without segments.
 
 With `context`, the entries matching the sentence come first (`apps/server/src/lookup/features/`, one file per feature; `lookup.ts` puts them in order):
