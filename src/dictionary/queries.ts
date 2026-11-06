@@ -1,5 +1,5 @@
 import { asc, inArray } from "drizzle-orm";
-import type { DictionaryDb } from "./DictionaryDb.ts";
+import type { DictionaryDb } from "../core/DictionaryDb.ts";
 import {
   type CompoundPiece,
   type CompoundRules,
@@ -8,7 +8,7 @@ import {
   type PartScore,
   splitCompound,
 } from "./compounds.ts";
-import { caseClass, cleanWord, lookupKey } from "./lookupKey.ts";
+import { caseClass, cleanWord, lookupKey } from "../core/lookupKey.ts";
 import {
   CaseClass,
   entries,
@@ -16,7 +16,7 @@ import {
   pronunciations,
   senses,
   type UdPos,
-} from "./schema.ts";
+} from "../core/schema.ts";
 
 /** Entry in the shape of the protocol's `/v1/lookup` response. */
 export type LookupEntry = {

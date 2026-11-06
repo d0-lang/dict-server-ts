@@ -2,7 +2,7 @@ import { Context, Effect, Layer } from "effect";
 import { AppConfig, DATA_DIR } from "../config.ts";
 import { compoundRules } from "./compounds.ts";
 import { phraseIndex } from "./context.ts";
-import { openDictionary, type DictionaryDb } from "./DictionaryDb.ts";
+import { openDictionary, type DictionaryDb } from "../core/DictionaryDb.ts";
 import { lookupWord } from "./lookup.ts";
 import { warmCompounds } from "./queries.ts";
 import type { LookupBody } from "../domain/schemas.ts";

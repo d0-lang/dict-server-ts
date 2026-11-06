@@ -1,4 +1,4 @@
-import type { UdPos } from "./schema.ts";
+import type { UdPos } from "../core/schema.ts";
 
 /**
  * Compound splitting for languages that write compounds as one word, used only

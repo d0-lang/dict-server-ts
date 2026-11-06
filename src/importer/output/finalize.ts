@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { mkdir, rename, rm, stat } from "node:fs/promises";
 import { dirname } from "node:path";
 import { Effect } from "effect";
-import { FormSource } from "../../dictionary/schema.ts";
+import { FormSource } from "../../core/schema.ts";
 import { ImportError, importFailure } from "../errors.ts";
 
 /**

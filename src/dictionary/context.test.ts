@@ -1,10 +1,10 @@
 import { assert, describe, it } from "@effect/vitest";
 import { tokenize } from "./context.ts";
-import { createDictionaryFile, type DictionaryDb } from "./DictionaryDb.ts";
+import { createDictionaryFile, type DictionaryDb } from "../core/DictionaryDb.ts";
 import { lookupWord } from "./lookup.ts";
-import { caseClass, lookupKey } from "./lookupKey.ts";
+import { caseClass, lookupKey } from "../core/lookupKey.ts";
 import { surfaceSlices } from "./queries.ts";
-import { FormSource, type UdPos } from "./schema.ts";
+import { FormSource, type UdPos } from "../core/schema.ts";
 
 type Word = readonly [
   lemma: string,

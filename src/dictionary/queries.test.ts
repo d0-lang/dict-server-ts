@@ -1,8 +1,8 @@
 import { assert, describe, it } from "@effect/vitest";
-import { createDictionaryFile } from "./DictionaryDb.ts";
-import { caseClass } from "./lookupKey.ts";
+import { createDictionaryFile } from "../core/DictionaryDb.ts";
+import { caseClass } from "../core/lookupKey.ts";
 import { findEntriesByForm } from "./queries.ts";
-import { CaseClass, FormSource } from "./schema.ts";
+import { CaseClass, FormSource } from "../core/schema.ts";
 
 describe("caseClass", () => {
   it("classifies lowercase, capitalised and all-caps words", () => {

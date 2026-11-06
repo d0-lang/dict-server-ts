@@ -1,11 +1,7 @@
-import type { DictionaryDb } from "../../dictionary/DictionaryDb.ts";
-import { caseClass, lookupKey } from "../../dictionary/lookupKey.ts";
-import { FormSource } from "../../dictionary/schema.ts";
-import {
-  GRAMMAR_POS,
-  GRAMMAR_SOURCE_POS,
-  type GrammarEntry,
-} from "../grammar.ts";
+import type { DictionaryDb } from "../../core/DictionaryDb.ts";
+import { caseClass, lookupKey } from "../../core/lookupKey.ts";
+import { FormSource, GRAMMAR_SOURCE_POS } from "../../core/schema.ts";
+import { GRAMMAR_POS, type GrammarEntry } from "../grammar.ts";
 import { degreeBase, isDegreeGloss, isPointerGloss } from "../transform/rules.ts";
 import type {
   DerivedSense,

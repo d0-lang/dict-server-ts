@@ -107,6 +107,9 @@ export const pronunciations = sqliteTable(
   (t) => [primaryKey({ columns: [t.entryId, t.idx] })],
 );
 
+/** `entries.source_pos` of entries from a language's grammar file. */
+export const GRAMMAR_SOURCE_POS = "grammar";
+
 /** Where a `forms` row came from. The first writer wins (INSERT OR IGNORE). */
 export const FormSource = {
   /** the entry's own headword */

@@ -5,7 +5,7 @@ import {
   phraseEntryIds,
   separableEntryIds,
 } from "./context.ts";
-import type { DictionaryDb } from "./DictionaryDb.ts";
+import type { DictionaryDb } from "../core/DictionaryDb.ts";
 import {
   dropLiteralPointers,
   findEntriesWithCompounds,

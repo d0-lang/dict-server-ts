@@ -1,6 +1,6 @@
 import { Effect, Result, Stream } from "effect";
-import { createDictionaryFile } from "../dictionary/DictionaryDb.ts";
-import { SCHEMA_VERSION } from "../dictionary/schema.ts";
+import { createDictionaryFile } from "../core/DictionaryDb.ts";
+import { SCHEMA_VERSION } from "../core/schema.ts";
 import { ImportError, importFailure } from "./errors.ts";
 import { loadGrammar, type GrammarEntry } from "./grammar.ts";
 import {

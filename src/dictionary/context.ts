@@ -1,7 +1,11 @@
-import { GRAMMAR_SOURCE_POS } from "../importer/grammar.ts";
-import type { DictionaryDb } from "./DictionaryDb.ts";
-import { caseClass, lookupKey } from "./lookupKey.ts";
-import { CaseClass, FormSource, type UdPos } from "./schema.ts";
+import type { DictionaryDb } from "../core/DictionaryDb.ts";
+import { caseClass, lookupKey } from "../core/lookupKey.ts";
+import {
+  CaseClass,
+  FormSource,
+  GRAMMAR_SOURCE_POS,
+  type UdPos,
+} from "../core/schema.ts";
 
 /**
  * What the sentence around a word adds to its lookup: the multi-word entries

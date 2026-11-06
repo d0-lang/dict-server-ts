@@ -4,16 +4,22 @@ import { Effect } from "effect";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { openDictionary } from "../dictionary/DictionaryDb.ts";
-import { findEntriesByForm } from "../dictionary/queries.ts";
-import { SCHEMA_VERSION } from "../dictionary/schema.ts";
-import { importWiktextract } from "./Importer.ts";
+import { openDictionary } from "../core/DictionaryDb.ts";
+import { findEntriesByForm } from "./queries.ts";
+import { SCHEMA_VERSION } from "../core/schema.ts";
+import { importWiktextract } from "../importer/Importer.ts";
 
 /**
  * Real (trimmed) lines from the raw English Wiktionary extract, plus one
  * English entry whose translations mention `"lang_code": "pl"`.
  */
-const FIXTURE = join(import.meta.dirname, "fixtures", "pl-sample.jsonl");
+const FIXTURE = join(
+  import.meta.dirname,
+  "..",
+  "importer",
+  "fixtures",
+  "pl-sample.jsonl",
+);
 
 const tempDir = Effect.acquireRelease(
   Effect.promise(() => mkdtemp(join(tmpdir(), "dict-import-"))),

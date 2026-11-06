@@ -17,10 +17,10 @@ import { drizzle } from "drizzle-orm/bun-sqlite";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
-import type { DictionaryDb } from "../src/dictionary/DictionaryDb.ts";
+import type { DictionaryDb } from "../src/core/DictionaryDb.ts";
 import { lookupWord } from "../src/dictionary/lookup.ts";
-import { lookupKey } from "../src/dictionary/lookupKey.ts";
-import { SCHEMA_VERSION, schema } from "../src/dictionary/schema.ts";
+import { lookupKey } from "../src/core/lookupKey.ts";
+import { SCHEMA_VERSION, schema } from "../src/core/schema.ts";
 
 export type ContextCase = {
   readonly id: string;

@@ -24,10 +24,10 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { compoundRules } from "../src/dictionary/compounds.ts";
-import type { DictionaryDb } from "../src/dictionary/DictionaryDb.ts";
-import { lookupKey } from "../src/dictionary/lookupKey.ts";
+import type { DictionaryDb } from "../src/core/DictionaryDb.ts";
+import { lookupKey } from "../src/core/lookupKey.ts";
 import { compoundEntries } from "../src/dictionary/queries.ts";
-import { schema } from "../src/dictionary/schema.ts";
+import { schema } from "../src/core/schema.ts";
 
 export type SegmentCase = {
   readonly word: string;

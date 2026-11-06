@@ -1,5 +1,5 @@
-import { cleanWord, lookupKey } from "../../dictionary/lookupKey.ts";
-import type { PronKind, UdPos } from "../../dictionary/schema.ts";
+import { cleanWord, lookupKey } from "../../core/lookupKey.ts";
+import type { PronKind, UdPos } from "../../core/schema.ts";
 import { isHistorical, type LanguageRules } from "./languages.ts";
 import { toUdPos } from "./pos.ts";
 import {

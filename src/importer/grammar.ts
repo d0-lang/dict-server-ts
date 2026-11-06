@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { cleanWord } from "../dictionary/lookupKey.ts";
-import { UD_POS, type UdPos } from "../dictionary/schema.ts";
+import { cleanWord } from "../core/lookupKey.ts";
+import { UD_POS, type UdPos } from "../core/schema.ts";
 
 /**
  * Hand-written entries for a language's grammar words (articles, pronouns,
@@ -41,9 +41,6 @@ export const GRAMMAR_POS: ReadonlySet<UdPos> = new Set([
   "PART",
   "AUX",
 ]);
-
-/** `entries.source_pos` of grammar-file entries. */
-export const GRAMMAR_SOURCE_POS = "grammar";
 
 const POS: ReadonlySet<string> = new Set(UD_POS);
 
