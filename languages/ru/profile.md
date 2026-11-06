@@ -127,7 +127,7 @@ Sample: 300 multi-word or hyphenated entries (`/tmp` working set; not in the rep
 
 ## Settings
 
-The values are in `language.toml` next to this file. Earlier sections and the iteration log name the TypeScript constants these replaced: `BRACKET` is `context.verbBracket`, `SEPARABLE` is `context.separableVerbs`, `HYPHEN_WORDS` is `context.hyphenWords`, `REFLEXIVES` is `context.reflexives`, `NEGATIONS` is `context.negation`, `MAX_GAPS` is `context.maxGap`, `CONJUNCTIONS` is `context.clauseConjunctions`, and `CompoundRules` is `[compounds]`.
+The values are in `language.toml` next to this file. Earlier sections and the iteration log name the TypeScript constants these replaced: `BRACKET` is `context.verbBracket`, `SEPARABLE` is `context.separableVerbs`, `HYPHEN_WORDS` is `context.hyphenWords`, `REFLEXIVES` is `context.reflexives`, `NEGATIONS` is `context.negation`, `MAX_GAPS` is `context.maxGap`, `CONJUNCTIONS` is `context.clauseConjunctions`, and `CompoundRules` is `[compounds]`. The code those entries name (`context.ts`, `compounds.ts`, `queries.ts`) is now split by feature under `apps/server/src/lookup/` (`features/phrases/`, `features/hyphenWords.ts`, `features/compounds/stems.ts`, …).
 
 | Setting | Value | Why |
 |---|---|---|

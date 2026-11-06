@@ -2,7 +2,7 @@ import { Effect, Layer } from "effect";
 import { HttpApiBuilder } from "effect/http-api";
 import { Api } from "../api/Api.ts";
 import { AppConfig, loadConfig } from "../config.ts";
-import { Dictionaries } from "../dictionary/Dictionaries.ts";
+import { Dictionaries } from "../lookup/Dictionaries.ts";
 import {
   Legal,
   LookupError,

@@ -26,7 +26,7 @@ import { join } from "node:path";
 import { parseArgs } from "node:util";
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import { readPairLanguage, type Language } from "@dict/core/language";
-import { lookupWord } from "../src/dictionary/lookup.ts";
+import { lookupWord } from "../src/lookup/lookup.ts";
 import { lookupKey } from "@dict/core/lookupKey";
 import { SCHEMA_VERSION, schema } from "@dict/core/schema";
 

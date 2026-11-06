@@ -1,19 +1,27 @@
-import { compoundRules } from "./compounds.ts";
-import {
-  abbreviationEntryIds,
-  hyphenEntryIds,
-  phraseEntryIds,
-  separableEntryIds,
-} from "./context.ts";
+import { compoundRules } from "./features/compounds/split.ts";
+import { abbreviationEntryIds } from "./features/abbreviations.ts";
+import { hyphenEntryIds } from "./features/hyphenWords.ts";
+import { phraseEntryIds } from "./features/phrases/match.ts";
+import { separableEntryIds } from "./features/separableVerbs.ts";
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import type { Language } from "@dict/core/language";
 import {
   dropLiteralPointers,
-  findEntriesWithCompounds,
   loadEntries,
   type LookupEntry,
   type LookupResult,
-} from "./queries.ts";
+} from "./common/entries.ts";
+import { findEntriesWithCompounds } from "./features/compounds/lookup.ts";
+
+/**
+ * A lookup: the word's own entries (`common/entries.ts`), or its parts when it
+ * has no entry and the language splits compounds (`features/compounds/`).
+ * When the client sends `context`, the sentence adds entries first, one
+ * feature per file in `features/`: the phrases the word is part of there, the
+ * abbreviation or hyphen-joined word it is a piece of, and the separable verb
+ * it belongs to. Which features a language uses, and how, is in its
+ * `language.toml`.
+ */
 
 /** Entries that read the same: same lemma (spacing aside: `и т. д.`, `и т.д.`), part of speech and senses. */
 const entryId = (entry: LookupEntry) =>

@@ -1,7 +1,7 @@
 import { assert, describe, it } from "@effect/vitest";
 import { createDictionaryFile } from "@dict/core/DictionaryDb";
 import { caseClass } from "@dict/core/lookupKey";
-import { findEntriesByForm } from "./queries.ts";
+import { findEntriesByForm } from "./entries.ts";
 import { CaseClass, FormSource } from "@dict/core/schema";
 
 describe("caseClass", () => {

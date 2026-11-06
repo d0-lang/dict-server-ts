@@ -1,11 +1,11 @@
 import { Context, Effect, Layer } from "effect";
 import { AppConfig, DATA_DIR } from "../config.ts";
-import { compoundRules } from "./compounds.ts";
-import { phraseIndex } from "./context.ts";
+import { compoundRules } from "./features/compounds/split.ts";
+import { phraseIndex } from "./features/phrases/phraseIndex.ts";
 import { openDictionary, type DictionaryDb } from "@dict/core/DictionaryDb";
 import { pairLanguage, type Language } from "@dict/core/language";
 import { lookupWord } from "./lookup.ts";
-import { warmCompounds } from "./queries.ts";
+import { warmCompounds } from "./features/compounds/stems.ts";
 import type { LookupBody } from "../domain/schemas.ts";
 
 /** The dictionary files of the language pairs this server lists. */

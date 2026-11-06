@@ -1,6 +1,6 @@
 import { assert, describe, it } from "@effect/vitest";
 import { readLanguage } from "@dict/core/language";
-import { compoundRules, splitCompound } from "./compounds.ts";
+import { compoundRules, splitCompound } from "./split.ts";
 
 const linkers = compoundRules(readLanguage("de"))!.linkers;
 

@@ -1,5 +1,5 @@
 import { assert, describe, it } from "@effect/vitest";
-import { tokenize } from "./context.ts";
+import { tokenize } from "./common/tokenize.ts";
 import {
   createDictionaryFile,
   type DictionaryDb,
@@ -7,7 +7,7 @@ import {
 import { lookupWord } from "./lookup.ts";
 import { readPairLanguage, type Language } from "@dict/core/language";
 import { caseClass, lookupKey } from "@dict/core/lookupKey";
-import { surfaceSlices } from "./queries.ts";
+import { surfaceSlices } from "./features/compounds/lookup.ts";
 import { FormSource, type UdPos } from "@dict/core/schema";
 
 /** The pair's language record, read once, as the server does at startup. */

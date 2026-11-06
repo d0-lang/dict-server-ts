@@ -5,7 +5,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { openDictionary } from "@dict/core/DictionaryDb";
-import { findEntriesByForm } from "./queries.ts";
+import { findEntriesByForm } from "./common/entries.ts";
 import { SCHEMA_VERSION } from "@dict/core/schema";
 import { PL_SAMPLE } from "@dict/importer/fixtures";
 import { importWiktextract } from "@dict/importer/Importer";
