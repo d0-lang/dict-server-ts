@@ -89,7 +89,7 @@ bun eval/score.ts --dir eval/out/<lang>/<run>/gate
 A beginner meets the common words first, so they mustn't get lost there. Every failing common word is read by you (or a stronger model) and the user where one reads the language:
 
 - a real miss: fix it (grammar file, importer, ranking). In Russian the misses fell into a few groups, each with one fix: forms of "to be" and modals, comparatives, prepositions missing a sense, abbreviations, endings after numbers, and set phrases English Wiktionary lacks (`в принципе`, `за счёт`, `по словам`), which go in the grammar file as phrase lines for a reader to review;
-- not the word's own entry's job: add it to `eval/out/<lang>/overrides.jsonl` with the reason, after the user approves it (or, with no user, list it in the report for them). Approved Russian examples: the meaning comes from a governing verb or idiom the word is only part of (`относиться к`, `ни перед чем не`), a plural read as its singular (`тысячи`), and comparatives shown as "comparative degree of хороший: good", which is how the dictionary labels them. Overrides are listed in every report.
+- not the word's own entry's job: add it to `../corpus/eval/out/<lang>/overrides.jsonl` with the reason, after the user approves it (or, with no user, list it in the report for them). Approved Russian examples: the meaning comes from a governing verb or idiom the word is only part of (`относиться к`, `ни перед чем не`), a plural read as its singular (`тысячи`), and comparatives shown as "comparative degree of хороший: good", which is how the dictionary labels them. Overrides are listed in every report.
 
 ### 5. Iterate on tier 1
 

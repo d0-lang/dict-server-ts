@@ -28,13 +28,13 @@ Branch `importer-fixes`. Polish went from 100,019 to 99,136 entries and from 180
 - `razu` loses "synonym of raz" at lookup. Its other sense, "synonym of ani razu", stays with no `see`, because `ani razu` has no entry.
 - Eval against `base` (116 of 1,000 popovers changed and re-judged): understood 83.3% -> 83.8%, junk senses 7.0% -> 6.1%, popovers with junk 28.1% -> 24.9%, first group 83.3% -> 83.5%, first sense 58.1% -> 58.7%. 8 items better, 7 worse. Junk flags on the changed popovers went from 136 to 71.
 - First run's regressions, now fixed: pointer links added wrong entries through the form-of fallback (`tych` -> `ta` INTJ, CCONJ and PART; `prostu` -> `prosty` NOUN), and a grammar pointer could show as a parent (`się` opened with "dative/locative singular of się"). Pointer links now take only the same part of speech and skip a form that already reaches the lemma. Grammar parents are dropped, with their children kept and a pointer link added.
-- After those fixes (`eval/out/pl/after-importer-2`, 14 popovers re-judged): understood 83.8%, no-help verdicts 51 (base 52), junk senses 6.1%, popovers with junk 25.6%. 9 items better and 4 worse than `base`.
+- After those fixes (`../corpus/eval/out/pl/after-importer-2`, 14 popovers re-judged): understood 83.8%, no-help verdicts 51 (base 52), junk senses 6.1%, popovers with junk 25.6%. 9 items better and 4 worse than `base`.
 - Not changed: 83 merged senses open with a form-style parent like "alternative form of ręka" and 63 with "synonym of ...".
 - Still open: nested `form-of` senses keep only their last gloss (67 senses outside `inflection of`), so `prawy` "ellipsis of prawa strona" loses its parent there unless the parent also exists as its own sense. Popover support for `see` isn't built, so the eval can't credit links yet.
 
 ## Lookup eval, baseline (2026-11-02)
 
-Findings, not decisions. 1,000 items judged by Haiku at medium effort (`eval/out/pl/base`): 83.3% understood (85.6% without foreign words, typos and names), 7.0% of senses flagged junk, 5.8% marginal, and the fitting sense is in the first group for 83.3% and first overall for 58.1%. For the frequent words, the first-group figure is 77.9%.
+Findings, not decisions. 1,000 items judged by Haiku at medium effort (`../corpus/eval/out/pl/base`): 83.3% understood (85.6% without foreign words, typos and names), 7.0% of senses flagged junk, 5.8% marginal, and the fitting sense is in the first group for 83.3% and first overall for 58.1%. For the frequent words, the first-group figure is 77.9%.
 
 - `senseGloss` keeps only the last item of `glosses`, dropping the parent. 1,973 of 157,956 non-form senses are nested. Checked for `król`; not all of them lose information.
 - The commonest words fail on order: `to`, `w`, `nie`, `jest`, `no`, `tak` and `z` have the fitting sense outside the first group, in at least the sentences sampled.
@@ -61,9 +61,9 @@ Branch `german`, not committed yet. The eval corpus is 25 openly licensed or off
 | Run | Understood | Frequent | Random | Junk senses | First group |
 |---|---|---|---|---|---|
 | First import | 82.2% | 85.5% | 74.7% | 9.6% | 81.4% |
-| Final (`eval/out/de/iter6`) | 87.2% | 89.3% | 82.3% | 3.9% | 87.8% |
+| Final (`../corpus/eval/out/de/iter6`) | 87.2% | 89.3% | 82.3% | 3.9% | 87.8% |
 
-Polish on the same code (`eval/out/pl/de-iter6`, against `after-importer-2`): understood 83.8% -> 86.2%, first group 83.5% -> 85.5%.
+Polish on the same code (`../corpus/eval/out/pl/de-iter6`, against `after-importer-2`): understood 83.8% -> 86.2%, first group 83.5% -> 85.5%.
 
 - Fixed in the data: German verb tables list the perfect auxiliary as a row (`haben` reached 9,034 verbs). Spellings with a usage label (obsolete, dialectal, ...) only resolve for words that reach nothing else (`für` no longer gives `vor`). A form-of target that is several words with no link in the language keeps its gloss (`sich` lost "reflexive pronoun"). That last rule catches 1,401 German senses, mostly targets with text pasted after the word (`Imbiß` -> "Imbiss which was deprecated..."). Taking the linked word as the target would resolve them; not done.
 - Grammar words come from `languages/<lang>/grammar.tsv`, written by hand and to be proofread by a speaker. It replaced rules for the shared pronoun table, the possessive box of `sein`/`Ihr`, and closed-class form-of entries.

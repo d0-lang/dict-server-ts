@@ -10,6 +10,8 @@ RUN bun install --frozen-lockfile --production
 
 COPY packages/core/src packages/core/src
 COPY apps/server/src apps/server/src
+# Each language's settings, read at startup (grammar files are the importer's).
+COPY languages languages
 
 # Dictionaries and the identity key are mounted at /app/data, see compose.yaml.
 USER bun
