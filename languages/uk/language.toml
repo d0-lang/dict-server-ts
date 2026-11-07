@@ -1,0 +1,67 @@
+#:schema ../../spec/language.schema.json
+# Ukrainian. Started from Russian's record and checked against the Ukrainian
+# dump (data/raw/uk.jsonl, 60,297 lines) and corpus; settings left out take
+# their defaults (spec/language.schema.json). The profile and iteration log are
+# in profile.md.
+
+code = "uk"
+name = "Ukrainian"
+target = "en"
+# Not Russian's ё/е: the dump has no word with ё. Not ґ/г either: ґ is a letter
+# of its own (346 words), and folding it would merge real pairs (`ґрати` "bars",
+# `грати` "to play") to find 4 corpus words the dump spells with an old ґ
+# (`реґламент`). See profile.md.
+optionalLetters = []
+
+[import]
+# Old East Slavic is a separate language in the dump (orv), and no sense,
+# form or sound carries an Old Ukrainian tag.
+historicalStages = []
+# 12 entries list the standard pronunciation with the note "Standard
+# Ukrainian" next to Transcarpathian, Carpathian and Galician-Bukovian ones
+# (він, що); the other notes are regional.
+standardPronNotes = ["Standard Ukrainian"]
+# 38,454 rows on 5,884 verb tables: the periphrastic future, past perfect and
+# conditional, written as a heading ("Future conjugation of бути + infinitive")
+# and a phrase ("він бу́де ма́ти"). They are no forms of the verb.
+untrustedFormTags = ["error-unrecognized-form"]
+# Participles are adjectives too (`поширений` "widespread", `розташований`
+# "located"), and `-ся` passives are verbs of their own (`використовуватися`
+# "to be used"): 377 "passive of" and 447 adjectival participle glosses. As
+# links to the verb, the verb ranked before a same-spelled adjective and the
+# passive sense was lost; as entries they keep their gloss with the verb's
+# meaning. Adverbial participles (`роблячи`) stay links: they are verb forms.
+ownEntryForms = ["passive", "active participle"]
+# Ukrainian stress is unpredictable and moves in inflection, as in Russian:
+# learners need it to say the word. 58,232 forms carry a stressed `canonical`.
+stressedLemmas = true
+
+[context]
+# Hyphen-joined words (`будь-який`, `по-українськи`, `хто-небудь`): 290 such
+# lemmas. The segmenter splits them, so with context the parts are joined back.
+hyphenWords = true
+# Negation can put the verb's object in the genitive, as in Russian (`мати
+# значення` -> `не має значення`), though less strictly.
+negation = "не"
+# Ukrainian puts objects and adverbs between the verb and the rest of a phrase
+# as freely as Russian (`збити всіх з пантелику`).
+maxGap = 2
+# A word that may stand before an abbreviation as part of it (`і т. д.`,
+# `у т. ч.`; Ukrainian writes `і` where Russian writes `и`).
+abbreviationLeads = ["і", "у", "в"]
+
+[compounds]
+# As Russian: `о` (`вод|о|постачання`), `е` (`земл|е|трус`); not `и`, which
+# joins only numbers (`п'ят|и|поверховий`, a plain join of the genitive).
+linkers = ["", "о", "е"]
+# Modifiers are stems: `нафта` -> `нафт|о|газовий`, `новий` -> `нов|о|...`.
+# Ukrainian adjectives end in -ий/-ій (no -ый/-ой), nouns in -а/-я/-о/-е/-ь/-й,
+# plurals in -и/-і.
+stemEndings = ["ий", "ій", "а", "я", "о", "е", "и", "і", "ь", "й"]
+# A verb form is a head only as a participle, so with an adjective ending.
+# Only endings of two or more letters: the one-letter ones (-а, -е, -і, -у)
+# are also past-tense and present-tense verb endings (`робила`, `роблю`).
+adjectiveEndings = [
+  "ий", "ій", "ого", "ього", "ому", "ьому", "им", "ім", "их", "іх",
+  "ими", "іми", "ої", "ьої", "ою", "ьою",
+]

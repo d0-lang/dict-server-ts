@@ -16,7 +16,7 @@ import {
  * is stored as `PRAGMA user_version`. The constants here are mirrored in
  * `spec/dictionary/format.json` (checked by `format.test.ts`).
  */
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 /** Universal Dependencies part-of-speech tags (https://universaldependencies.org/u/pos/). */
 export const UD_POS = [

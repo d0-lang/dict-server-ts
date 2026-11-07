@@ -41,7 +41,8 @@ One SQLite file per language pair, `data/<source>_<target>.sqlite` (e.g. `data/r
 1. NFC.
 2. Trim.
 3. Lowercase.
-4. For a word that contains a Cyrillic letter, drop the combining acute and grave (U+0301, U+0300): decompose to NFD, remove them, recompose to NFC. `й` and `ё` keep their marks.
+4. Replace the typographic apostrophes U+2018, U+2019 and U+02BC with `'` (U+0027): texts write `п’ять` and `пʼять` where the dump writes `п'ять`.
+5. For a word that contains a Cyrillic letter, drop the combining acute and grave (U+0301, U+0300): decompose to NFD, remove them, recompose to NFC. `й` and `ё` keep their marks.
 
 All other diacritics are kept (Polish `łza` and `lza` are different words).
 

@@ -13,3 +13,7 @@
 {"word": "z.B.", "key": "z.b.", "caseClass": "Lower"}
 {"word": "3-го", "key": "3-го", "caseClass": "Lower", "note": "only letters count: the first letter is lowercase"}
 {"word": "1990", "key": "1990", "caseClass": "Capitalised", "note": "no letters"}
+{"word": "п’ять", "key": "п'ять", "caseClass": "Lower", "note": "typographic apostrophes are written as ': right single quotation mark"}
+{"word": "Пʼять", "key": "п'ять", "caseClass": "Capitalised", "note": "modifier letter apostrophe (U+02BC)"}
+{"word": "об‘єкт", "key": "об'єкт", "caseClass": "Lower", "note": "left single quotation mark"}
+{"word": "geht’s", "key": "geht's", "caseClass": "Lower", "note": "in every script"}

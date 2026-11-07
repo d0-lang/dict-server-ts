@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ukrainian (uk_en): language report</title>
+<style>
+:root{--bg:#fff;--fg:#1d1d1f;--muted:#6b6b70;--line:#e3e3e6;--card:#f6f6f8;--up:#1a7f37;--down:#b3261e;--accent:#2f5fd0}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--fg:#ececef;--muted:#9a9aa2;--line:#2c2c31;--card:#1c1c20;--up:#4ac26b;--down:#ff7b72;--accent:#7aa2ff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1060px;margin:0 auto;padding:32px 24px 64px}h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:40px 0 10px;padding-top:8px;border-top:1px solid var(--line)}h3{font-size:15px;margin:22px 0 8px}
+.sub{color:var(--muted);margin:0 0 20px}code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card);padding:1px 4px;border-radius:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}.kpi{background:var(--card);border-radius:10px;padding:12px 14px}.kpi .v{font-size:24px;font-weight:650}.kpi .l{color:var(--muted);font-size:13px}.kpi .d{font-size:13px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;margin:8px 0 4px}th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--muted)}
+.small{font-size:13px}.tests div{margin-bottom:3px}.tests div::before{content:"✓ ";color:var(--up)}ul{padding-left:20px}li{margin:3px 0}.note{color:var(--muted);font-size:13px}
+@media (max-width:600px){main{padding:24px 16px 48px}}
+</style></head><body><main>
+<h1>Ukrainian (uk_en): language report</h1>
+<p class="sub">Branch <code>ukrainian</code>, 2026-11-06 and 07. Tier 1 only, built with the add-language skill, with no reader of Ukrainian. Profile and round log: <code>languages/uk/profile.md</code>. Nothing committed.</p>
+<div class="kpis">
+<div class="kpi"><div class="l">Tier</div><div class="v">Model only</div><div class="d">unreviewed: no reader checked the profile, the grammar file or a sample</div></div>
+<div class="kpi"><div class="l">Common grammar words</div><div class="v">99.7%</div><div class="d"><span class="up">+13.8</span> from 85.9%; needs 97.5%</div></div>
+<div class="kpi"><div class="l">Common content words</div><div class="v">96.2%</div><div class="d"><span class="up">+2.7</span> from 93.5%; needs 92.5%</div></div>
+<div class="kpi"><div class="l">Random words</div><div class="v">80.6%</div><div class="d"><span class="down">fails</span> 87.5%; 93.8% without missing words</div></div>
+<div class="kpi"><div class="l">Judge: understood (2,200 items)</div><div class="v">88.6%</div><div class="d"><span class="up">+4.7</span> from 83.9%</div></div>
+</div>
+
+<h2>Profile summary</h2>
+<ul>
+<li><b>Data.</b> English Wiktionary dump of 2026-11-01, 60,297 Ukrainian lines; <code>uk_en.sqlite</code> (schema v5) has 33,102 entries. English Wiktionary's Ukrainian is thin: Russian has 62k entries, Polish and German about 105k. 90.3% of corpus words have an entry (Russian 96.1%, Polish 94.6%, German 97.2%).</li>
+<li><b>Corpus.</b> 43 texts, 89k words. Spoken: 20 YouTube videos in 10 genres, auto-captions repaired by Haiku, 40.3k words. Written: 8 Wikipedia articles and 15 articles from Українська правда and its sites, 48.8k words. No gaming or podcasts: every candidate ran over 40 minutes.</li>
+<li><b>Settings</b> (<code>languages/uk/language.toml</code>), from Russian's, each checked against the dump: no ё/е letter variants (the dump has no ё), ґ kept as its own letter (folding it would merge <code>ґрати</code> "bars" with <code>грати</code> "to play"), standard IPA marked "Standard Ukrainian", the periphrastic future rows dropped, stressed lemmas, hyphen words, negation <code>не</code>, gap 2, abbreviation leads <code>і</code>, <code>у</code>, <code>в</code>, Ukrainian adjective endings for compounds, and the new <code>ownEntryForms</code>.</li>
+<li><b>Headword.</b> Default labels: 98% of nouns carry gender, 80% animacy; 94% of verbs carry aspect.</li>
+<li><b>Grammar file.</b> 226 lines, written without a reader: personal pronouns (Wiktionary gives them one shared table, so <code>мені</code> reached every pronoun), plural demonstratives, forms of <code>бути</code> and <code>могти</code>, endings after numbers, abbreviations, interjections, about 40 set phrases English Wiktionary lacks (<code>залежно від</code>, <code>відповідно до</code>, <code>тим не менш</code>, <code>більше того</code>), and <code>року</code>, which reached <code>рок</code> "rock music" before <code>рік</code> "year".</li>
+</ul>
+
+<h2>Gates</h2>
+<p class="small">Same 2,200 items in every run (sampled from <code>r0</code>), judged by Haiku. In brackets: the figure without the judge's <code>missing_word</code> misses, words the dictionary has no entry for. A common word with no entry at all counts toward neither common gate.</p>
+<div class="scroll"><table>
+<tr><th>Gate</th><th class="n">Needs</th><th class="n">r0 (before)</th><th class="n">r1</th><th class="n">r3</th><th class="n">r6 (after)</th></tr>
+<tr><td>Common grammar words</td><td class="n">97.5%</td><td class="n">85.9% (86.5%)</td><td class="n">97.9%</td><td class="n">99.0%</td><td class="n up">99.7%</td></tr>
+<tr><td>Common content words</td><td class="n">92.5%</td><td class="n">93.5%</td><td class="n">96.3%</td><td class="n">96.2%</td><td class="n up">96.2%</td></tr>
+<tr><td>Random words</td><td class="n">87.5%</td><td class="n">80.1% (93.5%)</td><td class="n">80.3% (93.6%)</td><td class="n">80.6% (93.8%)</td><td class="n down">80.6% (93.8%)</td></tr>
+<tr><td>Common words without an entry (no gate)</td><td class="n"></td><td class="n">15</td><td class="n">11</td><td class="n">11</td><td class="n">11</td></tr>
+</table></div>
+<p class="small">The random gate fails on data alone: 138 of its 190 misses are words English Wiktionary has no Ukrainian entry for, which only hand patches fix. Without them it is 93.8%, against German's 93.5% and Polish's 94.2% scored the same way.</p>
+
+<h3>Judge scores</h3>
+<div class="scroll"><table>
+<tr><th>Items</th><th class="n">r0 understood</th><th class="n">r6 understood</th><th class="n">r6 popovers with junk</th><th class="n">r6 fits in first group</th></tr>
+<tr><td>overall (2,200)</td><td class="n">83.9%</td><td class="n up">88.6%</td><td class="n">6.8%</td><td class="n">94.8%</td></tr>
+<tr><td>common (1,200)</td><td class="n">88.3%</td><td class="n up">96.5%</td><td class="n">8.4%</td><td class="n">93.9%</td></tr>
+<tr><td>random (1,000)</td><td class="n">78.6%</td><td class="n">79.1%</td><td class="n">4.3%</td><td class="n">96.3%</td></tr>
+</table></div>
+<p class="small">All judging and classifying cost about $1.50 on Haiku. Baseline judge: 88 batches, $0.55, 6.5 minutes; later runs only judged changed popovers.</p>
+
+<h2>Accepted rules and their unit tests</h2>
+<h3>Typographic apostrophes are one character (every language)</h3>
+<p>Texts write <code>п’ять</code> and <code>пʼять</code> (U+02BC, the orthography's sign) where the dump writes <code>п'ять</code>. <code>lookupKey</code> reads ’ ʼ ‘ as ': schema v5, with spec vectors.</p>
+<div class="tests small"><div><code>lookupKey</code> matches the spec vectors (<code>п’ять</code>, <code>Пʼять</code>, <code>об‘єкт</code>, <code>geht’s</code>)</div></div>
+<h3>Form-of targets without their aspect (every language)</h3>
+<p>Slavic templates write the aspect after the target (<code>розташува́ти pf</code>, <code>узурпува́ти impf or pf</code>), so 6,635 Ukrainian and 405 Russian links didn't resolve: participles showed only "participle of розташувати".</p>
+<div class="tests small"><div>cleans the aspect off form-of targets (<code>розташува́ти pf</code>)</div></div>
+<h3>A table of dashes keeps its headword-line cases (every language)</h3>
+<p><code>монета</code>'s table is all dashes; its headword line gives <code>моне́ти</code>, <code>моне́т</code>. Only when a table exists and lists nothing: without a table, a headword line holds other words too (German <code>der</code> for <code>CIA</code>).</p>
+<div class="tests small"><div>takes cases from the headword line when the table lists none (<code>монета</code>)</div><div>takes nothing from the headword line of an entry without a table (<code>CIA</code>)</div></div>
+<h3>Passives and participles keep an entry (<code>import.ownEntryForms</code>, Ukrainian only)</h3>
+<p>As links, <code>використовується</code> lost "is used" and the verb ranked before a same-spelled adjective. Now "passive of використовувати: to use". Adverbial participles (<code>роблячи</code>) stay links. Russian (2,253 "passive of" glosses) and Polish (1,548 adjectival participles) could set it too.</p>
+<div class="tests small"><div>keeps an entry for a language's own form kinds (<code>ownEntryForms</code>)</div></div>
+<h3>A participle after the adjective of the same lemma (every language)</h3>
+<p><code>поширені</code> gives <code>поширений</code> "widespread" before "participle of поширити". Only for entries whose senses say "participle of", so German <code>erhalten</code> "to receive" and Russian <code>звучать</code>, which the dump also lists as an adjective, keep their place.</p>
+<div class="tests small"><div>puts a participle after the adjective of the same lemma (<code>поширені</code>; <code>erhalten</code> unchanged)</div></div>
+<h3>Other languages</h3>
+<p>Against collections made before any change: German 0 changes, Polish 0, Russian 50. All 50 were read: 48 drop a label entry ("plural past indicative of стать pf") so the verb's own entry leads, as for every other Russian verb form; <code>о'кей</code> gains an entry through the apostrophe fold; one label entry drops behind a phrase.</p>
+
+<h2>What got worse, and why it stays</h2>
+<ul>
+<li><b>Participles where the verb's sense fits.</b> The adjective now leads (<code>зафіксована</code>: "fixed" first where "recorded" fits; <code>спрямовані</code>). 12 words in the last classified diff, against 1,239 better.</li>
+<li><b>Homographs in dump order.</b> The label entries that won as the word's own lemma are gone, so <code>стане</code> leads with the vocative of <code>стан</code> and <code>діє</code> with <code>дія</code>. Russian has always worked this way; ranking by frequency is tier 2.</li>
+<li><b><code>вбраний</code></b> links to <code>вбрати</code>, which the dump lacks, so it lost its entry (1 corpus word). <b><code>геліобактеріях</code></b> no longer splits with the Ukrainian compound endings (2 words).</li>
+<li><b>Browser and API differ on 3 words</b> of 86,952 (<code>визивати</code>, <code>визвати</code>): the extension shows a sense's <code>see</code> links, which <code>collect.ts</code> leaves out. Not fixed yet.</li>
+</ul>
+
+<h2>False positives</h2>
+<ul>
+<li><code>не</code> in <code>ледь не</code>: clicking <code>ледь</code> shows the phrase "almost, nearly", and <code>не</code> gives its own meaning.</li>
+<li><code>частіше</code>: the entry says "comparative degree of часто: frequently, often", the dictionary's comparative label (as in Russian).</li>
+</ul>
+<p class="small">Doubtful labels among the items not counted: <code>Герої_ні</code> is the gender-inclusive spelling, not a transcription slip; Russian words in Ukrainian speech are labelled <code>foreign_word</code> (<code>короче</code>, <code>вообще</code>) or <code>missing_word</code> (<code>тоже</code>) inconsistently.</p>
+
+<h2>Hand-patch list</h2>
+<p>Words English Wiktionary lacks that the corpus uses: <code>класно</code>, <code>максимально</code>, <code>смачно</code>, <code>реально</code>, <code>прям</code>, <code>формат</code>, <code>ліміт</code>, <code>акумулятор</code>, <code>ламінат</code>, <code>подавати</code>, <code>заставити</code>, <code>вкривати</code>, <code>перемішувати</code>, <code>орендувати</code>, <code>зварювання</code>, <code>передавання</code>, <code>поглинання</code>, <code>номінал</code>, <code>хлорофіл</code>, <code>сингулярність</code>, <code>природно</code>, <code>слабо</code>, <code>декоративно</code>, <code>класний</code>, <code>пісний</code>, <code>ріст</code>, <code>ланка</code>, <code>порода</code>, <code>фаворит</code>, <code>старшина</code>, <code>забарвлення</code>, <code>трек</code>, <code>матрас</code>, <code>мінус</code>.</p>
+
+<h2>Open items</h2>
+<ul>
+<li>Tier 2 candidates: adverbs in <code>-о</code> from adjectives in <code>-ий</code> (240 corpus words without an entry, but <code>конечно</code>, a Russian word, would read as <code>конечний</code> "finite"); homograph ranking (<code>стане</code>, <code>діє</code>); <code>в тому, щоб</code>; football phrases.</li>
+<li><code>ownEntryForms</code> for Russian and Polish, with their corpus diffs.</li>
+<li><code>see</code> links in <code>collect.ts</code>, as the extension shows them.</li>
+</ul>
+</main></body></html>

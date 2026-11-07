@@ -50,6 +50,8 @@ export type LanguageRules = {
     readonly endings: ReadonlyArray<string>;
     readonly onlyNew: boolean;
   };
+  /** Form-gloss openings that keep an entry of their own (`passive`, `active participle`): see `isOwnEntryGloss`. */
+  readonly ownEntryForms?: ReadonlyArray<string>;
   /** Reflexive senses become an entry with the particle before or after the lemma (`bawić się`). */
   readonly reflexive?: "before" | "after";
 };

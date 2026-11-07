@@ -165,8 +165,15 @@ const toEtymology = (value: number | string | undefined): number => {
   return n !== undefined && Number.isInteger(n) && n >= 0 ? n : 0;
 };
 
-/** `sens==Polish==`: a heading the dump left on a link target. */
-const cleanTarget = (word: string): string => word.replace(/==.*$/, "");
+/**
+ * A link target as the dump writes it, without what isn't the word: a heading
+ * the dump left on it (`sens==Polish==`), or the aspect Slavic form-of templates
+ * write after a verb (`розташува́ти pf`, `узурпува́ти impf or pf`).
+ */
+const cleanTarget = (word: string): string =>
+  word
+    .replace(/==.*$/, "")
+    .replace(/\s+(?:impf|pf)(?:\s+or\s+(?:impf|pf))?$/, "");
 
 const isLinkSense = (
   rules: LanguageRules,
@@ -292,7 +299,7 @@ const classifySense = (
     const links = [...(sense.form_of ?? []), ...(sense.alt_of ?? [])].map(
       (link) => ({ word: cleanTarget(link.word) }),
     );
-    if (gloss !== undefined && isOwnEntryGloss(gloss)) {
+    if (gloss !== undefined && isOwnEntryGloss(gloss, rules.ownEntryForms)) {
       return {
         kind: "derived",
         gloss,
@@ -337,8 +344,14 @@ const collectForms = (
   const forms = new Set<string>();
   const participles = new Set<string>();
   let dropped = 0;
+  // A table whose every cell is a dash (Ukrainian `монета`), not a missing
+  // table: without one, the headword line holds other words too (German `der`
+  // for `CIA`).
+  const table = rawForms.filter((form) => form.source !== undefined);
+  const noTable =
+    table.length > 0 && !table.some((form) => keepForm(rules, lemma, form));
   for (const form of rawForms) {
-    if (!keepForm(rules, lemma, form)) {
+    if (!keepForm(rules, lemma, form, noTable)) {
       dropped++;
       continue;
     }

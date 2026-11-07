@@ -104,8 +104,23 @@ export const skipSense = (
 const OWN_ENTRY_OPENING =
   /^(?:\S+\s+)?(?:(?:female|male) equivalent|diminutive|augmentative|verbal noun|agent noun|frequentative|iterative|causative|singulative|abbreviation|initialism|acronym|clipping|ellipsis|(?:comparative|superlative)(?: degree)?) of\b/i;
 
-export const isOwnEntryGloss = (gloss: string): boolean =>
-  OWN_ENTRY_OPENING.test(gloss);
+export const isOwnEntryGloss = (
+  gloss: string,
+  ownEntryForms: ReadonlyArray<string> = [],
+): boolean => {
+  if (OWN_ENTRY_OPENING.test(gloss)) return true;
+  // A language's own kinds (`ownEntryForms`): every word of an item opens the
+  // gloss before its "of" ("adjectival past passive participle of" has `passive`).
+  const opening = gloss.match(/^(.*?)\s+of\s/i)?.[1];
+  if (opening === undefined) return false;
+  const words = new Set(opening.toLowerCase().split(/\s+/));
+  return ownEntryForms.some((item) =>
+    item
+      .toLowerCase()
+      .split(/\s+/)
+      .every((word) => words.has(word)),
+  );
+};
 
 const DEGREE_OPENING =
   /^(?:\S+\s+)?(comparative|superlative)(?: degree)? of\s+([^\s(:;,]+)/i;
@@ -253,7 +268,12 @@ export const isBareDerivedGloss = (
   return targets.some((target) => {
     const word = target.trim().toLowerCase();
     if (!rest.startsWith(word)) return false;
-    const after = rest.slice(word.length).replace(/^\s*\([^“)]*\)/, "");
+    // The aspect Slavic templates write after a verb, then the romanization:
+    // "passive of використовува́ти impf (vykorystovuváty)".
+    const after = rest
+      .slice(word.length)
+      .replace(/^\s+(?:impf|pf)(?:\s+or\s+(?:impf|pf))?/, "")
+      .replace(/^\s*\([^“)]*\)/, "");
     return /^[\s.,;:]*$/.test(after);
   });
 };
@@ -314,11 +334,27 @@ export const isMarkedAlternative = (form: WiktextractForm): boolean =>
   (form.tags?.includes("alternative") ?? false) &&
   isMarked(form.tags);
 
-/** Whether a raw form is indexed as a form of its lemma. */
+/** A headword-line form that names a case or number of the word itself (`моне́ти` genitive). */
+const isHeadwordInflection = (tags: ReadonlyArray<string>): boolean =>
+  tags.some((t) => GRAMMAR_CASES.has(t) || t === "plural") &&
+  !tags.some(
+    (t) =>
+      HEADWORD_FORM_TAGS.relatedWord.has(t) ||
+      t === "definite" ||
+      t === "indefinite",
+  );
+
+/**
+ * Whether a raw form is indexed as a form of its lemma. `noTable`: the entry's
+ * inflection table lists no form (Ukrainian `монета`'s is all dashes), so the
+ * cases and numbers its headword line gives (`моне́ти`, `моне́т`) are its forms,
+ * articles apart (German `der` in `des CIA`).
+ */
 export const keepForm = (
   language: LanguageRules,
   lemma: string,
   form: WiktextractForm,
+  noTable = false,
 ): boolean => {
   const word = form.form.trim();
   if (word === "" || word === "-" || word === "—") return false;
@@ -335,6 +371,7 @@ export const keepForm = (
   if (isHistorical(language, tags)) return false;
   if (form.source === undefined) {
     if (isMarkedAlternative(form)) return false;
+    if (noTable && isHeadwordInflection(tags)) return true;
     return (
       tags.some((t) => HEADWORD_FORM_TAGS.sameWord.has(t)) &&
       !tags.some((t) => HEADWORD_FORM_TAGS.relatedWord.has(t))

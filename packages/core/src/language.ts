@@ -74,6 +74,13 @@ const Import = doc(
         "Adjectival participles decline like adjectives, but verb tables list only one form (`wymagany`, `ausgelegt`). A participle row with all of `tags` that ends in `ending` also gets its stem with each of `endings` as forms of the verb (`wymaganego`, `wymaganej`; `ausgelegte`, `ausgelegten`).",
       ),
     ),
+    ownEntryForms: orDefault(
+      doc(
+        strings,
+        'Form glosses that describe a word a reader meets on its own, so the word keeps an entry with its base\'s meaning ("passive of використовувати: to use") instead of only linking to the base. Each item is a set of words, all of which must open the gloss before its "of": `passive` matches "passive of" and "adjectival past passive participle of", `active participle` matches "past active participle of". Ukrainian sets them because its participles are also adjectives (`поширений` "widespread"), which a link to the verb would rank behind it.',
+      ),
+      [],
+    ),
     stressedLemmas: orDefault(
       doc(
         Schema.Boolean,

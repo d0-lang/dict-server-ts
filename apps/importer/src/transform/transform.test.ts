@@ -7,6 +7,7 @@ import type { WiktextractEntry } from "../source/wiktextract.ts";
 const pl = importRules(readLanguage("pl"));
 const de = importRules(readLanguage("de"));
 const ru = importRules(readLanguage("ru"));
+const uk = importRules(readLanguage("uk"));
 
 const entry = (patch: Partial<WiktextractEntry>): WiktextractEntry => ({
   word: "lapis",
@@ -91,6 +92,60 @@ describe("transformEntry", () => {
     assert.strictEqual(result.droppedForms, 9);
   });
 
+  it("takes cases from the headword line when the table lists none (`монета`)", () => {
+    const forms = (
+      table: ReadonlyArray<{ form: string; tags: Array<string> }>,
+    ) =>
+      transformEntry(
+        uk,
+        entry({
+          word: "монета",
+          pos: "noun",
+          senses: [{ glosses: ["coin"] }],
+          forms: [
+            { form: "моне́та", tags: ["canonical", "feminine", "inanimate"] },
+            { form: "моне́ти", tags: ["genitive"] },
+            { form: "моне́ти", tags: ["nominative", "plural"] },
+            { form: "моне́т", tags: ["genitive", "plural"] },
+            { form: "моне́тка", tags: ["diminutive"] },
+            {
+              form: "uk-ndecl",
+              tags: ["inflection-template"],
+              source: "declension",
+            },
+            ...table.map((row) => ({ ...row, source: "declension" })),
+          ],
+        }),
+      ).entry?.forms;
+    // The table is all dashes: the headword line's cases are the forms.
+    assert.deepStrictEqual(
+      forms([{ form: "-", tags: ["genitive", "singular"] }]),
+      ["монети", "монет"],
+    );
+    // With a real table, the headword line adds nothing.
+    assert.deepStrictEqual(
+      forms([{ form: "моне́тою", tags: ["instrumental", "singular"] }]),
+      ["монетою"],
+    );
+  });
+
+  it("takes nothing from the headword line of an entry without a table (`CIA`)", () => {
+    const result = transformEntry(
+      de,
+      entry({
+        word: "CIA",
+        pos: "name",
+        senses: [{ glosses: ["CIA"] }],
+        forms: [
+          { form: "das CIA", tags: ["canonical", "feminine", "neuter"] },
+          { form: "der", tags: ["definite", "genitive"] },
+          { form: "des CIA", tags: ["definite", "genitive"] },
+        ],
+      }),
+    );
+    assert.deepStrictEqual(result.entry?.forms, []);
+  });
+
   it("turns form-of and alt-of senses into fallback links, not entries", () => {
     const result = transformEntry(
       pl,
@@ -137,6 +192,54 @@ describe("transformEntry", () => {
       { gloss: "diminutive of kotek", bases: ["kotek"] },
     ]);
     assert.deepStrictEqual(result.formOf, []);
+  });
+
+  it("keeps an entry for a language's own form kinds (`ownEntryForms`)", () => {
+    const passive = (rules: typeof uk) =>
+      transformEntry(
+        rules,
+        entry({
+          word: "використовуватися",
+          pos: "verb",
+          senses: [
+            {
+              glosses: ["passive of використовува́ти impf (vykorystovuváty)"],
+              tags: ["form-of", "passive"],
+              form_of: [{ word: "використовува́ти impf" }],
+            },
+          ],
+        }),
+      );
+    // Ukrainian sets `passive`: the passive keeps its gloss and the verb's meaning.
+    assert.deepStrictEqual(passive(uk).entry?.derived, [
+      {
+        gloss: "passive of використовува́ти impf (vykorystovuváty)",
+        bases: ["використовувати"],
+      },
+    ]);
+    assert.deepStrictEqual(passive(uk).formOf, []);
+    // Without the setting it is a link to the verb, as before.
+    assert.strictEqual(passive(ru).entry, undefined);
+    assert.deepStrictEqual(
+      passive(ru).formOf.map((link) => link.lemma),
+      ["використовувати"],
+    );
+    // An adverbial participle is a verb form: still a link.
+    const adverbial = transformEntry(
+      uk,
+      entry({
+        word: "роблячи",
+        pos: "verb",
+        senses: [
+          {
+            glosses: ["present adverbial participle of роби́ти impf (robýty)"],
+            tags: ["form-of", "participle"],
+            form_of: [{ word: "роби́ти impf" }],
+          },
+        ],
+      }),
+    );
+    assert.strictEqual(adverbial.entry, undefined);
   });
 
   it("copies nothing when the derived gloss already has a meaning", () => {
@@ -572,6 +675,35 @@ describe("transformEntry", () => {
       }),
     );
     assert.strictEqual(result.formOf[0]?.lemma, "sens");
+  });
+
+  it("cleans the aspect off form-of targets (`розташува́ти pf`)", () => {
+    // Under rules without `ownEntryForms`, so the participle is a link.
+    const result = transformEntry(
+      ru,
+      entry({
+        word: "розташований",
+        pos: "verb",
+        senses: [
+          {
+            glosses: ["adjectival past passive participle of розташува́ти pf"],
+            tags: ["adjectival", "form-of", "participle", "passive", "past"],
+            form_of: [{ word: "розташува́ти pf" }],
+            links: [["розташува́ти", "розташувати#Ukrainian"]],
+          },
+          {
+            glosses: ["inflection of узурпува́ти impf or pf"],
+            tags: ["form-of"],
+            form_of: [{ word: "узурпува́ти impf or pf" }],
+          },
+        ],
+      }),
+    );
+    assert.strictEqual(result.entry, undefined);
+    assert.deepStrictEqual(
+      result.formOf.map((link) => link.lemma),
+      ["розташувати", "узурпувати"],
+    );
   });
 
   it("takes synonym targets from links, ignoring labels and other languages", () => {

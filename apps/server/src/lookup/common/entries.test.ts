@@ -25,19 +25,23 @@ const ranked = (
       sourcePos: string,
       form: string,
       source: number,
+      gloss?: string,
     ]
   >,
   word: string,
 ) => {
   const db = createDictionaryFile(":memory:");
-  rows.forEach(([lemma, pos, sourcePos, form, source], i) => {
+  rows.forEach(([lemma, pos, sourcePos, form, source, gloss], i) => {
     db.$client.run(
       "INSERT OR IGNORE INTO entries VALUES (?, ?, ?, ?, 0, ?, NULL)",
       [i + 1, lemma, pos, sourcePos, caseClass(lemma)],
     );
     db.$client.run("INSERT INTO senses VALUES (?, 0, ?, NULL)", [
       i + 1,
-      JSON.stringify([`${lemma} ${pos}`]),
+      JSON.stringify([
+        `${lemma} ${pos}`,
+        ...(gloss === undefined ? [] : [gloss]),
+      ]),
     ]);
     db.$client.run("INSERT INTO forms VALUES (?, ?, ?)", [form, i + 1, source]);
   });
@@ -47,6 +51,45 @@ const ranked = (
 };
 
 describe("findEntriesByForm ranking", () => {
+  it("puts a participle after the adjective of the same lemma (`поширені`)", () => {
+    assert.deepStrictEqual(
+      ranked(
+        [
+          [
+            "поши́рений",
+            "VERB",
+            "verb",
+            "поширені",
+            FormSource.Inflection,
+            "participle of поши́рити: to widen",
+          ],
+          ["поши́рений", "ADJ", "adj", "поширені", FormSource.Inflection],
+        ],
+        "поширені",
+      ),
+      ["поши́рений ADJ", "поши́рений VERB"],
+    );
+    // The verb's own lemma keeps its place: German `erhalten` "to receive"
+    // before the adjective `erhalten` "intact".
+    assert.deepStrictEqual(
+      ranked(
+        [
+          [
+            "erhalten",
+            "VERB",
+            "verb",
+            "erhalten",
+            FormSource.Lemma,
+            "to receive",
+          ],
+          ["erhalten", "ADJ", "adj", "erhalten", FormSource.Lemma],
+        ],
+        "erhalten",
+      ),
+      ["erhalten VERB", "erhalten ADJ"],
+    );
+  });
+
   it("puts letters and one-letter letter names after the word", () => {
     assert.deepStrictEqual(
       ranked(

@@ -107,13 +107,19 @@ Check at least:
 - **Tokens.** What the extension's word splitter does with hyphens, periods inside abbreviations and apostrophes, and whether clitics or contractions are written onto words (`dándose`, `l'homme`, `ins`). The clicked word is whatever the splitter gives.
 - **Coverage.** The share of corpus words with any entry, and the 50 most frequent words without one, each with its cause.
 - **Grammar words and irregular forms.** Wiktionary's pronoun and preposition entries are often shared tables, or wrong for a reader. Grammar words go in `grammar.tsv`. So do irregular forms a reader can't connect to their base (`был` "was", `будет` "will be", `мог` "could"), as entries of their own: the protocol has no inflection tables, and doesn't need them. A line with a content part of speech (`здесь ADV`) replaces Wiktionary's entry of that part of speech, for a sense Wiktionary lacks.
+  - **Order.** A word's grammar lines come before Wiktionary's entries in the popover, in the file's order. So put a word's commonest use first: the conjunction before the pronoun (Ukrainian `що SCONJ` before `що PRON`, `та CCONJ` before `та DET`). Putting them the other way round made hundreds of popovers worse.
+  - **Replacement.** Listing a word replaces *all* of Wiktionary's grammar-word entries for it (determiner, pronoun, preposition, conjunction, particle, auxiliary), not only the part of speech you wrote. Write a line for every one you want to keep: Ukrainian `за ADP` dropped Wiktionary's `за PART` "що за, what kind of".
 - **Ranking.** What opens the popover for the commonest words (letters, abbreviations, or names before the word).
 - **Structure.** Compounds written as one word (linking elements, entries with compound etymologies); separable particles and where they go; negation that changes case; reflexives that move away from the verb; reflexive verbs a learner learns with their particle (`bawić się`: `import.reflexive`, `context.reflexiveParticles`); a verb bracket. Each one that applies is a setting in `language.toml`, and the profile records why each value was chosen.
 - **What the general rules do here.** These already work for every language; check them on the new one: comparatives and superlatives as entries of their own (`лучше`, `besser`; a comparative spelled like a plain form of its base stays with the base, `neuer`), pieces of dotted abbreviations (`т` in `т.д.`, `z` in `z.B.`), endings after numbers (`3-го`), hyphen-joined words, negation, commas in conjunctions.
 
+Without a reader, the classified diff is the review: classify the diff of every round that changes the grammar file, and read every "worse". On Ukrainian it caught what a reader would have: lines in the wrong order, a phrase line that fired on a literal reading (`так як`), passives that lost their sense.
+
 If a reader of the language is available, give them a review page for the profile and the grammar file (`bun ../corpus/eval/review/build.ts --lang <lang> --name <Language> --out <file>`): a tick per item, and a download of what they don't agree with. Only ask them what changes a result, and decide small things yourself.
 
 ### 3. Collect, sample, judge
+
+Do this first on the plain import (step 1, before the profile's fixes) as run `r0`: it is the "before" of the gates and of every diff. Then again after the grammar file and the first fixes.
 
 Start the server with the new dictionary (`LANGUAGES=<pair> PORT=<port> bun run start`). Then, in `../corpus`:
 
@@ -129,13 +135,14 @@ bun eval/score.ts --dir eval/out/<lang>/<run>/gate
 - Two collections, for two jobs:
   - `collect.ts` sends every word of every text to the server API, split like the extension splits it (about 1.5 minutes for 77k words). It is cheap enough to run after every change, so it is the base for the sample (word frequencies, spoken or written, position) and for every diff.
   - `collect-browser.ts` does the same through the real extension in headless Chromium, which is what a reader sees, but slowly, so it runs on the sample.
-- The browser run must show the same word, sentence and popover as the API run. Any difference is reported and must be explained before judging (`../corpus/eval/README.md`). When they differ, change `collect.ts` to do what the extension does, never the reverse: the Russian check found that Chromium splits words at a period between letters (`т.д` → `т`), and that the extension sends no sentence longer than 500 characters. Run a full browser collection (`collect-browser.ts` without `--sample`, about 20 minutes for 77k words) once per new language and after any extension change.
+- The browser run must show the same word, sentence and popover as the API run. Any difference is reported and must be explained before judging (`../corpus/eval/README.md`). When they differ, change `collect.ts` to do what the extension does, never the reverse: the Russian check found that Chromium splits words at a period between letters (`т.д` → `т`), and that the extension sends no sentence longer than 500 characters. Run a full browser collection (`collect-browser.ts` without `--sample`; about 10 minutes for 87k words with the default tabs, the machine's threads less 4) once per new language and after any extension change. Rebuild the extension first (`bun run build` in `../extension`): `collect-browser.ts` warns when the source is newer than the build, and a stale build tests old popovers.
 - Judging the first sample (about 2,200 items) took Haiku about 25 minutes and about 4% of a 5-hour Claude usage window, with the default 5 parallel calls. More calls (`--concurrency 10` on `judge.ts` and `classify.ts`) should cut the time without costing more: the batches and their tokens stay the same. The limit is the account's rate limit, and `--attempts` retries a failed batch. Measured on Polish (2026-11-06, 2,188 items, 88 batches): 8.5 minutes with `--concurrency 10`, against about 25 minutes with 5 for a Russian sample of the same size, with 35 retried batches; the judge's own tally put the cost at $0.80.
 - Verdicts are cached per language by word, sentence and popover, so later runs only judge what changed.
 - The sample is fixed at the first run and reused (`--from`), so runs compare:
   - **common:** the 1,000 most widely used words, spoken and written weighed equally, names left out. The top 100 get up to 3 sentences.
-    - **grammar** words: any entry that isn't a noun, verb or adjective, or no entry at all (`и`, `по`, `уже`, `нибудь`).
+    - **grammar** words: any entry that isn't a noun, verb or adjective (`и`, `по`, `уже`, `нибудь`).
     - **content** words: only noun, verb or adjective entries.
+    - words with **no entry** at all: reported on a line of their own, with no gate. They are gaps in the data (Ukrainian `класно`, `реально`), not lookups, and go on the hand-patch list.
   - **random:** 1,000 more words, half spoken and half written.
 
 ### 4. Gates
@@ -147,6 +154,8 @@ bun eval/score.ts --dir eval/out/<lang>/<run>/gate
 | Random words | 87.5% |
 
 The judge itself is noisy: re-judging the same German popovers from scratch moved a gate by about a point. So the gates leave that much room rather than asking for 100%.
+
+`score.ts` gives every gate two figures: all counted items, and the same without the judge's `missing_word` misses, words the dictionary has no entry for. The gate passes on the first. Report both: the second says what lookups do with the data there is, the first also how much of the language English Wiktionary covers. Ukrainian, with 38k entries against Russian's 62k, ended tier 1 at 80.6% random words, 93.8% without missing words. When the random gate fails on missing words alone, the language needs hand patches, not rules: say so and stop.
 
 A beginner meets the common words first, so they mustn't get lost there. You read every failing common word yourself (or a stronger model does), and so does the user, if they read the language:
 
@@ -167,12 +176,13 @@ A beginner meets the common words first, so they mustn't get lost there. You rea
 After each change, in `../corpus`: collect again through the API (`collect.ts … --every-word`), then
 
 ```sh
-bun eval/diff.ts --before eval/out/<lang>/<old> --after eval/out/<lang>/<new> --out eval/out/<lang>/<new>/changes.jsonl --per-change 3 --sample eval/out/<lang>/<old>/gate/sample.json
+bun eval/diff.ts --before eval/out/<lang>/<old> --after eval/out/<lang>/<new> --out eval/out/<lang>/<new>/changes.jsonl --per-change 3 --sample eval/out/<lang>/<old>/gate/sample.json --sample-only
 bun eval/classify.ts --changes eval/out/<lang>/<new>/changes.jsonl
 bun eval/sample.ts --run eval/out/<lang>/<new> --name gate --from ../<old run>/gate   # same items, today's popovers
 bun eval/judge.ts … && bun eval/score.ts …   # only changed popovers are judged again
 ```
 
+- `--sample-only` classifies only the changes the gate sample holds: a grammar-file round changes thousands of popovers (Ukrainian's first: 3,469 changes, 87 batches; 391 in the sample). Read the full diff's word counts (`diff.ts` prints them) for anything the sample misses, and for other languages' diffs, which are small, classify or read all of them.
 - `--per-change 3` keeps 3 sentences for each word whose popover changed the same way: a sense added to a preposition changes a thousand popovers alike. Russian's first round went from 4,400 changes to rate down to 880.
 - An importer change needs a re-import, and a running server keeps the old file open, so restart it. For a "before" run, back up the dictionary files to a folder and serve them from a second port: `DATA_DIR=<folder> PORT=<port> bun run start`.
 - Most rules apply to every language, so collect and diff every language a change touches, not just the new one. The German diff was where comparatives spelled like plain adjectives (`ein neuer Film`) showed up.
@@ -265,11 +275,11 @@ Benchmarks built by models are only as good as the models' knowledge of the lang
 
 ## Report
 
-Write an HTML report in `docs/` (Russian's is `docs/ru-report.html`). It contains:
+Write an HTML report in `docs/` (Russian's is `docs/ru-report.html`) when a tier ends, tier 1 included: when tier 1 is all that was asked, the report is its result. It contains:
 
 - the profile summary and the tier;
-- the gates before and after, and the judge scores;
-- the baseline and final benchmarks per type;
+- the gates before and after, each with both figures (with and without missing words), and the judge scores;
+- the baseline and final benchmarks per type (tier 2 only);
 - the accepted rules, with their unit tests;
 - what got worse, and why it stays;
 - the false positives and the hand-patch list.

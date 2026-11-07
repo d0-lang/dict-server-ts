@@ -115,7 +115,13 @@ const dropRedundantSynonyms = (
  *    comes after its base (`größte` gives `groß`, then `größten`). A form
  *    reached only with an optional letter written plainly comes last (`все`
  *    gives `весь` before `всё`).
- * 4. Import order (`entries.id`): grammar-file entries, then the dump's order.
+ * 4. Participles: a participle entry (a verb whose senses name it a
+ *    "participle of" its verb) comes after an adjective entry of this form
+ *    with the same lemma, so `поширені` gives `поширений` "widespread" before
+ *    "participle of поширити: to widen". A verb that is no participle keeps
+ *    its place: German `erhalten` "to receive" before the adjective, and
+ *    Russian `звучать`, which the dump also lists as an adjective.
+ * 5. Import order (`entries.id`): grammar-file entries, then the dump's order.
  */
 const rankedIds = (
   db: DictionaryDb,
@@ -145,6 +151,15 @@ const rankedIds = (
          instr(?1, ' ') = 0 AND instr(e.lemma, ' ') > 0,
          f.source = ${FormSource.Degree},
          f.source = ${FormSource.LetterVariant},
+         e.pos = 'VERB'
+           AND EXISTS (
+             SELECT 1 FROM senses ps
+             WHERE ps.entry_id = e.id AND ps.translations LIKE '%participle of %'
+           )
+           AND EXISTS (
+             SELECT 1 FROM forms af JOIN entries ae ON ae.id = af.entry_id
+             WHERE af.form = ?1 AND ae.pos = 'ADJ' AND ae.lemma = e.lemma
+           ),
          e.id`,
     )
     .all(

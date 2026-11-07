@@ -4,7 +4,7 @@ import { decodeLanguage, languageCodes, readLanguage } from "./language.ts";
 describe("language records", () => {
   it("reads every language.toml", () => {
     const codes = languageCodes();
-    assert.deepStrictEqual(codes, ["de", "pl", "ru"]);
+    assert.deepStrictEqual(codes, ["de", "pl", "ru", "uk"]);
     for (const code of codes) assert.strictEqual(readLanguage(code).code, code);
   });
 
@@ -15,6 +15,7 @@ describe("language records", () => {
       historicalStages: [],
       standardPronNotes: [],
       untrustedFormTags: [],
+      ownEntryForms: [],
       stressedLemmas: false,
     });
     assert.deepStrictEqual(language.context, {

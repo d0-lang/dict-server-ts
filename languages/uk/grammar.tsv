@@ -1,0 +1,273 @@
+# Ukrainian grammar words. One line per word as written + part of speech:
+# word <TAB> UD part of speech <TAB> senses separated by " | ".
+# The file replaces Wiktionary's determiner, pronoun, preposition, conjunction,
+# particle and auxiliary entries for every word listed here; nouns, verbs,
+# adverbs and other content words stay (тому "therefore", треба "rite").
+# Write the word with its stress mark, as the dump does (one-syllable words need
+# none): lookups ignore the mark, and the reader sees it.
+# A phrase with its own entry (так званий, крім того) is left to that entry,
+# which lookups show first when the sentence contains it.
+# A line with a content part of speech (тут ADV) replaces Wiktionary's entry
+# of that part of speech for the word; X lines (endings) only add.
+# Irregular forms a reader can't connect to their base get lines of their own
+# (був "was", буде "will be", міг "could"): the protocol has no inflection tables.
+# Written without a reader of the language (see profile.md): every line is the
+# developer's, checked against the dump and the corpus, not by a Ukrainian reader.
+# See apps/importer/src/grammar.ts.
+
+## Personal pronouns
+# Wiktionary gives every personal pronoun one shared table (template l-self),
+# so each form reached я, ти, він, вона, воно, ми, ви, вони and себе at once.
+я	PRON	I (first-person singular pronoun)
+мене́	PRON	me (genitive or accusative: "у мене", I have; "бачиш мене", you see me; "для мене", for me)
+мені́	PRON	me, to me (dative: "дай мені", give me; "мені подобається", I like it; "мені холодно", I'm cold) | me (locative, after prepositions: "на мені", on me)
+мно́ю	PRON	me (instrumental: "зі мною", with me; "переді мною", in front of me)
+ти	PRON	you (singular, informal)
+тебе́	PRON	you (singular; genitive or accusative: "у тебе", you have; "люблю тебе", I love you)
+тобі́	PRON	you, to you (singular; dative: "тобі подобається", you like it) | you (locative, after prepositions: "на тобі", on you)
+тобо́ю	PRON	you (singular; instrumental: "з тобою", with you)
+він	PRON	he | it (for a masculine noun: "фотосинтез ... він", photosynthesis ... it)
+вона́	PRON	she | it (for a feminine noun)
+воно́	PRON	it (for a neuter noun)
+ми	PRON	we
+нас	PRON	us (genitive, accusative or locative: "у нас", we have, at our place; "для нас", for us; "про нас", about us)
+нам	PRON	us, to us (dative: "нам пора", it's time for us to go)
+на́ми	PRON	us (instrumental: "з нами", with us)
+ви	PRON	you (plural, or polite singular)
+вас	PRON	you (plural or polite; genitive, accusative or locative: "у вас", you have; "для вас", for you)
+вам	PRON	you, to you (plural or polite; dative)
+ва́ми	PRON	you (plural or polite; instrumental: "з вами", with you)
+вони́	PRON	they
+його́	PRON	him, it (genitive or accusative: "бачу його", I see him; "немає його", he isn't here)
+його́	DET	his, its (does not change form: "його брат", his brother)
+ньо́го	PRON	him, it (genitive, after prepositions: "у нього", he has; "для нього", for him; "з нього", from it)
+йому́	PRON	him, to him, to it (dative: "дай йому", give him; "йому сподобалось", he liked it)
+ним	PRON	him, it (instrumental: "з ним", with him; "керувати ним", to run it)
+ньо́му	PRON	him, it (locative, after prepositions: "у ньому", in it; "на ньому", on him)
+її́	PRON	her, it (genitive or accusative: "бачу її", I see her; "використовують її", they use it)
+її́	DET	her, hers, its (does not change form: "її мама", her mother)
+не́ї	PRON	her, it (genitive, after prepositions: "у неї", she has; "для неї", for her; "з неї", from it)
+їй	PRON	her, to her, to it (dative: "дай їй", give her)
+не́ю	PRON	her, it (instrumental: "з нею", with her; "за нею", after her)
+ній	PRON	her, it (locative, after prepositions: "у ній", in her, in it; "на ній", on her)
+їх	PRON	them (genitive or accusative: "бачу їх", I see them; "немає їх", they aren't here)
+їх	DET	their (colloquial for їхній: "їх дім", their house)
+них	PRON	them (genitive, accusative or locative, after prepositions: "у них", they have; "один з них", one of them; "про них", about them)
+їм	PRON	them, to them (dative: "скажи їм", tell them)
+ни́ми	PRON	them (instrumental: "з ними", with them; "між ними", between them)
+
+## Reflexive
+себе́	PRON	oneself: myself, yourself, himself, herself, itself, ourselves, themselves (genitive or accusative; refers back to the subject) | "до себе", to one's place, home; "у себе", at one's place
+собі́	PRON	oneself, to oneself (dative or locative: "купив собі", bought for himself) | for oneself, just (softening: "живе собі", lives quietly)
+собо́ю	PRON	oneself (instrumental: "з собою", with one, along; "між собою", among themselves; "являти собою", to be, to represent)
+
+## Demonstratives
+# Wiktionary sends every form to цей "this" and той "that", so plurals read as singular.
+це	PRON	this, it, that ("це добре", it's good; "що це?", what is this?) | this is, it is, that is ("це мій брат", this is my brother)
+це	DET	this (neuter: "це місто", this city)
+ці	DET	these (plural: "ці люди", these people)
+цих	DET	these, of these (plural genitive, accusative or locative: "у цих країнах", in these countries)
+цим	DET	this, with this (masculine or neuter instrumental: "з цим", with this) | these, to these (plural dative)
+ци́ми	DET	these, with these (plural instrumental) | this (with time words: "цими вихідними", this weekend; "цими днями", these days, recently)
+оці́	DET	these (plural, emphatic: "оці речі", these things here)
+та	CCONJ	and ("ти та я", you and I) | but ("хотів, та не зміг", wanted to, but couldn't)
+та	DET	that (feminine: "та жінка", that woman)
+те	PRON	that, the thing ("те, що", what, the fact that; "саме те", just the thing)
+те	DET	that (neuter: "те місто", that city)
+ті	DET	those (plural: "ті люди", those people) | the ones ("ті, хто", those who)
+тих	DET	those, of those (plural genitive, accusative or locative: "тих днів", of those days; "для тих, хто", for those who)
+тим	DET	that, with that (masculine or neuter instrumental: "з тим", with that) | those, to those (plural dative: "тим, хто", to those who) | the (with a comparative: "чим більше, тим краще", the more the better)
+ти́ми	DET	those, with those (plural instrumental)
+того́	DET	that, of that (masculine or neuter genitive; accusative of a person: "того року", that year; "після того", after that)
+то	PRON	that, it ("то була помилка", that was a mistake)
+то	CCONJ	then (after якщо, коли: "якщо хочеш, то йди", if you want, then go) | or ("то дощ, то сніг", now rain, now snow)
+
+## Interrogatives and relatives
+хто	PRON	who (asking or relative: "хто це?", who is it?; "той, хто", the one who)
+кого́	PRON	whom, who (genitive or accusative of хто: "кого ти бачив?", who did you see?; "ні від кого", from nobody)
+кому́	PRON	whom, to whom (dative of хто: "кому ти пишеш?", who are you writing to?)
+ким	PRON	whom, by whom (instrumental of хто: "з ким?", with whom?; "ким він працює?", what does he work as?)
+що	SCONJ	that ("знаю, що він прийде", I know that he'll come)
+що	PRON	which, that, who (relative: "книга, що лежить", the book that lies) | what (asking: "що це?", what is it?; "що за", what kind of)
+чого́	PRON	what, of what (genitive of що: "чого ти хочеш?", what do you want?) | which (relative: "після чого", after which) | why (colloquial: "чого ти плачеш?", why are you crying?)
+чим	PRON	what, with what (instrumental of що: "чим ти пишеш?", what are you writing with?) | the more (with a comparative: "чим більше, тим краще", the more the better)
+яки́й	PRON	which, what, what kind of (asking: "який він?", what is he like?) | which, who, that (relative: "людина, яка", the person who)
+яка́	PRON	which, what, what kind of, who (feminine of який: "яка книга?", which book?; "жінка, яка", the woman who)
+яке́	PRON	which, what, what kind of, that (neuter of який)
+які́	PRON	which, what, what kind of, who (plural of який: "люди, які", the people who)
+яко́го	PRON	which, what, what kind of, whom (masculine or neuter genitive of який; accusative of a person: "якого віку?", how old?)
+яко́ї	PRON	which, what, what kind of, whom (feminine genitive of який)
+яки́х	PRON	which, what, what kind of, whom (plural genitive, accusative or locative of який)
+
+## Quantifiers and indefinites
+все	DET	all, the whole (neuter: "все життя", all my life, the whole life)
+все	PRON	everything, all ("все добре", everything is fine)
+все	ADV	all the time, still, keep (doing) ("все працює", keeps working; "все ще", still) | more and more, ever (with a comparative: "все більше", more and more; "все краще", better and better)
+всі	DET	all (plural: "всі люди", all people)
+всі	PRON	everyone, everybody, all ("всі знають", everyone knows)
+усі́	DET	all (plural; form of всі)
+усі́	PRON	everyone, everybody, all (form of всі after a consonant)
+всього́	DET	all, the whole (masculine or neuter genitive: "всього світу", of the whole world) | of everything ("найбільше всього", most of all)
+всього́	ADV	in all, in total, altogether ("всього 50", 50 in total) | only, just ("всього два дні", only two days)
+усього́	ADV	in all, in total, altogether | only, just (form of всього)
+ніхто́	PRON	nobody, no one (with не: "ніхто не знає", nobody knows)
+ніко́го	PRON	nobody, no one (genitive or accusative: "нікого немає", there's nobody)
+ніко́му	PRON	nobody, to no one (dative)
+нічо́го	PRON	nothing (with не: "нічого не знаю", I know nothing) | it's all right, not bad ("нічого страшного", it's nothing serious)
+
+свої́	DET	one's own: my, your, his, her, our, their own (plural; refers back to the subject) | one's own people ("свої", our people)
+свої́х	DET	one's own (plural genitive, accusative or locative) | one's own people ("за своїх", for our own people)
+таки́й	DET	such, like this, like that ("такий день", such a day) | so (with an adjective: "такий гарний", so beautiful)
+такі́	DET	such, like these (plural: "такі речі", such things) | the following, these (introducing a list: "такі: ...") | such as ("такі як", such as)
+чому́сь	ADV	for some reason ("чомусь не працює", for some reason it doesn't work)
+чому́сь	PRON	something, in something (dative or locative of щось: "в чомусь", in some respect; "радіти чомусь", be glad of something)
+## Prepositions
+# Each sense names the case the noun after it takes.
+в	ADP	in, at (+ locative, where: "в місті", in the city; "в травні", in May) | into, to (+ accusative, where to: "в Київ", to Kyiv) | on, at (+ accusative, a day or time: "в середу", on Wednesday; "в п'ять годин", at five o'clock) | towards, in the direction of ("в бік", towards)
+у	ADP	in, at (+ locative, where: "у місті", in the city) | into, to (+ accusative, where to) | on (+ accusative, a day: "у понеділок", on Monday) | has, have (+ genitive: "у мене є", I have; "у нього немає", he hasn't got) | at, by (+ genitive: "у друга", at a friend's)
+на	ADP	on, at (+ locative, where: "на столі", on the table; "на роботі", at work) | onto, to (+ accusative, where to: "на південь", to the south) | for (+ accusative, a time or purpose: "на тиждень", for a week) | at, for, on (+ accusative, after verbs: "дивитися на", look at; "сподіватися на", hope for) | per, a ("раз на рік", once a year) | by (with a difference: "на 10%", by 10%)
+з	ADP	with (+ instrumental: "з другом", with a friend; "кава з молоком", coffee with milk) | from, out of, off (+ genitive: "з дому", from home; "з України", from Ukraine) | since (+ genitive: "з 2014 року", since 2014) | of (+ genitive, one of: "один з нас", one of us) | about, around (+ accusative: "з тиждень", about a week) | against, on (with words of struggle: "боротьба з корупцією", the fight against corruption)
+із	ADP	with, from, of (form of з between consonants: "із задоволенням", with pleasure)
+зі	ADP	with, from, of (form of з before some consonant clusters: "зі мною", with me; "зі Львова", from Lviv)
+до	ADP	to, towards, into (+ genitive: "до Києва", to Kyiv; "до школи", to school) | until, till, before (+ genitive: "до ранку", until morning; "до війни", before the war) | up to, as many as (with numbers: "до 20 градусів", up to 20 degrees) | for, about (+ genitive, after some words: "любов до", love for)
+від	ADP	from (+ genitive: "від друга", from a friend; "далеко від", far from) | of, for, against (+ genitive, a cure or protection: "ліки від кашлю", cough medicine) | because of, with (+ genitive: "від страху", from fear) | than (+ genitive, comparing: "більше від", more than)
+за	ADP	behind, beyond (+ instrumental, where; + accusative, where to: "за домом", behind the house) | for (+ accusative: "дякую за допомогу", thanks for the help; "за 100 гривень", for 100 hryvnias) | in, within (+ accusative, time taken: "за годину", in an hour) | during, under, in the time of (+ genitive: "за радянських часів", in Soviet times) | according to, by (+ instrumental: "за словами", according to; "за даними", according to the data) | after, to get (+ instrumental: "пішов за хлібом", went for bread) | at (+ instrumental, a place one sits or works at: "за комп'ютером", at the computer; "за столом", at the table) | over, more than ("за 40", over forty)
+за	PART	what (a), what kind of (in що за: "що за людина?", what kind of person?; "що за день!", what a day!)
+по	ADP	along, around, across (+ locative or dative: "по вулиці", along the street; "по всій країні", all over the country) | by, on (means: "по телефону", on the phone; "по радіо", on the radio) | under, according to ("по програмі", under the programme) | each, apiece (with numbers: "по два", two each) | at, on (+ locative, a target: "удар по воротах", a shot at goal; "бити по", to hit at) | up to (+ accusative: "по коліна", up to the knees)
+під	ADP	under, below (+ instrumental, where; + accusative, where to: "під столом", under the table) | near (+ instrumental: "під Києвом", near Kyiv) | during, towards (time: "під час", during; "під ранок", towards morning) | for, to suit (+ accusative: "під потреби", to suit the needs; "під ключ", turnkey) | to, accompanied by ("під музику", to music)
+про	ADP	about (+ accusative: "про війну", about the war; "розповідь про", a story about) | for, in case of ("про всяк випадок", just in case; "про запас", in reserve)
+для	ADP	for (+ genitive: "для тебе", for you; "для роботи", for work)
+че́рез	ADP	through, across (+ accusative: "через ліс", through the forest) | in, after (+ accusative, time: "через годину", in an hour) | because of (+ accusative: "через дощ", because of the rain) | via, by way of
+без	ADP	without (+ genitive: "без цукру", without sugar) | to (+ genitive, telling the time: "без п'яти три", five to three)
+при	ADP	at, by, near (+ locative) | with, in the presence of (+ locative: "при всіх", in front of everyone) | under, during (+ locative: "при Сталіні", under Stalin) | with, given (+ locative: "при бажанні", if you wish)
+між	ADP	between, among (+ instrumental: "між нами", between us)
+пі́сля	ADP	after (+ genitive: "після обіду", after lunch; "після того", after that)
+пе́ред	ADP	in front of (+ instrumental: "перед будинком", in front of the house) | before (+ instrumental, time: "перед обідом", before lunch) | to, towards (+ instrumental: "відповідальність перед", responsibility to)
+над	ADP	over, above (+ instrumental: "над містом", over the city) | on (+ instrumental, working on: "працювати над проєктом", work on a project)
+
+## Conjunctions and particles with a sense Wiktionary lacks
+ніж	CCONJ	than ("краще, ніж", better than; "більше, ніж", more than)
+як	CCONJ	as, like ("як завжди", as always; "як я", like me) | than ("більше як", more than) | when, if ("як прийдеш", when you come) | as well as (in "як ..., так і ...", both ... and ...)
+як	ADV	how ("як справи?", how are you?; "як це працює", how it works) | how, what (exclaiming: "як гарно!", how beautiful!)
+так	ADV	so, thus, like this ("так краще", it's better this way) | so, such (with adjectives and adverbs: "так довго", so long) | since, because (in так як: "так як нам треба", since we need) | the way, as (in так, як: "так, як він писав", the way he wrote) | and also (in як ..., так і ...: "як гривні, так і карбованці", both hryvnias and karbovantsi)
+хоча́	SCONJ	although, even though ("хоча було пізно", although it was late) | at least (in хоча б: "хоча б раз", at least once)
+ж	PART	(stresses the word before) after all, really, surely ("це ж правда", it's true, isn't it) | same, very (after такий, той, там: "такий же", the same; "того ж року", the same year; "там же", in the same place)
+же	PART	(stresses the word before) after all, really ("я же казав", I told you so) | same, very (after такий, той: "такий же", the same)
+ну	PART	well, um (a pause or start of a remark: "ну, типу", well, like) | come on (urging: "ну давай", come on) | well, yes (agreeing: "ну так", well, yes)
+ось	PART	here (is), there (is) ("ось книга", here is the book) | now, so (introducing what follows: "ось, торік", now, last year) | that's ("ось чому", that's why; "ось так", like this)
+от	PART	here, there, now ("от і все", that's all) | for instance, namely ("от, наприклад", for instance) | that's ("от чому", that's why)
+е	INTJ	uh, er, um (a pause while speaking)
+ой	INTJ	oh, oops, ouch (surprise, fright or pain)
+угу́	INTJ	uh-huh, mm-hmm (yes)
+плюс	CCONJ	plus, and also ("плюс ще одна", plus one more)
+плюс	NOUN	plus, advantage ("плюси і мінуси", pros and cons) | plus sign
+мі́нус	NOUN	minus, drawback ("плюси і мінуси", pros and cons) | minus sign
+
+## Forms of бути and могти
+був	AUX	was (past of бути, masculine: "він був вдома", he was at home)
+була́	AUX	was (past of бути, feminine: "вона була вдома", she was at home)
+було́	AUX	was, it was (past of бути, neuter: "було тихо", it was quiet) | there was, there were ("було багато людей", there were many people)
+були́	AUX	were (past of бути, plural: "ми були вдома", we were at home)
+бу́ду	AUX	I will be | I will (with an infinitive: "я буду читати", I will read)
+бу́деш	AUX	you will be | you will (with an infinitive)
+бу́де	AUX	will be ("завтра буде дощ", it will rain tomorrow) | will (with an infinitive: "він буде працювати", he will work) | there will be
+бу́демо	AUX	we will be | we will (with an infinitive) | let's ("будемо сподіватися", let's hope)
+бу́дете	AUX	you will be | you will (with an infinitive)
+бу́дуть	AUX	they will be | they will (with an infinitive: "будуть працювати", they will work)
+будь	AUX	be (imperative of бути: "будь обережний", be careful) | "будь ласка", please
+мо́же	AUX	can, is able to, may (he, she or it; present of могти: "він може прийти", he can come) | maybe, perhaps (on its own: "може, завтра", maybe tomorrow; "може бути", it may be)
+міг	AUX	could, was able to (past of могти, masculine: "він не міг спати", he couldn't sleep) | could, might (with би: "міг би", could, might)
+могла́	AUX	could, was able to (past of могти, feminine)
+могло́	AUX	could (past of могти, neuter: "могло бути гірше", it could have been worse)
+могли́	AUX	could, were able to (past of могти, plural)
+
+## Adverbs with a sense Wiktionary lacks
+# Each line replaces Wiktionary's adverb entry for the word, so it keeps its senses too.
+тут	ADV	here | at this point, now, then ("і тут", and then, suddenly; "тут важливо", what matters here)
+там	ADV	there | (filler) like, some, or so ("якийсь там", some kind of; "без всякого там", without any sort of)
+сього́дні	ADV	today | nowadays, these days ("сьогодні мало хто", few people nowadays)
+бли́зько	ADV	near, close | about, approximately (with numbers: "близько ста", about a hundred)
+десь	ADV	somewhere | about, roughly (with numbers: "десь 90 км", about 90 km) | sometime, at some point
+то́чно	ADV	exactly, precisely | definitely, for sure ("точно буде", will definitely be)
+пря́мо	ADV	straight, directly | right ("прямо зараз", right now; "прямо тут", right here) | really, literally (colloquial intensifier: "прямо здивував", really surprised)
+про́сто	ADV	simply, just, merely, only | easily, simply ("це просто", it's easy)
+бі́льше	ADV	more (comparative of багато) | any more, any longer (with не: "більше не працює", no longer works)
+скі́льки	ADV	how much, how many | how long ("скільки триватиме", how long it will last) | as much as, as many as
+цілко́м	ADV	completely, entirely, fully | quite, pretty ("цілком добре", quite good)
+тре́ба	ADV	it is necessary, (one) needs to, must (+ dative: "мені треба йти", I need to go; "треба зробити", it must be done)
+
+факти́чно	ADV	actually, in fact | in effect, effectively, virtually ("фактично знищила", virtually destroyed) | factually
+## Forms a reader can't connect to their base
+ро́ку	NOUN	year, of the year (genitive of рік: "2024 року", in 2024; "минулого року", last year; "50-го року", of the year '50) | rock music, fate (genitive of рок)
+
+## Abbreviations
+англ.	ADJ	English (abbreviation of англійська, англійською: "англ. ...", in English)
+дол.	NOUN	dollars (abbreviation of долар: "100 дол.", 100 dollars)
+хв.	NOUN	min, minutes (abbreviation of хвилина)
+млрд	NUM	billion (abbreviation of мільярд: "5 млрд", 5 billion)
+і т. д.	ADV	and so on, etc. (abbreviation of і так далі)
+
+## Endings written after a number (3-й, 1990-х)
+-й	X	-th, ordinal ending after a number (masculine: "1-й", first; "14-й", fourteenth)
+-а	X	-th, ordinal ending after a number (feminine: "1-а", first)
+-я	X	-th, ordinal ending after a number (feminine: "3-я", third)
+-е	X	-th, ordinal ending after a number (neuter: "5-е місце", fifth place)
+-і	X	-th, ordinal ending after a number (plural: "5-і класи", fifth grades) | -s, a decade ("1990-і", the 1990s)
+-го	X	-th, ordinal ending after a number (masculine or neuter genitive: "44-го року", of the year '44; "5-го травня", on the 5th of May)
+-му	X	-th, ordinal ending after a number (masculine or neuter dative or locative: "у 2025-му", in 2025)
+-х	X	ending after a number, plural (genitive, accusative or locative: "1990-х", of the 1990s; "у 1990-х", in the 1990s) | of (a cardinal number in the genitive: "2-х", of two)
+-их	X	ending after a number, plural (genitive or locative: "90-их", of the nineties)
+-ми	X	ending after a number, plural (instrumental: "1990-ми", the 1990s)
+-ї	X	-th, ordinal ending after a number (feminine genitive: "110-ї", of the 110th)
+-у	X	-th, ordinal ending after a number (feminine accusative: "на 5-у", onto the fifth)
+-ю	X	-th, ordinal ending after a number (feminine accusative: "3-ю", the third)
+-ій	X	-th, ordinal ending after a number (feminine dative or locative: "на 5-ій", on the fifth)
+-тя	X	-th, ordinal ending after a number (feminine of третій: "3-тя", third)
+-ту	X	-th, ordinal ending after a number (feminine accusative: "63-ту", the 63rd; "3-ту", the third)
+-тє	X	-th, ordinal ending after a number (neuter of третій: "3-тє", third)
+-те	X	-th, ordinal ending after a number (neuter: "5-те", fifth)
+-ті	X	-th, ordinal ending after a number (plural: "5-ті") | -s, a decade ("1990-ті", the 1990s)
+-тій	X	-th, ordinal ending after a number (feminine dative or locative: "у 3-тій", in the third)
+-ти	X	ending after a number (genitive of a cardinal number: "до 20-ти", up to twenty; "5-ти", of five)
+
+## Set phrases English Wiktionary lacks (hand patches; the context rules match them like any phrase)
+залежно від	ADP	depending on (+ genitive: "залежно від погоди", depending on the weather)
+відпові́дно до	ADP	according to, in accordance with (+ genitive: "відповідно до закону", according to the law)
+порі́вняно з	ADP	compared with (+ instrumental: "порівняно з минулим роком", compared with last year)
+за раху́нок	ADP	at the expense of, thanks to, by means of (+ genitive: "за рахунок економії", thanks to savings)
+за слова́ми	ADP	according to (+ genitive: "за словами лікаря", according to the doctor)
+на ду́мку	ADP	in the opinion of (+ genitive: "на думку експертів", in the experts' opinion)
+з то́чки зо́ру	ADP	from the point of view of (+ genitive)
+у ра́зі	ADP	in case of, if there is (+ genitive: "у разі потреби", if necessary)
+у ра́мках	ADP	within, as part of (+ genitive: "у рамках проєкту", as part of the project)
+в ра́мках	ADP	within, as part of (+ genitive)
+у зв'язку́ з	ADP	in connection with, because of (+ instrumental)
+в бік	ADP	towards, in the direction of (+ genitive: "в бік воріт", towards the goal)
+раз на	ADP	once a, once every (+ accusative: "раз на рік", once a year; "раз на пів року", once every six months)
+у ви́гляді	ADP	in the form of (+ genitive)
+в результа́ті	ADP	as a result of (+ genitive: "в результаті війни", as a result of the war)
+у результа́ті	ADP	as a result of (+ genitive)
+у то́му числі́	ADV	including, among them
+тим не менш	ADV	nevertheless, nonetheless, all the same
+тим не ме́нше	ADV	nevertheless, nonetheless, all the same
+бі́льше того́	ADV	moreover, what's more, furthermore
+при цьо́му	ADV	at the same time, in doing so, and yet ("при цьому ціна не змінилася", and yet the price didn't change)
+у свою́ чергу́	ADV	in turn, for one's part
+в свою́ чергу́	ADV	in turn, for one's part
+у ці́лому	ADV	on the whole, overall, in general
+в при́нципі	ADV	in principle, basically, generally speaking
+як мі́німум	ADV	at least
+тим бі́льше	ADV	all the more, especially, the more so
+все ж	ADV	still, nevertheless, after all ("все ж таки", all the same)
+хоча́ б	ADV	at least ("хоча б раз", at least once)
+ледь не	ADV	almost, nearly ("ледь не впав", almost fell)
+на сього́дні	ADV	for today | as of today, at present ("на сьогодні це найкращий", at present it's the best)
+не ли́ше	CCONJ	not only ("не лише ..., а й ...", not only ..., but also ...)
+не ті́льки	CCONJ	not only ("не тільки ..., а й ...", not only ..., but also ...)
+не те що	ADV	not just, let alone ("не те що X, а навіть Y", not just X but even Y) | it's not that ("не те, що я проти", it's not that I'm against it)
+че́рез те що	SCONJ	because, due to the fact that
+для то́го щоб	SCONJ	in order to, so that
+пі́сля то́го як	SCONJ	after ("після того як він пішов", after he left)
+до то́го як	SCONJ	before ("до того як почалася війна", before the war began)
+оди́н в оди́н	ADV	exactly alike, identical ("один в один як оригінал", exactly like the original) | one on one, man to man (in sport: "грати один в один", to mark man to man)
+при то́му що	SCONJ	although, while, given that ("при тому, що ціни зросли", although prices rose)
