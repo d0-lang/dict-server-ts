@@ -32,6 +32,8 @@ export const WiktextractForm = Schema.Struct({
   form: Schema.String,
   tags: Tags,
   source: Schema.optionalKey(Schema.String),
+  /** Readings over the form's kanji, as `[base, kana]` pairs (Japanese `[["食", "た"]]` for `食べる`). */
+  ruby: Schema.optionalKey(Schema.Array(Schema.Array(Schema.String))),
 });
 export type WiktextractForm = typeof WiktextractForm.Type;
 
@@ -56,6 +58,8 @@ export const WiktextractEntry = Schema.Struct({
   ),
   senses: Schema.optionalKey(Schema.Array(WiktextractSense)),
   forms: Schema.optionalKey(Schema.Array(WiktextractForm)),
+  /** A soft redirect's targets: the page only points at these words (Japanese kana -> kanji). */
+  redirects: Schema.optionalKey(Schema.Array(Schema.String)),
   sounds: Schema.optionalKey(Schema.Array(WiktextractSound)),
 });
 export type WiktextractEntry = typeof WiktextractEntry.Type;

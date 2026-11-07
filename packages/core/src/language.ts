@@ -167,6 +167,64 @@ const Context = doc(
       ),
       [],
     ),
+    analyzer: Schema.optionalKey(
+      doc(
+        Schema.Struct({
+          dictionary: doc(
+            Schema.Literals(["unidic", "ipadic", "ko-dic", "cc-cedict"]),
+            "The morphological analyzer's dictionary (Lindera): `unidic` or `ipadic` for Japanese, `ko-dic` for Korean, `cc-cedict` for Chinese.",
+          ),
+          baseFields: doc(
+            Schema.Array(Schema.Int),
+            "Which of the dictionary's detail fields hold a morpheme's base forms, looked up in this order (UniDic: 10, the written base form `いる`; 7, the lemma `要る`).",
+          ),
+          join: orDefault(
+            doc(
+              Schema.Array(
+                Schema.Struct({
+                  pos: doc(
+                    strings,
+                    "Parts of speech of the morpheme, as the dictionary tags them, each a prefix of its tags joined with `-` (`助動詞`, `動詞-非自立可能`).",
+                  ),
+                  surface: Schema.optionalKey(
+                    doc(strings, "Only these spellings of it (`て`, `で`)."),
+                  ),
+                  base: Schema.optionalKey(
+                    doc(strings, "Only these base forms of it (`する`)."),
+                  ),
+                  after: Schema.optionalKey(
+                    doc(
+                      strings,
+                      "Parts of speech of the morpheme before it, as in `pos`; left out, any morpheme with letters.",
+                    ),
+                  ),
+                  afterSurface: Schema.optionalKey(
+                    doc(strings, "Only after these spellings (`て`)."),
+                  ),
+                }),
+              ),
+              "Rules that join a morpheme to the word before it: a word is a morpheme and what the rules join to it (`食べ` + `まし` + `た`).",
+            ),
+            [],
+          ),
+          prefixes: orDefault(
+            doc(
+              strings,
+              "Parts of speech of morphemes that join the word after them (`接頭辞`: `お` + `茶`).",
+            ),
+            [],
+          ),
+          upos: orDefault(
+            doc(
+              Schema.Record(Schema.String, strings),
+              "The dictionary's parts of speech (a prefix of its tags, as in `pos`) as Universal Dependencies tags (`名詞`: `NOUN`), to tell which entries fit the analyzer's reading of a word.",
+            ),
+            {},
+          ),
+        }),
+        "A morphological analyzer finds the word around the clicked piece, for a script without spaces whose segmenter cuts words short (`食|べ|ま|した`). With context, the word is returned as `match` and its morphemes as `segments`, each looked up by its base form. Leave the table out for no analyzer.",
+      ),
+    ),
   }),
   "What the sentence around a word (`context`) adds to its lookup.",
 );

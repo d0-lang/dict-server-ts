@@ -1,7 +1,7 @@
 import { assert, describe, it } from "@effect/vitest";
 import { readLanguage } from "@dict/core/language";
 import { importRules } from "./languages.ts";
-import { transformEntry } from "./transform.ts";
+import { rubyReading, transformEntry } from "./transform.ts";
 import type { WiktextractEntry } from "../source/wiktextract.ts";
 
 const pl = importRules(readLanguage("pl"));
@@ -971,5 +971,52 @@ describe("transformEntry", () => {
       "auslegende",
     ]);
     assert.notInclude(forms, "legte ause");
+  });
+});
+
+describe("rubyReading", () => {
+  it("rebuilds the kana reading from the canonical form's ruby", () => {
+    const ruby = (form: string, pairs: Array<[string, string]>) => ({
+      form,
+      tags: ["canonical"],
+      ruby: pairs,
+    });
+    assert.strictEqual(
+      rubyReading("食べる", [ruby("食べる", [["食", "た"]])]),
+      "たべる",
+    );
+    assert.strictEqual(
+      rubyReading("日本語", [
+        ruby("日本語", [
+          ["日", "に"],
+          ["本", "ほん"],
+          ["語", "ご"],
+        ]),
+      ]),
+      "にほんご",
+    );
+    // a する-verb's canonical form adds する; the reading is the word's
+    assert.strictEqual(
+      rubyReading("勉強", [
+        ruby("勉強する", [
+          ["勉", "べん"],
+          ["強", "きょう"],
+        ]),
+      ]),
+      "べんきょう",
+    );
+  });
+
+  it("gives none without ruby, or when the ruby doesn't spell the word", () => {
+    assert.isUndefined(
+      rubyReading("コンピューター", [
+        { form: "コンピューター", tags: ["canonical"] },
+      ]),
+    );
+    assert.isUndefined(
+      rubyReading("食べる", [
+        { form: "食べる", tags: ["canonical"], ruby: [["飲", "の"]] },
+      ]),
+    );
   });
 });

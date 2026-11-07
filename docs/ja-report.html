@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Japanese (ja_en): language report</title>
+<style>
+:root{--bg:#fff;--fg:#1d1d1f;--muted:#6b6b70;--line:#e3e3e6;--card:#f6f6f8;--up:#1a7f37;--down:#b3261e;--accent:#2f5fd0}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--fg:#ececef;--muted:#9a9aa2;--line:#2c2c31;--card:#1c1c20;--up:#4ac26b;--down:#ff7b72;--accent:#7aa2ff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1060px;margin:0 auto;padding:32px 24px 64px}h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:40px 0 10px;padding-top:8px;border-top:1px solid var(--line)}h3{font-size:15px;margin:22px 0 8px}
+.sub{color:var(--muted);margin:0 0 20px}code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card);padding:1px 4px;border-radius:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}.kpi{background:var(--card);border-radius:10px;padding:12px 14px}.kpi .v{font-size:24px;font-weight:650}.kpi .l{color:var(--muted);font-size:13px}.kpi .d{font-size:13px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;margin:8px 0 4px}th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--muted)}
+.small{font-size:13px}.tests div{margin-bottom:3px}.tests div::before{content:"✓ ";color:var(--up)}ul{padding-left:20px}li{margin:3px 0}.note{color:var(--muted);font-size:13px}
+@media (max-width:600px){main{padding:24px 16px 48px}}
+</style>
+<style>.m{color:var(--muted)} .pass{color:var(--up);font-weight:600} .fail{color:var(--down);font-weight:600}</style>
+</head><body><main>
+<h1>Japanese (ja_en): tier 1</h1>
+<p class="sub">2026-11-07 · model only, unreviewed (no reader of Japanese checked it) · judge: Haiku · run <code>u13</code></p>
+
+<div class="kpis">
+<div class="kpi"><div class="v pass">97.7%</div><div class="l">common grammar words (needs 97.5)</div><div class="d">80.0 in the plain import</div></div>
+<div class="kpi"><div class="v fail">92.1%</div><div class="l">common content words (needs 92.5)</div><div class="d">78.5 plain; 93.3 without missing words</div></div>
+<div class="kpi"><div class="v pass">88.0%</div><div class="l">random words (needs 87.5)</div><div class="d">72.6 plain; 95.0 without missing words</div></div>
+<div class="kpi"><div class="v">437 / 26</div><div class="l">items understood better / worse than the plain import</div><div class="d">834 of 2,200 popovers changed</div></div>
+</div>
+
+<h2>Summary</h2>
+<p>Japanese writes no spaces, and the browser's word splitter cuts inflected words short (<code>食べました</code> → <code>食|べ|ま|した</code>). Clicking <code>食</code> showed "food". The server now finds the word around the clicked piece with a morphological analyzer (Lindera + UniDic). It underlines the word and lists its parts, each looked up by its base form: <code>食べ|まし|た</code> → 食べる, ます, た. This needed a protocol change (segments may split the underlined word) and an extension fix, and it costs about <b>600 MB of RAM</b> while <code>ja_en</code> is served.</p>
+<p>Two gates pass. The content-word gate misses by 0.4 points (4 items), inside the judge's noise. Its remaining failures are mostly senses English Wiktionary lacks.</p>
+
+<h2>Runs</h2>
+<p>The same 2,200 items in every run. Each cell gives understood %, then % without the words the judge called missing.</p>
+<div class="scroll"><table><tr><th>Run</th><th>Grammar</th><th>Content</th><th>Random</th><th>Change</th></tr><tr><td><code>u0</code></td><td>80.0 <span class=m>/ 84.1</span></td><td>78.5 <span class=m>/ 89.2</span></td><td>72.6 <span class=m>/ 91.0</span></td><td>plain import</td></tr><tr><td><code>u2</code></td><td>76.8 <span class=m>/ 81.8</span></td><td>86.3 <span class=m>/ 89.5</span></td><td>79.9 <span class=m>/ 92.7</span></td><td>longest-match rules</td></tr><tr><td><code>u3</code></td><td>81.7 <span class=m>/ 85.5</span></td><td>89.5 <span class=m>/ 91.4</span></td><td>84.8 <span class=m>/ 94.1</span></td><td>UniDic analyzer</td></tr><tr><td><code>u4</code></td><td>95.8 <span class=m>/ 97.3</span></td><td>91.1 <span class=m>/ 92.7</span></td><td>86.1 <span class=m>/ 94.7</span></td><td>grammar file, soft redirects</td></tr><tr><td><code>u7</code></td><td>96.6 <span class=m>/ 98.1</span></td><td>91.7 <span class=m>/ 93.0</span></td><td>87.2 <span class=m>/ 95.2</span></td><td>phrases first, numbers, kana lemmas</td></tr><tr><td><code>u11</code></td><td>97.7 <span class=m>/ 98.4</span></td><td>91.7 <span class=m>/ 93.1</span></td><td>86.9 <span class=m>/ 94.9</span></td><td>overlap, 2 false positives</td></tr><tr><td><code>u13</code></td><td>97.7 <span class=m>/ 98.4</span></td><td>92.1 <span class=m>/ 93.3</span></td><td>88.0 <span class=m>/ 95.0</span></td><td>compounds, kana redirects, base forms</td></tr></table></div>
+<p>The longest-match version (<code>u2</code>) was built first and measured against the analyzer (<code>u3</code>). The analyzer won every gate, and the rules were deleted. Clicks on a piece of a longer word: 69.4% understood in u0, 85.5% in u13.</p>
+
+<h2>Accepted changes</h2>
+<h3>Server (general mechanisms; Japanese sets them)</h3>
+<ul>
+<li><b><code>context.analyzer</code></b> (<code>features/analyzedWords.ts</code>, <code>common/analyzer.ts</code>) joins morphemes into words with rules from <code>language.toml</code>. It returns the word as <code>match</code> and its parts as <code>segments</code>, and it finds:
+<ul>
+<li>phrases over several words, kana spellings included (<code>かもしれない</code> → かも知れない; <code>によると</code> before the piece <code>による</code>);</li>
+<li>compounds the splitter keeps whole (<code>年前</code>, <code>明治天皇</code>);</li>
+<li>numbers with their counter (<code>27日</code>);</li>
+<li>the word holding most of a piece that starts inside another (<code>思っ|たより</code> → より);</li>
+<li>the analyzer's kanji lemma for a kana word whose own entries lack its part of speech (<code>もの</code> → 物).</li>
+</ul>
+Tests: <code>analyzedWords.ja.test.ts</code> (18). Each one fails without its rule.</li>
+<li><b><code>FormSource.Redirect</code></b> (<code>passes/redirects.ts</code>): Wiktionary's kana soft redirects become forms of the kanji lemmas read that way (<code>つまり</code> → 詰まり), for words with no entry of their own. A katakana spelling of a hiragana word always counts (<code>ワクワク</code>), and so does a kanji variant (<code>国々</code>). That's 34,035 forms, ranked with lemmas. Test: <code>imported/forms.ja.test.ts</code>.</li>
+<li><b>Readings</b> from ruby (<code>rubyReading</code>): 75,556 entries show kana under the headword. Tests in <code>transform.test.ts</code>.</li>
+<li><b>Syllable entries rank last</b>, like letters (<code>は</code> opens with the particle).</li>
+</ul>
+<h3>Language files</h3>
+<ul><li><code>languages/ja/language.toml</code>: the analyzer, its join rules and the <code>upos</code> map. <code>grammar.tsv</code>: 70 lines (endings by UniDic base form, particles, set phrases, fillers). <code>profile.md</code>: the profile and run log.</li></ul>
+<h3>Outside this repo (uncommitted)</h3>
+<ul>
+<li><code>../Protocol.md</code>: segments may split the first entry's one-string <code>match</code>; Japanese example.</li>
+<li><code>../extension</code>: <code>isValidSplit</code> accepts that split, and the popover marks the clicked part.</li>
+<li><code>../corpus/eval</code>:
+<ul>
+<li>reference words from Sudachi (<code>units.py</code>, <code>--units</code> on <code>collect</code> and <code>collect-browser</code>);</li>
+<li>a seeded click per word;</li>
+<li><code>match</code> kept, and the judge sees the word, the clicked piece and the underline (<code>judge-prompt-units.md</code>);</li>
+<li>score lines for clicks on pieces;</li>
+<li><code>repair.ts</code> splits parts at Japanese punctuation, or without any.</li>
+</ul></li>
+</ul>
+
+<h2>What got worse, and why it stays</h2>
+<ul>
+<li><b>Kana words now reach obscure kanji words written alike</b> through redirects, ranked after the right one but still listed: <code>けれど</code> also shows ケレド "Credo", <code>はし</code> five nouns. A redirect at the top is reordered by the analyzer's lemma (<code>みる</code> → 見る before 海松).</li>
+<li><b>Compounds with no entry</b> show their parts, not a meaning for the whole (<code>江戸前</code> as 江戸 + 前).</li>
+<li>Pieces <b>the analyzer reads differently from the text's intent</b>: brand names (<code>プーマ</code> → puma), slang (<code>ブレイクる</code>), transcript fragments.</li>
+</ul>
+
+<h2>False positives and hand patches</h2>
+<p>False positives (2), in <code>../corpus/eval/out/ja/false-positives.jsonl</code>: a cut-off filler <code>そ</code>, and <code>短いよで</code>, a transcript slip for 短いようで.</p>
+<p><b>No hand-patch list.</b> Of the 97 words the judge called missing (u11):</p>
+<ul>
+<li><b>32</b> turned out to be in the data and were fixed by the lookup and import changes above.</li>
+<li><b>65</b> are not in English Wiktionary. Most are compounds of words it has, units, abbreviations, fragments and rare terms. Only a few are common words a learner needs (分かれ道, 乗り心地, うーん).</li>
+</ul>
+
+<h2>Open</h2>
+<ul>
+<li><b>Memory:</b> UniDic takes about 600 MB of RAM; IPADIC about 120 MB, with an older dictionary. To decide.</li>
+<li><b>The content gate:</b> 4 items short. The failures left are senses Wiktionary lacks (36), phrases (15) and endings shown only as their base (10).</li>
+<li><b>Headword:</b> する-verbs show as the noun (<code>勉強</code> VERB); Wiktionary's canonical form is 勉強する.</li>
+<li><b>Corpus:</b> it has no news texts.</li>
+</ul>
+</main></body></html>

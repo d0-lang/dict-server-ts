@@ -177,6 +177,101 @@
             "type": "string"
           },
           "description": "Words that may stand before an abbreviation as part of it (`и` in `и т. д.`)."
+        },
+        "analyzer": {
+          "type": "object",
+          "properties": {
+            "dictionary": {
+              "type": "string",
+              "enum": [
+                "unidic",
+                "ipadic",
+                "ko-dic",
+                "cc-cedict"
+              ],
+              "description": "The morphological analyzer's dictionary (Lindera): `unidic` or `ipadic` for Japanese, `ko-dic` for Korean, `cc-cedict` for Chinese."
+            },
+            "baseFields": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "description": "Which of the dictionary's detail fields hold a morpheme's base forms, looked up in this order (UniDic: 10, the written base form `いる`; 7, the lemma `要る`)."
+            },
+            "join": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Parts of speech of the morpheme, as the dictionary tags them, each a prefix of its tags joined with `-` (`助動詞`, `動詞-非自立可能`)."
+                  },
+                  "surface": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Only these spellings of it (`て`, `で`)."
+                  },
+                  "base": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Only these base forms of it (`する`)."
+                  },
+                  "after": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Parts of speech of the morpheme before it, as in `pos`; left out, any morpheme with letters."
+                  },
+                  "afterSurface": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Only after these spellings (`て`)."
+                  }
+                },
+                "required": [
+                  "pos"
+                ],
+                "additionalProperties": false
+              },
+              "description": "Rules that join a morpheme to the word before it: a word is a morpheme and what the rules join to it (`食べ` + `まし` + `た`)."
+            },
+            "prefixes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Parts of speech of morphemes that join the word after them (`接頭辞`: `お` + `茶`)."
+            },
+            "upos": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "description": "The dictionary's parts of speech (a prefix of its tags, as in `pos`) as Universal Dependencies tags (`名詞`: `NOUN`), to tell which entries fit the analyzer's reading of a word."
+            }
+          },
+          "required": [
+            "dictionary",
+            "baseFields"
+          ],
+          "additionalProperties": false,
+          "description": "A morphological analyzer finds the word around the clicked piece, for a script without spaces whose segmenter cuts words short (`食|べ|ま|した`). With context, the word is returned as `match` and its morphemes as `segments`, each looked up by its base form. Leave the table out for no analyzer."
         }
       },
       "additionalProperties": false,

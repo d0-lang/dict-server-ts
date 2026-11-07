@@ -29,6 +29,7 @@
         "@effect/platform-node": "4.0.5",
         "drizzle-orm": "0.45.4",
         "effect": "4.0.5",
+        "lindera-wasm-unidic": "2.1.0",
       },
       "devDependencies": {
         "@dict/importer": "workspace:*",
@@ -206,6 +207,8 @@
     "lightningcss-win32-arm64-msvc": ["lightningcss-win32-arm64-msvc@1.33.0", "", { "os": "win32", "cpu": "arm64" }, "sha512-1K+MPfLSFVpphzpdbfkhlWk6wBrTObBzS2T6db10PNOZgR9GoVsAWzwNyuhUYYbTp23j+4RrncfujZ4uAzXvwA=="],
 
     "lightningcss-win32-x64-msvc": ["lightningcss-win32-x64-msvc@1.33.0", "", { "os": "win32", "cpu": "x64" }, "sha512-OlEICDx/Xl0FqSp4bry8zFnCvGpig3Gl4gCquvYwHuqJKEC1+n9NgDniFvqHGmMv1ZkqDJrDqKKSykTDX+ehuA=="],
+
+    "lindera-wasm-unidic": ["lindera-wasm-unidic@2.1.0", "", {}, "sha512-8QuGiY2to3PjguifH6WPpB8RA3h9b9HEB7ngVBnTMjgARKz1mYP/go6q1jRBG25fBRY/hCwkth28x+CEbiLNCg=="],
 
     "magic-string": ["magic-string@1.4.2", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.6.0" } }, "sha512-vG+rjFRj1PqdIBozIxAGMjPlOhaVe+GXpbttY/iSK7rGcJRMlwNJO7dcUwmUqkymsFLJiNGI06t4D7Fr7yRC9g=="],
 

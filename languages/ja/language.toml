@@ -1,0 +1,74 @@
+#:schema ../../spec/language.schema.json
+# Japanese. A first record for the plain import; every setting is checked
+# against the dump (data/raw/ja.jsonl) and the corpus in profile.md.
+
+code = "ja"
+name = "Japanese"
+target = "en"
+
+[context.analyzer]
+# Japanese writes no spaces, and Intl.Segmenter (Chromium's and Bun's ICU)
+# cuts inflected words short: 食べました -> 食|べ|ま|した, 行った -> 行|っ|た.
+# A morphological analyzer finds the word around the clicked piece. Measured
+# on the corpus (profile.md): it beat the longest dictionary form, which
+# guessed where kana words start (に as 煮る, がも "duck" in が|もたらされた).
+# UniDic, NINJAL's dictionary, maintained. It loads once, in about a second,
+# and takes about 600 MB of memory.
+dictionary = "unidic"
+# UniDic's written base form (いる for いら) and lemma (要る): Wiktionary has
+# words under either.
+baseFields = [10, 7]
+# UniDic's parts of speech as UD tags, to tell when a kana word's own entries
+# miss the analyzer's reading (もの the noun, with only particle entries).
+upos = { "名詞" = ["NOUN", "PROPN", "NUM"], "代名詞" = ["PRON"], "動詞" = ["VERB"], "形容詞" = ["ADJ"], "形状詞" = ["ADJ"], "副詞" = ["ADV"], "連体詞" = ["DET", "ADJ"], "接続詞" = ["CCONJ", "SCONJ"], "感動詞" = ["INTJ"], "助動詞" = ["AUX"], "助詞" = ["PART", "ADP", "CCONJ", "SCONJ"] }
+# Morphemes are short units (食べ|まし|た); these make words of them, as a
+# reader takes a word. Particles stay words of their own.
+prefixes = ["接頭辞"]
+
+# Auxiliaries after a verb, adjective or auxiliary: 食べ|まし|た, 行か|ない.
+[[context.analyzer.join]]
+pos = ["助動詞"]
+after = ["動詞", "形容詞", "助動詞"]
+
+# ない and the like after a stem or auxiliary: やり|たく|ない.
+[[context.analyzer.join]]
+pos = ["形容詞-非自立可能"]
+after = ["動詞", "形容詞", "助動詞"]
+
+# The て form and the conditional ば: 食べ|て, 食べれ|ば.
+[[context.analyzer.join]]
+pos = ["助詞-接続助詞"]
+surface = ["て", "で", "ば"]
+after = ["動詞", "形容詞", "助動詞"]
+
+# たり/だり listing actions: 入院し|たり, 読ん|だり.
+[[context.analyzer.join]]
+pos = ["助詞-副助詞"]
+surface = ["たり", "だり"]
+after = ["動詞", "形容詞", "助動詞"]
+
+# The verb after a て form: 食べ|て|いる, 忘れ|て|しまう.
+[[context.analyzer.join]]
+pos = ["動詞-非自立可能", "形容詞-非自立可能"]
+after = ["助詞-接続助詞"]
+afterSurface = ["て", "で"]
+
+# する and できる after a する-noun: 勉強|し|て, 発表|でき|なかった.
+[[context.analyzer.join]]
+pos = ["動詞"]
+base = ["する", "為る", "できる", "出来る"]
+after = ["名詞-普通名詞-サ変可能", "名詞-普通名詞-サ変形状詞可能"]
+
+# A number's digits, which UniDic gives one by one: 2|7.
+[[context.analyzer.join]]
+pos = ["名詞-数詞"]
+after = ["名詞-数詞"]
+
+# A counter or unit after a number: 27|日, 10|個, 28|g.
+[[context.analyzer.join]]
+pos = ["接尾辞", "名詞-普通名詞-助数詞可能", "記号-文字"]
+after = ["名詞-数詞"]
+
+# Suffixes after the word: 国際|的, 田中|さん.
+[[context.analyzer.join]]
+pos = ["接尾辞"]

@@ -11,8 +11,15 @@ export const MAX_CHAIN_STEPS = 3;
  * prepared statements, the counts, and what `writeEntry` collected for after
  * the last batch.
  */
+/** A soft redirect: `form` (a lookup key) spells the words `targets`. */
+export type Redirect = {
+  readonly form: string;
+  readonly targets: ReadonlyArray<string>;
+};
+
 export type WriterContext = {
   readonly sqlite: Database;
+  readonly redirects: ReadonlyArray<Redirect>;
   readonly counts: WriterCounts;
   readonly insertSense: Statement;
   readonly insertForm: Statement;

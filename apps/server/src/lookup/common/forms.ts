@@ -30,7 +30,7 @@ export type TokenInfo = {
   readonly verb: boolean;
 };
 
-export type FormRow = { id: number; lemma: string; pos: UdPos };
+export type FormRow = { id: number; lemma: string; pos: UdPos; source: number };
 
 /**
  * Entries a normalized form belongs to, without the abbreviation fallback,
@@ -43,7 +43,7 @@ export const formRows = (
 ): ReadonlyArray<FormRow> =>
   db.$client
     .query<FormRow, [string, number]>(
-      `SELECT e.id AS id, e.lemma AS lemma, e.pos AS pos FROM forms f JOIN entries e ON e.id = f.entry_id
+      `SELECT e.id AS id, e.lemma AS lemma, e.pos AS pos, f.source AS source FROM forms f JOIN entries e ON e.id = f.entry_id
        WHERE f.form = ?1 AND f.source <> ${FormSource.Abbreviation}
        ORDER BY
          CASE
@@ -52,8 +52,9 @@ export const formRows = (
            WHEN ?2 = ${CaseClass.Lower} THEN e.case_class <> ${CaseClass.Lower}
            ELSE 0
          END,
-         e.source_pos IN ('character', 'letter-name'),
-         f.source <> ${FormSource.Lemma},
+         e.source_pos IN ('character', 'letter-name', 'syllable'),
+         -- a redirect spells the word itself, in kana, so it ranks with the lemma
+         f.source NOT IN (${FormSource.Lemma}, ${FormSource.Redirect}),
          f.source = ${FormSource.LetterVariant},
          e.id`,
     )

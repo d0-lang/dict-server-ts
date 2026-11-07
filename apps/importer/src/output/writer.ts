@@ -8,7 +8,8 @@ import type {
   FormOfLink,
   ImportEntry,
 } from "../transform/transform.ts";
-import type { WriterContext } from "./passes/context.ts";
+import type { Redirect, WriterContext } from "./passes/context.ts";
+import { addRedirects } from "./passes/redirects.ts";
 import { addDegreeForms, settleDegreeEntries } from "./passes/degrees.ts";
 import { copyDerivedMeanings } from "./passes/derived.ts";
 import { dropUnreachedEntries, replaceGrammarWords } from "./passes/grammar.ts";
@@ -59,6 +60,8 @@ export type WriterCounts = {
   letterVariants: number;
   /** spaced abbreviations also reachable without the spaces */
   unspacedAbbreviations: number;
+  /** Kana spellings added as forms of the lemmas their soft redirect names (`つまり` -> `詰まり`). */
+  redirectForms: number;
 };
 
 export type FormOfResult = {
@@ -142,6 +145,7 @@ export const makeWriter = (
     abbreviations: 0,
     letterVariants: 0,
     unspacedAbbreviations: 0,
+    redirectForms: 0,
   };
   let lastId = 0;
   const byKey = new Map<string, EntryState>();
@@ -300,6 +304,9 @@ export const makeWriter = (
     }
   })();
 
+  /** Soft redirects, resolved once every entry is written (`addRedirects`). */
+  const redirects: Array<Redirect> = [];
+
   const writeLinks = (links: ReadonlyArray<FormOfLink>) => {
     for (const link of links) {
       counts.formOfLinks += insertPending.run(
@@ -319,9 +326,11 @@ export const makeWriter = (
         readonly historicalEntry?: ImportEntry;
         readonly reflexiveEntries?: ReadonlyArray<ImportEntry>;
         readonly formOf: ReadonlyArray<FormOfLink>;
+        readonly redirect?: Redirect;
       }>,
     ) => {
       for (const item of items) {
+        if (item.redirect !== undefined) redirects.push(item.redirect);
         if (item.entry !== undefined) writeEntry(item.entry);
         for (const entry of item.reflexiveEntries ?? []) writeEntry(entry);
         if (item.historicalEntry !== undefined) {
@@ -350,6 +359,7 @@ export const makeWriter = (
 
   /** What the passes in `passes/` work with. */
   const ctx: WriterContext = {
+    redirects,
     sqlite,
     counts,
     insertSense,
@@ -378,6 +388,8 @@ export const makeWriter = (
     // After the form-of links, which add a table's forms to its base too.
     addDegreeForms(ctx);
     addParticipleForms(ctx);
+    // After every form spelled so, which decide what has an entry of its own.
+    addRedirects(ctx);
     sqlite.run("DROP TABLE form_of_pending");
     // Then the steps that need every form in place.
     sqlite.transaction(() => {

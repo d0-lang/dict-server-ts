@@ -1,0 +1,89 @@
+# Japanese grammar words and endings. One line per word as written + part of speech:
+# word <TAB> UD part of speech <TAB> senses separated by " | ".
+# The file replaces Wiktionary's determiner, pronoun, preposition, conjunction,
+# particle and auxiliary entries for every word listed here; content words stay.
+# The analyzer (`context.analyzer` in language.toml) splits a clicked verb into
+# its morphemes (勉強|し|て|い|ます), and each ending shows its line here, found
+# by the morpheme's base form: たら has base た, でしょう has base です, so
+# their senses are on those lines. A word written in kana that Wiktionary only
+# redirects to its kanji spelling (つまり -> 詰まり) is found through the
+# redirect; lines here are for what Wiktionary lacks or says badly.
+# See apps/importer/src/grammar.ts.
+
+## Endings of verbs and adjectives
+ます	AUX	polite ending of a verb (食べます, eat; 行きました, went; 行きません, don't go; 行きましょう, let's go)
+た	AUX	past ending of a verb or adjective (食べた, ate; 高かった, was expensive) | completed action (もう食べた, have already eaten) | たら: if, when (行ったら, if/when (you) go) | たり: doing things like (食べたり飲んだり, eating, drinking and so on)
+だ	AUX	is, am, are (plain copula: 学生だ, (he) is a student) | だろう, だろ: probably; I wonder; ..., right? (雨だろう, it will probably rain) | past ending after ん (読んだ, read; 読んだら, if (you) read)
+です	AUX	is, am, are (polite copula: 学生です, (I) am a student) | polite ending of an adjective (高いです, it's expensive) | でしょう, でしょ: probably; ..., right? (雨でしょう, it will probably rain; 分かるでしょ?, you get it, right?)
+て	PART	the て form of a verb: "and", linking it to what follows (食べて寝る, eat and sleep) | with いる, しまう, ください, もいい and others: 食べている, is eating; 食べてください, please eat
+いる	AUX	be ...ing, after a verb's て form (食べている, is eating) | a state that results from an action (結婚している, is married; 知っている, knows)
+てる	AUX	is ...ing, has ...ed (casual ている: 食べてる, is eating; 落ちてる, has fallen)
+ない	AUX	not: negative ending of a verb (食べない, doesn't eat; 行かない, doesn't go) | ないで: without (doing) (教えないで, without teaching); please don't (行かないで, don't go)
+たい	AUX	want to: ending after a verb's stem (食べたい, want to eat)
+ちゃう	AUX	end up ...ing; ...completely (casual てしまう: 食べちゃう, eat it all up; 受けちゃってる, have ended up receiving)
+じゃう	AUX	end up ...ing; ...completely (casual でしまう: 読んじゃった, ended up reading it)
+ちゃ	PART	casual ては: if (you) ... (食べちゃだめ, you mustn't eat) | なくちゃ: must (行かなくちゃ, (I) have to go)
+れる	AUX	passive: be ...ed (言われる, be told) | potential: can (来れる, can come) | respect (書かれる, (he) writes, honorific)
+られる	AUX	passive: be ...ed (食べられる, be eaten; とされる, is considered) | potential: can (食べられる, can eat) | respect (来られる, (he) comes, honorific)
+せる	AUX	make or let (someone) do: causative (行かせる, make/let go)
+させる	AUX	make or let (someone) do: causative (食べさせる, make/let eat; 学習させる, have it learn)
+よう	AUX	let's; I will: volitional ending (食べよう, let's eat; しようとする, try to do) | like, as if; seems (様: 夢のようだ, it's like a dream; 短いようで, though it seems short)
+
+## Particles
+と	PART	and (between nouns: 犬と猫, a dog and a cat) | with (友達と行く, go with a friend) | quoting: that, "..." (行くと言った, said (he) would go; とされる, is said to be) | when, if (after a verb: 押すと開く, it opens when you push it)
+って	PART	quoting, casual と: that, "..." (行くって言った, said (he) would go) | as for, speaking of: casual topic (人間って怖い, humans are scary) | I hear, they say (雨だって, I hear it'll rain) | called (田中って人, a person called Tanaka)
+だって	CCONJ	but, because (casual: だって嫌だもん, but I don't want to) | even, too (子供だって分かる, even a child understands) | they say, I hear (行くんだって, I hear (he) is going)
+じゃん	PART	isn't it?, you know (casual じゃないか: いいじゃん, isn't it nice; 言ったじゃん, I told you)
+けれど	CCONJ	but, although (casual けれども: 高いけれど買った, it was expensive, but I bought it)
+なんか	PART	things like, such as (例えばなんか, for example) | kind of, like (filler: なんか変, kind of strange) | something (なんか食べる, eat something) | the likes of (dismissive: 私なんか, someone like me)
+なんて	PART	things like, such as (なんていう, (something) called) | how, what (exclamation: なんてきれい, how beautiful) | the likes of (dismissive: 勉強なんて, studying and the like)
+ぐらい	PART	about, around (三時間ぐらい, about three hours) | to the extent that, so ... that (泣くぐらい痛い, so painful you could cry) | at least, just (これぐらい, at least this much)
+くらい	PART	about, around (三時間くらい, about three hours) | to the extent that, so ... that (泣くくらい痛い, so painful you could cry) | at least, just (これくらい, at least this much)
+
+## Set phrases
+によると	ADP	according to (ニュースによると, according to the news)
+によれば	ADP	according to (調査によれば, according to the survey)
+によって	ADP	by (someone: 彼によって書かれた, written by him) | depending on (人によって違う, differs from person to person) | because of, due to (台風によって, due to the typhoon)
+による	ADP	by; caused by, due to (地震による被害, damage caused by the earthquake) | depending on
+に関して	ADP	about, regarding, concerning (この件に関して, regarding this matter)
+に関する	ADP	about, regarding (環境に関する本, a book about the environment)
+に対して	ADP	towards, to (客に対して, towards customers) | against (政府に対して, against the government) | compared with, per (一に対して二, two for every one)
+に対する	ADP	towards; against; regarding (政府に対する批判, criticism of the government)
+にすぎない	AUX	merely, nothing more than (噂にすぎない, it's nothing more than a rumor)
+に違いない	AUX	must be, surely (本当に違いない, it must be true)
+だけでなく	CCONJ	not only ... (but also) (日本だけでなく海外でも, not only in Japan but abroad too)
+だけじゃなく	CCONJ	not only ... (but also) (casual: 安いだけじゃなくおいしい, not only cheap but tasty)
+ではない	AUX	is not (negative of だ: 学生ではない, is not a student)
+じゃない	AUX	is not (casual ではない: 学生じゃない, is not a student) | isn't it? (いいじゃない, isn't it nice)
+ではなく	CCONJ	not ... but (AではなくB: 赤ではなく青, not red but blue)
+じゃなくて	CCONJ	not ... but (casual: 赤じゃなくて青, not red but blue)
+じゃないですか	PART	isn't it?, you know (polite tag: 大事じゃないですか, it's important, isn't it?)
+んです	AUX	explanation: it's that ..., because ... (行くんです, (it's that) I'm going) | んですか: is it that ...? (どうしたんですか, what happened?)
+のです	AUX	explanation: it's that ..., because ... (行くのです, (it's that) I'm going) | のですか: is it that ...?
+なんです	AUX	explanation after a noun or na-adjective: it's that ... is (学生なんです, (it's that) I'm a student; そうなんです, that's right, you see)
+んだ	AUX	explanation, casual: it's that ..., because ... (行くんだ, (it's that) I'm going) | んだって: I hear that
+ように	SCONJ	as (前に言ったように, as I said before) | so that, in order to (間に合うように, so as to be in time) | ようにする: make sure to (早く寝るようにする, make sure to go to bed early) | ようになる: come to (do) (話せるようになった, came to be able to speak)
+そのため	CCONJ	therefore, for that reason
+それに	CCONJ	besides, moreover (それに安い, and besides, it's cheap) | to that, on that (それに答える, answer that)
+それまで	ADV	until then (それまで待つ, wait until then) | that's all, the end of it
+それより	ADV	rather than that, more importantly (それより、どうする?, more importantly, what will you do?) | than that (それより大きい, bigger than that)
+そこで	CCONJ	so, thereupon (そこで考えた, so I thought) | there, at that place (そこで会う, meet there)
+そういう	DET	that kind of, such (そういう人, that kind of person) | so, well (sentence opener, casual)
+こういう	DET	this kind of, such (こういう時, at times like this)
+ああいう	DET	that kind of (over there) (ああいう人, a person like that)
+どういう	DET	what kind of (どういう意味, what does it mean)
+
+## Adverbs and fillers
+ほぼ	ADV	almost, nearly (ほぼ毎日, almost every day; ほぼゼロ, nearly zero) | about, approximately
+やはり	ADV	as expected, after all (やはり雨だった, it rained after all) | still, also, likewise (彼もやはり, he too)
+やっぱり	ADV	as expected, after all (casual やはり) | still, also | (filler) well, I think
+だんだん	ADV	gradually, little by little (だんだん寒くなる, it gradually gets colder)
+本当に	ADV	really, truly (本当にありがとう, thank you so much)
+非常に	ADV	very, extremely (非常に重要, extremely important)
+ちょっと	ADV	a little, a bit (ちょっと待って, wait a moment) | rather, not quite (ちょっと難しい, a bit difficult) | (refusing politely) that's a bit ...
+ま	INTJ	well, um (filler: ま、いいか, well, whatever)
+まあ	INTJ	well, um (filler: まあ、いいか, well, whatever) | oh my! | more or less (まあまあ, so-so)
+え	INTJ	uh, um (filler) | eh? what? (surprise)
+あ	INTJ	ah, oh (noticing: あ、そうだ, oh, right) | uh (hesitation)
+どの	DET	which (どの本, which book) | every, any (with も: どの鯉も, every carp; どの人でも, anyone)
+こちら	PRON	this way, this direction | here, this place (こちらへどうぞ, this way please) | this one, I, we (polite)

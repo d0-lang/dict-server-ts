@@ -4,7 +4,7 @@ import { decodeLanguage, languageCodes, readLanguage } from "./language.ts";
 describe("language records", () => {
   it("reads every language.toml", () => {
     const codes = languageCodes();
-    assert.deepStrictEqual(codes, ["de", "pl", "ru", "uk"]);
+    assert.deepStrictEqual(codes, ["de", "ja", "pl", "ru", "uk"]);
     for (const code of codes) assert.strictEqual(readLanguage(code).code, code);
   });
 
@@ -57,6 +57,6 @@ describe("language records", () => {
   });
 
   it("names the file and the known codes when a record is missing", () => {
-    assert.throws(() => readLanguage("xx"), /known: de, pl, ru/);
+    assert.throws(() => readLanguage("xx"), /known: de, ja, pl, ru/);
   });
 });

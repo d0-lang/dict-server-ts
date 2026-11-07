@@ -31,7 +31,8 @@
     "FormOf": 2,
     "Abbreviation": 3,
     "LetterVariant": 4,
-    "Degree": 5
+    "Degree": 5,
+    "Redirect": 6
   },
   "sourcePos": {
     "grammar": "grammar",

@@ -3,6 +3,7 @@ import { abbreviationEntryIds } from "./features/abbreviations.ts";
 import { hyphenEntryIds } from "./features/hyphenWords.ts";
 import { phraseEntryIds } from "./features/phrases/match.ts";
 import { separableEntryIds } from "./features/separableVerbs.ts";
+import { analyzedLookup } from "./features/analyzedWords.ts";
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import type { Language } from "@dict/core/language";
 import {
@@ -29,7 +30,8 @@ import { articleLookup, presentResult } from "./headword.ts";
  * When the client sends `context`, the sentence adds entries first, one
  * feature per file in `features/`: the phrases the word is part of there, the
  * abbreviation or hyphen-joined word it is a piece of, and the separable verb
- * it belongs to. Which features a language uses, and how, is in its
+ * it belongs to, or, in a script without spaces, the whole word the clicked
+ * piece is part of. Which features a language uses, and how, is in its
  * `language.toml`.
  */
 
@@ -59,6 +61,9 @@ const contextLookup = (
   if (context === undefined || context.trim() === "") {
     return findEntriesWithCompounds(db, word, compoundRules(language));
   }
+  // In a script without spaces, the word the analyzer finds around the click.
+  const unspaced = analyzedLookup(db, word, context, language, at);
+  if (unspaced !== undefined) return unspaced;
   // The features' token indexes are into this same tokenization.
   const tokens = tokenize(context, language.code);
   const clicked = positionsOf(tokens, word, language.code, { context, at });

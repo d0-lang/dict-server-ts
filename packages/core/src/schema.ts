@@ -144,6 +144,12 @@ export const FormSource = {
    * form of the base too, which comes first
    */
   Degree: 5,
+  /**
+   * a kana spelling whose page only points at its lemmas in kanji (Japanese
+   * soft redirects: `つまり` -> `詰まり`), for a word with no entry of its own;
+   * it is the word itself, so it ranks with the lemma
+   */
+  Redirect: 6,
 } as const;
 export type FormSource = (typeof FormSource)[keyof typeof FormSource];
 

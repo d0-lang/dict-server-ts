@@ -34,6 +34,7 @@ One SQLite file per language pair, `data/<source>_<target>.sqlite` (e.g. `data/r
   - `Abbreviation`: an abbreviation without its period (`bzw` → `bzw.`).
   - `LetterVariant`: a form spelled another common way: an optional letter written plainly (`все` for `всё`), or an abbreviation without its spaces (`z.B.`).
   - `Degree`: a declined comparative or superlative that isn't its base plus an ending (`größte`, `beste`, `jüngeren`), on the entry for that degree (`größten`, `besten`, `jünger`). The form is also an `Inflection` of the base, which ranks first.
+  - `Redirect`: a kana spelling whose Wiktionary page only points at its lemmas in kanji (a Japanese soft redirect: `つまり` → `詰まり`), for a word with no entry of its own. It is the word itself, so lookups rank it with `Lemma`.
 
 ## Normalization
 

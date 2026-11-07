@@ -126,6 +126,11 @@ export type TransformResult = {
   readonly parentGlosses: ReadonlyArray<string>;
   readonly skippedSenses: Readonly<Record<SkippedSenseReason, number>>;
   readonly droppedForms: number;
+  /** A soft redirect: the word (`form`, a lookup key) is a spelling of these lemmas (`つまり` -> `詰まり`). */
+  readonly redirect?: {
+    readonly form: string;
+    readonly targets: ReadonlyArray<string>;
+  };
 };
 
 /** The most specific gloss of wiktextract's parent-to-child path. */
@@ -136,9 +141,48 @@ const senseGloss = (sense: WiktextractSense): string | undefined => {
   return gloss === "" ? undefined : gloss;
 };
 
+/**
+ * The word in kana: the first form with ruby that spells `word` (or `word`
+ * and kana after it), with each
+ * base replaced by its reading (`食べる` with `[["食", "た"]]` is `たべる`).
+ * Words without ruby (kana, or no kanji reading given) have none.
+ */
+export const rubyReading = (
+  word: string,
+  forms: ReadonlyArray<WiktextractForm>,
+): string | undefined => {
+  for (const form of forms) {
+    // The canonical form may add kana after the word: `勉強する` for the
+    // する-verb `勉強`. The reading then drops the same kana.
+    if (
+      !form.form.startsWith(word) ||
+      form.ruby === undefined ||
+      form.ruby.length === 0
+    )
+      continue;
+    const added = form.form.slice(word.length);
+    if (form.ruby.some(([base]) => base !== undefined && added.includes(base)))
+      continue;
+    let rest = word;
+    let reading = "";
+    const fits = form.ruby.every((pair) => {
+      const [base, kana] = pair;
+      const at =
+        base === undefined || pair.length !== 2 ? -1 : rest.indexOf(base);
+      if (at < 0) return false;
+      reading += rest.slice(0, at) + kana;
+      rest = rest.slice(at + base!.length);
+      return true;
+    });
+    if (fits) return reading + rest;
+  }
+  return undefined;
+};
+
 const pickPronunciations = (
   rules: LanguageRules,
   sounds: ReadonlyArray<WiktextractSound>,
+  reading?: string,
 ): ImportEntry["pronunciations"] => {
   const usable = sounds.filter((s) => !isHistorical(rules, s.tags));
   const isStandard = (s: WiktextractSound) =>
@@ -157,6 +201,9 @@ const pickPronunciations = (
   return [
     ...[...new Set(ipa)].map((value) => ({ kind: "ipa" as const, value })),
     ...[...new Set(audio)].map((value) => ({ kind: "audio" as const, value })),
+    ...(reading !== undefined
+      ? [{ kind: "reading" as const, value: reading }]
+      : []),
   ];
 };
 
@@ -475,6 +522,24 @@ export const transformEntry = (
 ): TransformResult => {
   const lemma = cleanWord(raw.word);
   const lemmaKey = lookupKey(lemma);
+  if (raw.pos === "soft-redirect") {
+    return {
+      entry: undefined,
+      formOf: [],
+      parentGlosses: [],
+      skippedSenses: {
+        archaic: 0,
+        "historical-stage": 0,
+        "no-gloss": 0,
+        placeholder: 0,
+      },
+      droppedForms: 0,
+      redirect: {
+        form: lemmaKey,
+        targets: (raw.redirects ?? []).map(cleanWord),
+      },
+    };
+  }
   const shownLemma = rules.stressedLemmas
     ? stressedLemma(lemma, raw.forms ?? [])
     : lemma;
@@ -600,7 +665,11 @@ export const transformEntry = (
     sourcePos: isLetterName(lemma, entrySenses) ? LETTER_NAME_POS : raw.pos,
     etymology: toEtymology(raw.etymology_number),
     senses: entrySenses,
-    pronunciations: pickPronunciations(rules, raw.sounds ?? []),
+    pronunciations: pickPronunciations(
+      rules,
+      raw.sounds ?? [],
+      rubyReading(raw.word, raw.forms ?? []),
+    ),
     // A reflexive entry is found by the verb's forms, the verb itself included.
     forms: particle === undefined ? forms : [...new Set([lemmaKey, ...forms])],
     derived: derivedSenses,

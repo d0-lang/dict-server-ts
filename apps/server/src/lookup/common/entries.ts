@@ -146,8 +146,9 @@ const rankedIds = (
              AND NOT (?6 = 1 AND e.pos = 'VERB' AND f.source = ${FormSource.Lemma})
            ELSE 0
          END,
-         e.source_pos IN ('character', 'letter-name'),
-         f.source <> ${FormSource.Lemma},
+         e.source_pos IN ('character', 'letter-name', 'syllable'),
+         -- a redirect spells the word itself, in kana, so it ranks with the lemma
+         f.source NOT IN (${FormSource.Lemma}, ${FormSource.Redirect}),
          instr(?1, ' ') = 0 AND instr(e.lemma, ' ') > 0,
          f.source = ${FormSource.Degree},
          f.source = ${FormSource.LetterVariant},

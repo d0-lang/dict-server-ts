@@ -210,6 +210,7 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     abbreviations: writer.counts.abbreviations,
     letterVariants: writer.counts.letterVariants,
     unspacedAbbreviations: writer.counts.unspacedAbbreviations,
+    redirectForms: writer.counts.redirectForms,
     topParentGlosses: topParentGlosses(tally),
     fileBytes,
     seconds: elapsedSeconds(),
