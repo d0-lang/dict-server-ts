@@ -302,4 +302,52 @@ describe("words found by the analyzer, in a script without spaces", () => {
       "所",
     );
   });
+
+  it("reads a word with no entry by the analyzer when there is no context", () => {
+    // お送りします, as a client that sends no sentence picks it: お + 送る
+    const db = dictionary([
+      ["送る", "VERB", ["送ります"], ["to send"]],
+      ["御", "X", [], ["honorific prefix"]],
+    ]);
+    const language = languageOf("ja_en");
+    const { entries, segments } = lookupWord(db, language, "お送り");
+    assert.deepStrictEqual(
+      entries.map((entry) => entry.lemma),
+      ["送る", "御"],
+    );
+    assert.deepStrictEqual(entries[0]!.match, ["お送り"]);
+    assert.deepStrictEqual(
+      segments?.map((segment) => segment.text),
+      ["お", "送り"],
+    );
+    // A word with an entry of its own keeps it.
+    assert.deepStrictEqual(
+      lookupWord(db, language, "送る").entries.map((entry) => entry.lemma),
+      ["送る"],
+    );
+  });
+
+  it("shows a word made with a suffix by its parts, not as the word before the suffix", () => {
+    // Intl.Segmenter: 機械|屋; the analyzer: 機械 + the suffix 屋
+    const db = dictionary([
+      ["機械", "NOUN", [], ["machine"]],
+      ["屋", "NOUN", [], ["shop; dealer"]],
+    ]);
+    const { entries, segments } = lookupWord(
+      db,
+      languageOf("ja_en"),
+      "機械",
+      "僕は機械屋です。",
+      1,
+    );
+    assert.deepStrictEqual(
+      entries.map((entry) => entry.lemma),
+      ["機械", "屋"],
+    );
+    assert.deepStrictEqual(entries[0]!.match, ["機械屋"]);
+    assert.deepStrictEqual(segments, [
+      { text: "機械", entries: [0] },
+      { text: "屋", entries: [1] },
+    ]);
+  });
 });

@@ -362,9 +362,15 @@ export const analyzedLookup = (
     return [];
   }
 
-  const whole = wholeIds(found, text);
+  // A word made with a suffix (`機械|屋` "mechanic") is not the word before
+  // the suffix (`機械` "machine"). Without an entry of its own, it has no
+  // entries as a whole: each part shows its own.
+  const derived =
+    rows(text).length === 0 &&
+    found.some((m) => hasPos(m.pos, settings.suffixes));
+  const whole = derived ? [] : wholeIds(found, text);
   // Without the word's own entries there is nothing to underline it with.
-  if (whole.length === 0) return undefined;
+  if (whole.length === 0 && !derived) return undefined;
   const shown = new Set(whole);
   const match = [text];
   const wholeEntries = loadEntries(db, whole).map((entry) => ({
@@ -372,7 +378,9 @@ export const analyzedLookup = (
     match,
   }));
   // A piece wider than the word can't be split by the word's parts.
-  if (found.length === 1 || wider) return { entries: wholeEntries };
+  if (found.length === 1 || wider) {
+    return derived ? undefined : { entries: wholeEntries };
+  }
 
   // Each morpheme a part: an ending by its grammar-file line, else by its base
   // forms (`し` -> `する`); the head also by its spelling (`勉強` the noun).
@@ -411,11 +419,12 @@ export const analyzedLookup = (
       ? { text: morpheme.surface, entries: indexes }
       : { text: morpheme.surface };
   });
-  return {
-    entries: [
-      ...wholeEntries,
-      ...partIds.flatMap((ids) => loadEntries(db, ids)),
-    ],
-    segments,
-  };
+  const partEntries = partIds.flatMap((ids) => loadEntries(db, ids));
+  if (derived) {
+    if (partEntries.length === 0) return undefined;
+    // The first entry's `match` names the word the parts split.
+    const [first, ...rest] = partEntries;
+    return { entries: [{ ...first!, match }, ...rest], segments };
+  }
+  return { entries: [...wholeEntries, ...partEntries], segments };
 };

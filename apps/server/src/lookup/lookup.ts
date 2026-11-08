@@ -59,7 +59,15 @@ const contextLookup = (
   at?: number,
 ): LookupResult => {
   if (context === undefined || context.trim() === "") {
-    return findEntriesWithCompounds(db, word, compoundRules(language));
+    const plain = findEntriesWithCompounds(db, word, compoundRules(language));
+    // No sentence was sent and the word has no entry. If the language has an
+    // analyzer, let it split the word by itself, as it would in a sentence:
+    // `お送り` has no entry, but the analyzer reads it as the prefix `お` and
+    // `送り`, a form of `送る`, so the lookup shows `送る`.
+    if (plain.entries.length > 0 || language.context.analyzer === undefined) {
+      return plain;
+    }
+    return analyzedLookup(db, word, word, language) ?? plain;
   }
   // In a script without spaces, the word the analyzer finds around the click.
   const unspaced = analyzedLookup(db, word, context, language, at);

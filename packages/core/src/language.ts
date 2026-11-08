@@ -214,6 +214,13 @@ const Context = doc(
             ),
             [],
           ),
+          suffixes: orDefault(
+            doc(
+              strings,
+              "Parts of speech of morphemes that make a new word of the word before them (`接尾辞`: `機械` + `屋` \"mechanic\"). Such a word without an entry of its own is shown by its parts, each with its own entries, not as its head.",
+            ),
+            [],
+          ),
           upos: orDefault(
             doc(
               Schema.Record(Schema.String, strings),

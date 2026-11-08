@@ -24,6 +24,9 @@ upos = { "名詞" = ["NOUN", "PROPN", "NUM"], "代名詞" = ["PRON"], "動詞" =
 # Morphemes are short units (食べ|まし|た); these make words of them, as a
 # reader takes a word. Particles stay words of their own.
 prefixes = ["接頭辞"]
+# Suffixes make a new word (機械|屋 "mechanic", 国際|的 "international"): one
+# without an entry is shown by its parts, not as the word before the suffix.
+suffixes = ["接尾辞"]
 
 # Auxiliaries after a verb, adjective or auxiliary: 食べ|まし|た, 行か|ない.
 [[context.analyzer.join]]
