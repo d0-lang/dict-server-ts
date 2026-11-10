@@ -6,6 +6,7 @@ import { analyzerFor, type Morpheme } from "../common/analyzer.ts";
 import { type FormRow, formRows, grammarIds } from "../common/forms.ts";
 import {
   loadEntries,
+  type LookupEntry,
   type LookupResult,
   type Segment,
 } from "../common/entries.ts";
@@ -21,6 +22,12 @@ import { positionsOf, tokenize } from "../common/tokenize.ts";
  * first (`食べる`, by the head's base form), then each morpheme as a part
  * (`segments`), an ending by its grammar-file line (`ます`, `た`). A phrase the
  * dictionary lists over several words (`手に入る`, `かもしれない`) comes first.
+ *
+ * `match` is the protocol's: only on entries the sentence adds, and always a
+ * run that holds the clicked piece and more. A piece the analyzer reads as
+ * several words (`よ|ね`), or that is cut across them (`たん` of
+ * `なかった|ん`), is answered by those words as parts, not by the first of
+ * them alone.
  */
 
 /** Parts of speech that take endings, so a word with endings keeps only these entries. */
@@ -80,6 +87,59 @@ export const wordsOf = (
   return words;
 };
 
+/** A written piece of the answer with its entries' ids. `main`: it holds the click, so its entries rank first. */
+type Part = {
+  readonly text: string;
+  readonly ids: ReadonlyArray<number>;
+  readonly main?: boolean;
+};
+
+/**
+ * A result of entries for the whole run, then each part's: the main parts'
+ * first, then the others' as written. `match` names the run the parts spell,
+ * when it is more than the clicked word: on the whole run's entries, as the
+ * protocol asks of the first entry. With none of those, on the entries of the
+ * part shown first, all of them: entries with one headword are merged only
+ * when their `match` is the same (`presentResult`).
+ */
+const splitResult = (
+  db: DictionaryDb,
+  whole: ReadonlyArray<LookupEntry>,
+  parts: ReadonlyArray<Part>,
+  match: Pick<LookupEntry, "match">,
+): LookupResult => {
+  const ranked = [
+    ...parts.filter((part) => part.main === true),
+    ...parts.filter((part) => part.main !== true),
+  ];
+  const from = new Map<Part, number>();
+  let next = whole.length;
+  for (const part of ranked) {
+    from.set(part, next);
+    next += part.ids.length;
+  }
+  const first =
+    whole.length === 0 ? ranked.find((part) => part.ids.length > 0) : undefined;
+  return {
+    entries: [
+      ...whole.map((entry) => ({ ...entry, ...match })),
+      ...ranked.flatMap((part) =>
+        loadEntries(db, part.ids).map((entry) =>
+          part === first ? { ...entry, ...match } : entry,
+        ),
+      ),
+    ],
+    segments: parts.map((part): Segment =>
+      part.ids.length > 0
+        ? {
+            text: part.text,
+            entries: part.ids.map((_, k) => from.get(part)! + k),
+          }
+        : { text: part.text },
+    ),
+  };
+};
+
 /**
  * The lookup of `word` as part of the word the analyzer finds around it in
  * `context`, or undefined when that word is just `word` (or the click can't be
@@ -125,9 +185,28 @@ export const analyzedLookup = (
   }
   if (index < 0) return undefined;
   const found = words[index]!;
-  const text = context.slice(startOf(found), endOf(found));
-  // The piece runs past the word on either side (`たより` for `より`).
-  const wider = piece.start < startOf(found) || piece.end > endOf(found);
+  const textOf = (w: ReadonlyArray<Morpheme>) =>
+    context.slice(startOf(w), endOf(w));
+  const text = textOf(found);
+  // The piece runs past the word on either side (`たより` for `より`): it
+  // touches other words too.
+  const touched = words.filter((w) => overlap(w) > 0);
+  const wider = touched.length > 1;
+  /**
+   * `match` for entries the sentence adds: the run of `context` they cover,
+   * when it holds the clicked word and more. The word's own entries get none,
+   * and neither does a lookup without a sentence, where the word is all
+   * there is.
+   */
+  const matchOf = (start: number, end: number): Pick<LookupEntry, "match"> => {
+    const run = context.slice(start, end);
+    return start <= piece.start &&
+      end >= piece.end &&
+      run !== word &&
+      run.includes(word)
+      ? { match: [run] }
+      : {};
+  };
 
   const cache = new Map<string, ReadonlyArray<FormRow>>();
   const rows = (form: string): ReadonlyArray<FormRow> => {
@@ -172,6 +251,9 @@ export const analyzedLookup = (
       );
       if (gaps) continue;
       const start = startOf(span[0]!);
+      // The phrase holds the clicked piece from its start on (not `より…`
+      // for `たより`, which starts in the word before).
+      if (start > piece.start) continue;
       const last = span.at(-1)!;
       const head = headOf(last);
       const forms: Array<{ form: string; written: string }> = [];
@@ -211,16 +293,22 @@ export const analyzedLookup = (
         if (written === word && rows(word).length > 0) return undefined;
         const phraseIds = [...new Set(phrase.map((row) => row.id))];
         const own = wholeIds(found, text);
+        // Each underlines what it covers, when that is more than the clicked
+        // word: the phrase (`手に入る` for `入る`), and the word around the
+        // piece (`しれないです` for `れ`). The clicked word's own entries
+        // (`入る`) underline nothing.
+        const phraseMatch = matchOf(start, start + written.length);
+        const ownMatch = matchOf(startOf(found), endOf(found));
         return {
           entries: [
             ...loadEntries(db, phraseIds).map((entry) => ({
               ...entry,
-              match: [written],
+              ...phraseMatch,
             })),
             ...loadEntries(
               db,
               own.filter((id) => !phraseIds.includes(id)),
-            ).map((entry) => ({ ...entry, match: [text] })),
+            ).map((entry) => ({ ...entry, ...ownMatch })),
           ],
         };
       }
@@ -239,38 +327,6 @@ export const analyzedLookup = (
     )
   ) {
     return undefined;
-  }
-
-  // A piece over several words with no entry of its own, a compound
-  // (`年|前`, `明治|天皇`, `南|関東`): what each word has inside the piece as
-  // a part with its own entries, as a compound written as one word. The
-  // piece starts and ends between morphemes (`2900年` gives `年`).
-  const inPiece = words
-    .map((w) => w.filter((m) => m.start >= piece.start && m.end <= piece.end))
-    .filter((w) => w.length > 0);
-  if (
-    inPiece.length > 1 &&
-    startOf(inPiece[0]!) === piece.start &&
-    endOf(inPiece.at(-1)!) === piece.end &&
-    rows(word).length === 0
-  ) {
-    const partIds = inPiece.map((w) => [
-      ...new Set(wholeIds(w, context.slice(startOf(w), endOf(w)))),
-    ]);
-    if (partIds.some((ids) => ids.length > 0)) {
-      let next = 0;
-      const segments = inPiece.map((w, i): Segment => {
-        const text = context.slice(startOf(w), endOf(w));
-        const count = partIds[i]!.length;
-        const indexes = Array.from({ length: count }, (_, k) => next + k);
-        next += count;
-        return count > 0 ? { text, entries: indexes } : { text };
-      });
-      return {
-        entries: partIds.flatMap((ids) => loadEntries(db, ids)),
-        segments,
-      };
-    }
   }
 
   // The clicked piece is the word: the plain lookup answers, unless its top
@@ -365,66 +421,99 @@ export const analyzedLookup = (
   // A word made with a suffix (`機械|屋` "mechanic") is not the word before
   // the suffix (`機械` "machine"). Without an entry of its own, it has no
   // entries as a whole: each part shows its own.
-  const derived =
-    rows(text).length === 0 &&
-    found.some((m) => hasPos(m.pos, settings.suffixes));
-  const whole = derived ? [] : wholeIds(found, text);
-  // Without the word's own entries there is nothing to underline it with.
-  if (whole.length === 0 && !derived) return undefined;
-  const shown = new Set(whole);
-  const match = [text];
-  const wholeEntries = loadEntries(db, whole).map((entry) => ({
-    ...entry,
-    match,
-  }));
-  // A piece wider than the word can't be split by the word's parts.
-  if (found.length === 1 || wider) {
-    return derived ? undefined : { entries: wholeEntries };
-  }
-
+  const derivedWord = (w: ReadonlyArray<Morpheme>): boolean =>
+    rows(textOf(w)).length === 0 &&
+    w.some((m) => hasPos(m.pos, settings.suffixes));
   // Each morpheme a part: an ending by its grammar-file line, else by its base
   // forms (`し` -> `する`); the head also by its spelling (`勉強` the noun).
-  const partIds = found.map((morpheme, i) => {
-    const grammar = morpheme.bases.flatMap((base) => grammarIds(db, base));
-    const isHead =
-      i === found.findIndex((m) => !hasPos(m.pos, settings.prefixes));
-    const forms = isHead
-      ? [morpheme.surface, ...morpheme.bases]
-      : morpheme.bases;
-    const bases = new Set([morpheme.surface, ...morpheme.bases].map(lookupKey));
-    // Entries of the part's own lemma; else what its base forms find, for a
-    // lemma the dictionary writes otherwise (`欲しい` under `ほしい`).
-    const byLemma = forms.flatMap((form) =>
-      rows(form).filter((row) => bases.has(lookupKey(row.lemma))),
+  // Entries already `shown` for the whole word are left out.
+  const morphemeParts = (
+    w: ReadonlyArray<Morpheme>,
+    shown: ReadonlySet<number>,
+  ): ReadonlyArray<Part> =>
+    w.map((morpheme, i) => {
+      const grammar = morpheme.bases.flatMap((base) => grammarIds(db, base));
+      const isHead =
+        i === w.findIndex((m) => !hasPos(m.pos, settings.prefixes));
+      const forms = isHead
+        ? [morpheme.surface, ...morpheme.bases]
+        : morpheme.bases;
+      const bases = new Set(
+        [morpheme.surface, ...morpheme.bases].map(lookupKey),
+      );
+      // Entries of the part's own lemma; else what its base forms find, for a
+      // lemma the dictionary writes otherwise (`欲しい` under `ほしい`).
+      const byLemma = forms.flatMap((form) =>
+        rows(form).filter((row) => bases.has(lookupKey(row.lemma))),
+      );
+      // Only when they find one lemma: `とく` (casual `ておく`) would bring
+      // `解く`, `説く` and `得`.
+      const byBase = morpheme.bases.flatMap((base) => rows(base));
+      const own =
+        byLemma.length > 0
+          ? byLemma
+          : new Set(byBase.map((row) => lookupKey(row.lemma))).size === 1
+            ? byBase
+            : [];
+      const ids =
+        !isHead && grammar.length > 0 ? grammar : own.map((row) => row.id);
+      return {
+        text: morpheme.surface,
+        ids: [...new Set(ids)].filter((id) => !shown.has(id)),
+      };
+    });
+
+  // A piece that is several words (`よ|ね`, `年|前`, `明治|天皇`), or is cut
+  // across them (`たん` of `なかった|ん`, `すか` of `あります|か`): each word
+  // it touches is a part with its own entries, the one that holds most of the
+  // piece first. The parts spell the run of those words, which is the `match`
+  // when it is more than the piece. What the dictionary has for the piece
+  // itself was not taken above, and is left out (`委員` for `いいん`), unless
+  // it has nothing for the word that holds most of the piece: then the
+  // analyzer's cut is no better, and the plain lookup answers (`でも` in
+  // `横ばえで|も`, `ちゃんと` in `スマホちゃん|と`).
+  if (wider) {
+    const known = !derivedWord(found) && wholeIds(found, text).length > 0;
+    if (!known && rows(word).length > 0) return undefined;
+    const parts = touched.flatMap((w): ReadonlyArray<Part> => {
+      if (!derivedWord(w)) {
+        return [
+          { text: textOf(w), ids: wholeIds(w, textOf(w)), main: w === found },
+        ];
+      }
+      // Of a word shown by its parts, the ones inside the piece come first
+      // (`上` of `保全|上` for `上の`).
+      return morphemeParts(w, new Set()).map((part, i) => ({
+        ...part,
+        main: w === found && w[i]!.start < piece.end && w[i]!.end > piece.start,
+      }));
+    });
+    if (parts.every((part) => part.ids.length === 0)) return undefined;
+    return splitResult(
+      db,
+      [],
+      parts,
+      matchOf(startOf(touched[0]!), endOf(touched.at(-1)!)),
     );
-    // Only when they find one lemma: `とく` (casual `ておく`) would bring
-    // `解く`, `説く` and `得`.
-    const byBase = morpheme.bases.flatMap((base) => rows(base));
-    const own =
-      byLemma.length > 0
-        ? byLemma
-        : new Set(byBase.map((row) => lookupKey(row.lemma))).size === 1
-          ? byBase
-          : [];
-    const ids =
-      !isHead && grammar.length > 0 ? grammar : own.map((row) => row.id);
-    return [...new Set(ids)].filter((id) => !shown.has(id));
-  });
-  let next = whole.length;
-  const segments = found.map((morpheme, i): Segment => {
-    const count = partIds[i]!.length;
-    const indexes = Array.from({ length: count }, (_, k) => next + k);
-    next += count;
-    return count > 0
-      ? { text: morpheme.surface, entries: indexes }
-      : { text: morpheme.surface };
-  });
-  const partEntries = partIds.flatMap((ids) => loadEntries(db, ids));
-  if (derived) {
-    if (partEntries.length === 0) return undefined;
-    // The first entry's `match` names the word the parts split.
-    const [first, ...rest] = partEntries;
-    return { entries: [{ ...first!, match }, ...rest], segments };
   }
-  return { entries: [...wholeEntries, ...partEntries], segments };
+
+  // The word around the piece (`食べました` for `食`), or the piece itself
+  // read as several morphemes (`新|幹線`): its own entries, underlining it
+  // when it is more than the piece, then each morpheme as a part.
+  const derived = derivedWord(found);
+  const whole = derived ? [] : wholeIds(found, text);
+  // Without the word's own entries there is nothing to show it by.
+  if (whole.length === 0 && !derived) return undefined;
+  const match = matchOf(startOf(found), endOf(found));
+  const wholeEntries = loadEntries(db, whole);
+  if (found.length === 1) {
+    return derived
+      ? undefined
+      : { entries: wholeEntries.map((entry) => ({ ...entry, ...match })) };
+  }
+  const parts = morphemeParts(found, new Set(whole));
+  if (derived && parts.every((part) => part.ids.length === 0)) {
+    return undefined;
+  }
+  return splitResult(db, wholeEntries, parts, match);
 };

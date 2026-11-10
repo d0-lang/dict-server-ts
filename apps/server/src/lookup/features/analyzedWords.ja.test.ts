@@ -55,11 +55,17 @@ describe("words found by the analyzer, in a script without spaces", () => {
     ]);
   });
 
-  it("gives a piece that starts inside a word that word", () => {
+  it("gives a piece cut across two words both, the one that holds most of it first", () => {
     // Intl.Segmenter: ありま|すか; the analyzer: あり|ます, か
-    const { entries } = lookup("すか", "東京に行ったことがありますか。");
+    const context = "東京に行ったことがありますか。";
+    const { entries } = lookup("すか", context);
     assert.strictEqual(entries[0]!.lemma, "ある");
-    assert.deepStrictEqual(entries[0]!.match, ["あります"]);
+    // the run of both words, which holds the clicked piece
+    assert.deepStrictEqual(entries[0]!.match, ["ありますか"]);
+    assert.deepStrictEqual(parts("すか", context), [
+      "あります: ある",
+      "か: か",
+    ]);
   });
 
   it("ranks the analyzer's lemma first among words written alike", () => {
@@ -71,14 +77,14 @@ describe("words found by the analyzer, in a script without spaces", () => {
   });
 
   it("puts a phrase of several words first, written either way", () => {
+    const found = lookup("入る", "安定して手に入るようになった。").entries;
     assert.deepStrictEqual(
-      lookup("入る", "安定して手に入るようになった。").entries[0]!.match,
-      ["手に入る"],
+      found.map((entry) => entry.lemma),
+      ["手に入る", "入る"],
     );
-    assert.strictEqual(
-      lookup("入る", "安定して手に入るようになった。").entries[0]!.lemma,
-      "手に入る",
-    );
+    assert.deepStrictEqual(found[0]!.match, ["手に入る"]);
+    // the clicked word's own entry underlines nothing
+    assert.isUndefined(found[1]!.match);
     // かもしれない, spelled かも知れない in the dictionary
     const { entries } = lookup("れ", "影響はないのかもしれないですけど。");
     assert.strictEqual(entries[0]!.lemma, "かも知れない");
@@ -128,11 +134,25 @@ describe("words found by the analyzer, in a script without spaces", () => {
       FormSource.Redirect,
     ]);
     const language = languageOf("ja_en");
-    assert.strictEqual(
-      lookupWord(db, language, "よね", "できないですよね。", 1).entries[0]!
-        .lemma,
-      "よ",
+    // both words as parts of the clicked piece, with nothing underlined
+    const { entries, segments } = lookupWord(
+      db,
+      language,
+      "よね",
+      "できないですよね。",
+      1,
     );
+    assert.deepStrictEqual(
+      entries.map((entry) => [entry.lemma, entry.match]),
+      [
+        ["よ", undefined],
+        ["ね", undefined],
+      ],
+    );
+    assert.deepStrictEqual(segments, [
+      { text: "よ", entries: [0] },
+      { text: "ね", entries: [1] },
+    ]);
     // a piece the dictionary spells as a word is left to the plain lookup
     assert.strictEqual(
       lookupWord(db, language, "そうですね", "そうですね、確かに。", 1)
@@ -230,14 +250,45 @@ describe("words found by the analyzer, in a script without spaces", () => {
       ["より", "PART", [], ["than"]],
     ]);
     // Intl.Segmenter: 思っ|たより; the analyzer: 思っ|た|より
-    const { entries } = lookupWord(
+    const { entries, segments } = lookupWord(
       db,
       languageOf("ja_en"),
       "たより",
       "思ったより安い。",
       1,
     );
-    assert.strictEqual(entries[0]!.lemma, "より");
+    assert.deepStrictEqual(
+      entries.map((entry) => [entry.lemma, entry.match]),
+      [
+        ["より", ["思ったより"]],
+        ["思う", undefined],
+      ],
+    );
+    // in written order, though より is ranked first
+    assert.deepStrictEqual(segments, [
+      { text: "思った", entries: [1] },
+      { text: "より", entries: [0] },
+    ]);
+  });
+
+  it("leaves a piece to the plain lookup when the dictionary lacks the word that holds most of it", () => {
+    const db = dictionary([
+      ["でも", "PART", [], ["even"]],
+      ["も", "PART", [], ["also"]],
+    ]);
+    // the analyzer: 横ばえで|も, and 横ばえ is no word the dictionary has
+    const { entries, segments } = lookupWord(
+      db,
+      languageOf("ja_en"),
+      "でも",
+      "あの横ばえでも朝から大幅安に。",
+      1,
+    );
+    assert.deepStrictEqual(
+      entries.map((entry) => entry.lemma),
+      ["でも"],
+    );
+    assert.isUndefined(segments);
   });
 
   it("splits a compound the segmenter keeps whole into its words", () => {
@@ -245,7 +296,7 @@ describe("words found by the analyzer, in a script without spaces", () => {
       ["年", "NOUN", [], ["year"]],
       ["前", "NOUN", [], ["before, ago"]],
     ]);
-    // Intl.Segmenter: 年前, one piece; the analyzer: 年|前
+    // Intl.Segmenter: 年前, one piece; the analyzer: 2900年|前
     const { entries, segments } = lookupWord(
       db,
       languageOf("ja_en"),
@@ -258,9 +309,40 @@ describe("words found by the analyzer, in a script without spaces", () => {
         (segment) =>
           `${segment.text}: ${(segment.entries ?? []).map((i) => entries[i]!.lemma).join(", ")}`,
       ),
-      ["年: 年", "前: 前"],
+      ["2900年: 年", "前: 前"],
     );
-    assert.isUndefined(entries[0]!.match);
+    // the piece starts inside 2900年, so the parts spell more than the piece
+    assert.deepStrictEqual(entries[0]!.match, ["2900年前"]);
+  });
+
+  it("underlines nothing when the words are the clicked piece, and for the piece's own entries", () => {
+    const db = dictionary([
+      ["そう", "ADV", [], ["so"]],
+      ["する", "VERB", ["し", "して"], ["to do"]],
+      ["甲子", "NOUN", [], ["Wood Rat"]],
+      ["園", "NOUN", [], ["garden"]],
+    ]);
+    const language = languageOf("ja_en");
+    const read = (word: string, context: string) => {
+      const { entries, segments } = lookupWord(db, language, word, context, 1);
+      return {
+        matches: entries.map((entry) => entry.match),
+        parts: segments?.map(
+          (segment) =>
+            `${segment.text}: ${(segment.entries ?? []).map((i) => entries[i]!.lemma).join(", ")}`,
+        ),
+      };
+    };
+    // Intl.Segmenter: そうして, one piece; the analyzer: そう|して
+    assert.deepStrictEqual(read("そうして", "そうしてそれだけの事をした。"), {
+      matches: [undefined, undefined],
+      parts: ["そう: そう", "して: する"],
+    });
+    // one word to both, made with a suffix: 甲子|園
+    assert.deepStrictEqual(read("甲子園", "甲子園に行った。"), {
+      matches: [undefined, undefined],
+      parts: ["甲子: 甲子", "園: 園"],
+    });
   });
 
   it("explains a part whose lemma the dictionary writes in kana", () => {
@@ -315,7 +397,11 @@ describe("words found by the analyzer, in a script without spaces", () => {
       entries.map((entry) => entry.lemma),
       ["送る", "御"],
     );
-    assert.deepStrictEqual(entries[0]!.match, ["お送り"]);
+    // `match` names a part of the sentence, and none was sent
+    assert.deepStrictEqual(
+      entries.map((entry) => entry.match),
+      [undefined, undefined],
+    );
     assert.deepStrictEqual(
       segments?.map((segment) => segment.text),
       ["お", "送り"],
