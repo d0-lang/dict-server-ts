@@ -33,6 +33,12 @@ import { positionsOf, tokenize } from "../common/tokenize.ts";
 /** Parts of speech that take endings, so a word with endings keeps only these entries. */
 const INFLECTING = new Set(["VERB", "ADJ", "AUX"]);
 
+/**
+ * UD's open classes: content words. A morpheme the language maps to none of
+ * them (a particle, an auxiliary, a conjunction) is a function word.
+ */
+const CONTENT = new Set(["NOUN", "PROPN", "VERB", "ADJ", "ADV", "INTJ"]);
+
 /** Most words a phrase may span. */
 const MAX_PHRASE_WORDS = 4;
 
@@ -324,6 +330,35 @@ export const analyzedLookup = (
     piece.start === startOf(found) &&
     rows(word).some(
       (row) => row.source !== FormSource.Redirect && severalWords(row),
+    )
+  ) {
+    return undefined;
+  }
+  // So does a piece of content words alone that the dictionary has as a
+  // word, cut only because of what stands around it: a compound after a
+  // number or a prefix (`年代` in `2000年|代`, `日本語` in `非日本|語`), a
+  // filler cut into syllables (`ま|あ`). No particle or auxiliary is in it,
+  // which stand next to any word (`とも` is `と|も`, `すると` is `する|と`).
+  // It ends where a word ends, so no ending is cut off (not `外出` in
+  // `外|出たい`), and its entry has the part of speech of its last morpheme,
+  // which makes the compound's (not `となり` "neighbour" for `と|なり`).
+  const inside = touched
+    .flat()
+    .filter((m) => m.start < piece.end && m.end > piece.start);
+  const functionWord = (m: Morpheme) => {
+    const tags = [...uposOf(m)];
+    return tags.length > 0 && !tags.some((tag) => CONTENT.has(tag));
+  };
+  if (
+    wider &&
+    inside[0]!.start === piece.start &&
+    endOf(touched.at(-1)!) === piece.end &&
+    !inside.some(functionWord) &&
+    rows(word).some(
+      (row) =>
+        row.source === FormSource.Lemma &&
+        lookupKey(row.lemma) === lookupKey(word) &&
+        uposOf(inside.at(-1)!).has(row.pos),
     )
   ) {
     return undefined;

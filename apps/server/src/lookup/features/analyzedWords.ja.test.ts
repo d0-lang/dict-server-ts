@@ -315,6 +315,46 @@ describe("words found by the analyzer, in a script without spaces", () => {
     assert.deepStrictEqual(entries[0]!.match, ["2900年前"]);
   });
 
+  it("lets the dictionary's word answer for a piece of content words the analyzer cut", () => {
+    const db = dictionary([
+      ["年代", "NOUN", [], ["era; decade"]],
+      ["年", "NOUN", [], ["year"]],
+      ["代", "NOUN", [], ["generation"]],
+      ["とも", "PART", [], ["even if"]],
+      ["と", "PART", [], ["as"]],
+      ["も", "PART", [], ["also"]],
+    ]);
+    const language = languageOf("ja_en");
+    // the analyzer: 2000年|代, because of the number
+    const compound = lookupWord(
+      db,
+      language,
+      "年代",
+      "2000年代に入り、公的資金を注入した。",
+      1,
+    );
+    assert.deepStrictEqual(
+      compound.entries.map((entry) => [entry.lemma, entry.match]),
+      [["年代", undefined]],
+    );
+    assert.isUndefined(compound.segments);
+    // と|も are particles, which stand next to any word: the analyzer's cut stays
+    const particles = lookupWord(
+      db,
+      language,
+      "とも",
+      "資源の博物館とも呼ばれている。",
+      1,
+    );
+    assert.deepStrictEqual(
+      particles.segments?.map(
+        (segment) =>
+          `${segment.text}: ${(segment.entries ?? []).map((i) => particles.entries[i]!.lemma).join(", ")}`,
+      ),
+      ["と: と", "も: も"],
+    );
+  });
+
   it("underlines nothing when the words are the clicked piece, and for the piece's own entries", () => {
     const db = dictionary([
       ["そう", "ADV", [], ["so"]],
