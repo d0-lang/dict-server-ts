@@ -115,7 +115,11 @@ export type Click = {
  * Where the `at`-th copy of `word` starts in `context`: copies are counted
  * left to right without overlap, on the string as sent, as the protocol says.
  */
-const copyStart = (context: string, word: string, at: number): number => {
+export const copyStart = (
+  context: string,
+  word: string,
+  at: number,
+): number => {
   let start = -word.length;
   for (let n = 0; n < at; n++) {
     start = context.indexOf(word, start + word.length);

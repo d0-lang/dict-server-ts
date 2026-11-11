@@ -8,7 +8,7 @@ import {
 } from "../../common/analyzer.ts";
 import type { LookupEntry, LookupResult } from "../../common/entries.ts";
 import { type FormRow, formRows } from "../../common/forms.ts";
-import { positionsOf, tokenize } from "../../common/tokenize.ts";
+import { copyStart } from "../../common/tokenize.ts";
 import {
   endOf,
   hasPos,
@@ -86,6 +86,14 @@ export type Click = {
 const hiragana = (text: string): string =>
   text.replace(/[ァ-ヶ]/gu, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
 
+/** Where the only copy of `word` in `context` starts, or -1 when there is none or more than one. */
+const onlyCopy = (context: string, word: string): number => {
+  const first = context.indexOf(word);
+  return first >= 0 && context.indexOf(word, first + word.length) < 0
+    ? first
+    : -1;
+};
+
 /**
  * The click on `word` in `context`, placed in the analyzer's words, or
  * undefined when the language has no analyzer or the click can't be placed.
@@ -100,13 +108,20 @@ export const clickOf = (
   const settings = language.context.analyzer;
   const analyze = analyzerFor(language);
   if (settings === undefined || analyze === undefined) return undefined;
-  const tokens = tokenize(context, language.code);
-  const clicked = positionsOf(tokens, word, language.code, { context, at });
-  // Without a sentence the word is all there is (`5冊`, which the segmenter
-  // cuts in two).
-  if (clicked.length !== 1 && context !== word) return undefined;
-  const piece =
-    context === word ? { start: 0, end: word.length } : tokens[clicked[0]!]!;
+  // The click by its place in the string, as `at` counts copies of `word`,
+  // not by the server's own segmenter: Bun's cuts a sentence otherwise than
+  // the browser's (`どう|した|の`, where Chrome sends `どうし`; `な|っ|た`,
+  // where it sends `った`), so the piece the client sent need not be one of
+  // its words. Without `at`, the only copy; without a sentence, the word is
+  // all there is (`5冊`).
+  const start =
+    context === word
+      ? 0
+      : at !== undefined
+        ? copyStart(context, word, at)
+        : onlyCopy(context, word);
+  if (word === "" || start < 0) return undefined;
+  const piece = { start, end: start + word.length };
   // A word in Latin letters alone (`JOC`, `Don`) is no word of this
   // language. A unit after a number is (`28g`: the analyzer reads `グラム`).
   if (/^[\p{Script=Latin}\p{P}]+$/u.test(word)) return undefined;

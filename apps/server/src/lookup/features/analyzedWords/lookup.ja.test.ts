@@ -477,4 +477,19 @@ describe("words found by the analyzer, in a script without spaces", () => {
     assert.strictEqual(entries[0]!.match, undefined);
     assert.strictEqual(segments, undefined);
   });
+
+  it("places the click by where the copy is, not by the server's segmenter", () => {
+    // Chrome sends どうし and った; Bun's segmenter cuts どう|した|の and
+    // ことに|な|っ|た, so neither is one of its words
+    const db = dictionary([
+      ["どうしたの", "X", [], ["what's the matter?"]],
+      ["同士", "NOUN", ["どうし"], ["fellow"]],
+      ["成る", "VERB", ["なる", "なっ"], ["to become"]],
+    ]);
+    const language = languageOf("ja_en");
+    const first = (word: string, context: string) =>
+      lookupWord(db, language, word, context, 1).entries[0];
+    assert.strictEqual(first("どうし", "どうしたの")!.lemma, "どうしたの");
+    assert.deepStrictEqual(first("った", "ことになった")!.match, ["なった"]);
+  });
 });
