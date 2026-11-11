@@ -33,8 +33,11 @@ export const singleWord = (c: Click): Answer => {
               lookupKey(row.lemma) === lookupKey(lemma) && upos.has(row.pos),
           )
       : [];
+  // Written in kana, the word is its reading: the lemma's entries read so
+  // come first (`ところ` is `所` ところ "place", before `所` しょ), of the
+  // analyzer's part of speech first (`まだ` the adverb).
   if (own.length > 0) {
-    const ids = [...new Set(own.map((row) => row.id))];
+    const ids = c.byReading([...new Set(own.map((row) => row.id))], [word]);
     const rest = c
       .rows(word)
       .map((row) => row.id)
@@ -57,7 +60,12 @@ export const singleWord = (c: Click): Answer => {
           .rows(lemma)
           .filter((row) => lookupKey(row.lemma) === lookupKey(lemma))
           .map((row) => row.id);
-  const ranked = byLemma.length > 0 ? byLemma : wholeIds(c, found, text);
+  const ranked =
+    byLemma.length > 0
+      ? c.byReading(byLemma, [word], (id) =>
+          upos.has(c.infoOf(id).pos) ? 1 : 0,
+        )
+      : wholeIds(c, found, text);
   if (ranked.length === 0 || ranked[0] === c.rows(word)[0]?.id) {
     return PLAIN;
   }

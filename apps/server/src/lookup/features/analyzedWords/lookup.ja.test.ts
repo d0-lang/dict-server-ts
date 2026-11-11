@@ -492,4 +492,23 @@ describe("words found by the analyzer, in a script without spaces", () => {
     assert.strictEqual(first("どうし", "どうしたの")!.lemma, "どうしたの");
     assert.deepStrictEqual(first("った", "ことになった")!.match, ["なった"]);
   });
+
+  it("puts a kana word's own reading first among its kanji lemma's entries", () => {
+    // ところ is only redirected to 所, which Wiktionary lists as しょ first
+    const db = dictionary([
+      ["所", "X", [], ["place (suffix)"], "suffix", undefined, "しょ"],
+      ["所", "NOUN", [], ["a place"], "noun", undefined, "ところ"],
+    ]);
+    db.$client.run(
+      "INSERT INTO forms VALUES ('ところ', 1, 6), ('ところ', 2, 6)",
+    );
+    const { entries } = lookupWord(
+      db,
+      languageOf("ja_en"),
+      "ところ",
+      "そういうところが好き。",
+      1,
+    );
+    assert.strictEqual(entries[0]!.pron?.reading, "ところ");
+  });
 });
