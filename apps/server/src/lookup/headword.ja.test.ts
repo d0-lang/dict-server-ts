@@ -8,6 +8,9 @@ const japanese = dictionary([
   ["割", "X", [], ["proportion"], "character"],
   ["割", "X", [], ["cut, division"], "affix", undefined, "かつ"],
   ["割", "X", [], ["divide"], "affix", undefined, "かつ"],
+  ["三", "NUM", [], ["three, 3"], "num", undefined, "さん"],
+  ["三", "NUM", [], ["three"], "num", undefined, "サン"],
+  ["三", "NUM", [], ["three"], "num", undefined, "み"],
 ]);
 
 const lookup = (word: string) =>
@@ -28,6 +31,13 @@ describe("Japanese headwords", () => {
     assert.deepStrictEqual(lookup("割"), [
       // a character entry ranks last, and joins the first
       "割 かつ: cut, division, divide, proportion",
+    ]);
+  });
+
+  it("takes a reading in katakana and in hiragana as one", () => {
+    assert.deepStrictEqual(lookup("三"), [
+      "三 さん: three, 3, three",
+      "三 み: three",
     ]);
   });
 });
