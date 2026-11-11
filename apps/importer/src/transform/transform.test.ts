@@ -1005,6 +1005,16 @@ describe("rubyReading", () => {
       ]),
       "べんきょう",
     );
+    // ruby leaves a small ヶ bare; it is read か
+    assert.strictEqual(
+      rubyReading("三ヶ月", [
+        ruby("三ヶ月", [
+          ["三", "さん"],
+          ["月", "げつ"],
+        ]),
+      ]),
+      "さんかげつ",
+    );
   });
 
   it("gives none without ruby, or when the ruby doesn't spell the word", () => {

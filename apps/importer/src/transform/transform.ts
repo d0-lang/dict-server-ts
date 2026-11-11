@@ -145,7 +145,8 @@ const senseGloss = (sense: WiktextractSense): string | undefined => {
  * The word in kana: the first form with ruby that spells `word` (or `word`
  * and kana after it), with each
  * base replaced by its reading (`食べる` with `[["食", "た"]]` is `たべる`).
- * Words without ruby (kana, or no kanji reading given) have none.
+ * Words without ruby (kana, or no kanji reading given) have none. A small
+ * `ヶ` or `ヵ`, which ruby leaves bare, is read か (`ヶ月` is かげつ).
  */
 export const rubyReading = (
   word: string,
@@ -174,7 +175,7 @@ export const rubyReading = (
       rest = rest.slice(at + base!.length);
       return true;
     });
-    if (fits) return reading + rest;
+    if (fits) return (reading + rest).replace(/[ヶヵ]/gu, "か");
   }
   return undefined;
 };
