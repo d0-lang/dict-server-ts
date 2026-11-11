@@ -132,7 +132,8 @@ export const presentResult = (
     reading: string | undefined;
     senses: Array<LookupEntry["senses"][number]>;
   }> = [];
-  const indexOf = new Map<string, number>();
+  /** The merged entries with each headword, readings aside, in order. */
+  const withKey = new Map<string, Array<number>>();
   const newIndex = new Map<number, number>();
   result.entries.forEach((entry, i) => {
     const head = headwordOf(language, entry.lemma, entry.pos, entry.features);
@@ -144,10 +145,21 @@ export const presentResult = (
       segmentOf.get(i),
       entry.match,
     ]);
-    let at = indexOf.get(key);
+    // A different reading is a different headword (`人前` as ひとまえ "the
+    // public" and as にんまえ "portion of food"). An entry without one joins
+    // the first with that headword, whatever its reading: it names none of
+    // its own, and the first is the likeliest. An entry with one joins the
+    // one with the same reading, else the first that has none yet.
+    const reading = entry.pron?.reading;
+    const same = withKey.get(key) ?? [];
+    let at =
+      reading === undefined
+        ? same[0]
+        : (same.find((m) => merged[m]!.reading === reading) ??
+          same.find((m) => merged[m]!.reading === undefined));
     if (at === undefined) {
       at = merged.length;
-      indexOf.set(key, at);
+      withKey.set(key, [...same, at]);
       merged.push({
         lemma: head.lemma,
         pos: entry.pos,
