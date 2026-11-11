@@ -39,11 +39,58 @@ const INFLECTING = new Set(["VERB", "ADJ", "AUX"]);
  */
 const CONTENT = new Set(["NOUN", "PROPN", "VERB", "ADJ", "ADV", "INTJ"]);
 
+/** Content words that name or describe, unlike adverbs and interjections: never a clause's edge alone. */
+const NAMING = new Set(["NOUN", "PROPN", "VERB", "ADJ"]);
+
 /** Most words a phrase may span. */
 const MAX_PHRASE_WORDS = 4;
 
+/** Wiktionary's part of speech for a counter (`人` "counter for number of people"). */
+const COUNTER = "counter";
+
 type Settings = NonNullable<Language["context"]["analyzer"]>;
 type Rule = Settings["join"][number];
+
+/** Katakana as hiragana, so readings compare however they are written (`サン`, `さん`). */
+const hiragana = (text: string): string =>
+  text.replace(/[ァ-ヶ]/gu, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
+
+/**
+ * `text` with each run of digits written in `numerals` (`10月` -> `十月`,
+ * `1998` -> `千九百九十八`, `20000` -> `二万`), or undefined when it has no
+ * digits or a number too big for them.
+ */
+export const inNumerals = (
+  text: string,
+  numerals: NonNullable<Settings["numerals"]>,
+): string | undefined => {
+  const { digits, units, myriads } = numerals;
+  const digit = [...digits];
+  let found = false;
+  let tooBig = false;
+  const written = text.replace(/[0-9０-９]+/gu, (run) => {
+    found = true;
+    const values = [...run]
+      .map((c) => c.charCodeAt(0) - (c >= "０" ? 0xff10 : 0x30))
+      .reverse();
+    // Groups of four digits, each but the lowest followed by its myriad.
+    const groups: Array<string> = [];
+    for (let k = 0; k * 4 < values.length; k++) {
+      let group = "";
+      for (let p = 3; p >= 0; p--) {
+        const d = values[k * 4 + p] ?? 0;
+        if (d === 0) continue;
+        group +=
+          p === 0 ? digit[d]! : (d === 1 ? "" : digit[d]!) + units[p - 1]!;
+      }
+      if (group === "") continue;
+      if (k > myriads.length) tooBig = true;
+      groups.unshift(k === 0 ? group : group + myriads[k - 1]!);
+    }
+    return groups.length === 0 ? digit[0]! : groups.join("");
+  });
+  return found && !tooBig ? written : undefined;
+};
 
 /** `pos` is one of `tags` or starts with one and a `-`. */
 const hasPos = (pos: string, tags: ReadonlyArray<string>): boolean =>
@@ -161,10 +208,15 @@ export const analyzedLookup = (
   const settings = language.context.analyzer;
   const analyze = analyzerFor(language);
   if (settings === undefined || analyze === undefined) return undefined;
+  // `settings`, for the functions below, which are hoisted.
+  const config: Settings = settings;
   const tokens = tokenize(context, language.code);
   const clicked = positionsOf(tokens, word, language.code, { context, at });
-  if (clicked.length !== 1) return undefined;
-  const piece = tokens[clicked[0]!]!;
+  // Without a sentence the word is all there is (`5冊`, which the segmenter
+  // cuts in two).
+  if (clicked.length !== 1 && context !== word) return undefined;
+  const piece =
+    context === word ? { start: 0, end: word.length } : tokens[clicked[0]!]!;
   // A word in Latin letters alone (`JOC`, `Don`) is no word of this
   // language. A unit after a number is (`28g`: the analyzer reads `グラム`).
   if (/^[\p{Script=Latin}\p{P}]+$/u.test(word)) return undefined;
@@ -231,6 +283,71 @@ export const analyzedLookup = (
         hasPos(m.pos, [tag]) ? tags : [],
       ),
     );
+  /** An entry's readings, in hiragana, and Wiktionary's part of speech. */
+  const infos = new Map<
+    number,
+    {
+      readonly pos: string;
+      readonly readings: ReadonlyArray<string>;
+      readonly sourcePos: string;
+    }
+  >();
+  const infoOf = (id: number) => {
+    let info = infos.get(id);
+    if (info === undefined) {
+      const rows = db.$client
+        .query<
+          { pos: string; sourcePos: string; reading: string | null },
+          [number]
+        >(
+          `SELECT e.pos AS pos, e.source_pos AS sourcePos, p.value AS reading FROM entries e
+           LEFT JOIN pronunciations p ON p.entry_id = e.id AND p.kind = 'reading'
+           WHERE e.id = ?1`,
+        )
+        .all(id);
+      info = {
+        pos: rows[0]?.pos ?? "",
+        sourcePos: rows[0]?.sourcePos ?? "",
+        readings: rows.flatMap((row) =>
+          row.reading === null ? [] : [hiragana(row.reading)],
+        ),
+      };
+      infos.set(id, info);
+    }
+    return info;
+  };
+  /** The entry has one of `readings` (the analyzer's, in katakana). */
+  const readAs = (id: number, readings: ReadonlyArray<string | undefined>) => {
+    const own = infoOf(id).readings;
+    return readings.some(
+      (reading) => reading !== undefined && own.includes(hiragana(reading)),
+    );
+  };
+  /**
+   * `ids` with the entries read as the analyzer reads the word first (`人` as
+   * にん in `3人`, not ひと), then by `preferred`, highest first (a
+   * counter's counter entries: `年` "years" before `年` "a year"); in their
+   * order otherwise.
+   */
+  const byReading = (
+    ids: ReadonlyArray<number>,
+    readings: ReadonlyArray<string | undefined>,
+    preferred: (id: number) => number = () => 0,
+  ): ReadonlyArray<number> => {
+    const score = (id: number) =>
+      (readAs(id, readings) ? 10 : 0) + preferred(id);
+    return ids
+      .map((id, i) => ({ id, i, score: score(id) }))
+      .sort((a, b) => b.score - a.score || a.i - b.i)
+      .map(({ id }) => id);
+  };
+  /** The analyzer's reading of `text`, its morphemes' readings joined. */
+  const readingOf = (text: string): string | undefined => {
+    const morphemes = analyze(text);
+    return morphemes.every((m) => m.reading !== undefined)
+      ? morphemes.map((m) => m.reading).join("")
+      : undefined;
+  };
   // A word's head: its first morpheme that is no prefix and has letters
   // (`日` in `2|7|日`, `勉強` in `お|勉強`).
   const headOf = (w: ReadonlyArray<Morpheme>): Morpheme =>
@@ -364,6 +481,9 @@ export const analyzedLookup = (
     return undefined;
   }
 
+  // A number, and the counter after it (`10|月`, `5|冊`, `三百|円`).
+  if (!wider && found.some(isNumber)) return numberLookup(found);
+
   // The clicked piece is the word: the plain lookup answers, unless its top
   // entry is only redirected there, as an obscure word written alike (`みる`
   // to `海松` "seaweed"). Then the analyzer's lemma comes first (`見る`), with
@@ -419,6 +539,48 @@ export const analyzedLookup = (
     return { entries: loadEntries(db, [...ranked, ...new Set(rest)]) };
   }
 
+  /**
+   * Entries of `form` as a word that stands at the edge of a clause: an
+   * adverb, an interjection or a function word (`なんて`), as its lemma, as
+   * a form-of entry (`そうして`, of `そして`), or as a spelling of the lemma
+   * (`なるほど`, of `成程`). Not a noun (`すか` "nonsense" in `なんすか?`),
+   * an inflected form (`かって` of `買う`) or a redirect (`いるか` to `海豚`
+   * "dolphin").
+   */
+  function ownIds(form: string): ReadonlyArray<number> {
+    const key = lookupKey(form);
+    return [
+      ...new Set(
+        rows(form)
+          .filter(
+            (row) =>
+              !NAMING.has(row.pos) &&
+              ((row.source === FormSource.Lemma &&
+                lookupKey(row.lemma) === key) ||
+                row.source === FormSource.FormOf ||
+                (row.source === FormSource.Inflection &&
+                  !INFLECTING.has(row.pos))),
+          )
+          .map((row) => row.id),
+      ),
+    ];
+  }
+
+  /** The text before `at` starts a clause: nothing, or a mark that ends one or opens a bracket or quote, before it. */
+  function clauseStart(at: number): boolean {
+    const before = context.slice(0, at).trimEnd().at(-1);
+    return (
+      before === undefined ||
+      /[\p{Terminal_Punctuation}\p{Ps}\p{Pi}]/u.test(before)
+    );
+  }
+
+  /** The text after `at` ends a sentence: nothing, or a sentence's last mark, after it. */
+  function sentenceEnd(at: number): boolean {
+    const after = context.slice(at).trimStart()[0];
+    return after === undefined || /\p{Sentence_Terminal}/u.test(after);
+  }
+
   /** The word's own entries: its form as written, else its head's base forms (`勉強` for `勉強しています`). */
   function wholeIds(
     w: ReadonlyArray<Morpheme>,
@@ -462,14 +624,13 @@ export const analyzedLookup = (
   // Each morpheme a part: an ending by its grammar-file line, else by its base
   // forms (`し` -> `する`); the head also by its spelling (`勉強` the noun).
   // Entries already `shown` for the whole word are left out.
-  const morphemeParts = (
+  function morphemeParts(
     w: ReadonlyArray<Morpheme>,
     shown: ReadonlySet<number>,
-  ): ReadonlyArray<Part> =>
-    w.map((morpheme, i) => {
+  ): ReadonlyArray<Part> {
+    return w.map((morpheme, i) => {
       const grammar = morpheme.bases.flatMap((base) => grammarIds(db, base));
-      const isHead =
-        i === w.findIndex((m) => !hasPos(m.pos, settings.prefixes));
+      const isHead = i === w.findIndex((m) => !hasPos(m.pos, config.prefixes));
       const forms = isHead
         ? [morpheme.surface, ...morpheme.bases]
         : morpheme.bases;
@@ -497,6 +658,158 @@ export const analyzedLookup = (
         ids: [...new Set(ids)].filter((id) => !shown.has(id)),
       };
     });
+  }
+
+  function isNumber(m: Morpheme): boolean {
+    return hasPos(m.pos, config.numbers);
+  }
+
+  /**
+   * A number and the word after it, read as its counter (`10|月`, `5|冊`,
+   * `三百|円`). The number's digits are one piece (`10`, not `1` and `0`)
+   * with one entry or none: the number's own (`十`), read as the analyzer
+   * reads it (`五` as ご, not いつ), never a name or a character (`一` "a
+   * surname"). The counter's entries come read as the analyzer reads them
+   * (`人` as にん, `月` as がつ), then counter entries, then suffixes and
+   * affixes (`目` "-th" in `3つ目`, not "eye"), and no names or symbols
+   * (`つ` "a giving hand").
+   * The whole has entries when the dictionary lists it (`十月`, `三人`), and
+   * those hold the irregular readings (`一匹` いっぴき, `三日` みっか); never
+   * by its head alone (`年` for `1998年`). Without them nothing is the whole
+   * word, so nothing carries `match`: the clicked piece answers by itself.
+   */
+  function numberLookup(w: ReadonlyArray<Morpheme>): LookupResult | undefined {
+    // Digits make one number (`1|9|9|8`), and so do numerals (`二十|八`);
+    // where they meet, each is read by itself (`2|万`, `1|億|2000|万`).
+    const digits = (m: Morpheme) => /^[0-9\uff10-\uff19]+$/u.test(m.surface);
+    const pieces: Array<Array<Morpheme>> = [];
+    for (const m of w) {
+      const before = pieces.at(-1)?.at(-1);
+      if (
+        before !== undefined &&
+        isNumber(m) &&
+        isNumber(before) &&
+        digits(m) === digits(before)
+      ) {
+        pieces.at(-1)!.push(m);
+      } else {
+        pieces.push([m]);
+      }
+    }
+    // As written, and with its digits as numerals (`10` as `十`).
+    const spellings = (written: string): ReadonlyArray<string> => {
+      const numerals =
+        config.numerals === undefined
+          ? undefined
+          : inNumerals(written, config.numerals);
+      return numerals === undefined ? [written] : [written, numerals];
+    };
+    const numberIds = (p: ReadonlyArray<Morpheme>): ReadonlyArray<number> => {
+      const forms = [
+        ...spellings(textOf(p)),
+        ...(p.length === 1 ? p[0]!.bases : []),
+      ];
+      const keys = new Set(forms.map(lookupKey));
+      const ids = forms
+        .flatMap((form) => rows(form))
+        .filter(
+          (row) =>
+            keys.has(lookupKey(row.lemma)) &&
+            (row.pos === "NUM" || row.pos === "NOUN"),
+        )
+        .map((row) => row.id);
+      // A number's reading is its digits' only when it is one morpheme.
+      const [best] = byReading(
+        [...new Set(ids)],
+        p.length === 1 ? [p[0]!.reading] : [],
+        (id) => (infoOf(id).pos === "NUM" ? 1 : 0),
+      );
+      return best === undefined ? [] : [best];
+    };
+    const match = matchOf(startOf(w), endOf(w));
+    if (pieces.length === 1) {
+      const ids = numberIds(w);
+      return ids.length === 0
+        ? undefined
+        : { entries: loadEntries(db, ids).map((e) => ({ ...e, ...match })) };
+    }
+    // The whole as the analyzer reads it written in numerals, where it knows
+    // the irregular readings (`二人` ふたり, where `2|人` is に + にん).
+    const spelled = spellings(textOf(w));
+    const whole = byReading(
+      [
+        ...new Set(
+          spelled
+            .flatMap((form) => rows(form))
+            .filter((row) => row.pos !== "PROPN")
+            .map((row) => row.id),
+        ),
+      ],
+      [readingOf(spelled.at(-1)!)],
+    );
+    const shown = new Set(whole);
+    const overlaps = (p: ReadonlyArray<Morpheme>) =>
+      startOf(p) < piece.end && endOf(p) > piece.start;
+    const parts = pieces.map((p, i): Part => {
+      // The number is shown first when it alone is clicked; a click over it
+      // and its counter shows the counter first (`g` of `28g`).
+      if (p.some(isNumber)) {
+        const main =
+          overlaps(p) && startOf(p) <= piece.start && endOf(p) >= piece.end;
+        return {
+          text: textOf(p),
+          ids: numberIds(p).filter((id) => !shown.has(id)),
+          main,
+        };
+      }
+      const main = overlaps(p);
+      const [part] = morphemeParts(p, shown);
+      // After the number: its counter, and what follows that (`目` "-th"
+      // in `3|つ|目`).
+      const counter = pieces.slice(0, i).some((q) => q.some(isNumber));
+      return {
+        text: part!.text,
+        ids: counter
+          ? byReading(
+              part!.ids.filter(
+                (id) => !["PROPN", "SYM"].includes(infoOf(id).pos),
+              ),
+              [p[0]!.reading],
+              (id) =>
+                infoOf(id).sourcePos === COUNTER
+                  ? 2
+                  : infoOf(id).pos === "X"
+                    ? 1
+                    : 0,
+            )
+          : part!.ids,
+        main,
+      };
+    });
+    if (whole.length > 0) {
+      return splitResult(db, loadEntries(db, whole), parts, match);
+    }
+    // The parts the click covers answer: the one clicked (`冊` of `5冊`), or
+    // each of those it covers (`万年` of `8|万|年`, `5冊` without a
+    // sentence), which spell the clicked word.
+    const covered = parts.filter((_, i) => overlaps(pieces[i]!));
+    const first = pieces[parts.indexOf(covered[0]!)];
+    const last = pieces[parts.indexOf(covered.at(-1)!)];
+    if (
+      first !== undefined &&
+      last !== undefined &&
+      startOf(first) === piece.start &&
+      endOf(last) === piece.end
+    ) {
+      if (covered.every((part) => part.ids.length === 0)) return undefined;
+      return covered.length === 1
+        ? { entries: loadEntries(db, covered[0]!.ids) }
+        : splitResult(db, [], covered, {});
+    }
+    // A click cut across them: all the parts, which spell the whole.
+    if (parts.every((part) => part.ids.length === 0)) return undefined;
+    return splitResult(db, [], parts, match);
+  }
 
   // A piece that is several words (`よ|ね`, `年|前`, `明治|天皇`), or is cut
   // across them (`たん` of `なかった|ん`, `すか` of `あります|か`): each word
@@ -510,23 +823,42 @@ export const analyzedLookup = (
   if (wider) {
     const known = !derivedWord(found) && wholeIds(found, text).length > 0;
     if (!known && rows(word).length > 0) return undefined;
+    // A piece of whole words that starts a clause or ends a sentence
+    // (`そう|して` at the start, `、なん|て`, `ありますなる|ほど。`) is a word
+    // of its own as often as not: its own entries come first, as the whole
+    // word, and the parts follow. Inside a clause such a piece is mostly
+    // other words (`博物館と|も`, `問題と|なり`, `わかんないよ|って`, `大きく
+    // なればなる|ほど`), and only the parts answer.
+    const own =
+      piece.start === startOf(touched[0]!) &&
+      piece.end === endOf(touched.at(-1)!) &&
+      (clauseStart(piece.start) || sentenceEnd(piece.end))
+        ? ownIds(word)
+        : [];
+    const shown = new Set(own);
     const parts = touched.flatMap((w): ReadonlyArray<Part> => {
       if (!derivedWord(w)) {
         return [
-          { text: textOf(w), ids: wholeIds(w, textOf(w)), main: w === found },
+          {
+            text: textOf(w),
+            ids: wholeIds(w, textOf(w)).filter((id) => !shown.has(id)),
+            main: w === found,
+          },
         ];
       }
       // Of a word shown by its parts, the ones inside the piece come first
       // (`上` of `保全|上` for `上の`).
-      return morphemeParts(w, new Set()).map((part, i) => ({
+      return morphemeParts(w, shown).map((part, i) => ({
         ...part,
         main: w === found && w[i]!.start < piece.end && w[i]!.end > piece.start,
       }));
     });
-    if (parts.every((part) => part.ids.length === 0)) return undefined;
+    if (own.length === 0 && parts.every((part) => part.ids.length === 0)) {
+      return undefined;
+    }
     return splitResult(
       db,
-      [],
+      loadEntries(db, own),
       parts,
       matchOf(startOf(touched[0]!), endOf(touched.at(-1)!)),
     );

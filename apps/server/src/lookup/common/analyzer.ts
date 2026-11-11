@@ -25,6 +25,8 @@ export type Morpheme = {
    * lemma `知れる`), so phrases written either way are found.
    */
   readonly spellings: ReadonlyArray<string>;
+  /** Its lemma's reading, from the language's `readingField` (`ニン` for `人` the counter), when the dictionary gives one. */
+  readonly reading?: string;
 };
 
 /** `surface` spelled the way `other` spells what `base` spells (`しれ`, `しれる`, `知れる` -> `知れ`). */
@@ -135,7 +137,14 @@ export const analyzerFor = (language: Language): Analyzer | undefined => {
             .filter((base) => base !== "" && base !== "*"),
         ),
       ];
+      const reading =
+        settings.readingField === undefined
+          ? undefined
+          : details[settings.readingField];
       const morpheme: Morpheme = {
+        ...(reading !== undefined && reading !== "" && reading !== "*"
+          ? { reading }
+          : {}),
         surface: token.surface,
         start: offsets.get(token.byte_start) ?? 0,
         end: offsets.get(token.byte_end) ?? text.length,
