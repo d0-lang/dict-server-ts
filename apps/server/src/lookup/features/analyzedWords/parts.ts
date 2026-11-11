@@ -112,19 +112,68 @@ export const derivedWord = (c: Click, w: Word): boolean =>
   w.some((m) => hasPos(m.pos, c.settings.suffixes));
 
 /**
+ * Endings after the head that the grammar file lists together, as one part:
+ * the longest run from `from` whose spelling has a line (`なかっ|た` is
+ * `なかった`, "past of ない"), or whose last morpheme in its base form does
+ * (`て|おい` is `ておく`, `て|い` is `ている`). Undefined when no run of two
+ * or more has one.
+ */
+const endingGroup = (
+  c: Click,
+  w: Word,
+  from: number,
+):
+  { readonly end: number; readonly ids: ReadonlyArray<number> } | undefined => {
+  for (let end = w.length; end >= from + 2; end--) {
+    const run = w.slice(from, end);
+    const before = run
+      .slice(0, -1)
+      .map((m) => m.surface)
+      .join("");
+    const last = run.at(-1)!;
+    for (const form of [last.surface, ...last.bases].map((f) => before + f)) {
+      const ids = grammarIds(c.db, lookupKey(form));
+      if (ids.length > 0) return { end, ids };
+    }
+  }
+  return undefined;
+};
+
+/**
  * Each morpheme a part: an ending by its grammar-file line, else by its base
  * forms (`し` -> `する`); the head also by its spelling (`勉強` the noun).
- * Entries already `shown` for the whole word are left out.
+ * Endings the grammar file lists together are one part (`言え|なかった`,
+ * `食べ|てい|ます`: `endingGroup`). Entries already `shown` for the whole
+ * word are left out.
  */
 export const morphemeParts = (
   c: Click,
   w: Word,
   shown: ReadonlySet<number>,
-): ReadonlyArray<Part> =>
-  w.map((morpheme, i) => {
+): ReadonlyArray<Part> => {
+  const head = w.findIndex((m) => !hasPos(m.pos, c.settings.prefixes));
+  const parts: Array<Part> = [];
+  const add = (text: string, ids: ReadonlyArray<number>) =>
+    parts.push({
+      text,
+      ids: [...new Set(ids)].filter((id) => !shown.has(id)),
+    });
+  for (let i = 0; i < w.length;) {
+    const group = head >= 0 && i > head ? endingGroup(c, w, i) : undefined;
+    if (group !== undefined) {
+      add(
+        w
+          .slice(i, group.end)
+          .map((m) => m.surface)
+          .join(""),
+        group.ids,
+      );
+      i = group.end;
+      continue;
+    }
+    const morpheme = w[i]!;
     const grammar = morpheme.bases.flatMap((base) => grammarIds(c.db, base));
-    const isHead =
-      i === w.findIndex((m) => !hasPos(m.pos, c.settings.prefixes));
+    const isHead = i === head;
     const forms = isHead
       ? [morpheme.surface, ...morpheme.bases]
       : morpheme.bases;
@@ -143,10 +192,11 @@ export const morphemeParts = (
         : new Set(byBase.map((row) => lookupKey(row.lemma))).size === 1
           ? byBase
           : [];
-    const ids =
-      !isHead && grammar.length > 0 ? grammar : own.map((row) => row.id);
-    return {
-      text: morpheme.surface,
-      ids: [...new Set(ids)].filter((id) => !shown.has(id)),
-    };
-  });
+    add(
+      morpheme.surface,
+      !isHead && grammar.length > 0 ? grammar : own.map((row) => row.id),
+    );
+    i++;
+  }
+  return parts;
+};

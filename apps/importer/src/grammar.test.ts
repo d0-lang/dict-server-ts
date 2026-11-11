@@ -15,6 +15,39 @@ describe("parseGrammarFile", () => {
     );
   });
 
+  it("reads the words a sense points at after an arrow", () => {
+    assert.deepStrictEqual(
+      parseGrammarFile(
+        "ない\tAUX\tnot\nなかった\tAUX\tpast of ない: didn't → ない | was not\n",
+        "t.tsv",
+      )[1],
+      {
+        lemma: "なかった",
+        pos: "AUX",
+        senses: ["past of ない: didn't", "was not"],
+        see: [["ない"], []],
+      },
+    );
+    assert.throws(
+      () => parseGrammarFile("なかった\tAUX\tpast → ない", "t.tsv"),
+      /t\.tsv:1: → ない/,
+    );
+  });
+
+  it("reads other spellings after a slash", () => {
+    assert.deepStrictEqual(
+      parseGrammarFile("ようとする/うとする\tAUX\ttry to\n", "t.tsv"),
+      [
+        {
+          lemma: "ようとする",
+          pos: "AUX",
+          senses: ["try to"],
+          forms: ["うとする"],
+        },
+      ],
+    );
+  });
+
   it("rejects bad lines with their position", () => {
     assert.throws(() => parseGrammarFile("im ADP in the", "t.tsv"), /t\.tsv:1/);
     assert.throws(() => parseGrammarFile("im\tPREP\tin", "t.tsv"), /PREP/);
@@ -27,7 +60,7 @@ describe("parseGrammarFile", () => {
 
 describe("loadGrammar", () => {
   it("parses the files in the repo", () => {
-    for (const lang of ["de", "pl"]) {
+    for (const lang of ["de", "pl", "ja"]) {
       assert.isAbove(loadGrammar(lang).length, 50, lang);
     }
     assert.deepStrictEqual(loadGrammar("xx"), []);
