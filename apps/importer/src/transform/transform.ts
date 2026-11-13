@@ -3,6 +3,7 @@ import {
   FEATURE_POS,
   formatFeatures,
 } from "@dict/core/features";
+import { hiragana } from "@dict/core/kana";
 import { cleanWord, lookupKey } from "@dict/core/lookupKey";
 import type { PronKind, UdPos } from "@dict/core/schema";
 import { isHistorical, type LanguageRules } from "./languages.ts";
@@ -146,7 +147,8 @@ const senseGloss = (sense: WiktextractSense): string | undefined => {
  * and kana after it), with each
  * base replaced by its reading (`食べる` with `[["食", "た"]]` is `たべる`).
  * Words without ruby (kana, or no kanji reading given) have none. A small
- * `ヶ` or `ヵ`, which ruby leaves bare, is read か (`ヶ月` is かげつ).
+ * `ヶ` or `ヵ`, which ruby leaves bare, is read by the romanization
+ * (`smallKe`).
  */
 export const rubyReading = (
   word: string,
@@ -175,9 +177,35 @@ export const rubyReading = (
       rest = rest.slice(at + base!.length);
       return true;
     });
-    if (fits) return (reading + rest).replace(/[ヶヵ]/gu, "か");
+    if (fits) return smallKe(reading + rest, forms);
   }
   return undefined;
+};
+
+/**
+ * `reading` with each small `ヶ` or `ヵ` as it is read: か in a counter
+ * (`三ヶ月` is さんかげつ), が in a name (`関ヶ原` is せきがはら). Ruby gives
+ * it no reading, but the romanization tells which: read が, it has one more
+ * `g` than the rest of the reading has kana of the が row (`Chigasaki` for
+ * ち + さき; `sankagetsu` for さん + げつ has only げ's). か without a
+ * romanization: the counter is the common word.
+ */
+const smallKe = (
+  reading: string,
+  forms: ReadonlyArray<WiktextractForm>,
+): string => {
+  if (!/[ヶヵ]/u.test(reading)) return reading;
+  const romanization = forms.find((form) =>
+    form.tags?.includes("romanization"),
+  )?.form;
+  const count = (text: string, letters: RegExp) =>
+    text.match(letters)?.length ?? 0;
+  let voiced =
+    romanization === undefined
+      ? 0
+      : count(romanization, /g/giu) -
+        count(hiragana(reading), /[がぎぐげご]/gu);
+  return reading.replace(/[ヶヵ]/gu, () => (voiced-- > 0 ? "が" : "か"));
 };
 
 const pickPronunciations = (

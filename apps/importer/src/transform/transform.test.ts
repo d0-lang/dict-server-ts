@@ -1005,16 +1005,62 @@ describe("rubyReading", () => {
       ]),
       "べんきょう",
     );
-    // ruby leaves a small ヶ bare; it is read か
+  });
+
+  it("reads a small ヶ, which ruby leaves bare, by the romanization", () => {
+    const ruby = (form: string, pairs: Array<[string, string]>) => ({
+      form,
+      tags: ["canonical"],
+      ruby: pairs,
+    });
+    const roman = (form: string) => ({ form, tags: ["romanization"] });
+    const reading = (
+      word: string,
+      pairs: Array<[string, string]>,
+      romanization?: string,
+    ) =>
+      rubyReading(word, [
+        ruby(word, pairs),
+        ...(romanization === undefined ? [] : [roman(romanization)]),
+      ]);
+    // か in a counter: the only g is げ's
     assert.strictEqual(
-      rubyReading("三ヶ月", [
-        ruby("三ヶ月", [
+      reading(
+        "三ヶ月",
+        [
           ["三", "さん"],
           ["月", "げつ"],
-        ]),
-      ]),
+        ],
+        "sankagetsu",
+      ),
       "さんかげつ",
     );
+    // が in a name
+    assert.strictEqual(
+      reading(
+        "茅ヶ崎",
+        [
+          ["茅", "ち"],
+          ["崎", "さき"],
+        ],
+        "Chigasaki",
+      ),
+      "ちがさき",
+    );
+    // a name read か, with a g of its own (ご)
+    assert.strictEqual(
+      reading(
+        "五ヶ瀬",
+        [
+          ["五", "ご"],
+          ["瀬", "せ"],
+        ],
+        "Gokase",
+      ),
+      "ごかせ",
+    );
+    // か without a romanization
+    assert.strictEqual(reading("ヶ所", [["所", "しょ"]]), "かしょ");
   });
 
   it("gives none without ruby, or when the ruby doesn't spell the word", () => {
