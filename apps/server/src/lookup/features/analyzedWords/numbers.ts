@@ -1,6 +1,7 @@
 import { lookupKey } from "@dict/core/lookupKey";
 import type { Morpheme } from "../../common/analyzer.ts";
 import { loadEntries } from "../../common/entries.ts";
+import { numberSense } from "../../common/glossNumbers.ts";
 import { type Answer, type Click, PLAIN } from "./click.ts";
 import { morphemeParts, type Part, splitResult } from "./parts.ts";
 import { endOf, hasPos, type Settings, startOf, type Word } from "./words.ts";
@@ -57,6 +58,10 @@ export const inNumerals = (
  * those hold the irregular readings (`一匹` いっぴき, `三日` みっか); never
  * by its head alone (`年` for `1998年`). Without them nothing is the whole
  * word, so nothing carries `match`: the clicked piece answers by itself.
+ *
+ * Written with digits, the word is the number and its counter, so of the
+ * whole's entries only those of that word are it (`aboutNumber`): `10分` is
+ * "ten minutes", though `十分` is mostly "enough".
  */
 export const numberLookup = (c: Click): Answer => {
   const { found: w, piece, settings } = c;
@@ -119,7 +124,7 @@ export const numberLookup = (c: Click): Answer => {
   // The whole as the analyzer reads it written in numerals, where it knows
   // the irregular readings (`二人` ふたり, where `2|人` is に + にん).
   const spelled = spellings(c.textOf(w));
-  const whole = c.byReading(
+  const listed = c.byReading(
     [
       ...new Set(
         spelled
@@ -130,6 +135,9 @@ export const numberLookup = (c: Click): Answer => {
     ],
     [c.readingOf(spelled.at(-1)!)],
   );
+  const whole = /[0-9０-９]/u.test(c.textOf(w))
+    ? aboutNumber(c, listed)
+    : listed;
   const shown = new Set(whole);
   const overlaps = (p: Word) =>
     startOf(p) < piece.end && endOf(p) > piece.start;
@@ -192,4 +200,39 @@ export const numberLookup = (c: Click): Answer => {
   // A click cut across them: all the parts, which spell the whole.
   if (parts.every((part) => part.ids.length === 0)) return PLAIN;
   return splitResult(c.db, [], parts, match);
+};
+
+/**
+ * Of `ids`, the entries of the word its digits spell, in their order. The
+ * entries about a number tell how that word is read: those with a sense
+ * that begins with a number (`十分` じっぷん "ten minutes"), or without
+ * any, those with a number in a sense (`千年` "a millennium; a thousand
+ * years"). They come first, then the other entries read so, which are the
+ * same word (`一番` いちばん "first, number one", then "most"). Entries
+ * read otherwise are other words spelled alike (`十分` じゅうぶん "enough",
+ * `一番` ひとつがい "a pair", `五月` さつき "azalea"), and so is every
+ * entry when none is about a number (`七節` "a stick insect"). All of
+ * `ids` when the code knows no number words of the senses' language.
+ */
+const aboutNumber = (
+  c: Click,
+  ids: ReadonlyArray<number>,
+): ReadonlyArray<number> => {
+  const ranks = loadEntries(c.db, ids).map((entry) =>
+    numberSense(
+      c.target,
+      entry.senses.flatMap((sense) => sense.translations),
+    ),
+  );
+  if (ranks.some((rank) => rank === undefined)) return ids;
+  const best = Math.max(0, ...ranks.map((rank) => rank ?? 0));
+  if (best === 0) return [];
+  const numbers = ids.filter((_, i) => ranks[i] === best);
+  const readings = new Set(numbers.flatMap((id) => c.infoOf(id).readings));
+  const readAlike = ids.filter(
+    (id) =>
+      !numbers.includes(id) &&
+      c.infoOf(id).readings.some((reading) => readings.has(reading)),
+  );
+  return [...numbers, ...readAlike];
 };

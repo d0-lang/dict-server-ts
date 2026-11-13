@@ -40,6 +40,8 @@ export type Click = {
   readonly db: DictionaryDb;
   readonly word: string;
   readonly context: string;
+  /** The language the senses are written in. */
+  readonly target: string;
   readonly settings: Settings;
   readonly analyze: Analyzer;
   /** Where the clicked piece is in `context`. */
@@ -198,6 +200,7 @@ export const clickOf = (
     db,
     word,
     context,
+    target: language.target,
     settings,
     analyze,
     piece,

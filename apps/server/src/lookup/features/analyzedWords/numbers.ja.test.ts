@@ -31,6 +31,37 @@ describe("numbers and their counters", () => {
     ["つ", "SYM", [], ["a giving hand"], "symbol"],
     ["目", "NOUN", [], ["eye"], "noun", undefined, "め"],
     ["目", "X", [], ["-th"], "suffix", undefined, "め"],
+    ["分", "X", [], ["minutes"], "counter", undefined, "ふん"],
+    ["十分", "ADJ", [], ["enough"], "adj", undefined, "じゅうぶん"],
+    [
+      "十分",
+      "NOUN",
+      [],
+      ["division into ten equal parts"],
+      "noun",
+      undefined,
+      "じゅうぶん",
+    ],
+    ["十分", "NOUN", [], ["ten minutes"], "noun", undefined, "じっぷん"],
+    ["番", "X", [], ["-th"], "counter", undefined, "ばん"],
+    ["一番", "ADV", [], ["most"], "adv", undefined, "いちばん"],
+    ["一番", "NOUN", [], ["number one"], "noun", undefined, "いちばん"],
+    ["一番", "NOUN", [], ["a pair"], "noun", undefined, "ひとつがい"],
+    ["節", "X", [], ["verses"], "counter", undefined, "せつ"],
+    ["七", "NUM", [], ["seven"], "num", undefined, "なな"],
+    ["七節", "NOUN", [], ["a stick insect"], "noun", undefined, "ななふし"],
+    ["四月一日", "PROPN", [], ["a surname"], "name", undefined, "わたぬき"],
+    ["四月", "NOUN", [], ["April"], "noun", undefined, "しがつ"],
+    ["日", "X", [], ["day of the month"], "counter", undefined, "にち"],
+    [
+      "第二次世界大戦",
+      "PROPN",
+      [],
+      ["World War II"],
+      "name",
+      undefined,
+      "だいにじせかいたいせん",
+    ],
   ]);
   const language = languageOf("ja_en");
   /** Each entry as `lemma reading`, and `match` when it has one. */
@@ -107,6 +138,50 @@ describe("numbers and their counters", () => {
       "二人 ふたり 2人",
       "二人 ににん 2人",
     ]);
+  });
+
+  it("shows a word written with digits by the entries of its number", () => {
+    // 十分 is mostly "enough"; 10分 is always ten minutes, read じっぷん
+    assert.deepStrictEqual(shown("分", "10分待った。").entries, [
+      "十分 じっぷん 10分",
+      "分 ふん",
+      "十 じゅう",
+    ]);
+    // written in kanji, every entry of the word answers
+    assert.include(
+      lookupWord(numbers, language, "十分", "十分です。", 1).entries.flatMap(
+        (entry) => entry.senses.flatMap((sense) => sense.translations),
+      ),
+      "enough",
+    );
+    // the other entries read like the number's are the same word: 一番
+    // "number one" and "most", not ひとつがい "a pair"
+    assert.deepStrictEqual(
+      lookupWord(numbers, language, "番", "1番好きだ。", 1)
+        .entries.filter((entry) => entry.lemma === "一番")
+        .map((entry) => `${entry.pos} ${entry.pron?.reading}`),
+      ["NOUN いちばん", "ADV いちばん"],
+    );
+    // no entry about a number: the number and its counter
+    assert.deepStrictEqual(shown("節", "第7節を読む。").entries, ["節 せつ"]);
+    // a month is one
+    assert.strictEqual(
+      shown("月", "4月に行く。").entries[0],
+      "四月 しがつ 4月",
+    );
+  });
+
+  it("takes no name for a date, and a name read with its number", () => {
+    // 四月一日 the surname is read わたぬき, with no four and no one in it
+    assert.strictEqual(shown("日", "4月1日に会う。").entries[0], "日 にち");
+    assert.strictEqual(
+      shown("月", "4月1日に会う。").entries[0],
+      "四月 しがつ 4月",
+    );
+    assert.strictEqual(
+      shown("世界", "第2次世界大戦が終わった。").entries[0],
+      "第二次世界大戦 だいにじせかいたいせん 第2次世界大戦",
+    );
   });
 
   it("splits a number and its counter without a sentence", () => {

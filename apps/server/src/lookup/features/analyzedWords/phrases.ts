@@ -1,3 +1,4 @@
+import { hiragana } from "@dict/core/kana";
 import { GRAMMAR_SOURCE_POS } from "@dict/core/schema";
 import { loadEntries } from "../../common/entries.ts";
 import type { FormRow } from "../../common/forms.ts";
@@ -109,8 +110,26 @@ const phraseAt = (
       }
     }
   }
+  // A name over a span written with digits is read with one of its numbers
+  // (`第2次世界大戦`, with に in it). `四月一日` the surname, read わたぬき,
+  // is not `4月1日`.
+  const numbers = morphemes.flatMap((m) =>
+    /[0-9０-９]/u.test(m.surface) && m.reading !== undefined
+      ? [hiragana(m.reading)]
+      : [],
+  );
+  const otherName = (row: FormRow) => {
+    const { pos, readings } = c.infoOf(row.id);
+    return (
+      pos === "PROPN" &&
+      numbers.length > 0 &&
+      readings.length > 0 &&
+      !readings.some((reading) => numbers.some((n) => reading.includes(n)))
+    );
+  };
   const fits = (row: FormRow) =>
     c.severalWords(row) &&
+    !otherName(row) &&
     (!grammarOnly || c.infoOf(row.id).sourcePos === GRAMMAR_SOURCE_POS);
   for (const { form, written } of forms) {
     const phrase = c.rows(form).filter(fits);
