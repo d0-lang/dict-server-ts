@@ -6,6 +6,7 @@
   "exports": {
     "./schema": "./src/schema.ts",
     "./lookupKey": "./src/lookupKey.ts",
+    "./kana": "./src/kana.ts",
     "./DictionaryDb": "./src/DictionaryDb.ts",
     "./language": "./src/language.ts",
     "./features": "./src/features.ts"

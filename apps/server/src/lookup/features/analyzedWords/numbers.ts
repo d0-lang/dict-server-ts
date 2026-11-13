@@ -5,9 +5,6 @@ import { type Answer, type Click, PLAIN } from "./click.ts";
 import { morphemeParts, type Part, splitResult } from "./parts.ts";
 import { endOf, hasPos, type Settings, startOf, type Word } from "./words.ts";
 
-/** Wiktionary's part of speech for a counter (`人` "counter for number of people"). */
-const COUNTER = "counter";
-
 /**
  * `text` with each run of digits written in `numerals` (`10月` -> `十月`,
  * `1998` -> `千九百九十八`, `20000` -> `二万`), or undefined when it has no
@@ -51,7 +48,8 @@ export const inNumerals = (
  * with one entry or none: the number's own (`十`), read as the analyzer
  * reads it (`五` as ご, not いつ), never a name or a character (`一` "a
  * surname"). The counter's entries come read as the analyzer reads them
- * (`人` as にん, `月` as がつ), then counter entries, then suffixes and
+ * (`人` as にん, `月` as がつ), then counter entries (the language's
+ * `counters`), then suffixes and
  * affixes (`目` "-th" in `3つ目`, not "eye"), and no names or symbols
  * (`つ` "a giving hand").
  *
@@ -161,7 +159,7 @@ export const numberLookup = (c: Click): Answer => {
             ),
             [p[0]!.reading],
             (id) =>
-              c.infoOf(id).sourcePos === COUNTER
+              settings.counters.includes(c.infoOf(id).sourcePos)
                 ? 2
                 : c.infoOf(id).pos === "X"
                   ? 1

@@ -1,14 +1,7 @@
+import { hiragana, isKana } from "@dict/core/kana";
 import { lookupKey } from "@dict/core/lookupKey";
 import { FormSource } from "@dict/core/schema";
 import type { WriterContext } from "./context.ts";
-
-const KANA = /^[\p{Script=Hiragana}\p{Script=Katakana}ー]+$/u;
-
-/** Katakana as hiragana (`ワクワク` -> `わくわく`), to see two kana spellings of one word. */
-const hiragana = (text: string): string =>
-  text.replace(/[ァ-ヶ]/g, (ch) =>
-    String.fromCharCode(ch.charCodeAt(0) - 0x60),
-  );
 
 /**
  * `つまり` -> `詰まり`: Japanese Wiktionary keeps a word written in kana on
@@ -49,10 +42,10 @@ export const addRedirects = ({
       for (const target of targets) {
         const key = lookupKey(target);
         const kanaVariant =
-          KANA.test(form) && KANA.test(key) && hiragana(form) === hiragana(key);
+          isKana(form) && isKana(key) && hiragana(form) === hiragana(key);
         if (own && !kanaVariant) continue;
         const ids =
-          KANA.test(form) && !KANA.test(key)
+          isKana(form) && !isKana(key)
             ? readAs.all(key, FormSource.Lemma, form)
             : lemmaOf.all(key, FormSource.Lemma);
         for (const { id } of ids) {

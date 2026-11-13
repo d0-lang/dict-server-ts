@@ -26,6 +26,9 @@ numbers = ["名詞-数詞"]
 # Digits as kanji, to find 10 under 十: Wiktionary lists some words with
 # digits (10月 under 十月), but no number by itself.
 numerals = { digits = "〇一二三四五六七八九", units = ["十", "百", "千"], myriads = ["万", "億", "兆"] }
+# Wiktionary's part of speech for the word after a number (人 "counter for
+# number of people"): those entries come first there.
+counters = ["counter"]
 # UniDic's parts of speech as UD tags, to tell when a kana word's own entries
 # miss the analyzer's reading (もの the noun, with only particle entries).
 # A noun that may be an adverb (ほとんど, 今日) is both.

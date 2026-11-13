@@ -1,3 +1,4 @@
+import { hasKanji, isKana } from "@dict/core/kana";
 import { lookupKey } from "@dict/core/lookupKey";
 import { FormSource } from "@dict/core/schema";
 import { loadEntries } from "../../common/entries.ts";
@@ -23,8 +24,8 @@ export const singleWord = (c: Click): Answer => {
   const own =
     lemma !== undefined &&
     upos.size > 0 &&
-    /^[\p{Script=Hiragana}\p{Script=Katakana}ー]+$/u.test(word) &&
-    /\p{Script=Han}/u.test(lemma) &&
+    isKana(word) &&
+    hasKanji(lemma) &&
     !c.rows(word).some((row) => upos.has(row.pos))
       ? c
           .rows(lemma)

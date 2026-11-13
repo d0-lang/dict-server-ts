@@ -210,6 +210,13 @@ const Context = doc(
               "How the language writes a number in characters, to find a number written in digits under its entry (`10` as `十`, `10月` as `十月`).",
             ),
           ),
+          counters: orDefault(
+            doc(
+              strings,
+              'Wiktionary\'s parts of speech for a counter (`counter`: `人` "counter for number of people"). For the word after a number, entries of these come before its other entries (`年` "years" before `年` "a year").',
+            ),
+            [],
+          ),
           join: orDefault(
             doc(
               Schema.Array(

@@ -1,4 +1,5 @@
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
+import { hiragana } from "@dict/core/kana";
 import type { Language } from "@dict/core/language";
 import { lookupKey } from "@dict/core/lookupKey";
 import {
@@ -81,10 +82,6 @@ export type Click = {
   /** An entry whose lemma is itself several words: a phrase. */
   readonly severalWords: (row: FormRow) => boolean;
 };
-
-/** Katakana as hiragana, so readings compare however they are written (`サン`, `さん`). */
-const hiragana = (text: string): string =>
-  text.replace(/[ァ-ヶ]/gu, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
 
 /** Where the only copy of `word` in `context` starts, or -1 when there is none or more than one. */
 const onlyCopy = (context: string, word: string): number => {
@@ -186,7 +183,10 @@ export const clickOf = (
     }
     return info;
   };
-  /** The entry has one of `readings` (the analyzer's, in katakana). */
+  /**
+   * The entry has one of `readings`. Japanese: the analyzer gives a reading
+   * in katakana (`ニン`) and the dictionary in hiragana (`にん`).
+   */
   const readAs = (id: number, readings: ReadonlyArray<string | undefined>) => {
     const own = infoOf(id).readings;
     return readings.some(
