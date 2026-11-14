@@ -27,6 +27,11 @@ export type AppConfigValues = {
   readonly port: number;
   readonly name: string;
   readonly languages: ReadonlyArray<string>;
+  /**
+   * Send the `legal` section. Off: clients tell users the server is for
+   * testing only. On without the settings below: the templates in `legal/`
+   * and `example.invalid` links stand in, for trying the legal flow.
+   */
   readonly includeLegal: boolean;
   /** Accept `context` on lookups and list the `context` feature. */
   readonly context: boolean;
@@ -93,15 +98,15 @@ export const loadConfig = (): AppConfigValues => ({
   port: Number(envString("PORT", "3000")),
   name: envString("SERVER_NAME", "dict poc"),
   languages: languages(),
-  includeLegal: envBool("INCLUDE_LEGAL", true),
+  includeLegal: envBool("INCLUDE_LEGAL", false),
   context: envBool("CONTEXT", true),
   verificationUrls: envList("VERIFICATION_URLS", [
     "https://example.invalid/verify",
   ]),
   privacyLink: envString("PRIVACY_LINK", "https://example.invalid/privacy"),
   tosLink: envString("TOS_LINK", "https://example.invalid/tos"),
-  privacyFile: envString("PRIVACY_FILE", "data/privacy.md"),
-  tosFile: envString("TOS_FILE", "data/terms.md"),
+  privacyFile: envString("PRIVACY_FILE", "legal/privacy.example.md"),
+  tosFile: envString("TOS_FILE", "legal/terms.example.md"),
   privacyChange: env("PRIVACY_CHANGE"),
   tosChange: env("TOS_CHANGE"),
   identityFile: envString("IDENTITY_FILE", "data/identity.json"),

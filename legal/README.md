@@ -1,6 +1,6 @@
 # Legal texts
 
-`privacy.example.md` and `terms.example.md` are templates for a public server. Copy them to `data/privacy.md` and `data/terms.md`, where the server reads them by default (`PRIVACY_FILE`, `TOS_FILE`), and edit the copies: `data/` is not in git, so your text stays yours and the templates can change upstream without a conflict. They describe what the server software does and what the protocol requires of every client. They say nothing about one client's settings or defaults: a client can change without you, and its own disclosures cover that. The rest depends on how you run the server, so read this before you publish them.
+`privacy.example.md` and `terms.example.md` are templates for a public server. With `INCLUDE_LEGAL=true` and nothing else set, the server hashes them as they are, which is only good for trying the legal flow. Copy them somewhere outside git, edit the copies, and point `PRIVACY_FILE` and `TOS_FILE` at them: your text stays yours, and the templates can change upstream without a conflict. They describe what the server software does and what the protocol requires of every client. They say nothing about one client's settings or defaults: a client can change without you, and its own disclosures cover that. The rest depends on how you run the server, so read this before you publish them.
 
 The server puts a hash of each document in its metadata. Any change to the text makes every client pause lookups until its user has seen the notice, so settle the text before you go public.
 

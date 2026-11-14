@@ -12,9 +12,11 @@ COPY packages/core/src packages/core/src
 COPY apps/server/src apps/server/src
 # Each language's settings, read at startup (grammar files are the importer's).
 COPY languages languages
+# The templates, the default legal documents with INCLUDE_LEGAL=true. Mount
+# your filled-in copies and point PRIVACY_FILE and TOS_FILE at them.
+COPY legal legal
 
-# Dictionaries, the identity key and the legal documents are mounted at
-# /app/data, see compose.yaml.
+# Dictionaries and the identity key are mounted at /app/data, see compose.yaml.
 USER bun
 EXPOSE 3000
 CMD ["bun", "apps/server/src/index.ts"]

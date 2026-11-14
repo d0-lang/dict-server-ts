@@ -29,7 +29,7 @@ const readDocument = (file: string, setting: string) =>
     try: () => new Uint8Array(readFileSync(file)),
     catch: (cause) =>
       new Error(
-        `${setting}=${file}: cannot read the document to hash (${cause instanceof Error ? cause.message : String(cause)}). Start from the templates in legal/ (legal/README.md), or set INCLUDE_LEGAL=false.`,
+        `${setting}=${file}: cannot read the document to hash (${cause instanceof Error ? cause.message : String(cause)})`,
       ),
   });
 

@@ -105,8 +105,8 @@ export const DictHandlersMemory = DictHandlersNoDeps.pipe(
       AppConfig.of({
         ...loadConfig(),
         languages: ["de_en"],
-        privacyFile: "legal/privacy.example.md",
-        tosFile: "legal/terms.example.md",
+        // The defaults: the templates and example.invalid links.
+        includeLegal: true,
       }),
     ),
     Layer.succeed(Dictionaries, {

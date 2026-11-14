@@ -36,6 +36,9 @@ if (Result.isFailure(legal)) {
   console.error(legal.failure.message);
   process.exit(1);
 }
+if (legal.success === undefined) {
+  console.log("INCLUDE_LEGAL is off: clients will treat this as a test server");
+}
 
 console.log(`serving ${languages.join(", ")}`);
 

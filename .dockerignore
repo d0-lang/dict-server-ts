@@ -11,4 +11,5 @@
 !languages/*/language.toml
 !languages/*/labels.toml
 !languages/labels.*.toml
+!legal/*.example.md
 **/*.test.ts
