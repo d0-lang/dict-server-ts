@@ -1,6 +1,6 @@
 # Legal texts
 
-`privacy.md` and `terms.md` are the starting text for a public server. They describe what the server software does and what the protocol requires of every client. They say nothing about one client's settings or defaults: a client can change without you, and its own disclosures cover that. The rest depends on how you run the server, so read this before you publish them.
+`privacy.example.md` and `terms.example.md` are templates for a public server. Copy them to `data/privacy.md` and `data/terms.md`, where the server reads them by default (`PRIVACY_FILE`, `TOS_FILE`), and edit the copies: `data/` is not in git, so your text stays yours and the templates can change upstream without a conflict. They describe what the server software does and what the protocol requires of every client. They say nothing about one client's settings or defaults: a client can change without you, and its own disclosures cover that. The rest depends on how you run the server, so read this before you publish them.
 
 The server puts a hash of each document in its metadata. Any change to the text makes every client pause lookups until its user has seen the notice, so settle the text before you go public.
 
@@ -8,17 +8,17 @@ The server puts a hash of each document in its metadata. Any change to the text 
 
 Replace every `[[...]]`:
 
-| Placeholder | What goes there |
-|---|---|
-| `[[DATE]]` | The day the text last changed. |
-| `[[SERVER URL]]` | The address users add in their client. |
-| `[[OPERATOR]]`, `[[COUNTRY]]` | Who runs the server and where. Some countries also require a postal address; add it if yours does. |
-| `[[CONTACT EMAIL]]` | An address you read. |
-| `[[PRIVACY URL]]` | Where the privacy policy is published. |
-| `[[LOG DAYS]]` | How long logs are kept. |
-| `[[HOSTING PROVIDER, COUNTRY]]` | Who hosts the server, and any CDN in front of it. |
-| `[[TRANSFERS: ...]]` | Whether data leaves the European Economic Area, and on what basis. |
-| `[[SUPERVISORY AUTHORITY]]` | Your country's data protection authority. |
+| Placeholder                     | What goes there                                                                                    |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `[[DATE]]`                      | The day the text last changed.                                                                     |
+| `[[SERVER URL]]`                | The address users add in their client.                                                             |
+| `[[OPERATOR]]`, `[[COUNTRY]]`   | Who runs the server and where. Some countries also require a postal address; add it if yours does. |
+| `[[CONTACT EMAIL]]`             | An address you read.                                                                               |
+| `[[PRIVACY URL]]`               | Where the privacy policy is published.                                                             |
+| `[[LOG DAYS]]`                  | How long logs are kept.                                                                            |
+| `[[HOSTING PROVIDER, COUNTRY]]` | Who hosts the server, and any CDN in front of it.                                                  |
+| `[[TRANSFERS: ...]]`            | Whether data leaves the European Economic Area, and on what basis.                                 |
+| `[[SUPERVISORY AUTHORITY]]`     | Your country's data protection authority.                                                          |
 
 ## Make the promises true
 

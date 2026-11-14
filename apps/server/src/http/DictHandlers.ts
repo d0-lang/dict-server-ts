@@ -102,7 +102,12 @@ export const DictHandlersMemory = DictHandlersNoDeps.pipe(
   Layer.provide([
     Identity.layerMemory,
     Layer.sync(AppConfig, () =>
-      AppConfig.of({ ...loadConfig(), languages: ["de_en"] }),
+      AppConfig.of({
+        ...loadConfig(),
+        languages: ["de_en"],
+        privacyFile: "legal/privacy.example.md",
+        tosFile: "legal/terms.example.md",
+      }),
     ),
     Layer.succeed(Dictionaries, {
       lookup: (_pair, word) => lookupStub(word),

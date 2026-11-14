@@ -1,6 +1,3 @@
 node_modules
 data
 spec/language.schema.json
-# The legal texts are hashed into the metadata: reformatting one changes its
-# hash, and the owner keeps their wording as written.
-legal

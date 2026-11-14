@@ -94,9 +94,9 @@ describe("HTTP API", () => {
         .digest("hex");
     assert.deepStrictEqual((parsed as { legal?: unknown }).legal, {
       privacy_link: "https://example.invalid/privacy",
-      privacy_hash: sha256("legal/privacy.md"),
+      privacy_hash: sha256("legal/privacy.example.md"),
       tos_link: "https://example.invalid/tos",
-      tos_hash: sha256("legal/terms.md"),
+      tos_hash: sha256("legal/terms.example.md"),
     });
 
     const keyResponse = await handler(
