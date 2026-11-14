@@ -435,6 +435,55 @@ describe("words found by the analyzer, in a script without spaces", () => {
     );
   });
 
+  it("ranks the stem's entries first when a prefix is written before it", () => {
+    const db = dictionary([
+      ["お", "X", [], ["The hiragana syllable お (o)."], "syllable"],
+      ["御", "NOUN", [], ["equestrianism, horseriding"], "noun"],
+      ["御", "X", [], ["used to respectfully refer to…"], "prefix"],
+      ["送る", "VERB", ["送ります"], ["to send"], "verb"],
+      ["送り", "NOUN", [], ["sending"], "noun"],
+      ["名前", "NOUN", [], ["name"], "noun"],
+      ["お名前", "NOUN", [], ["(polite) name"], "noun"],
+      ["は", "PART"],
+      ["何", "PRON"],
+    ]);
+    const language = languageOf("ja_en");
+    const shown = (result: ReturnType<typeof lookupWord>) => ({
+      entries: result.entries.map(
+        (entry) => `${entry.lemma}: ${entry.senses[0]!.glosses[0]}`,
+      ),
+      segments: result.segments,
+    });
+    // The whole word, then the stem (the client opens on its segment), then
+    // the prefix, by its entries as a prefix first. Segments stay as written.
+    assert.deepStrictEqual(shown(lookupWord(db, language, "お送り")), {
+      entries: [
+        "送る: to send",
+        "送り: sending",
+        "御: used to respectfully refer to…",
+        "御: equestrianism, horseriding",
+        "お: The hiragana syllable お (o).",
+      ],
+      segments: [
+        { text: "お", entries: [2, 3, 4] },
+        { text: "送り", entries: [1] },
+      ],
+    });
+    const named = shown(
+      lookupWord(db, language, "名前", "お名前は何ですか。", 1),
+    );
+    assert.deepStrictEqual(named.entries.slice(0, 3), [
+      "お名前: (polite) name",
+      "名前: name",
+      "御: used to respectfully refer to…",
+    ]);
+    assert.deepStrictEqual(
+      named.segments?.map((s) => s.text),
+      ["お", "名前"],
+    );
+    assert.deepStrictEqual(named.segments?.[1], { text: "名前", entries: [1] });
+  });
+
   it("shows a word made with a suffix by its parts, not as the word before the suffix", () => {
     // Intl.Segmenter: 機械|屋; the analyzer: 機械 + the suffix 屋
     const db = dictionary([
