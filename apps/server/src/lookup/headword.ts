@@ -1,4 +1,5 @@
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
+import { hiragana } from "@dict/core/kana";
 import {
   FEATURE_LABELS,
   FEATURES,
@@ -150,13 +151,17 @@ export const presentResult = (
     // the first with that headword, whatever its reading: it names none of
     // its own, and the first is the likeliest. An entry with one joins the
     // one with the same reading, else the first that has none yet.
+    // Katakana and hiragana spell the same reading (`三` as サン and さん).
     const reading = entry.pron?.reading;
     const same = withKey.get(key) ?? [];
     let at =
       reading === undefined
         ? same[0]
-        : (same.find((m) => merged[m]!.reading === reading) ??
-          same.find((m) => merged[m]!.reading === undefined));
+        : (same.find(
+            (m) =>
+              merged[m]!.reading !== undefined &&
+              hiragana(merged[m]!.reading!) === hiragana(reading),
+          ) ?? same.find((m) => merged[m]!.reading === undefined));
     if (at === undefined) {
       at = merged.length;
       withKey.set(key, [...same, at]);
