@@ -38,7 +38,7 @@ layer(HandlersLayer)("DictApi", (it) => {
     Effect.gen(function* () {
       const client = yield* makeClient;
       const result = yield* client.dict.lookup({
-        query: { word: "Mutter", lang: "de_en" },
+        payload: { word: "Mutter", lang: "de_en" },
       });
       assert.deepStrictEqual(
         result.entries.map((e) => e.senses[0]?.glosses),

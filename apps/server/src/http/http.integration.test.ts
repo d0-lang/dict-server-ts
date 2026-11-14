@@ -115,11 +115,19 @@ describe("HTTP API", () => {
     );
   });
 
-  const lookup = (query: string) =>
-    handler(new Request(`http://localhost/v1/lookup${query}`));
+  const lookupRaw = (body: string) =>
+    handler(
+      new Request("http://localhost/v1/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+      }),
+    );
 
-  it("GET /v1/lookup returns entries, also for an inflected word", async () => {
-    const response = await lookup("?word=PSA&lang=de_en");
+  const lookup = (body: unknown) => lookupRaw(JSON.stringify(body));
+
+  it("POST /v1/lookup returns entries, also for an inflected word", async () => {
+    const response = await lookup({ word: "PSA", lang: "de_en" });
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(await response.json(), {
       entries: [
@@ -133,10 +141,8 @@ describe("HTTP API", () => {
     });
   });
 
-  it("GET /v1/lookup returns segments for a split word", async () => {
-    const response = await lookup(
-      `?word=${encodeURIComponent("Gemüsefonds")}&lang=de_en`,
-    );
+  it("POST /v1/lookup returns segments for a split word", async () => {
+    const response = await lookup({ word: "Gemüsefonds", lang: "de_en" });
     const body = (await response.json()) as {
       entries: Array<{ lemma: string }>;
       segments: Array<{ text: string; entries?: Array<number> }>;
@@ -151,8 +157,8 @@ describe("HTTP API", () => {
     ]);
   });
 
-  it("GET /v1/lookup links an entry's pages and its recordings' file pages", async () => {
-    const response = await lookup("?word=Mutter&lang=de_en");
+  it("POST /v1/lookup links an entry's pages and its recordings' file pages", async () => {
+    const response = await lookup({ word: "Mutter", lang: "de_en" });
     const body = (await response.json()) as {
       entries: Array<{
         sources?: Array<string>;
@@ -192,40 +198,71 @@ describe("HTTP API", () => {
     }
   });
 
-  it("GET /v1/lookup accepts a context", async () => {
-    const response = await lookup(
-      `?word=Mutter&lang=de_en&context=${encodeURIComponent("Meine Mutter kocht.")}`,
-    );
+  it("POST /v1/lookup accepts a context", async () => {
+    const response = await lookup({
+      word: "Mutter",
+      lang: "de_en",
+      context: "Meine Mutter kocht.",
+      at: 1,
+    });
     assert.strictEqual(response.status, 200);
     const body = (await response.json()) as { entries: Array<unknown> };
     assert.strictEqual(body.entries.length, 2);
   });
 
-  it("GET /v1/lookup returns no entries for an unknown word", async () => {
-    const response = await lookup("?word=nope&lang=de_en");
+  it("POST /v1/lookup ignores fields it does not know and a bad `at`", async () => {
+    const response = await lookup({
+      word: "Mutter",
+      lang: "de_en",
+      context: "Meine Mutter kocht.",
+      at: "second",
+      later: true,
+    });
+    assert.strictEqual(response.status, 200);
+  });
+
+  it("POST /v1/lookup returns no entries for an unknown word", async () => {
+    const response = await lookup({ word: "nope", lang: "de_en" });
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(await response.json(), { entries: [] });
   });
 
-  it("GET /v1/lookup rejects missing parameters", async () => {
-    for (const query of [
-      "",
-      "?word=Mutter",
-      "?lang=de_en",
-      "?word=&lang=de_en",
+  it("POST /v1/lookup rejects missing or mistyped fields", async () => {
+    for (const body of [
+      {},
+      { word: "Mutter" },
+      { lang: "de_en" },
+      { word: "", lang: "de_en" },
+      { word: 7, lang: "de_en" },
+      { word: "Mutter", lang: "de_en", context: 7 },
     ]) {
-      const response = await lookup(query);
+      const response = await lookup(body);
       assert.strictEqual(response.status, 400);
       assert.deepStrictEqual(await response.json(), { error: "bad_request" });
     }
   });
 
-  it("GET /v1/lookup rejects a language the server does not list", async () => {
-    const response = await lookup("?word=Mutter&lang=xx_en");
+  it("POST /v1/lookup rejects a body that is not a JSON object", async () => {
+    for (const body of ["", "not json", "[]", '"Mutter"']) {
+      const response = await lookupRaw(body);
+      assert.strictEqual(response.status, 400);
+      assert.deepStrictEqual(await response.json(), { error: "bad_request" });
+    }
+  });
+
+  it("POST /v1/lookup rejects a language the server does not list", async () => {
+    const response = await lookup({ word: "Mutter", lang: "xx_en" });
     assert.strictEqual(response.status, 400);
     assert.deepStrictEqual(await response.json(), {
       error: "unsupported_lang",
     });
+  });
+
+  it("GET /v1/lookup is gone, so a word cannot be put in a URL", async () => {
+    const response = await handler(
+      new Request("http://localhost/v1/lookup?word=Mutter&lang=de_en"),
+    );
+    assert.strictEqual(response.status, 404);
   });
 
   it("unknown route is not found", async () => {
