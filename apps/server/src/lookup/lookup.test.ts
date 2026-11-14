@@ -19,7 +19,7 @@ describe("lookup with context", () => {
     assert.deepStrictEqual(phrase, {
       lemma: "w tym",
       pos: "ADP",
-      senses: [{ translations: ["including"] }],
+      senses: [{ glosses: ["including"] }],
       match: ["w tym"],
     });
   });

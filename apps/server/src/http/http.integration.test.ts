@@ -103,7 +103,7 @@ describe("HTTP API", () => {
           lemma: "pies",
           pos: "NOUN",
           pron: { ipa: ["/pjɛs/"] },
-          senses: [{ translations: ["dog"] }],
+          senses: [{ glosses: ["dog"] }],
         },
       ],
     });

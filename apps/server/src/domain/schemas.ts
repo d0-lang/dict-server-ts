@@ -39,7 +39,7 @@ export const LookupEntry = Schema.Struct({
   ),
   senses: Schema.Array(
     Schema.Struct({
-      translations: Schema.Array(Schema.String),
+      glosses: Schema.Array(Schema.String),
       see: Schema.optionalKey(Schema.Array(Schema.String)),
     }),
   ),

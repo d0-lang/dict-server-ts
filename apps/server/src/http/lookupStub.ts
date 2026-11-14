@@ -9,7 +9,7 @@ const pies: LookupEntry = {
   lemma: "pies",
   pos: "NOUN",
   pron: { ipa: ["/pjɛs/"] },
-  senses: [{ translations: ["dog"] }],
+  senses: [{ glosses: ["dog"] }],
 };
 
 const nauczycielka: LookupEntry = {
@@ -17,7 +17,7 @@ const nauczycielka: LookupEntry = {
   pos: "NOUN",
   senses: [
     {
-      translations: [
+      glosses: [
         "female equivalent of nauczyciel: teacher (person who teaches, especially one employed in a school)",
       ],
     },
@@ -36,13 +36,13 @@ const SAMPLES: Readonly<Record<string, ReadonlyArray<LookupEntry>>> = {
       lemma: "Mutter",
       pos: "NOUN",
       pron: mutterPron,
-      senses: [{ translations: ["mother"] }],
+      senses: [{ glosses: ["mother"] }],
     },
     {
       lemma: "Mutter",
       pos: "NOUN",
       pron: mutterPron,
-      senses: [{ translations: ["nut (for a bolt)"] }],
+      senses: [{ glosses: ["nut (for a bolt)"] }],
     },
   ],
   matka: [
@@ -50,12 +50,12 @@ const SAMPLES: Readonly<Record<string, ReadonlyArray<LookupEntry>>> = {
       lemma: "matka",
       pos: "NOUN",
       pron: { ipa: ["/ˈmat.ka/"] },
-      senses: [{ translations: ["mother"] }, { translations: ["queen bee"] }],
+      senses: [{ glosses: ["mother"] }, { glosses: ["queen bee"] }],
     },
     {
       lemma: "matka",
       pos: "NOUN",
-      senses: [{ translations: ["diminutive of mata: mat (floor pad)"] }],
+      senses: [{ glosses: ["diminutive of mata: mat (floor pad)"] }],
     },
   ],
   // An inflected form returns its base form, without saying which form matched.
@@ -70,14 +70,14 @@ const SAMPLES: Readonly<Record<string, ReadonlyArray<LookupEntry>>> = {
       pos: "NOUN",
       pron: { ipa: ["/ˈza.mɛk/"] },
       senses: [
-        { translations: ["castle (fortified building)"] },
-        { translations: ["lock (fastening device)"] },
-        { translations: ["zipper", "zip"] },
-        { translations: ["bolt (of a firearm)"] },
-        { translations: ["keystone (top stone of an arch)"] },
-        { translations: ["joint (in carpentry)"] },
-        { translations: ["fortress (historical)"] },
-        { translations: ["palace (of a ruler)"] },
+        { glosses: ["castle (fortified building)"] },
+        { glosses: ["lock (fastening device)"] },
+        { glosses: ["zipper", "zip"] },
+        { glosses: ["bolt (of a firearm)"] },
+        { glosses: ["keystone (top stone of an arch)"] },
+        { glosses: ["joint (in carpentry)"] },
+        { glosses: ["fortress (historical)"] },
+        { glosses: ["palace (of a ruler)"] },
       ],
     },
   ],
@@ -85,7 +85,7 @@ const SAMPLES: Readonly<Record<string, ReadonlyArray<LookupEntry>>> = {
     {
       lemma: "robić",
       pos: "VERB",
-      senses: [{ translations: ["to do"] }, { translations: ["to make"] }],
+      senses: [{ glosses: ["to do"] }, { glosses: ["to make"] }],
     },
   ],
   // `reading` and a script without case.
@@ -94,7 +94,7 @@ const SAMPLES: Readonly<Record<string, ReadonlyArray<LookupEntry>>> = {
       lemma: "母",
       pos: "NOUN",
       pron: { ipa: ["[ha̠ha̠]"], reading: "はは" },
-      senses: [{ translations: ["mother"] }],
+      senses: [{ glosses: ["mother"] }],
     },
   ],
 };
@@ -105,13 +105,13 @@ const gemuesefonds: LookupBody = {
     {
       lemma: "Gemüse",
       pos: "NOUN",
-      senses: [{ translations: ["vegetable; vegetables"] }],
+      senses: [{ glosses: ["vegetable; vegetables"] }],
     },
-    { lemma: "Fonds", pos: "NOUN", senses: [{ translations: ["fund"] }] },
+    { lemma: "Fonds", pos: "NOUN", senses: [{ glosses: ["fund"] }] },
     {
       lemma: "Fond",
       pos: "NOUN",
-      senses: [{ translations: ["stock (broth)"] }],
+      senses: [{ glosses: ["stock (broth)"] }],
     },
   ],
   segments: [

@@ -109,7 +109,7 @@ export const makeWriter = (
     "INSERT INTO entries (id, lemma, pos, source_pos, etymology, case_class, features) VALUES (?, ?, ?, ?, ?, ?, ?)",
   );
   const insertSense = sqlite.prepare(
-    "INSERT INTO senses (entry_id, idx, translations, see) VALUES (?, ?, ?, ?)",
+    "INSERT INTO senses (entry_id, idx, glosses, see) VALUES (?, ?, ?, ?)",
   );
   const insertPron = sqlite.prepare(
     "INSERT INTO pronunciations (entry_id, idx, kind, value) VALUES (?, ?, ?, ?)",
@@ -227,13 +227,13 @@ export const makeWriter = (
     } else {
       counts.mergedLines++;
     }
-    for (const { translations, see } of entry.senses) {
-      const k = translations.join("\u0000");
+    for (const { glosses, see } of entry.senses) {
+      const k = glosses.join("\u0000");
       if (state.glosses.has(k)) continue;
       insertSense.run(
         state.id,
         state.glosses.size,
-        JSON.stringify(translations),
+        JSON.stringify(glosses),
         see.length > 0 ? JSON.stringify(see) : null,
       );
       state.glosses.add(k);

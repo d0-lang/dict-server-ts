@@ -16,7 +16,7 @@ const japanese = dictionary([
 const lookup = (word: string) =>
   lookupWord(japanese, languageOf("ja_en"), word).entries.map(
     (entry) =>
-      `${entry.lemma} ${entry.pron?.reading ?? "-"}: ${entry.senses.map((sense) => sense.translations[0]).join(", ")}`,
+      `${entry.lemma} ${entry.pron?.reading ?? "-"}: ${entry.senses.map((sense) => sense.glosses[0]).join(", ")}`,
   );
 
 describe("Japanese headwords", () => {

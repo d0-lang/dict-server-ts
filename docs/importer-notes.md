@@ -105,7 +105,7 @@ Rough size, from gloss-prefix matching on the old extract: about 7,260 words ret
 
 - **One word, one entry.** Only the same word with different grammar is a form. This has to hold across languages, and the protocol can't carry grammatical information such as gender.
 - **One entry must be enough to understand the word.** Showing the base word as a second lookup result was considered and rejected on UX grounds.
-- **The relation goes in the translation text**, which carries the gender without a protocol change:
+- **The relation goes in the gloss text**, which carries the gender without a protocol change:
 
 ```json
 {
@@ -113,7 +113,7 @@ Rough size, from gloss-prefix matching on the old extract: about 7,260 words ret
   "pos": "NOUN",
   "senses": [
     {
-      "translations": [
+      "glosses": [
         "female equivalent of nauczyciel: teacher (person who teaches, especially one employed in a school)"
       ]
     }

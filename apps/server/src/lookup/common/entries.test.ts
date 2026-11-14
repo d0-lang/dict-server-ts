@@ -46,7 +46,7 @@ const ranked = (
     db.$client.run("INSERT INTO forms VALUES (?, ?, ?)", [form, i + 1, source]);
   });
   return findEntriesByForm(db, word).map(
-    (entry) => entry.senses[0]!.translations[0],
+    (entry) => entry.senses[0]!.glosses[0],
   );
 };
 

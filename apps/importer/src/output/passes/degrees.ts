@@ -22,9 +22,9 @@ export const settleDegreeEntries = ({
   degreeFormsByEntry,
 }: WriterContext) => {
   const sensesOf = sqlite.query<
-    { translations: string; see: string | null },
+    { glosses: string; see: string | null },
     [number]
-  >("SELECT translations, see FROM senses WHERE entry_id = ? ORDER BY idx");
+  >("SELECT glosses, see FROM senses WHERE entry_id = ? ORDER BY idx");
   const headOf = sqlite.query<{ lemma: string; pos: string }, [number]>(
     "SELECT lemma, pos FROM entries WHERE id = ?",
   );
@@ -47,7 +47,7 @@ export const settleDegreeEntries = ({
     return (
       senses.length > 0 &&
       senses.every((row) =>
-        isDegreeGloss((JSON.parse(row.translations) as Array<string>)[0]!),
+        isDegreeGloss((JSON.parse(row.glosses) as Array<string>)[0]!),
       )
     );
   };
@@ -55,7 +55,7 @@ export const settleDegreeEntries = ({
   const candidates = sqlite
     .query<{ id: number }, []>(
       `SELECT DISTINCT entry_id AS id FROM senses
-       WHERE translations LIKE '%comparative%of%' OR translations LIKE '%superlative%of%' ORDER BY entry_id`,
+       WHERE glosses LIKE '%comparative%of%' OR glosses LIKE '%superlative%of%' ORDER BY entry_id`,
     )
     .all()
     .map((row) => row.id);
@@ -66,7 +66,7 @@ export const settleDegreeEntries = ({
         // A word with its own senses too (`дальше` "furthermore", `eher` "rather"): those first.
         const rows = sensesOf.all(id);
         const degree = (row: (typeof rows)[number]) =>
-          isDegreeGloss((JSON.parse(row.translations) as Array<string>)[0]!);
+          isDegreeGloss((JSON.parse(row.glosses) as Array<string>)[0]!);
         const ordered = [
           ...rows.filter((row) => !degree(row)),
           ...rows.filter(degree),
@@ -74,7 +74,7 @@ export const settleDegreeEntries = ({
         if (ordered.some((row, i) => row !== rows[i])) {
           deleteSenses.run(id);
           ordered.forEach((row, idx) =>
-            insertSense.run(id, idx, row.translations, row.see),
+            insertSense.run(id, idx, row.glosses, row.see),
           );
         }
         continue;
@@ -86,7 +86,7 @@ export const settleDegreeEntries = ({
         ...new Set(
           senses.flatMap((row) => {
             const base = degreeBase(
-              (JSON.parse(row.translations) as Array<string>)[0]!,
+              (JSON.parse(row.glosses) as Array<string>)[0]!,
             );
             return base === undefined ? [] : [lookupKey(base)];
           }),
@@ -116,7 +116,7 @@ export const settleDegreeEntries = ({
       if (other === undefined) continue;
       let idx = nextIdx.get(other.id)!.n;
       for (const row of senses) {
-        insertSense.run(other.id, idx++, row.translations, row.see);
+        insertSense.run(other.id, idx++, row.glosses, row.see);
         counts.senses++;
       }
       moveForms.run(other.id, id);
@@ -144,9 +144,9 @@ export const addDegreeForms = ({
   degreeFormsByEntry,
 }: WriterContext) => {
   const rows = sqlite
-    .query<{ id: number; pos: string; translations: string }, []>(
-      `SELECT s.entry_id AS id, e.pos, s.translations FROM senses s JOIN entries e ON e.id = s.entry_id
-       WHERE (s.translations LIKE '%comparative%of%' OR s.translations LIKE '%superlative%of%')
+    .query<{ id: number; pos: string; glosses: string }, []>(
+      `SELECT s.entry_id AS id, e.pos, s.glosses FROM senses s JOIN entries e ON e.id = s.entry_id
+       WHERE (s.glosses LIKE '%comparative%of%' OR s.glosses LIKE '%superlative%of%')
          AND e.source_pos <> '${GRAMMAR_SOURCE_POS}'
          AND EXISTS (SELECT 1 FROM forms f WHERE f.entry_id = e.id)
        ORDER BY e.pos <> 'ADJ', e.id, s.idx`,
@@ -155,7 +155,7 @@ export const addDegreeForms = ({
   // degree + base -> the first entry with such a sense, adjectives first
   const targets = new Map<string, number>();
   for (const row of rows) {
-    const gloss = (JSON.parse(row.translations) as Array<string>)[0]!;
+    const gloss = (JSON.parse(row.glosses) as Array<string>)[0]!;
     const base = degreeBase(gloss);
     const degree = degreeOf(gloss);
     if (base === undefined || degree === undefined) continue;

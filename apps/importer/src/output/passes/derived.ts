@@ -35,12 +35,12 @@ export const copyDerivedMeanings = ({
   );
   const sensesOf = (id: number) =>
     sqlite
-      .query<{ translations: string; see: string | null }, [number]>(
-        "SELECT translations, see FROM senses WHERE entry_id = ? ORDER BY idx",
+      .query<{ glosses: string; see: string | null }, [number]>(
+        "SELECT glosses, see FROM senses WHERE entry_id = ? ORDER BY idx",
       )
       .all(id)
       .map((row) => ({
-        translations: JSON.parse(row.translations) as Array<string>,
+        glosses: JSON.parse(row.glosses) as Array<string>,
         see: row.see,
       }));
   const linkTargets = sqlite.query<{ lemma: string }, [string]>(
@@ -72,9 +72,9 @@ export const copyDerivedMeanings = ({
     const otherPos = all.filter((e) => e.source_pos !== sourcePos);
     for (const group of [samePos, otherPos]) {
       const meanings = group.flatMap((entry) =>
-        sensesOf(entry.id).flatMap(({ translations }) => {
-          if (derivedByEntry.get(entry.id)?.has(translations[0]!)) return [];
-          const meaning = translations
+        sensesOf(entry.id).flatMap(({ glosses }) => {
+          if (derivedByEntry.get(entry.id)?.has(glosses[0]!)) return [];
+          const meaning = glosses
             .filter((gloss) => !isPointerGloss(gloss))
             .join("; ");
           return meaning === "" ? [] : [meaning];
@@ -99,7 +99,7 @@ export const copyDerivedMeanings = ({
   const rewrites = [...derivedByEntry].map(([entryId, derived]) => {
     const sourcePos = sourcePosOf.get(entryId)!.source_pos;
     const rows = sensesOf(entryId).flatMap((row) => {
-      const gloss = row.translations[0]!;
+      const gloss = row.glosses[0]!;
       const sense = derived.get(gloss);
       if (sense === undefined) return [row];
       const meanings = sense.bases.flatMap((base) =>
@@ -114,22 +114,22 @@ export const copyDerivedMeanings = ({
       // Every meaning of the base, comparatives too: its first is often not
       // the one meant (`крупнейших` "largest", not "coarsest").
       return meanings.map((meaning) => ({
-        translations: [`${prefix}: ${meaning}`],
+        glosses: [`${prefix}: ${meaning}`],
         see: null,
       }));
     });
     // The word's own senses before its comparative ones (`później` "later"
     // before "comparative of późno").
     const ownFirst = [
-      ...rows.filter((row) => !isDegreeGloss(row.translations[0]!)),
-      ...rows.filter((row) => isDegreeGloss(row.translations[0]!)),
+      ...rows.filter((row) => !isDegreeGloss(row.glosses[0]!)),
+      ...rows.filter((row) => isDegreeGloss(row.glosses[0]!)),
     ];
     rows.splice(0, rows.length, ...ownFirst);
     const seen = new Set<string>();
     return {
       entryId,
-      rows: rows.filter(({ translations }) => {
-        const key = translations.join("\u0000");
+      rows: rows.filter(({ glosses }) => {
+        const key = glosses.join("\u0000");
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
@@ -141,8 +141,8 @@ export const copyDerivedMeanings = ({
   sqlite.transaction(() => {
     for (const { entryId, rows } of rewrites) {
       counts.senses -= deleteSenses.run(entryId).changes;
-      rows.forEach(({ translations, see }, idx) => {
-        insertSense.run(entryId, idx, JSON.stringify(translations), see);
+      rows.forEach(({ glosses, see }, idx) => {
+        insertSense.run(entryId, idx, JSON.stringify(glosses), see);
         counts.senses++;
       });
     }

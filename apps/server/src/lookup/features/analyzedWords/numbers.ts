@@ -233,7 +233,7 @@ const aboutNumber = (
   const ranks = loadEntries(c.db, ids).map((entry) =>
     numberSense(
       c.target,
-      entry.senses.flatMap((sense) => sense.translations),
+      entry.senses.flatMap((sense) => sense.glosses),
     ),
   );
   if (ranks.some((rank) => rank === undefined)) return ids;

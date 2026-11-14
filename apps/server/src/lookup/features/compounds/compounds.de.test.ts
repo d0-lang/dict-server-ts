@@ -12,12 +12,12 @@ describe("segments", () => {
           {
             lemma: "Gemüse",
             pos: "NOUN",
-            senses: [{ translations: ["[Gemüse]"] }],
+            senses: [{ glosses: ["[Gemüse]"] }],
           },
           {
             lemma: "Fonds",
             pos: "NOUN",
-            senses: [{ translations: ["[Fonds]"] }],
+            senses: [{ glosses: ["[Fonds]"] }],
           },
         ],
         segments: [

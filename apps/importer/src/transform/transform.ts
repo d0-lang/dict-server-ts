@@ -34,7 +34,7 @@ import type {
 
 /** One sense of an entry: a parent gloss first, then what was nested under it. */
 export type ImportSense = {
-  readonly translations: ReadonlyArray<string>;
+  readonly glosses: ReadonlyArray<string>;
   /** Words a "synonym of" gloss points at; the writer keeps those with an entry. */
   readonly see: ReadonlyArray<string>;
 };
@@ -321,7 +321,7 @@ const makeSenseGroups = () => {
     },
     senses: (): ReadonlyArray<ImportSense> =>
       [...groups.values()].map(({ glosses, see }) => ({
-        translations: [...glosses],
+        glosses: [...glosses],
         see: [...see],
       })),
   };
@@ -788,7 +788,7 @@ const isLetterName = (
   lemma: string,
   senses: ReadonlyArray<ImportSense>,
 ): boolean =>
-  [...lemma].length === 1 && LETTER_NAME.test(senses[0]?.translations[0] ?? "");
+  [...lemma].length === 1 && LETTER_NAME.test(senses[0]?.glosses[0] ?? "");
 
 /** How weak a link is: a pointer or a marked spelling is weaker than a plain link. */
 const weakness = (link: FormOfLink): number =>

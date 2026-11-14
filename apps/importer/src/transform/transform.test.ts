@@ -16,8 +16,8 @@ const entry = (patch: Partial<WiktextractEntry>): WiktextractEntry => ({
   ...patch,
 });
 
-const translations = (result: ReturnType<typeof transformEntry>) =>
-  result.entry?.senses.map((s) => s.translations);
+const glossesOf = (result: ReturnType<typeof transformEntry>) =>
+  result.entry?.senses.map((s) => s.glosses);
 
 describe("transformEntry", () => {
   it("keeps real senses, groups nested ones, and skips archaic and Middle Polish ones", () => {
@@ -33,7 +33,7 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(result), [
+    assert.deepStrictEqual(glossesOf(result), [
       ["silver nitrate"],
       ["colour", "light lilac colour"],
     ]);
@@ -186,7 +186,7 @@ describe("transformEntry", () => {
         forms: [{ form: "koteczka", source: "declension" }],
       }),
     );
-    assert.deepStrictEqual(translations(result), [["diminutive of kotek"]]);
+    assert.deepStrictEqual(glossesOf(result), [["diminutive of kotek"]]);
     assert.deepStrictEqual(result.entry?.forms, ["koteczka"]);
     assert.deepStrictEqual(result.entry?.derived, [
       { gloss: "diminutive of kotek", bases: ["kotek"] },
@@ -260,7 +260,7 @@ describe("transformEntry", () => {
           ],
         }),
       );
-      assert.deepStrictEqual(translations(result), [[gloss]]);
+      assert.deepStrictEqual(glossesOf(result), [[gloss]]);
       assert.deepStrictEqual(result.entry?.derived, []);
     }
   });
@@ -279,7 +279,7 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(result), [
+    assert.deepStrictEqual(glossesOf(result), [
       ["continuation (act or state of continuing)"],
     ]);
     assert.deepStrictEqual(result.formOf, []);
@@ -364,7 +364,7 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(better), [
+    assert.deepStrictEqual(glossesOf(better), [
       ["comparative degree of хоро́ший (xoróšij)"],
     ]);
     assert.deepStrictEqual(better.entry?.derived[0]?.bases, ["хороший"]);
@@ -388,7 +388,7 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(later), [
+    assert.deepStrictEqual(glossesOf(later), [
       ["comparative degree of по́здний (pózdnij): later, afterwards"],
     ]);
     assert.deepStrictEqual(later.entry?.derived, []);
@@ -411,7 +411,7 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(lay), [
+    assert.deepStrictEqual(glossesOf(lay), [
       ["causative of liegen: to lay; to put, place"],
       ["to castrate"],
     ]);
@@ -447,7 +447,7 @@ describe("transformEntry", () => {
     );
     assert.strictEqual(result.entry, undefined);
     assert.deepStrictEqual(
-      result.historicalEntry?.senses.map((s) => s.translations),
+      result.historicalEntry?.senses.map((s) => s.glosses),
       [["prince"]],
     );
   });
@@ -516,7 +516,7 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(result), [
+    assert.deepStrictEqual(glossesOf(result), [
       [king, "synonym of państwo", "king and queen"],
       ["chess king"],
       ["a", "b", "c", "d"],
@@ -553,7 +553,7 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(result), [["alive"]]);
+    assert.deepStrictEqual(glossesOf(result), [["alive"]]);
   });
 
   it("drops placeholders at every level and keeps what they hold", () => {
@@ -568,10 +568,7 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(result), [
-      ["queen ant"],
-      ["character"],
-    ]);
+    assert.deepStrictEqual(glossesOf(result), [["queen ant"], ["character"]]);
     assert.strictEqual(result.skippedSenses.placeholder, 1);
     assert.deepStrictEqual(result.parentGlosses, []);
 
@@ -597,7 +594,7 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(result), [[greeting]]);
+    assert.deepStrictEqual(glossesOf(result), [[greeting]]);
     assert.deepStrictEqual(result.formOf, []);
   });
 
@@ -643,7 +640,7 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(result), [["oneself"], ["each other"]]);
+    assert.deepStrictEqual(glossesOf(result), [["oneself"], ["each other"]]);
     assert.deepStrictEqual(result.parentGlosses, []);
     assert.deepStrictEqual(result.formOf, [
       { form: "sobie", lemma: "się", sourcePos: "pron", pointer: true },
@@ -656,7 +653,7 @@ describe("transformEntry", () => {
       ["locative of something unlinked"],
     ]) {
       const result = transformEntry(pl, entry({ senses: [{ glosses }] }));
-      assert.deepStrictEqual(translations(result), [glosses]);
+      assert.deepStrictEqual(glossesOf(result), [glosses]);
     }
   });
 
@@ -725,8 +722,8 @@ describe("transformEntry", () => {
       }),
     );
     assert.deepStrictEqual(result.entry?.senses, [
-      { translations: ["synonym of strunnik"], see: ["strunnik"] },
-      { translations: ["dog"], see: [] },
+      { glosses: ["synonym of strunnik"], see: ["strunnik"] },
+      { glosses: ["dog"], see: [] },
     ]);
   });
 
@@ -833,11 +830,11 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(bawic), [["to amuse"], ["to ask"]]);
+    assert.deepStrictEqual(glossesOf(bawic), [["to amuse"], ["to ask"]]);
     assert.deepStrictEqual(
       bawic.reflexiveEntries?.map((e) => [
         e.lemma,
-        e.senses.map((s) => s.translations),
+        e.senses.map((s) => s.glosses),
       ]),
       [
         ["bawić się", [["to play"]]],
@@ -889,7 +886,7 @@ describe("transformEntry", () => {
         ],
       }),
     );
-    assert.deepStrictEqual(translations(result), [["to be glad"]]);
+    assert.deepStrictEqual(glossesOf(result), [["to be glad"]]);
     assert.isUndefined(result.reflexiveEntries);
   });
 

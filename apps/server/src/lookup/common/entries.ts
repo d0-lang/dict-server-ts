@@ -29,7 +29,7 @@ export type LookupEntry = {
     readonly reading?: string;
   };
   readonly senses: ReadonlyArray<{
-    readonly translations: ReadonlyArray<string>;
+    readonly glosses: ReadonlyArray<string>;
     readonly see?: ReadonlyArray<string>;
   }>;
 };
@@ -39,8 +39,8 @@ type LookupSense = LookupEntry["senses"][number];
 /** "synonym of x" with nothing else to read: no meaning in brackets, no parent. */
 const isBareSynonym = (sense: LookupSense): boolean =>
   sense.see !== undefined &&
-  sense.translations.length === 1 &&
-  /^synonym of [^(“]*$/i.test(sense.translations[0]!);
+  sense.glosses.length === 1 &&
+  /^synonym of [^(“]*$/i.test(sense.glosses[0]!);
 
 /**
  * Wiktionary's pointer from an idiom to its literal reading ("Used other than
@@ -48,10 +48,8 @@ const isBareSynonym = (sense: LookupSense): boolean =>
  * more, and context lookups show them right after the phrase.
  */
 const isLiteralPointer = (sense: LookupSense): boolean =>
-  sense.translations.length === 1 &&
-  sense.translations[0]!.startsWith(
-    "Used other than figuratively or idiomatically",
-  );
+  sense.glosses.length === 1 &&
+  sense.glosses[0]!.startsWith("Used other than figuratively or idiomatically");
 
 /** `entries` without literal pointers, and without entries left with no senses. */
 export const dropLiteralPointers = (
@@ -155,7 +153,7 @@ const rankedIds = (
          e.pos = 'VERB'
            AND EXISTS (
              SELECT 1 FROM senses ps
-             WHERE ps.entry_id = e.id AND ps.translations LIKE '%participle of %'
+             WHERE ps.entry_id = e.id AND ps.glosses LIKE '%participle of %'
            )
            AND EXISTS (
              SELECT 1 FROM forms af JOIN entries ae ON ae.id = af.entry_id
@@ -217,7 +215,7 @@ export const loadEntries = (
       senses: senseRows
         .filter((s) => s.entryId === id)
         .map((s) => ({
-          translations: s.translations,
+          glosses: s.glosses,
           ...(s.see !== null ? { see: s.see } : {}),
         })),
     };

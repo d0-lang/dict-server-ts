@@ -116,7 +116,7 @@ describe("words found by the analyzer, in a script without spaces", () => {
 
   it("ranks a kana syllable entry after the word's other entries", () => {
     assert.strictEqual(
-      lookup("た").entries.at(-1)!.senses[0]!.translations[0],
+      lookup("た").entries.at(-1)!.senses[0]!.glosses[0],
       "The hiragana syllable た",
     );
   });

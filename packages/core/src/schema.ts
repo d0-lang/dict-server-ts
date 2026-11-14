@@ -16,7 +16,7 @@ import {
  * is stored as `PRAGMA user_version`. The constants here are mirrored in
  * `spec/dictionary/format.json` (checked by `format.test.ts`).
  */
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 /** Universal Dependencies part-of-speech tags (https://universaldependencies.org/u/pos/). */
 export const UD_POS = [
@@ -85,7 +85,7 @@ export const entries = sqliteTable("entries", {
 });
 
 /**
- * Ordered senses; `translations` is a JSON array of strings (never empty) and
+ * Ordered senses; `glosses` is a JSON array of strings (never empty) and
  * `see` a JSON array of words with an entry, or null.
  */
 export const senses = sqliteTable(
@@ -93,7 +93,7 @@ export const senses = sqliteTable(
   {
     entryId: integer("entry_id").notNull(),
     idx: integer("idx").notNull(),
-    translations: text("translations", { mode: "json" })
+    glosses: text("glosses", { mode: "json" })
       .$type<ReadonlyArray<string>>()
       .notNull(),
     see: text("see", { mode: "json" }).$type<ReadonlyArray<string>>(),

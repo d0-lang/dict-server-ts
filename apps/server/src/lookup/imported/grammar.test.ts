@@ -57,7 +57,7 @@ describe("importWiktextract", () => {
       const senses = (word: string) =>
         findEntriesByForm(db, word).map((e) => [
           `${e.lemma}/${e.pos}`,
-          ...e.senses.map((s) => s.translations[0]),
+          ...e.senses.map((s) => s.glosses[0]),
         ]);
       // the file's entry instead of a redirect to `der`
       assert.deepStrictEqual(senses("des"), [["des/DET", "of the"]]);
@@ -113,7 +113,7 @@ describe("importWiktextract", () => {
           findEntriesByForm(db, word)
             .map((e) => [
               `${e.lemma}/${e.pos}`,
-              ...e.senses.map((s) => s.translations[0]),
+              ...e.senses.map((s) => s.glosses[0]),
             ])
             .sort();
         // the line replaces Wiktionary's adverb instead of repeating "here"

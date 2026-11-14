@@ -21,10 +21,10 @@ CREATE TABLE entries (
 );
 
 CREATE TABLE senses (
-  entry_id     INTEGER NOT NULL,
-  idx          INTEGER NOT NULL,
-  translations TEXT NOT NULL,
-  see          TEXT,
+  entry_id INTEGER NOT NULL,
+  idx      INTEGER NOT NULL,
+  glosses  TEXT NOT NULL,
+  see      TEXT,
   PRIMARY KEY (entry_id, idx)
 ) WITHOUT ROWID;
 

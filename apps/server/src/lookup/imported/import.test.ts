@@ -97,12 +97,12 @@ describe("importWiktextract", () => {
       const [dom] = findEntriesByForm(db, "dom");
       assert.deepStrictEqual(dom?.pron, { ipa: ["/ˈdɔm/"] });
       assert.strictEqual(
-        dom?.senses[0]?.translations[0],
+        dom?.senses[0]?.glosses[0],
         "house (building for living)",
       );
       // lapis keeps its sense but drops the archaic one
       assert.deepStrictEqual(
-        findEntriesByForm(db, "lapis")[0]?.senses.map((s) => s.translations),
+        findEntriesByForm(db, "lapis")[0]?.senses.map((s) => s.glosses),
         [["silver nitrate (silver salt of nitric acid, AgNO3)"]],
       );
 
