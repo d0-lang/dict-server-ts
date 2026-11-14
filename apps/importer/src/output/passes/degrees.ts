@@ -19,15 +19,17 @@ export const settleDegreeEntries = ({
   sqlite,
   counts,
   insertSense,
+  addPages,
   degreeFormsByEntry,
 }: WriterContext) => {
   const sensesOf = sqlite.query<
     { glosses: string; see: string | null },
     [number]
   >("SELECT glosses, see FROM senses WHERE entry_id = ? ORDER BY idx");
-  const headOf = sqlite.query<{ lemma: string; pos: string }, [number]>(
-    "SELECT lemma, pos FROM entries WHERE id = ?",
-  );
+  const headOf = sqlite.query<
+    { lemma: string; pos: string; pages: string | null },
+    [number]
+  >("SELECT lemma, pos, pages FROM entries WHERE id = ?");
   const lemmaEntries = sqlite.query<{ id: number; pos: string }, [string]>(
     `SELECT e.id, e.pos FROM forms f JOIN entries e ON e.id = f.entry_id
      WHERE f.form = ? AND f.source = ${FormSource.Lemma} AND e.source_pos <> '${GRAMMAR_SOURCE_POS}' ORDER BY e.id`,
@@ -119,6 +121,7 @@ export const settleDegreeEntries = ({
         insertSense.run(other.id, idx++, row.glosses, row.see);
         counts.senses++;
       }
+      if (head.pages !== null) addPages(other.id, JSON.parse(head.pages));
       moveForms.run(other.id, id);
       dropForms.run(id);
       counts.degreeMerged++;

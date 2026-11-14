@@ -2,8 +2,14 @@ import type { LookupBody, LookupEntry } from "../domain/schemas.ts";
 
 const mutterPron = {
   ipa: ["/ˈmʊtər/", "[ˈmʊtɐ]"],
-  audio: ["https://upload.wikimedia.org/wikipedia/commons/0/03/De-Mutter.ogg"],
+  audio: [
+    {
+      url: "https://upload.wikimedia.org/wikipedia/commons/0/03/De-Mutter.ogg",
+      source: "https://commons.wikimedia.org/wiki/File:De-Mutter.ogg",
+    },
+  ],
 };
+const mutterSources = ["https://en.wiktionary.org/wiki/Mutter#German"];
 
 const pies: LookupEntry = {
   lemma: "pies",
@@ -37,12 +43,14 @@ const SAMPLES: Readonly<Record<string, ReadonlyArray<LookupEntry>>> = {
       pos: "NOUN",
       pron: mutterPron,
       senses: [{ glosses: ["mother"] }],
+      sources: mutterSources,
     },
     {
       lemma: "Mutter",
       pos: "NOUN",
       pron: mutterPron,
       senses: [{ glosses: ["nut (for a bolt)"] }],
+      sources: mutterSources,
     },
   ],
   matka: [

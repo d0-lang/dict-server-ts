@@ -23,6 +23,8 @@ export type WriterContext = {
   readonly counts: WriterCounts;
   readonly insertSense: Statement;
   readonly insertForm: Statement;
+  /** Add Wiktionary pages to those an entry credits (`entries.pages`), after its own. */
+  readonly addPages: (id: number, pages: Iterable<string>) => void;
   readonly optionalLetters: ReadonlyArray<readonly [string, string]>;
   /** Whether `key` is the lemma of an entry. */
   readonly hasEntry: (key: string) => boolean;

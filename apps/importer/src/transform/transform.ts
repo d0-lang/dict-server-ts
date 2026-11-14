@@ -42,6 +42,8 @@ export type ImportSense = {
 /** A dictionary entry ready to be written. */
 export type ImportEntry = {
   readonly lemma: string;
+  /** The Wiktionary page the entry comes from (wiktextract's `word`), credited in lookups. */
+  readonly page: string;
   readonly pos: UdPos;
   readonly sourcePos: string;
   readonly etymology: number;
@@ -690,6 +692,7 @@ export const transformEntry = (
         : rules.reflexive === "before"
           ? `${particle} ${shownLemma}`
           : `${shownLemma} ${particle}`,
+    page: lemma,
     pos: toUdPos(raw.pos),
     sourcePos: isLetterName(lemma, entrySenses) ? LETTER_NAME_POS : raw.pos,
     etymology: toEtymology(raw.etymology_number),

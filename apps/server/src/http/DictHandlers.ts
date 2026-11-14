@@ -11,6 +11,7 @@ import {
   PublicKey,
 } from "../domain/schemas.ts";
 import { Identity } from "../identity/Identity.ts";
+import { SOURCES } from "../lookup/common/sources.ts";
 import { lookupStub } from "./lookupStub.ts";
 import { signedMetaResponse } from "./signMeta.ts";
 
@@ -62,6 +63,7 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
             nonce: headers["x-nonce"],
             languages: [...config.languages],
             verification_urls: [...config.verificationUrls],
+            sources: SOURCES.map((source) => ({ ...source })),
             ...(config.context
               ? { features: ["context", "context-match"] }
               : {}),

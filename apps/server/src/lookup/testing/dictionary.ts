@@ -49,7 +49,7 @@ export const dictionary = (words: ReadonlyArray<Word>): DictionaryDb => {
       i,
     ) => {
       const id = i + 1;
-      db.$client.run("INSERT INTO entries VALUES (?, ?, ?, ?, 0, ?, ?)", [
+      db.$client.run("INSERT INTO entries VALUES (?, ?, ?, ?, 0, ?, ?, NULL)", [
         id,
         lemma,
         pos,

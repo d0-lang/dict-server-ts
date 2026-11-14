@@ -82,6 +82,12 @@ export const entries = sqliteTable("entries", {
    * `features.ts`), or null. Entries that differ in it are different words.
    */
   features: text("features"),
+  /**
+   * JSON array of the titles of the Wiktionary pages the entry is built from:
+   * its own, then those of the base words its meaning was copied from
+   * (`koteczek`, `kotek`). Null for entries from a language's grammar file.
+   */
+  pages: text("pages", { mode: "json" }).$type<ReadonlyArray<string>>(),
 });
 
 /**

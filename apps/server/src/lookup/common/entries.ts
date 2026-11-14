@@ -9,6 +9,7 @@ import {
   type UdPos,
 } from "@dict/core/schema";
 import { asc, inArray } from "drizzle-orm";
+import { commonsFilePage } from "./sources.ts";
 
 /**
  * Entry in the shape of the protocol's `/v1/lookup` response. Until
@@ -25,13 +26,26 @@ export type LookupEntry = {
   readonly match?: ReadonlyArray<string>;
   readonly pron?: {
     readonly ipa?: ReadonlyArray<string>;
-    readonly audio?: ReadonlyArray<string>;
+    readonly audio?: ReadonlyArray<Audio>;
     readonly reading?: string;
   };
   readonly senses: ReadonlyArray<{
     readonly glosses: ReadonlyArray<string>;
     readonly see?: ReadonlyArray<string>;
   }>;
+  /**
+   * Until `presentResult`: the titles of the Wiktionary pages the entry is
+   * built from (`entries.pages`). After, `sources` links them.
+   */
+  readonly pages?: ReadonlyArray<string>;
+  /** Links to the pages the entry is built from. */
+  readonly sources?: ReadonlyArray<string>;
+};
+
+/** A recording: the file, and the page that credits it. */
+export type Audio = {
+  readonly url: string;
+  readonly source?: string;
 };
 
 type LookupSense = LookupEntry["senses"][number];
@@ -200,7 +214,14 @@ export const loadEntries = (
     const head = byId.get(id)!;
     const prons = pronRows.filter((p) => p.entryId === id);
     const ipa = prons.filter((p) => p.kind === "ipa").map((p) => p.value);
-    const audio = prons.filter((p) => p.kind === "audio").map((p) => p.value);
+    const audio = prons
+      .filter((p) => p.kind === "audio")
+      .map((p): Audio => {
+        const source = commonsFilePage(p.value);
+        return source === undefined
+          ? { url: p.value }
+          : { url: p.value, source };
+      });
     const reading = prons.find((p) => p.kind === "reading")?.value;
     const pron = {
       ...(ipa.length > 0 ? { ipa } : {}),
@@ -211,6 +232,9 @@ export const loadEntries = (
       lemma: head.lemma,
       pos: head.pos,
       ...(head.features !== null ? { features: head.features } : {}),
+      ...(head.pages !== null && head.pages.length > 0
+        ? { pages: head.pages }
+        : {}),
       ...(Object.keys(pron).length > 0 ? { pron } : {}),
       senses: senseRows
         .filter((s) => s.entryId === id)

@@ -3,16 +3,25 @@ import { isDegreeGloss, isPointerGloss } from "../../transform/rules.ts";
 import type { WriterContext } from "./context.ts";
 import { MAX_CHAIN_STEPS } from "./context.ts";
 
+/** Meanings copied from a base word, and the entries they were read from. */
+type Meanings = {
+  readonly meanings: ReadonlyArray<string>;
+  readonly from: ReadonlyArray<number>;
+};
+const NONE: Meanings = { meanings: [], from: [] };
+
 /**
  * Add the base's meaning to each derived sense: same part of speech first,
  * then any, following chains (`koteczek` -> `kotek` -> `kot`). Every result
  * is worked out from the glosses as they were written, before any is
- * replaced, so processing order can't change it.
+ * replaced, so processing order can't change it. The entry then credits the
+ * pages of the entries the meanings were read from too.
  */
 export const copyDerivedMeanings = ({
   sqlite,
   counts,
   insertSense,
+  addPages,
   derivedByEntry,
 }: WriterContext) => {
   const entriesOf = sqlite.query<
@@ -51,15 +60,15 @@ export const copyDerivedMeanings = ({
     word: string,
     sourcePos: string,
     seen: ReadonlySet<string>,
-  ): ReadonlyArray<string> => {
-    if (seen.has(word) || seen.size >= MAX_CHAIN_STEPS) return [];
+  ): Meanings => {
+    if (seen.has(word) || seen.size >= MAX_CHAIN_STEPS) return NONE;
     const visited = new Set(seen).add(word);
-    const follow = (bases: ReadonlyArray<string>) => {
+    const follow = (bases: ReadonlyArray<string>): Meanings => {
       for (const base of bases) {
         const found = meaningsOf(base, sourcePos, visited);
-        if (found.length > 0) return found;
+        if (found.meanings.length > 0) return found;
       }
-      return [];
+      return NONE;
     };
 
     const own = entriesOf.all(word, FormSource.Lemma);
@@ -71,16 +80,20 @@ export const copyDerivedMeanings = ({
     const samePos = all.filter((e) => e.source_pos === sourcePos);
     const otherPos = all.filter((e) => e.source_pos !== sourcePos);
     for (const group of [samePos, otherPos]) {
-      const meanings = group.flatMap((entry) =>
-        sensesOf(entry.id).flatMap(({ glosses }) => {
+      const from: Array<number> = [];
+      const meanings = group.flatMap((entry) => {
+        const own = sensesOf(entry.id).flatMap(({ glosses }) => {
           if (derivedByEntry.get(entry.id)?.has(glosses[0]!)) return [];
           const meaning = glosses
             .filter((gloss) => !isPointerGloss(gloss))
             .join("; ");
           return meaning === "" ? [] : [meaning];
-        }),
-      );
-      if (meanings.length > 0) return [...new Set(meanings)];
+        });
+        if (own.length > 0) from.push(entry.id);
+        return own;
+      });
+      if (meanings.length > 0)
+        return { meanings: [...new Set(meanings)], from };
       const viaChain = follow(
         group.flatMap((entry) =>
           [...(derivedByEntry.get(entry.id)?.values() ?? [])].flatMap(
@@ -88,9 +101,9 @@ export const copyDerivedMeanings = ({
           ),
         ),
       );
-      if (viaChain.length > 0) return viaChain;
+      if (viaChain.meanings.length > 0) return viaChain;
     }
-    return [];
+    return NONE;
   };
 
   const sourcePosOf = sqlite.query<{ source_pos: string }, [number]>(
@@ -98,13 +111,16 @@ export const copyDerivedMeanings = ({
   );
   const rewrites = [...derivedByEntry].map(([entryId, derived]) => {
     const sourcePos = sourcePosOf.get(entryId)!.source_pos;
+    const from = new Set<number>();
     const rows = sensesOf(entryId).flatMap((row) => {
       const gloss = row.glosses[0]!;
       const sense = derived.get(gloss);
       if (sense === undefined) return [row];
-      const meanings = sense.bases.flatMap((base) =>
-        meaningsOf(base, sourcePos, new Set()),
-      );
+      const meanings = sense.bases.flatMap((base) => {
+        const found = meaningsOf(base, sourcePos, new Set());
+        found.from.forEach((id) => from.add(id));
+        return found.meanings;
+      });
       if (meanings.length === 0) {
         counts.derivedBare++;
         return [row];
@@ -128,6 +144,7 @@ export const copyDerivedMeanings = ({
     const seen = new Set<string>();
     return {
       entryId,
+      from,
       rows: rows.filter(({ glosses }) => {
         const key = glosses.join("\u0000");
         if (seen.has(key)) return false;
@@ -137,9 +154,24 @@ export const copyDerivedMeanings = ({
     };
   });
 
+  const pagesQuery = sqlite.query<{ pages: string | null }, [number]>(
+    "SELECT pages FROM entries WHERE id = ?",
+  );
+  // Read before any entry's pages change, like the glosses.
+  const pagesOf = (id: number): ReadonlyArray<string> => {
+    const stored = pagesQuery.get(id)?.pages;
+    return stored === null || stored === undefined ? [] : JSON.parse(stored);
+  };
+  const basePages = new Map(
+    rewrites.flatMap(({ from }) => [...from]).map((id) => [id, pagesOf(id)]),
+  );
   const deleteSenses = sqlite.prepare("DELETE FROM senses WHERE entry_id = ?");
   sqlite.transaction(() => {
-    for (const { entryId, rows } of rewrites) {
+    for (const { entryId, from, rows } of rewrites) {
+      addPages(
+        entryId,
+        [...from].flatMap((id) => basePages.get(id) ?? []),
+      );
       counts.senses -= deleteSenses.run(entryId).changes;
       rows.forEach(({ glosses, see }, idx) => {
         insertSense.run(entryId, idx, JSON.stringify(glosses), see);

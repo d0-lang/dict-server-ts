@@ -74,6 +74,15 @@ describe("HTTP API", () => {
       "context",
       "context-match",
     ]);
+    assert.deepStrictEqual((parsed as { sources?: unknown }).sources, [
+      {
+        name: "Wiktionary",
+        url: "https://en.wiktionary.org/",
+        license: "CC-BY-SA-4.0",
+        license_url: "https://creativecommons.org/licenses/by-sa/4.0/",
+      },
+      { name: "Wikimedia Commons", url: "https://commons.wikimedia.org/" },
+    ]);
 
     const keyResponse = await handler(
       new Request("http://localhost/v1/get-key"),
@@ -124,6 +133,25 @@ describe("HTTP API", () => {
     assert.deepStrictEqual(body.segments, [
       { text: "Gemüse", entries: [0] },
       { text: "fonds", entries: [1, 2] },
+    ]);
+  });
+
+  it("GET /v1/lookup links an entry's pages and its recordings' file pages", async () => {
+    const response = await lookup("?word=Mutter&lang=de_en");
+    const body = (await response.json()) as {
+      entries: Array<{
+        sources?: Array<string>;
+        pron?: { audio?: Array<{ url: string; source?: string }> };
+      }>;
+    };
+    assert.deepStrictEqual(body.entries[0]!.sources, [
+      "https://en.wiktionary.org/wiki/Mutter#German",
+    ]);
+    assert.deepStrictEqual(body.entries[0]!.pron?.audio, [
+      {
+        url: "https://upload.wikimedia.org/wikipedia/commons/0/03/De-Mutter.ogg",
+        source: "https://commons.wikimedia.org/wiki/File:De-Mutter.ogg",
+      },
     ]);
   });
 
