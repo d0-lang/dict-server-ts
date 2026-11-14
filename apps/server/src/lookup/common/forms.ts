@@ -90,15 +90,22 @@ export const tokenInfos = (db: DictionaryDb) => {
   };
 };
 
-/** Entry ids of the grammar file's lines for `form` (`-го`), and no others. */
+/**
+ * Entry ids of the grammar file's lines for `form` (`-го`), and no others:
+ * the lines for that word itself, or when it has none, the lines it is
+ * another spelling or a form of (`とく` finds `ておく`). `て` has a line, so
+ * it is not `ている`, which Wiktionary makes it a form of by the stem of `てる`.
+ */
 export const grammarIds = (
   db: DictionaryDb,
   form: string,
-): ReadonlyArray<number> =>
-  db.$client
-    .query<{ id: number }, [string]>(
-      `SELECT e.id AS id FROM forms f JOIN entries e ON e.id = f.entry_id
+): ReadonlyArray<number> => {
+  const rows = db.$client
+    .query<{ id: number; source: number }, [string]>(
+      `SELECT e.id AS id, f.source AS source FROM forms f JOIN entries e ON e.id = f.entry_id
        WHERE f.form = ?1 AND e.source_pos = '${GRAMMAR_SOURCE_POS}' ORDER BY e.id`,
     )
-    .all(form)
-    .map((row) => row.id);
+    .all(form);
+  const own = rows.filter((row) => row.source === FormSource.Lemma);
+  return (own.length > 0 ? own : rows).map((row) => row.id);
+};

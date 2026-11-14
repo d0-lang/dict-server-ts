@@ -10,6 +10,9 @@ describe("grammar phrases and endings", () => {
     ["なかった", "AUX", [], ["past of ない"], "grammar"],
     ["ない", "AUX", [], ["not"], "grammar"],
     ["た", "AUX", ["たら"], ["past", "たら: if"], "grammar"],
+    ["て", "PART", [], ["and"], "grammar"],
+    // Wiktionary makes て a form of ている, by the stem of てる
+    ["ている", "AUX", ["て"], ["be ...ing"], "grammar"],
     ["こと", "NOUN", [], ["thing"]],
     ["成る", "VERB", ["なる", "なっ"], ["to become"]],
     ["出る", "VERB", ["出よう"], ["to leave"]],
@@ -51,6 +54,21 @@ describe("grammar phrases and endings", () => {
     );
     // a click on the verb before it shows the verb
     assert.strictEqual(shown("出", "出ようとした").first, "出る 出よう");
+  });
+
+  it("shows an ending by its own line, not by a line it is a form of", () => {
+    const { entries, segments } = lookupWord(
+      words,
+      language,
+      "て",
+      "言えて、出る。",
+      1,
+    );
+    const part = segments!.find((segment) => segment.text === "て")!;
+    assert.deepStrictEqual(
+      part.entries!.map((i) => entries[i]!.lemma),
+      ["て"],
+    );
   });
 
   it("shows endings the grammar file lists together as one segment", () => {
