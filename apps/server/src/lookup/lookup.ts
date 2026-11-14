@@ -3,7 +3,7 @@ import { abbreviationEntryIds } from "./features/abbreviations.ts";
 import { hyphenEntryIds } from "./features/hyphenWords.ts";
 import { phraseEntryIds } from "./features/phrases/match.ts";
 import { separableEntryIds } from "./features/separableVerbs.ts";
-import { analyzedLookup } from "./features/analyzedWords.ts";
+import { analyzedLookup } from "./features/analyzedWords/lookup.ts";
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import type { Language } from "@dict/core/language";
 import {

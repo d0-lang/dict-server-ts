@@ -295,8 +295,17 @@ export const makeWriter = (
         null,
       );
       insertForm.run(lookupKey(entry.lemma), id, FormSource.Lemma);
+      for (const form of entry.forms ?? []) {
+        insertForm.run(lookupKey(form), id, FormSource.Inflection);
+      }
       entry.senses.forEach((sense, idx) => {
-        insertSense.run(id, idx, JSON.stringify([sense]), null);
+        const see = entry.see?.[idx] ?? [];
+        insertSense.run(
+          id,
+          idx,
+          JSON.stringify([sense]),
+          see.length > 0 ? JSON.stringify(see) : null,
+        );
         counts.senses++;
       });
       counts.entries++;

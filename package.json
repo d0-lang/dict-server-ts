@@ -15,6 +15,7 @@
     "filter": "bun apps/importer/src/filterCli.ts",
     "bench:context": "bun apps/server/eval/context-bench.ts",
     "bench:segments": "bun apps/server/eval/segments-bench.ts",
+    "dump:lookups": "bun apps/server/eval/lookup-dump.ts",
     "format": "prettier --write .",
     "spec": "bun packages/core/scripts/spec.ts"
   },

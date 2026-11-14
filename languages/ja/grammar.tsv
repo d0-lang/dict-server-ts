@@ -29,6 +29,30 @@
 させる	AUX	make or let (someone) do: causative (食べさせる, make/let eat; 学習させる, have it learn)
 よう	AUX	let's; I will: volitional ending (食べよう, let's eat; しようとする, try to do) | like, as if; seems (様: 夢のようだ, it's like a dream; 短いようで, though it seems short)
 
+## Forms of endings, shown as one segment (言え|なかった, 食べ|てい|ます)
+# A run of endings whose spelling, or whose last ending in its base form,
+# has a line here is one segment, with the line's senses (endingGroup in
+# apps/server/src/lookup/features/analyzedWords/parts.ts). "→ word" links a
+# sense to that word's line.
+なかった	AUX	past of ない: didn't, wasn't (言えなかった, couldn't say; 行かなかった, didn't go; 高くなかった, wasn't expensive) → ない
+なければ	AUX	ば form of ない: if not, unless (行かなければ, if (you) don't go) → ない | なければならない, なければいけない: must, have to (行かなければならない, (I) have to go)
+なくて	AUX	て form of ない: not ... and; because (it) doesn't (分からなくて, not understanding, ...) → ない | なくてもいい: don't have to (行かなくてもいい, (you) don't have to go)
+ました	AUX	past of ます: polite past (食べました, ate; 行きました, went) → ます
+ません	AUX	negative of ます: polite "not" (食べません, don't eat; 分かりません, (I) don't understand) → ます
+ませんでした	AUX	past negative of ます: polite "didn't" (食べませんでした, didn't eat) → ます
+でした	AUX	past of です: was, were (学生でした, was a student; 楽しかったです, it was fun) → です
+だった	AUX	past of だ: was, were (plain: 学生だった, was a student; 静かだった, was quiet) → だ
+たかった	AUX	past of たい: wanted to (食べたかった, wanted to eat) → たい
+ている	AUX	be ...ing (食べている, is eating) | a state that results from an action (結婚している, is married; 知っている, knows) → いる
+ておく	AUX	do in advance, for later (買っておく, buy in advance) | leave as it is (開けておく, leave open)
+てしまう	AUX	end up ...ing; ...completely, to the end (忘れてしまった, (I) forgot; 食べてしまった, ate it all up)
+てみる	AUX	try ...ing, ... and see (食べてみる, try eating; 聞いてみた, (I) asked to see)
+てくる	AUX	come to ..., start to ... (寒くなってきた, it has got cold) | go and ... and come back (買ってくる, go buy (it))
+ていく	AUX	go on ...ing, keep ...ing (増えていく, keep increasing) | ... and go (持っていく, take along)
+てくれる	AUX	(someone) does ... for me or us (教えてくれた, (he) taught me)
+てもらう	AUX	have (someone) do ... for me (教えてもらった, (I) had (her) teach me)
+てあげる	AUX	do ... for (someone) (教えてあげる, (I'll) teach you)
+
 ## Particles
 と	PART	and (between nouns: 犬と猫, a dog and a cat) | with (友達と行く, go with a friend) | quoting: that, "..." (行くと言った, said (he) would go; とされる, is said to be) | when, if (after a verb: 押すと開く, it opens when you push it)
 って	PART	quoting, casual と: that, "..." (行くって言った, said (he) would go) | as for, speaking of: casual topic (人間って怖い, humans are scary) | I hear, they say (雨だって, I hear it'll rain) | called (田中って人, a person called Tanaka)
@@ -72,6 +96,33 @@
 こういう	DET	this kind of, such (こういう時, at times like this)
 ああいう	DET	that kind of (over there) (ああいう人, a person like that)
 どういう	DET	what kind of (どういう意味, what does it mean)
+
+## Constructions over several words
+# Phrases Wiktionary lacks. A line here may start at an ending inside a word
+# (ようとする in 出よう|と|した), which a Wiktionary phrase may not.
+ことになる	AUX	it is decided that; it turns out that; will end up ...ing (行くことになった, it was decided that (I) would go)
+ことにする	AUX	decide to (行くことにした, (I) decided to go)
+ことができる	AUX	can, be able to (泳ぐことができる, can swim)
+ことがある	AUX	sometimes (行くことがある, (I) sometimes go) | after た: have ...ed before (行ったことがある, have been (there)) | there is something that ... (言ってないことがある, there's something (I) haven't said)
+ようとする/うとする	AUX	try to; be about to (出ようとした, tried to leave, was about to leave; 行こうとした, tried to go)
+ようになる	AUX	come to, get to the point where (話せるようになった, became able to speak)
+ようにする	AUX	make sure to, try to (早く寝るようにする, make sure to go to bed early)
+なければならない	AUX	must, have to (行かなければならない, (I) have to go)
+なければいけない	AUX	must, have to (行かなければいけない, (I) have to go)
+なくてはいけない	AUX	must, have to (行かなくてはいけない, (I) have to go)
+なくちゃいけない	AUX	must, have to (casual なくてはいけない: 行かなくちゃいけない, (I) have to go)
+なきゃいけない	AUX	must, have to (casual なければいけない: 行かなきゃいけない, (I) have to go)
+てもいい	AUX	may, it's all right to (食べてもいい, (you) may eat) | なくてもいい: don't have to
+てはいけない	AUX	must not (食べてはいけない, (you) must not eat)
+ちゃいけない	AUX	must not (casual てはいけない: 食べちゃいけない, (you) mustn't eat)
+わけにはいかない	AUX	can't very well, can't afford to (休むわけにはいかない, (I) can't very well take a day off)
+はずだ	AUX	should, is expected to (来るはずだ, (he) should come; 知っているはずだ, (she) must know)
+つもりだ	AUX	intend to, plan to (行くつもりだ, (I) intend to go)
+ばいい	AUX	should, it would be good to (どうすればいい?, what should I do?)
+ほうがいい	AUX	had better (行ったほうがいい, (you'd) better go; 行かないほうがいい, (you'd) better not go) | ... is better (小さいほうがいい, smaller is better)
+方がいい	AUX	had better (行った方がいい, (you'd) better go; 行かない方がいい, (you'd) better not go) | ... is better (他の方がいい, the other one is better)
+このようにして	ADV	in this way, like this (このようにして世界は…, in this way the world …)
+ということ	AUX	that, the fact that (行くということ, (the fact) that (he) will go) | that is to say, which means
 
 ## Adverbs and fillers
 ほぼ	ADV	almost, nearly (ほぼ毎日, almost every day; ほぼゼロ, nearly zero) | about, approximately

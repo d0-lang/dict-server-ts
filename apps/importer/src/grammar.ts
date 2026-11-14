@@ -16,13 +16,20 @@ import { UD_POS, type UdPos } from "@dict/core/schema";
  *     des	DET	of the (masculine or neuter, genitive)
  *
  * Senses are separated by ` | `. `#` starts a comment line. Case matters:
- * `Sie` and `sie` are different lines.
+ * `Sie` and `sie` are different lines. A sense may end with `→` and words the
+ * file lists, which it points at as `see` (`なかった`, "past of ない" → `ない`).
+ * A word may have other spellings after a `/`, which find its line
+ * (`ようとする/うとする`: `行こうとする` has no `よう`).
  */
 
 export type GrammarEntry = {
   readonly lemma: string;
   readonly pos: UdPos;
   readonly senses: ReadonlyArray<string>;
+  /** Other spellings that find the line (`うとする` for `ようとする`). */
+  readonly forms?: ReadonlyArray<string>;
+  /** Each sense's `see` words, by the sense's index, when any has some. */
+  readonly see?: ReadonlyArray<ReadonlyArray<string>>;
 };
 
 /**
@@ -50,7 +57,7 @@ export const parseGrammarFile = (
   file: string,
 ): ReadonlyArray<GrammarEntry> => {
   const seen = new Set<string>();
-  return text.split("\n").flatMap((raw, i) => {
+  const entries = text.split("\n").flatMap((raw, i) => {
     const line = raw.trimEnd();
     if (line.trim() === "" || line.trimStart().startsWith("#")) return [];
     const where = `${file}:${i + 1}`;
@@ -59,18 +66,51 @@ export const parseGrammarFile = (
       throw new Error(`${where}: expected 3 tab-separated columns`);
     }
     const [word, pos, meanings] = columns as [string, string, string];
-    const lemma = cleanWord(word);
-    if (lemma === "") throw new Error(`${where}: empty word`);
+    const [lemma = "", ...forms] = word.split("/").map(cleanWord);
+    if (lemma === "" || forms.includes("")) {
+      throw new Error(`${where}: empty word`);
+    }
     if (!POS.has(pos))
       throw new Error(`${where}: unknown part of speech ${pos}`);
     const key = `${lemma}\u0000${pos}`;
     if (seen.has(key))
       throw new Error(`${where}: ${lemma} ${pos} is listed twice`);
     seen.add(key);
-    const senses = meanings.split(" | ").map((s) => s.trim());
-    if (senses.some((s) => s === "")) throw new Error(`${where}: empty sense`);
-    return [{ lemma, pos: pos as UdPos, senses }];
+    const parts = meanings.split(" | ").map((s) => {
+      const [sense = "", targets] = s.split("→");
+      return {
+        sense: sense.trim(),
+        see:
+          targets === undefined
+            ? []
+            : targets.split(",").map((target) => cleanWord(target)),
+      };
+    });
+    if (parts.some(({ sense, see }) => sense === "" || see.includes(""))) {
+      throw new Error(`${where}: empty sense`);
+    }
+    const senses = parts.map(({ sense }) => sense);
+    const see = parts.map(({ see }) => see);
+    return [
+      {
+        where,
+        lemma,
+        pos: pos as UdPos,
+        senses,
+        ...(forms.length > 0 ? { forms } : {}),
+        ...(see.some((words) => words.length > 0) ? { see } : {}),
+      },
+    ];
   });
+  // `see` names words of this file, so each has an entry.
+  const lemmas = new Set(entries.map((entry) => entry.lemma));
+  for (const { where, see } of entries) {
+    const missing = see?.flat().find((target) => !lemmas.has(target));
+    if (missing !== undefined) {
+      throw new Error(`${where}: → ${missing}, which the file does not list`);
+    }
+  }
+  return entries.map(({ where: _, ...entry }) => entry);
 };
 
 /** The grammar entries of a language; none when it has no file. */

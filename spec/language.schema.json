@@ -200,6 +200,56 @@
               },
               "description": "Which of the dictionary's detail fields hold a morpheme's base forms, looked up in this order (UniDic: 10, the written base form `いる`; 7, the lemma `要る`)."
             },
+            "readingField": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991,
+              "description": "Which detail field holds the reading of a morpheme's lemma (UniDic: 6, `ニン` for `人` after a number). Entries with that reading rank first among those the morpheme finds (`人` as にん, not ひと). Katakana and hiragana compare alike."
+            },
+            "numbers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Parts of speech of numerals, as in `pos` (`名詞-数詞`). A run of them is one number (`1|0` is `10`), shown by one entry or none, and the word after it is read as a counter (`人` \"counter for people\" in `3人`)."
+            },
+            "numerals": {
+              "type": "object",
+              "properties": {
+                "digits": {
+                  "type": "string",
+                  "description": "The characters for 0 to 9, in order (`〇一二三四五六七八九`)."
+                },
+                "units": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "The characters for ten, a hundred and a thousand (`十`, `百`, `千`), written without a 1 before them."
+                },
+                "myriads": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "The characters for each fourth power of ten from 10,000 on (`万`, `億`, `兆`), written with a 1 before them."
+                }
+              },
+              "required": [
+                "digits",
+                "units",
+                "myriads"
+              ],
+              "additionalProperties": false,
+              "description": "How the language writes a number in characters, to find a number written in digits under its entry (`10` as `十`, `10月` as `十月`)."
+            },
+            "counters": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Wiktionary's parts of speech for a counter (`counter`: `人` \"counter for number of people\"). For the word after a number, entries of these come before its other entries (`年` \"years\" before `年` \"a year\")."
+            },
             "join": {
               "type": "array",
               "items": {

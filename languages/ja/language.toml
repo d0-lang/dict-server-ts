@@ -18,9 +18,21 @@ dictionary = "unidic"
 # UniDic's written base form (いる for いら) and lemma (要る): Wiktionary has
 # words under either.
 baseFields = [10, 7]
+# UniDic's lemma reading, in katakana: it tells the readings of one spelling
+# apart by context (人 as ニン after a number, ヒト alone; 5 as ゴ, not いつ).
+readingField = 6
+# Numerals, which UniDic gives digit by digit (1|9|9|8): a run is one number.
+numbers = ["名詞-数詞"]
+# Digits as kanji, to find 10 under 十: Wiktionary lists some words with
+# digits (10月 under 十月), but no number by itself.
+numerals = { digits = "〇一二三四五六七八九", units = ["十", "百", "千"], myriads = ["万", "億", "兆"] }
+# Wiktionary's part of speech for the word after a number (人 "counter for
+# number of people"): those entries come first there.
+counters = ["counter"]
 # UniDic's parts of speech as UD tags, to tell when a kana word's own entries
 # miss the analyzer's reading (もの the noun, with only particle entries).
-upos = { "名詞" = ["NOUN", "PROPN", "NUM"], "代名詞" = ["PRON"], "動詞" = ["VERB"], "形容詞" = ["ADJ"], "形状詞" = ["ADJ"], "副詞" = ["ADV"], "連体詞" = ["DET", "ADJ"], "接続詞" = ["CCONJ", "SCONJ"], "感動詞" = ["INTJ"], "助動詞" = ["AUX"], "助詞" = ["PART", "ADP", "CCONJ", "SCONJ"] }
+# A noun that may be an adverb (ほとんど, 今日) is both.
+upos = { "名詞" = ["NOUN", "PROPN", "NUM"], "名詞-普通名詞-副詞可能" = ["ADV"], "代名詞" = ["PRON"], "動詞" = ["VERB"], "形容詞" = ["ADJ"], "形状詞" = ["ADJ"], "副詞" = ["ADV"], "連体詞" = ["DET", "ADJ"], "接続詞" = ["CCONJ", "SCONJ"], "感動詞" = ["INTJ"], "助動詞" = ["AUX"], "助詞" = ["PART", "ADP", "CCONJ", "SCONJ"] }
 # Morphemes are short units (食べ|まし|た); these make words of them, as a
 # reader takes a word. Particles stay words of their own.
 prefixes = ["接頭辞"]

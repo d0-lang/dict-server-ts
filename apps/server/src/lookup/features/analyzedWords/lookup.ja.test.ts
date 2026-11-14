@@ -1,9 +1,8 @@
 import { assert, describe, it } from "@effect/vitest";
-import { languageOf, lemmas } from "../testing/dictionary.ts";
-import { dictionary } from "../testing/dictionary.ts";
-import { japanese } from "../testing/japanese.ts";
 import { FormSource } from "@dict/core/schema";
-import { lookupWord } from "../lookup.ts";
+import { lookupWord } from "../../lookup.ts";
+import { dictionary, languageOf, lemmas } from "../../testing/dictionary.ts";
+import { japanese } from "../../testing/japanese.ts";
 
 const lookup = (word: string, context?: string) =>
   lookupWord(
@@ -201,23 +200,6 @@ describe("words found by the analyzer, in a script without spaces", () => {
     );
     assert.strictEqual(entries[0]!.lemma, "によると");
     assert.deepStrictEqual(entries[0]!.match, ["によると"]);
-  });
-
-  it("joins a number and its counter, and explains the counter", () => {
-    const db = dictionary([
-      ["日", "NOUN", [], ["day of the month"]],
-      ["七日", "NOUN", ["7日"], ["seventh day"]],
-    ]);
-    // the analyzer: 2|7|日, a digit each
-    const { entries } = lookupWord(
-      db,
-      languageOf("ja_en"),
-      "日",
-      "10月27日に会った。",
-      1,
-    );
-    assert.strictEqual(entries[0]!.lemma, "日");
-    assert.deepStrictEqual(entries[0]!.match, ["27日"]);
   });
 
   it("puts a kana word's kanji lemma first, when its own entries miss the analyzer's part of speech", () => {
@@ -475,5 +457,58 @@ describe("words found by the analyzer, in a script without spaces", () => {
       { text: "機械", entries: [0] },
       { text: "屋", entries: [1] },
     ]);
+  });
+
+  it("lets the plain lookup answer a piece over two words spelled like the first", () => {
+    // the segmenter: ポロ|ポロポロ|って; the analyzer: ポロポロ|ポロっ|て.
+    // The piece ポロポロ runs across both, and is spelled as the first.
+    const db = dictionary([["ぽろぽろ", "ADV", ["ポロポロ"], ["crumbling"]]]);
+    const { entries, segments } = lookupWord(
+      db,
+      languageOf("ja_en"),
+      "ポロポロ",
+      "そばからポロポロポロって入れちゃう。",
+      1,
+    );
+    assert.deepStrictEqual(
+      entries.map((entry) => entry.lemma),
+      ["ぽろぽろ"],
+    );
+    assert.strictEqual(entries[0]!.match, undefined);
+    assert.strictEqual(segments, undefined);
+  });
+
+  it("places the click by where the copy is, not by the server's segmenter", () => {
+    // Chrome sends どうし and った; Bun's segmenter cuts どう|した|の and
+    // ことに|な|っ|た, so neither is one of its words
+    const db = dictionary([
+      ["どうしたの", "X", [], ["what's the matter?"]],
+      ["同士", "NOUN", ["どうし"], ["fellow"]],
+      ["成る", "VERB", ["なる", "なっ"], ["to become"]],
+    ]);
+    const language = languageOf("ja_en");
+    const first = (word: string, context: string) =>
+      lookupWord(db, language, word, context, 1).entries[0];
+    assert.strictEqual(first("どうし", "どうしたの")!.lemma, "どうしたの");
+    assert.deepStrictEqual(first("った", "ことになった")!.match, ["なった"]);
+  });
+
+  it("puts a kana word's own reading first among its kanji lemma's entries", () => {
+    // ところ is only redirected to 所, which Wiktionary lists as しょ first
+    const db = dictionary([
+      ["所", "X", [], ["place (suffix)"], "suffix", undefined, "しょ"],
+      ["所", "NOUN", [], ["a place"], "noun", undefined, "ところ"],
+    ]);
+    db.$client.run(
+      "INSERT INTO forms VALUES ('ところ', 1, 6), ('ところ', 2, 6)",
+    );
+    const { entries } = lookupWord(
+      db,
+      languageOf("ja_en"),
+      "ところ",
+      "そういうところが好き。",
+      1,
+    );
+    assert.strictEqual(entries[0]!.pron?.reading, "ところ");
   });
 });

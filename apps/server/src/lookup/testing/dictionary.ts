@@ -28,6 +28,8 @@ export type Word = readonly [
   sourcePos?: string,
   /** The headword's grammar as a UD feature string, such as `Gender=Masc`. */
   features?: string,
+  /** Its reading (`pron.reading`), such as kana for Japanese. */
+  reading?: string,
 ];
 
 /** A dictionary; each sense is one gloss, by default the lemma in brackets. */
@@ -42,6 +44,7 @@ export const dictionary = (words: ReadonlyArray<Word>): DictionaryDb => {
         glosses = [`[${lemma}]`],
         sourcePos = "",
         features,
+        reading,
       ],
       i,
     ) => {
@@ -54,6 +57,12 @@ export const dictionary = (words: ReadonlyArray<Word>): DictionaryDb => {
         caseClass(lemma),
         features ?? null,
       ]);
+      if (reading !== undefined) {
+        db.$client.run(
+          "INSERT INTO pronunciations VALUES (?, 0, 'reading', ?)",
+          [id, reading],
+        );
+      }
       glosses.forEach((gloss, idx) =>
         db.$client.run("INSERT INTO senses VALUES (?, ?, ?, NULL)", [
           id,

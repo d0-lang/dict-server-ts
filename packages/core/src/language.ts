@@ -178,6 +178,45 @@ const Context = doc(
             Schema.Array(Schema.Int),
             "Which of the dictionary's detail fields hold a morpheme's base forms, looked up in this order (UniDic: 10, the written base form `いる`; 7, the lemma `要る`).",
           ),
+          readingField: Schema.optionalKey(
+            doc(
+              Schema.Int,
+              "Which detail field holds the reading of a morpheme's lemma (UniDic: 6, `ニン` for `人` after a number). Entries with that reading rank first among those the morpheme finds (`人` as にん, not ひと). Katakana and hiragana compare alike.",
+            ),
+          ),
+          numbers: orDefault(
+            doc(
+              strings,
+              'Parts of speech of numerals, as in `pos` (`名詞-数詞`). A run of them is one number (`1|0` is `10`), shown by one entry or none, and the word after it is read as a counter (`人` "counter for people" in `3人`).',
+            ),
+            [],
+          ),
+          numerals: Schema.optionalKey(
+            doc(
+              Schema.Struct({
+                digits: doc(
+                  Schema.String,
+                  "The characters for 0 to 9, in order (`〇一二三四五六七八九`).",
+                ),
+                units: doc(
+                  strings,
+                  "The characters for ten, a hundred and a thousand (`十`, `百`, `千`), written without a 1 before them.",
+                ),
+                myriads: doc(
+                  strings,
+                  "The characters for each fourth power of ten from 10,000 on (`万`, `億`, `兆`), written with a 1 before them.",
+                ),
+              }),
+              "How the language writes a number in characters, to find a number written in digits under its entry (`10` as `十`, `10月` as `十月`).",
+            ),
+          ),
+          counters: orDefault(
+            doc(
+              strings,
+              'Wiktionary\'s parts of speech for a counter (`counter`: `人` "counter for number of people"). For the word after a number, entries of these come before its other entries (`年` "years" before `年` "a year").',
+            ),
+            [],
+          ),
           join: orDefault(
             doc(
               Schema.Array(
@@ -217,7 +256,7 @@ const Context = doc(
           suffixes: orDefault(
             doc(
               strings,
-              "Parts of speech of morphemes that make a new word of the word before them (`接尾辞`: `機械` + `屋` \"mechanic\"). Such a word without an entry of its own is shown by its parts, each with its own entries, not as its head.",
+              'Parts of speech of morphemes that make a new word of the word before them (`接尾辞`: `機械` + `屋` "mechanic"). Such a word without an entry of its own is shown by its parts, each with its own entries, not as its head.',
             ),
             [],
           ),
