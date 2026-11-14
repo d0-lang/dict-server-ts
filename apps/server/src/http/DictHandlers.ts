@@ -4,6 +4,7 @@ import { Api } from "../api/Api.ts";
 import { AppConfig, loadConfig } from "../config.ts";
 import { Dictionaries } from "../lookup/Dictionaries.ts";
 import {
+  LabelsResponse,
   Legal,
   LookupError,
   LookupResponse,
@@ -64,12 +65,39 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
             languages: [...config.languages],
             verification_urls: [...config.verificationUrls],
             sources: SOURCES.map((source) => ({ ...source })),
-            ...(config.context
-              ? { features: ["context", "context-match"] }
-              : {}),
+            features: [
+              ...(config.context ? ["context", "context-match"] : []),
+              "labels",
+            ],
             ...(legal !== undefined ? { legal } : {}),
           }),
         ).pipe(Effect.orDie),
+      getLabels: ({ query }) => {
+        const pairs = [
+          ...new Set(
+            (query.lang ?? "")
+              .split(",")
+              .map((pair) => pair.trim())
+              .filter((pair) => pair !== ""),
+          ),
+        ];
+        if (pairs.length === 0) {
+          return Effect.fail(new LookupError({ error: "bad_request" }));
+        }
+        // A pair the server doesn't serve is left out.
+        return Effect.succeed(
+          new LabelsResponse({
+            labels: Object.fromEntries(
+              pairs.flatMap((pair) => {
+                const labels = config.languages.includes(pair)
+                  ? dictionaries.labels(pair)
+                  : undefined;
+                return labels === undefined ? [] : [[pair, { ...labels }]];
+              }),
+            ),
+          }),
+        );
+      },
       lookup: ({ query }) =>
         !query.word || !query.lang
           ? Effect.fail(new LookupError({ error: "bad_request" }))
@@ -104,6 +132,8 @@ export const DictHandlersMemory = DictHandlersNoDeps.pipe(
     ),
     Layer.succeed(Dictionaries, {
       lookup: (_pair, word) => lookupStub(word),
+      // German shows gender as the article; `c` is the rare common gender.
+      labels: () => ({ c: { name: "common gender" } }),
     }),
   ]),
 );

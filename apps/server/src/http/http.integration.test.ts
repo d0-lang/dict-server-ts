@@ -73,6 +73,7 @@ describe("HTTP API", () => {
     assert.deepStrictEqual((parsed as { features?: Array<string> }).features, [
       "context",
       "context-match",
+      "labels",
     ]);
     assert.deepStrictEqual((parsed as { sources?: unknown }).sources, [
       {
@@ -153,6 +154,28 @@ describe("HTTP API", () => {
         source: "https://commons.wikimedia.org/wiki/File:De-Mutter.ogg",
       },
     ]);
+  });
+
+  it("GET /v1/get-labels explains the labels of the pairs it serves", async () => {
+    const response = await handler(
+      new Request("http://localhost/v1/get-labels?lang=ru_en,de_en"),
+    );
+    assert.strictEqual(response.status, 200);
+    assert.isNull(response.headers.get("x-signature"));
+    // ru_en isn't served here, so it's left out.
+    assert.deepStrictEqual(await response.json(), {
+      labels: { de_en: { c: { name: "common gender" } } },
+    });
+  });
+
+  it("GET /v1/get-labels needs a pair", async () => {
+    for (const query of ["", "?lang=", "?lang=,"]) {
+      const response = await handler(
+        new Request(`http://localhost/v1/get-labels${query}`),
+      );
+      assert.strictEqual(response.status, 400, query);
+      assert.deepStrictEqual(await response.json(), { error: "bad_request" });
+    }
   });
 
   it("GET /v1/lookup accepts a context", async () => {

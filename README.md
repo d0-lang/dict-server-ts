@@ -8,7 +8,7 @@ Bun + Effect 4 dictionary protocol PoC: the HTTP server and the importer that bu
 | `apps/importer` (`@dict/importer`) | builds `data/<pair>.sqlite` from a wiktextract dump |
 | `packages/core` (`@dict/core`) | the dictionary file format both share: schema, `lookupKey`, opening and creating files |
 | `spec/` | what any implementation needs as data: the dictionary file format (`dictionary/`: `schema.sql`, `format.json`, `lookupKey` test vectors) and the language record's JSON Schema (`language.schema.json`, written by `bun run spec`) |
-| `languages/<lang>/` | per-language data: `language.toml` (the importer's and the server's settings; keys in `spec/language.schema.json`), `grammar.tsv`, the profile (`profile.md`), benchmark gold data |
+| `languages/<lang>/` | per-language data: `language.toml` (the importer's and the server's settings; keys in `spec/language.schema.json`), `grammar.tsv`, what its labels mean (`labels.toml`), the profile (`profile.md`), benchmark gold data. `languages/labels.<target>.toml` names the labels every language shares |
 | `data/` | dictionary files, raw dumps and the identity key (gitignored) |
 
 The importer and the server only share `@dict/core`; `boundaries.test.ts` fails on any other import between them (the server's tests may use the importer to build dictionaries). Run every script from the repo root: `data/` and `.env` are read from the working directory.
@@ -24,7 +24,8 @@ Settings live in `.env` (`PORT`, `SERVER_NAME`, `LANGUAGES`, `INCLUDE_LEGAL`, `C
 Ed25519 identity is stored at `IDENTITY_FILE` (default `data/identity.json`, gitignored). A rebuild/restart reloads that file instead of minting a new key.
 
 - `GET /v1/get-key` — unsigned Ed25519 public key (base64)
-- `GET /v1/get-meta` — signed metadata (`X-Nonce` required, `X-Signature` over exact body bytes); lists `"features": ["context"]` unless `CONTEXT=false`
+- `GET /v1/get-meta` — signed metadata (`X-Nonce` required, `X-Signature` over exact body bytes); lists `"features": ["context", "context-match", "labels"]` (the first two unless `CONTEXT=false`) and `sources`
+- `GET /v1/get-labels?lang=<pair>[,<pair>...]` — what the labels each served pair can show mean (`{"labels": {"ru_en": {"pf": {"name": "perfective", "text": "..."}}}}`), unsigned; `features` lists `"labels"`. The server reads which label strings a pair's entries have at startup (`apps/server/src/lookup/labels.ts`), and names each from `languages/<lang>/labels.toml`, then `languages/labels.<target>.toml`; a combination none lists (`m/f`) is named by its parts
 - `GET /v1/lookup?word=<word>&lang=<pair>[&context=<sentence>]` — entries from `data/<pair>.sqlite`, and `segments` for a split compound. Without `LANGUAGES`, every `data/<pair>.sqlite` is served; a pair listed in `LANGUAGES` needs its file: build it first, see below
 
 `context` is never logged: Effect's request logger drops the query string, and no tracer is set up. If you add one, redact `context`. The privacy text (`PRIVACY_SHORT`) has to say that full sentences are sent.

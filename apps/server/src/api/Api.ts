@@ -7,6 +7,7 @@ import {
 } from "effect/http-api";
 import { Schema } from "effect";
 import {
+  LabelsResponse,
   LookupError,
   LookupResponse,
   Meta,
@@ -38,6 +39,14 @@ export class DictApi extends HttpApiGroup.make("dict")
         at: Schema.optionalKey(Schema.String),
       },
       success: LookupResponse,
+      error: LookupError,
+    }),
+    HttpApiEndpoint.get("getLabels", "/get-labels", {
+      query: {
+        // One or more pairs, joined by commas. Optional so a missing one gets the protocol's error body.
+        lang: Schema.optionalKey(Schema.String),
+      },
+      success: LabelsResponse,
       error: LookupError,
     }),
   )

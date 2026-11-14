@@ -6,7 +6,9 @@ import { openDictionary, type DictionaryDb } from "@dict/core/DictionaryDb";
 import { pairLanguage, type Language } from "@dict/core/language";
 import { lookupWord } from "./lookup.ts";
 import { warmCompounds } from "./features/compounds/stems.ts";
+import type { LabelExplanation } from "@dict/core/labels";
 import type { LookupBody } from "../domain/schemas.ts";
+import { pairLabels } from "./labels.ts";
 
 /** The dictionary files of the language pairs this server lists. */
 export class Dictionaries extends Context.Service<
@@ -22,6 +24,10 @@ export class Dictionaries extends Context.Service<
       context?: string,
       at?: number,
     ) => LookupBody;
+    /** What the pair's labels mean (`/v1/get-labels`); undefined for a pair it doesn't serve. */
+    readonly labels: (
+      pair: string,
+    ) => Readonly<Record<string, LabelExplanation>> | undefined;
   }
 >()("server/dictionary/Dictionaries") {
   /**
@@ -29,6 +35,7 @@ export class Dictionaries extends Context.Service<
    * language's record (`languages/<lang>/language.toml`, defaults when there
    * is none); a missing file or an invalid record is fatal.
    * With `context` on, the phrase index is built here, not on the first lookup.
+   * So are the label explanations, and an invalid labels file is fatal too.
    */
   static readonly layer = (dir = DATA_DIR) =>
     Layer.effect(
@@ -37,7 +44,11 @@ export class Dictionaries extends Context.Service<
         const { languages, context } = yield* AppConfig;
         const files = new Map<
           string,
-          { readonly db: DictionaryDb; readonly language: Language }
+          {
+            readonly db: DictionaryDb;
+            readonly language: Language;
+            readonly labels: Readonly<Record<string, LabelExplanation>>;
+          }
         >();
         for (const pair of languages) {
           const db = yield* openDictionary(`${dir}/${pair}.sqlite`);
@@ -45,7 +56,12 @@ export class Dictionaries extends Context.Service<
           if (context) phraseIndex(db, language);
           const rules = compoundRules(language);
           if (rules !== undefined) warmCompounds(db, rules);
-          files.set(pair, { db, language });
+          const labels = yield* Effect.try({
+            try: () => pairLabels(db, language),
+            catch: (cause) =>
+              new Error(`labels of ${pair}: ${String(cause)}`, { cause }),
+          });
+          files.set(pair, { db, language, labels });
         }
         return Dictionaries.of({
           lookup: (pair, word, sentence, at) => {
@@ -54,6 +70,7 @@ export class Dictionaries extends Context.Service<
               ? { entries: [] }
               : lookupWord(file.db, file.language, word, sentence, at);
           },
+          labels: (pair) => files.get(pair)?.labels,
         });
       }),
     ).pipe(Layer.orDie);

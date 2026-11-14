@@ -87,6 +87,22 @@ export class LookupResponse extends Schema.Class<LookupResponse>(
   segments: Schema.optionalKey(Schema.Array(LookupSegment)),
 }) {}
 
+/** What a label means: `name` at most 60 characters, `text` at most 1000. */
+export const LabelExplanation = Schema.Struct({
+  name: Schema.String,
+  text: Schema.optionalKey(Schema.String),
+});
+
+/** `/v1/get-labels`: per pair served, label string -> its explanation. */
+export class LabelsResponse extends Schema.Class<LabelsResponse>(
+  "server/domain/LabelsResponse",
+)({
+  labels: Schema.Record(
+    Schema.String,
+    Schema.Record(Schema.String, LabelExplanation),
+  ),
+}) {}
+
 export class LookupError extends Schema.Class<LookupError>(
   "server/domain/LookupError",
 )(
