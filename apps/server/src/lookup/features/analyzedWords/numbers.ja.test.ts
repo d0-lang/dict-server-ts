@@ -53,6 +53,9 @@ describe("numbers and their counters", () => {
     ["四月一日", "PROPN", [], ["a surname"], "name", undefined, "わたぬき"],
     ["四月", "NOUN", [], ["April"], "noun", undefined, "しがつ"],
     ["日", "X", [], ["day of the month"], "counter", undefined, "にち"],
+    ["G", "NOUN", [], ["gravity"], "noun", undefined, "ジー"],
+    ["グラム", "NOUN", ["g"], ["gram"], "noun"],
+    ["グラム", "X", ["g"], ["gram"], "counter"],
     [
       "第二次世界大戦",
       "PROPN",
@@ -114,6 +117,14 @@ describe("numbers and their counters", () => {
       "-th",
     );
     assert.deepStrictEqual(shown("つ", "じゃあ3つ目。").entries, ["つ"]);
+  });
+
+  it("finds a unit in Latin letters by its spelling, not as the letter is read", () => {
+    // the analyzer reads `g` as ジー, which is the entry for gravity alone
+    assert.deepStrictEqual(shown("28g", "重さは28gです。"), {
+      entries: ["グラム", "G ジー", "グラム"],
+      segments: ["28: ", "g: グラム, G, グラム"],
+    });
   });
 
   it("gives a number one entry, read as the analyzer reads it, or none", () => {

@@ -156,16 +156,28 @@ export const numberLookup = (c: Click): Answer => {
     const main = overlaps(p);
     const [part] = morphemeParts(c, p, shown);
     // After the number: its counter, and what follows that (`目` "-th"
-    // in `3|つ|目`).
+    // in `3|つ|目`). A unit in Latin letters is every entry its spelling
+    // finds, with no reading to rank them by: the analyzer reads `g` as the
+    // letter's name, and the dictionary has it under `グラム`.
     const counter = pieces.slice(0, i).some((q) => q.some(isNumber));
+    const latin = /^\p{Script=Latin}+$/u.test(part!.text);
+    const found = latin
+      ? [
+          ...new Set([
+            ...part!.ids,
+            ...c
+              .rows(part!.text)
+              .map((row) => row.id)
+              .filter((id) => !shown.has(id)),
+          ]),
+        ]
+      : part!.ids;
     return {
       text: part!.text,
       ids: counter
         ? c.byReading(
-            part!.ids.filter(
-              (id) => !["PROPN", "SYM"].includes(c.infoOf(id).pos),
-            ),
-            [p[0]!.reading],
+            found.filter((id) => !["PROPN", "SYM"].includes(c.infoOf(id).pos)),
+            latin ? [] : [p[0]!.reading],
             (id) =>
               settings.counters.includes(c.infoOf(id).sourcePos)
                 ? 2
