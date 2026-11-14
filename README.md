@@ -19,7 +19,7 @@ cp .env.example .env   # already gitignored; Bun loads it automatically
 bun run dev
 ```
 
-Settings live in `.env` (`PORT`, `SERVER_NAME`, `LANGUAGES`, `INCLUDE_LEGAL`, `CONTEXT`, legal copy/links, `VERIFICATION_URLS`, `IDENTITY_FILE`). See `.env.example`.
+Settings live in `.env` (`PORT`, `SERVER_NAME`, `LANGUAGES`, `INCLUDE_LEGAL`, `CONTEXT`, the legal documents and links, `VERIFICATION_URLS`, `IDENTITY_FILE`). See `.env.example`.
 
 Ed25519 identity is stored at `IDENTITY_FILE` (default `data/identity.json`, gitignored). A rebuild/restart reloads that file instead of minting a new key.
 
@@ -28,7 +28,11 @@ Ed25519 identity is stored at `IDENTITY_FILE` (default `data/identity.json`, git
 - `GET /v1/get-labels?lang=<pair>[,<pair>...]` — what the labels each served pair can show mean (`{"labels": {"ru_en": {"pf": {"name": "perfective", "text": "..."}}}}`), unsigned; `features` lists `"labels"`. The server reads which label strings a pair's entries have at startup (`apps/server/src/lookup/labels.ts`), and names each from `languages/<lang>/labels.toml`, then `languages/labels.<target>.toml`; a combination none lists (`m/f`) is named by its parts
 - `GET /v1/lookup?word=<word>&lang=<pair>[&context=<sentence>]` — entries from `data/<pair>.sqlite`, and `segments` for a split compound. Without `LANGUAGES`, every `data/<pair>.sqlite` is served; a pair listed in `LANGUAGES` needs its file: build it first, see below
 
-`context` is never logged: Effect's request logger drops the query string, and no tracer is set up. If you add one, redact `context`. The privacy text (`PRIVACY_SHORT`) has to say that full sentences are sent.
+The server writes one log line per request: the time, the method, the path without its query string, and the status (Effect's request logger, which `HttpRouter.toWebHandler` adds; no IP address). So `word` and `context` are not in the server's own log, and no tracer is set up; if you add one, redact them. A web server or proxy in front logs the full address by default, query string included, and Docker keeps the server's lines without limit unless log rotation is set.
+
+## Legal texts
+
+`legal/privacy.md` and `legal/terms.md` are the starting text of the privacy policy and terms for anyone who runs a public server; `legal/README.md` says what to fill in and what your setup has to do for the texts to be true (proxy logs without the query string, log rotation, CDN, other sources). Publish the documents at `PRIVACY_LINK` and `TOS_LINK`, and point `PRIVACY_FILE` and `TOS_FILE` at their source text (default the files in `legal/`). `/v1/get-meta` sends the sha256 of each file as `privacy_hash` and `tos_hash`, so any edit makes clients pause lookups until the user has seen the notice; `PRIVACY_CHANGE` and `TOS_CHANGE` (at most 500 characters) summarise the change. The server refuses to start when a document can't be read, and warns while one still has `[[...]]` placeholders.
 
 ```bash
 bun run test

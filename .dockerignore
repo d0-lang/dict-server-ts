@@ -11,4 +11,6 @@
 !languages/*/language.toml
 !languages/*/labels.toml
 !languages/labels.*.toml
+!legal/privacy.md
+!legal/terms.md
 **/*.test.ts

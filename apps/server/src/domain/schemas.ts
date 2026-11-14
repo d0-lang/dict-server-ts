@@ -6,14 +6,13 @@ export class PublicKey extends Schema.Class<PublicKey>(
   key: Schema.String,
 }) {}
 
+/** Links to the hosted documents, and the sha256 of each one's source text. */
 export class Legal extends Schema.Class<Legal>("server/domain/Legal")({
-  privacy_hash: Schema.String,
-  tos_hash: Schema.String,
-  privacy_short: Schema.String,
-  tos_short: Schema.String,
   privacy_link: Schema.String,
-  tos_link: Schema.String,
+  privacy_hash: Schema.String,
   privacy_change: Schema.optionalKey(Schema.String),
+  tos_link: Schema.String,
+  tos_hash: Schema.String,
   tos_change: Schema.optionalKey(Schema.String),
 }) {}
 

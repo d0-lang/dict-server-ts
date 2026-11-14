@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterAll, assert, describe, it } from "@effect/vitest";
 import { Base64 } from "effect/encoding";
 import { DictHandlersMemory } from "./DictHandlers.ts";
@@ -84,6 +86,18 @@ describe("HTTP API", () => {
       },
       { name: "Wikimedia Commons", url: "https://commons.wikimedia.org/" },
     ]);
+
+    // The documents' source text, not short texts.
+    const sha256 = (file: string) =>
+      new Bun.CryptoHasher("sha256")
+        .update(readFileSync(join(import.meta.dirname, "../../../..", file)))
+        .digest("hex");
+    assert.deepStrictEqual((parsed as { legal?: unknown }).legal, {
+      privacy_link: "https://example.invalid/privacy",
+      privacy_hash: sha256("legal/privacy.md"),
+      tos_link: "https://example.invalid/tos",
+      tos_hash: sha256("legal/terms.md"),
+    });
 
     const keyResponse = await handler(
       new Request("http://localhost/v1/get-key"),

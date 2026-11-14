@@ -5,7 +5,6 @@ import { AppConfig, loadConfig } from "../config.ts";
 import { Dictionaries } from "../lookup/Dictionaries.ts";
 import {
   LabelsResponse,
-  Legal,
   LookupError,
   LookupResponse,
   Meta,
@@ -13,18 +12,9 @@ import {
 } from "../domain/schemas.ts";
 import { Identity } from "../identity/Identity.ts";
 import { SOURCES } from "../lookup/common/sources.ts";
+import { legalSection } from "../legal.ts";
 import { lookupStub } from "./lookupStub.ts";
 import { signedMetaResponse } from "./signMeta.ts";
-
-const sha256Hex = Effect.fnUntraced(function* (text: string) {
-  const digest = yield* Effect.tryPromise({
-    try: () => crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)),
-    catch: (cause) => new Error(`Failed to hash text: ${String(cause)}`),
-  });
-  return Array.from(new Uint8Array(digest), (byte) =>
-    byte.toString(16).padStart(2, "0"),
-  ).join("");
-});
 
 export const DictHandlersNoDeps = HttpApiBuilder.group(
   Api,
@@ -34,24 +24,8 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
     const config = yield* AppConfig;
     const dictionaries = yield* Dictionaries;
 
-    const privacy_hash = yield* sha256Hex(config.privacyShort);
-    const tos_hash = yield* sha256Hex(config.tosShort);
-    const legal = config.includeLegal
-      ? new Legal({
-          privacy_hash,
-          tos_hash,
-          privacy_short: config.privacyShort,
-          tos_short: config.tosShort,
-          privacy_link: config.privacyLink,
-          tos_link: config.tosLink,
-          ...(config.privacyChange !== undefined
-            ? { privacy_change: config.privacyChange }
-            : {}),
-          ...(config.tosChange !== undefined
-            ? { tos_change: config.tosChange }
-            : {}),
-        })
-      : undefined;
+    // A document that can't be read is fatal: its hash is what tells clients it changed.
+    const legal = yield* legalSection(config).pipe(Effect.orDie);
 
     return handlers.handleAll({
       getKey: () =>
