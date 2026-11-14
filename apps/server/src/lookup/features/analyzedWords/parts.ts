@@ -115,7 +115,9 @@ export const derivedWord = (c: Click, w: Word): boolean =>
  * Endings after the head that the grammar file lists together, as one part:
  * the longest run from `from` whose spelling has a line (`なかっ|た` is
  * `なかった`, "past of ない"), or whose last morpheme in its base form does
- * (`て|おい` is `ておく`, `て|い` is `ている`). Undefined when no run of two
+ * (`て|おい` is `ておく`, `て|い` is `ている`). Not by a base form that the
+ * ending only adds to, since it then says more than its base: `たら` is `た`
+ * and "if", so `なかっ|たら` is not `なかった`. Undefined when no run of two
  * or more has one.
  */
 const endingGroup = (
@@ -131,7 +133,10 @@ const endingGroup = (
       .map((m) => m.surface)
       .join("");
     const last = run.at(-1)!;
-    for (const form of [last.surface, ...last.bases].map((f) => before + f)) {
+    const bases = last.bases.filter(
+      (base) => last.surface === base || !last.surface.startsWith(base),
+    );
+    for (const form of [last.surface, ...bases].map((f) => before + f)) {
       const ids = grammarIds(c.db, lookupKey(form));
       if (ids.length > 0) return { end, ids };
     }

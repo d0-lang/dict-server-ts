@@ -9,7 +9,7 @@ describe("grammar phrases and endings", () => {
     ["ようとする", "AUX", ["うとする"], ["try to"], "grammar"],
     ["なかった", "AUX", [], ["past of ない"], "grammar"],
     ["ない", "AUX", [], ["not"], "grammar"],
-    ["た", "AUX", [], ["past"], "grammar"],
+    ["た", "AUX", ["たら"], ["past", "たら: if"], "grammar"],
     ["こと", "NOUN", [], ["thing"]],
     ["成る", "VERB", ["なる", "なっ"], ["to become"]],
     ["出る", "VERB", ["出よう"], ["to leave"]],
@@ -57,6 +57,12 @@ describe("grammar phrases and endings", () => {
     assert.deepStrictEqual(shown("言", "言えなかった。").segments, [
       "言え",
       "なかった",
+    ]);
+    // たら is its base た and "if": it stays out of the group
+    assert.deepStrictEqual(shown("言", "言えなかったら困る。").segments, [
+      "言え",
+      "なかっ",
+      "たら",
     ]);
   });
 });
