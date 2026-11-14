@@ -21,6 +21,8 @@ describe("numbers and their counters", () => {
     ["十月", "NOUN", ["10月"], ["October"], "noun", undefined, "じゅうがつ"],
     ["人", "NOUN", [], ["a person"], "noun", undefined, "ひと"],
     ["人", "X", [], ["counter for people"], "counter", undefined, "にん"],
+    // another word that 人 also spells: no counter of 3人
+    ["んちゅ", "X", ["人"], ["person (Okinawan)"], "suffix"],
     ["二人", "NOUN", ["2人"], ["two people"], "noun", undefined, "ににん"],
     ["二人", "NOUN", ["2人"], ["two people"], "noun", undefined, "ふたり"],
     ["冊", "X", [], ["books"], "counter", undefined, "さつ"],

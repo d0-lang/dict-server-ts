@@ -13,6 +13,10 @@ describe("grammar phrases and endings", () => {
     ["て", "PART", [], ["and"], "grammar"],
     // Wiktionary makes て a form of ている, by the stem of てる
     ["ている", "AUX", ["て"], ["be ...ing"], "grammar"],
+    ["てみる", "AUX", [], ["try doing"], "grammar"],
+    ["ちゃいけない", "AUX", [], ["must not"], "grammar"],
+    ["なくちゃいけない", "AUX", [], ["must"], "grammar"],
+    ["なきゃいけない", "AUX", [], ["must"], "grammar"],
     ["こと", "NOUN", [], ["thing"]],
     ["成る", "VERB", ["なる", "なっ"], ["to become"]],
     ["出る", "VERB", ["出よう"], ["to leave"]],
@@ -56,6 +60,28 @@ describe("grammar phrases and endings", () => {
     assert.strictEqual(shown("出", "出ようとした").first, "出る 出よう");
   });
 
+  it("takes the longer construction, which may mean the opposite", () => {
+    // なくちゃいけない "must" holds ちゃいけない "must not"
+    assert.strictEqual(
+      shown("ちゃ", "行かなくちゃいけない。").first,
+      "なくちゃいけない なくちゃいけない",
+    );
+    assert.strictEqual(
+      shown("いけ", "行かなくちゃいけない。").first,
+      "なくちゃいけない なくちゃいけない",
+    );
+    // なきゃ is one morpheme, with the base ない
+    assert.strictEqual(
+      shown("なきゃ", "出なきゃいけない。").first,
+      "なきゃいけない なきゃいけない",
+    );
+    // without なく before it, "must not"
+    assert.strictEqual(
+      shown("ちゃ", "行っちゃいけない。").first,
+      "ちゃいけない ちゃいけない",
+    );
+  });
+
   it("shows an ending by its own line, not by a line it is a form of", () => {
     const { entries, segments } = lookupWord(
       words,
@@ -75,6 +101,11 @@ describe("grammar phrases and endings", () => {
     assert.deepStrictEqual(shown("言", "言えなかった。").segments, [
       "言え",
       "なかった",
+    ]);
+    // by the base form of the last ending: みよう is みる
+    assert.deepStrictEqual(shown("出", "出てみよう。").segments, [
+      "出",
+      "てみよう",
     ]);
     // たら is its base た and "if": it stays out of the group
     assert.deepStrictEqual(shown("言", "言えなかったら困る。").segments, [
