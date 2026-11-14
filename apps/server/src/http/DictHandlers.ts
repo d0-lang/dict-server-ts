@@ -1,6 +1,6 @@
 import { Effect, Layer } from "effect";
-import { HttpApiBuilder } from "effect/http-api";
-import { Api } from "../api/Api.ts";
+import { HttpApiBuilder, HttpApiMiddleware } from "effect/http-api";
+import { Api, LookupBodyErrors } from "../api/Api.ts";
 import { AppConfig, loadConfig } from "../config.ts";
 import { Dictionaries } from "../lookup/Dictionaries.ts";
 import {
@@ -15,6 +15,11 @@ import { SOURCES } from "../lookup/common/sources.ts";
 import { legalSection } from "../legal.ts";
 import { lookupStub } from "./lookupStub.ts";
 import { signedMetaResponse } from "./signMeta.ts";
+
+const LookupBodyErrorsLive = HttpApiMiddleware.layerSchemaErrorTransform(
+  LookupBodyErrors,
+  () => Effect.fail(new LookupError({ error: "bad_request" })),
+);
 
 export const DictHandlersNoDeps = HttpApiBuilder.group(
   Api,
@@ -72,30 +77,38 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
           }),
         );
       },
-      lookup: ({ query }) =>
-        !query.word || !query.lang
-          ? Effect.fail(new LookupError({ error: "bad_request" }))
-          : !config.languages.includes(query.lang)
-            ? Effect.fail(new LookupError({ error: "unsupported_lang" }))
-            : Effect.succeed(
-                new LookupResponse(
-                  dictionaries.lookup(
-                    query.lang,
-                    query.word,
-                    config.context ? query.context : undefined,
-                    config.context ? clickedCopy(query.at) : undefined,
-                  ),
-                ),
-              ),
+      lookup: ({ payload }) => {
+        const { word, lang, context, at } = payload;
+        if (
+          typeof word !== "string" ||
+          word === "" ||
+          typeof lang !== "string" ||
+          lang === "" ||
+          (context !== undefined && typeof context !== "string")
+        ) {
+          return Effect.fail(new LookupError({ error: "bad_request" }));
+        }
+        if (!config.languages.includes(lang)) {
+          return Effect.fail(new LookupError({ error: "unsupported_lang" }));
+        }
+        return Effect.succeed(
+          new LookupResponse(
+            dictionaries.lookup(
+              lang,
+              word,
+              config.context ? context : undefined,
+              config.context ? clickedCopy(at) : undefined,
+            ),
+          ),
+        );
+      },
     });
   }),
-);
+).pipe(Layer.provideMerge(LookupBodyErrorsLive));
 
-/** `at` as a number; anything but a positive integer is ignored, as if it weren't sent. */
-const clickedCopy = (at: string | undefined): number | undefined => {
-  const n = at === undefined ? NaN : Number(at);
-  return Number.isInteger(n) && n > 0 ? n : undefined;
-};
+/** `at` as sent; anything but a positive integer is ignored, as if it weren't sent. */
+const clickedCopy = (at: unknown): number | undefined =>
+  typeof at === "number" && Number.isInteger(at) && at > 0 ? at : undefined;
 
 /** In-memory handlers for tests: a stub dictionary and `de_en`, whatever is in `data/`. */
 export const DictHandlersMemory = DictHandlersNoDeps.pipe(
