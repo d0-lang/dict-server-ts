@@ -1,0 +1,38 @@
+# Names of the labels every language shares, for pairs whose glosses are in
+# English (`/v1/get-labels`). A label is what an entry's `labels` shows: one
+# value (`pf`), or several values of one feature joined by `/` (`impf/pf`).
+# Combined labels not listed here are named by their parts ("masculine or
+# feminine"). A language's own texts go in `languages/<code>/labels.toml`.
+# `name` at most 60 characters, `text` at most 1000; plain text.
+
+[m]
+name = "masculine"
+
+[f]
+name = "feminine"
+
+[n]
+name = "neuter"
+
+[c]
+name = "common gender"
+
+[anim]
+name = "animate"
+
+[inan]
+name = "inanimate"
+
+[impf]
+name = "imperfective"
+
+[pf]
+name = "perfective"
+
+["impf/pf"]
+name = "imperfective and perfective"
+text = "The verb has one form for both aspects: the context shows whether the action is seen as a process or as a whole."
+
+[pl]
+name = "plural only"
+text = "The noun has no singular. It takes plural verbs and adjectives even when it means one thing."

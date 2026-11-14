@@ -4,25 +4,17 @@ import { Api } from "../api/Api.ts";
 import { AppConfig, loadConfig } from "../config.ts";
 import { Dictionaries } from "../lookup/Dictionaries.ts";
 import {
-  Legal,
+  LabelsResponse,
   LookupError,
   LookupResponse,
   Meta,
   PublicKey,
 } from "../domain/schemas.ts";
 import { Identity } from "../identity/Identity.ts";
+import { SOURCES } from "../lookup/common/sources.ts";
+import { legalSection } from "../legal.ts";
 import { lookupStub } from "./lookupStub.ts";
 import { signedMetaResponse } from "./signMeta.ts";
-
-const sha256Hex = Effect.fnUntraced(function* (text: string) {
-  const digest = yield* Effect.tryPromise({
-    try: () => crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)),
-    catch: (cause) => new Error(`Failed to hash text: ${String(cause)}`),
-  });
-  return Array.from(new Uint8Array(digest), (byte) =>
-    byte.toString(16).padStart(2, "0"),
-  ).join("");
-});
 
 export const DictHandlersNoDeps = HttpApiBuilder.group(
   Api,
@@ -32,24 +24,8 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
     const config = yield* AppConfig;
     const dictionaries = yield* Dictionaries;
 
-    const privacy_hash = yield* sha256Hex(config.privacyShort);
-    const tos_hash = yield* sha256Hex(config.tosShort);
-    const legal = config.includeLegal
-      ? new Legal({
-          privacy_hash,
-          tos_hash,
-          privacy_short: config.privacyShort,
-          tos_short: config.tosShort,
-          privacy_link: config.privacyLink,
-          tos_link: config.tosLink,
-          ...(config.privacyChange !== undefined
-            ? { privacy_change: config.privacyChange }
-            : {}),
-          ...(config.tosChange !== undefined
-            ? { tos_change: config.tosChange }
-            : {}),
-        })
-      : undefined;
+    // A document that can't be read is fatal: its hash is what tells clients it changed.
+    const legal = yield* legalSection(config).pipe(Effect.orDie);
 
     return handlers.handleAll({
       getKey: () =>
@@ -62,12 +38,40 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
             nonce: headers["x-nonce"],
             languages: [...config.languages],
             verification_urls: [...config.verificationUrls],
-            ...(config.context
-              ? { features: ["context", "context-match"] }
-              : {}),
+            sources: SOURCES.map((source) => ({ ...source })),
+            features: [
+              ...(config.context ? ["context", "context-match"] : []),
+              "labels",
+            ],
             ...(legal !== undefined ? { legal } : {}),
           }),
         ).pipe(Effect.orDie),
+      getLabels: ({ query }) => {
+        const pairs = [
+          ...new Set(
+            (query.lang ?? "")
+              .split(",")
+              .map((pair) => pair.trim())
+              .filter((pair) => pair !== ""),
+          ),
+        ];
+        if (pairs.length === 0) {
+          return Effect.fail(new LookupError({ error: "bad_request" }));
+        }
+        // A pair the server doesn't serve is left out.
+        return Effect.succeed(
+          new LabelsResponse({
+            labels: Object.fromEntries(
+              pairs.flatMap((pair) => {
+                const labels = config.languages.includes(pair)
+                  ? dictionaries.labels(pair)
+                  : undefined;
+                return labels === undefined ? [] : [[pair, { ...labels }]];
+              }),
+            ),
+          }),
+        );
+      },
       lookup: ({ query }) =>
         !query.word || !query.lang
           ? Effect.fail(new LookupError({ error: "bad_request" }))
@@ -98,10 +102,17 @@ export const DictHandlersMemory = DictHandlersNoDeps.pipe(
   Layer.provide([
     Identity.layerMemory,
     Layer.sync(AppConfig, () =>
-      AppConfig.of({ ...loadConfig(), languages: ["de_en"] }),
+      AppConfig.of({
+        ...loadConfig(),
+        languages: ["de_en"],
+        // The defaults: the templates and example.invalid links.
+        includeLegal: true,
+      }),
     ),
     Layer.succeed(Dictionaries, {
       lookup: (_pair, word) => lookupStub(word),
+      // German shows gender as the article; `c` is the rare common gender.
+      labels: () => ({ c: { name: "common gender" } }),
     }),
   ]),
 );

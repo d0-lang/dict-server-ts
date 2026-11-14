@@ -8,7 +8,7 @@ Bun + Effect 4 dictionary protocol PoC: the HTTP server and the importer that bu
 | `apps/importer` (`@dict/importer`) | builds `data/<pair>.sqlite` from a wiktextract dump |
 | `packages/core` (`@dict/core`) | the dictionary file format both share: schema, `lookupKey`, opening and creating files |
 | `spec/` | what any implementation needs as data: the dictionary file format (`dictionary/`: `schema.sql`, `format.json`, `lookupKey` test vectors) and the language record's JSON Schema (`language.schema.json`, written by `bun run spec`) |
-| `languages/<lang>/` | per-language data: `language.toml` (the importer's and the server's settings; keys in `spec/language.schema.json`), `grammar.tsv`, the profile (`profile.md`), benchmark gold data |
+| `languages/<lang>/` | per-language data: `language.toml` (the importer's and the server's settings; keys in `spec/language.schema.json`), `grammar.tsv`, what its labels mean (`labels.toml`), the profile (`profile.md`), benchmark gold data. `languages/labels.<target>.toml` names the labels every language shares |
 | `data/` | dictionary files, raw dumps and the identity key (gitignored) |
 
 The importer and the server only share `@dict/core`; `boundaries.test.ts` fails on any other import between them (the server's tests may use the importer to build dictionaries). Run every script from the repo root: `data/` and `.env` are read from the working directory.
@@ -19,15 +19,20 @@ cp .env.example .env   # already gitignored; Bun loads it automatically
 bun run dev
 ```
 
-Settings live in `.env` (`PORT`, `SERVER_NAME`, `LANGUAGES`, `INCLUDE_LEGAL`, `CONTEXT`, legal copy/links, `VERIFICATION_URLS`, `IDENTITY_FILE`). See `.env.example`.
+Settings live in `.env` (`PORT`, `SERVER_NAME`, `LANGUAGES`, `INCLUDE_LEGAL`, `CONTEXT`, the legal documents and links, `VERIFICATION_URLS`, `IDENTITY_FILE`). See `.env.example`.
 
 Ed25519 identity is stored at `IDENTITY_FILE` (default `data/identity.json`, gitignored). A rebuild/restart reloads that file instead of minting a new key.
 
 - `GET /v1/get-key` — unsigned Ed25519 public key (base64)
-- `GET /v1/get-meta` — signed metadata (`X-Nonce` required, `X-Signature` over exact body bytes); lists `"features": ["context"]` unless `CONTEXT=false`
+- `GET /v1/get-meta` — signed metadata (`X-Nonce` required, `X-Signature` over exact body bytes); lists `"features": ["context", "context-match", "labels"]` (the first two unless `CONTEXT=false`) and `sources`
+- `GET /v1/get-labels?lang=<pair>[,<pair>...]` — what the labels each served pair can show mean (`{"labels": {"ru_en": {"pf": {"name": "perfective", "text": "..."}}}}`), unsigned; `features` lists `"labels"`. The server reads which label strings a pair's entries have at startup (`apps/server/src/lookup/labels.ts`), and names each from `languages/<lang>/labels.toml`, then `languages/labels.<target>.toml`; a combination none lists (`m/f`) is named by its parts
 - `GET /v1/lookup?word=<word>&lang=<pair>[&context=<sentence>]` — entries from `data/<pair>.sqlite`, and `segments` for a split compound. Without `LANGUAGES`, every `data/<pair>.sqlite` is served; a pair listed in `LANGUAGES` needs its file: build it first, see below
 
-`context` is never logged: Effect's request logger drops the query string, and no tracer is set up. If you add one, redact `context`. The privacy text (`PRIVACY_SHORT`) has to say that full sentences are sent.
+The server writes one log line per request: the time, the method, the path without its query string, and the status (Effect's request logger, which `HttpRouter.toWebHandler` adds; no IP address). So `word` and `context` are not in the server's own log, and no tracer is set up; if you add one, redact them. A web server or proxy in front logs the full address by default, query string included, and Docker keeps the server's lines without limit unless log rotation is set.
+
+## Legal texts
+
+`legal/privacy.example.md` and `legal/terms.example.md` are templates of the privacy policy and terms for anyone who runs a public server; `legal/README.md` says what to fill in and what your setup has to do for the texts to be true (proxy logs without the query string, log rotation, CDN, other sources). `INCLUDE_LEGAL` is off by default, so clients treat the server as a test server. Turned on, the templates and `example.invalid` links stand in for the documents (`PRIVACY_FILE`, `TOS_FILE`, `PRIVACY_LINK`, `TOS_LINK`), which is enough to try the legal flow. For a public server, copy the templates outside git, fill them in, publish them at `PRIVACY_LINK` and `TOS_LINK`, and point `PRIVACY_FILE` and `TOS_FILE` at the copies (in Docker, mount them into the container). `/v1/get-meta` sends the sha256 of each file as `privacy_hash` and `tos_hash`, so any edit makes clients pause lookups until the user has seen the notice; `PRIVACY_CHANGE` and `TOS_CHANGE` (at most 500 characters) summarise the change. The server refuses to start when a document can't be read, and warns while one still has `[[...]]` placeholders.
 
 ```bash
 bun run test
@@ -64,10 +69,11 @@ What gets imported:
 - one entry per word + etymology + part of speech (wiktextract lines that repeat that key are merged); `pos` is mapped to a Universal Dependencies tag, `X` if unknown
 - senses: the most specific gloss of each sense; archaic senses and the language's historical stages (Middle/Old Polish) are skipped (see the last point below)
 - pronunciation: standard IPA (regional variants only when nothing else exists) and `upload.wikimedia.org` audio URLs
+- the Wiktionary page each entry comes from (`entries.pages`), for credit: a lookup links it in `sources` (`https://en.wiktionary.org/wiki/Mutter#German`, the section named by `name` in `language.toml`), and each recording in `pron.audio` carries its Commons file page as `source`. `/v1/get-meta` lists Wiktionary (CC BY-SA 4.0) and Wikimedia Commons in `sources` (`apps/server/src/lookup/common/sources.ts`); every link a lookup sends is on one of their origins
 - `forms`: every form from the lemma's inflection table plus the lemma itself, normalized (NFC, lowercase, diacritics kept); template rows, multi-word analytic forms and related words (diminutives, aspect partners, ...) are dropped. The `(form, entry_id)` primary key deduplicates
 - grammar words (articles, pronouns, possessives, contractions) come from a hand-written file, `languages/<lang>/grammar.tsv`, because Wiktionary only redirects their forms (`des` -> `der`, Polish `mi` -> `ja` "I"). Each line is one word as written, a UD part of speech and its senses. For a word in the file, Wiktionary's determiner, pronoun, preposition, conjunction, particle and auxiliary entries are dropped; its nouns, verbs and other content words stay. The file's entries are written first
 - form-of / alt-of senses that are grammar or spelling ("domu: genitive singular of dom") never become entries; they add `form -> lemma` rows when the lemma exists and the form was missing from its table. A word with no entry also passes on its own table, following chains, so `tańsi` (from the table of `tańszy`, comparative of `tani`) returns `tani` (turn all of this off with `--no-form-of-fallback`)
-- derived words and abbreviations get their own entry, recognised by the gloss opening (`isOwnEntryGloss` in `rules.ts`). A gloss that only names its base gets the base's meanings, one sense each ("diminutive of bal: log"): same part of speech first, following chains, skipping `synonym of` senses, and every etymology when the base has several. If nothing is found, the bare gloss stays
+- derived words and abbreviations get their own entry, recognised by the gloss opening (`isOwnEntryGloss` in `rules.ts`). A gloss that only names its base gets the base's meanings, one sense each ("diminutive of bal: log"): same part of speech first, following chains, skipping `synonym of` senses, and every etymology when the base has several. If nothing is found, the bare gloss stays. The entry then credits the base pages the meanings were read from as well as its own
 - a word whose only senses are historical keeps them, if it has no other entry
 - spellings with a usage label (obsolete, dialectal, poetic, ...), from alt-of senses or the headword line, only point at their standard word when they reach nothing else, so obsolete `für` ("alternative form of vor") doesn't add `vor` to `für`
 - table rows that aren't forms of the word are dropped: German verb tables list the perfect auxiliary (`haben`, `sein`)

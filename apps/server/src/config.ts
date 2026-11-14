@@ -27,14 +27,21 @@ export type AppConfigValues = {
   readonly port: number;
   readonly name: string;
   readonly languages: ReadonlyArray<string>;
+  /**
+   * Send the `legal` section. Off: clients tell users the server is for
+   * testing only. On without the settings below: the templates in `legal/`
+   * and `example.invalid` links stand in, for trying the legal flow.
+   */
   readonly includeLegal: boolean;
   /** Accept `context` on lookups and list the `context` feature. */
   readonly context: boolean;
   readonly verificationUrls: ReadonlyArray<string>;
-  readonly privacyShort: string;
-  readonly tosShort: string;
   readonly privacyLink: string;
   readonly tosLink: string;
+  /** The privacy policy's source text, as published at `privacyLink`; its sha256 is `privacy_hash`. */
+  readonly privacyFile: string;
+  /** The terms' source text, as published at `tosLink`; its sha256 is `tos_hash`. */
+  readonly tosFile: string;
   readonly privacyChange: string | undefined;
   readonly tosChange: string | undefined;
   readonly identityFile: string;
@@ -91,21 +98,15 @@ export const loadConfig = (): AppConfigValues => ({
   port: Number(envString("PORT", "3000")),
   name: envString("SERVER_NAME", "dict poc"),
   languages: languages(),
-  includeLegal: envBool("INCLUDE_LEGAL", true),
+  includeLegal: envBool("INCLUDE_LEGAL", false),
   context: envBool("CONTEXT", true),
   verificationUrls: envList("VERIFICATION_URLS", [
     "https://example.invalid/verify",
   ]),
-  privacyShort: envString(
-    "PRIVACY_SHORT",
-    "PoC privacy policy. Do not use in production. Lookups may send the full sentence around a word, which is used for that lookup only and never stored or logged.",
-  ),
-  tosShort: envString(
-    "TOS_SHORT",
-    "PoC terms of service. Do not use in production.",
-  ),
   privacyLink: envString("PRIVACY_LINK", "https://example.invalid/privacy"),
   tosLink: envString("TOS_LINK", "https://example.invalid/tos"),
+  privacyFile: envString("PRIVACY_FILE", "legal/privacy.example.md"),
+  tosFile: envString("TOS_FILE", "legal/terms.example.md"),
   privacyChange: env("PRIVACY_CHANGE"),
   tosChange: env("TOS_CHANGE"),
   identityFile: envString("IDENTITY_FILE", "data/identity.json"),

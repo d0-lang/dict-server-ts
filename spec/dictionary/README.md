@@ -25,8 +25,9 @@ One SQLite file per language pair, `data/<source>_<target>.sqlite` (e.g. `data/r
   - `etymology`: wiktextract's etymology number, 0 when the word has one etymology.
   - `case_class`: `caseClass` of the lemma (see below).
   - `features`: the headword's grammar as a Universal Dependencies feature string, names sorted, several values of one feature joined by a comma (`Animacy=Anim|Gender=Fem`, `Aspect=Imp,Perf`), or null. Only nouns and verbs have them; `features.json` lists the names and values. Lines of the source that differ in them are different words (`See` with `Gender=Masc` "lake" and with `Gender=Fem` "sea") and get separate entries.
-- **`senses`**: ordered by `idx` within an entry. `translations` is a JSON array of strings and is never empty. `see` is a JSON array of words that have entries, or null.
-- **`pronunciations`**: ordered by `idx`, with `kind` from `pronKinds`. `ipa` and `audio` rows become the protocol's `pron.ipa[]` and `pron.audio[]`. An entry has at most one `reading`.
+  - `pages`: a JSON array of the titles of the English Wiktionary pages the entry is built from (wiktextract's `word`, `Mutter`), or null for an entry from the grammar file. Its own page comes first; an entry whose meaning was copied from a base word (`koteczek` "diminutive of kotek: cat") also lists the page the meaning was read from (`kot`). Readers link them to the page's section for the language (`https://en.wiktionary.org/wiki/Mutter#German`).
+- **`senses`**: ordered by `idx` within an entry. `glosses` is a JSON array of strings and is never empty. `see` is a JSON array of words that have entries, or null.
+- **`pronunciations`**: ordered by `idx`, with `kind` from `pronKinds`. `ipa` and `audio` rows become the protocol's `pron.ipa[]` and `pron.audio[]`. An `audio` value is a file URL on `upload.wikimedia.org`; the Commons file page that credits it is read from the URL (the path segment after the two hash directories, also in a `transcoded/` URL). An entry has at most one `reading`.
 - **`forms`**: the deinflection index, `lookupKey(surface form) → entry`. The lemma itself is a row too, so a lookup is one primary-key prefix scan. `source` is a code from `formSource`:
   - `Lemma`: the entry's own headword.
   - `Inflection`: a form from the lemma's inflection table or head forms.

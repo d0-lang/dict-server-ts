@@ -34,7 +34,7 @@ import type {
 
 /** One sense of an entry: a parent gloss first, then what was nested under it. */
 export type ImportSense = {
-  readonly translations: ReadonlyArray<string>;
+  readonly glosses: ReadonlyArray<string>;
   /** Words a "synonym of" gloss points at; the writer keeps those with an entry. */
   readonly see: ReadonlyArray<string>;
 };
@@ -42,6 +42,8 @@ export type ImportSense = {
 /** A dictionary entry ready to be written. */
 export type ImportEntry = {
   readonly lemma: string;
+  /** The Wiktionary page the entry comes from (wiktextract's `word`), credited in lookups. */
+  readonly page: string;
   readonly pos: UdPos;
   readonly sourcePos: string;
   readonly etymology: number;
@@ -321,7 +323,7 @@ const makeSenseGroups = () => {
     },
     senses: (): ReadonlyArray<ImportSense> =>
       [...groups.values()].map(({ glosses, see }) => ({
-        translations: [...glosses],
+        glosses: [...glosses],
         see: [...see],
       })),
   };
@@ -690,6 +692,7 @@ export const transformEntry = (
         : rules.reflexive === "before"
           ? `${particle} ${shownLemma}`
           : `${shownLemma} ${particle}`,
+    page: lemma,
     pos: toUdPos(raw.pos),
     sourcePos: isLetterName(lemma, entrySenses) ? LETTER_NAME_POS : raw.pos,
     etymology: toEtymology(raw.etymology_number),
@@ -788,7 +791,7 @@ const isLetterName = (
   lemma: string,
   senses: ReadonlyArray<ImportSense>,
 ): boolean =>
-  [...lemma].length === 1 && LETTER_NAME.test(senses[0]?.translations[0] ?? "");
+  [...lemma].length === 1 && LETTER_NAME.test(senses[0]?.glosses[0] ?? "");
 
 /** How weak a link is: a pointer or a marked spelling is weaker than a plain link. */
 const weakness = (link: FormOfLink): number =>

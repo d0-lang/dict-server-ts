@@ -10,7 +10,8 @@ import {
 import type { Language } from "@dict/core/language";
 import { cleanWord, lookupKey } from "@dict/core/lookupKey";
 import { FormSource } from "@dict/core/schema";
-import type { LookupEntry, LookupResult } from "./common/entries.ts";
+import type { Audio, LookupEntry, LookupResult } from "./common/entries.ts";
+import { wiktionaryPageUrl } from "./common/sources.ts";
 
 /**
  * The headword a reader sees: the lemma as a learner's dictionary prints it
@@ -129,9 +130,10 @@ export const presentResult = (
     labels: ReadonlyArray<string>;
     match: ReadonlyArray<string> | undefined;
     ipa: Array<string>;
-    audio: Array<string>;
+    audio: Array<Audio>;
     reading: string | undefined;
     senses: Array<LookupEntry["senses"][number]>;
+    sources: Array<string>;
   }> = [];
   /** The merged entries with each headword, readings aside, in order. */
   const withKey = new Map<string, Array<number>>();
@@ -174,12 +176,24 @@ export const presentResult = (
         audio: [],
         reading: undefined,
         senses: [],
+        sources: [],
       });
     }
     newIndex.set(i, at);
     const target = merged[at]!;
     target.ipa = unique([...target.ipa, ...(entry.pron?.ipa ?? [])]);
-    target.audio = unique([...target.audio, ...(entry.pron?.audio ?? [])]);
+    for (const audio of entry.pron?.audio ?? []) {
+      if (!target.audio.some((other) => other.url === audio.url)) {
+        target.audio.push(audio);
+      }
+    }
+    target.sources = unique([
+      ...target.sources,
+      ...(entry.sources ?? []),
+      ...(entry.pages ?? []).map((title) =>
+        wiktionaryPageUrl(title, language.name),
+      ),
+    ]);
     target.reading ??= entry.pron?.reading;
     target.senses.push(
       ...entry.senses.map((sense) =>
@@ -209,6 +223,7 @@ export const presentResult = (
       ...(entry.labels.length > 0 ? { labels: entry.labels } : {}),
       ...(Object.keys(pron).length > 0 ? { pron } : {}),
       senses: entry.senses,
+      ...(entry.sources.length > 0 ? { sources: entry.sources } : {}),
       ...(entry.match !== undefined ? { match: entry.match } : {}),
     };
   });

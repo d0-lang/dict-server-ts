@@ -103,7 +103,7 @@ describe("importWiktextract", () => {
       const senses = (word: string) =>
         findEntriesByForm(db, word).map((e) => [
           e.lemma,
-          ...e.senses.map((s) => s.translations[0]),
+          ...e.senses.map((s) => s.glosses[0]),
         ]);
 
       // chain across lines, skipping the pointer sense, with its own table
@@ -214,7 +214,7 @@ describe("importWiktextract", () => {
             "król",
             [
               {
-                translations: ["king", "synonym of państwo", "royal couple"],
+                glosses: ["king", "synonym of państwo", "royal couple"],
                 see: ["państwo"],
               },
             ],
@@ -222,24 +222,21 @@ describe("importWiktextract", () => {
         ]);
         // the pointer is left out of the copy, and the group stays one sense
         assert.deepStrictEqual(senses("królik"), [
-          [
-            "królik",
-            [{ translations: ["diminutive of król: king; royal couple"] }],
-          ],
+          ["królik", [{ glosses: ["diminutive of król: king; royal couple"] }]],
         ]);
         // a target with no entry gets no link
         assert.deepStrictEqual(senses("grządka"), [
           [
             "grządka",
             [
-              { translations: ["synonym of zagon"], see: ["zagon"] },
-              { translations: ["synonym of brak"] },
+              { glosses: ["synonym of zagon"], see: ["zagon"] },
+              { glosses: ["synonym of brak"] },
             ],
           ],
         ]);
         // the target is already in the result
         assert.deepStrictEqual(senses("razu"), [
-          ["raz", [{ translations: ["once"] }]],
+          ["raz", [{ glosses: ["once"] }]],
         ]);
         // words that only point at each other still return something
         assert.strictEqual(senses("sam").length, 2);
@@ -349,7 +346,7 @@ describe("importWiktextract", () => {
         assert.deepStrictEqual(lemmas(db, "mahn"), ["Mann/NOUN"]);
         // an English "target" leaves the gloss in place
         assert.deepStrictEqual(
-          findEntriesByForm(db, "sich").map((e) => e.senses[0]?.translations),
+          findEntriesByForm(db, "sich").map((e) => e.senses[0]?.glosses),
           [["Reflexive pronoun of the third person: oneself"]],
         );
       }).pipe(Effect.scoped),
@@ -421,7 +418,7 @@ describe("importWiktextract", () => {
         ]);
         assert.deepStrictEqual(
           findEntriesByForm(db, "bawić").map((e) =>
-            e.senses.map((s) => s.translations[0]),
+            e.senses.map((s) => s.glosses[0]),
           ),
           [["to amuse", "to guard"], ["to play"]],
         );
@@ -433,7 +430,7 @@ describe("importWiktextract", () => {
         ]);
         assert.deepStrictEqual(
           findEntriesByForm(db, "wydarzenie")[0]?.senses.map(
-            (s) => s.translations[0],
+            (s) => s.glosses[0],
           ),
           ["verbal noun of wydarzyć: to happen"],
         );

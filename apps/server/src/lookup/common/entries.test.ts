@@ -33,7 +33,7 @@ const ranked = (
   const db = createDictionaryFile(":memory:");
   rows.forEach(([lemma, pos, sourcePos, form, source, gloss], i) => {
     db.$client.run(
-      "INSERT OR IGNORE INTO entries VALUES (?, ?, ?, ?, 0, ?, NULL)",
+      "INSERT OR IGNORE INTO entries VALUES (?, ?, ?, ?, 0, ?, NULL, NULL)",
       [i + 1, lemma, pos, sourcePos, caseClass(lemma)],
     );
     db.$client.run("INSERT INTO senses VALUES (?, 0, ?, NULL)", [
@@ -46,7 +46,7 @@ const ranked = (
     db.$client.run("INSERT INTO forms VALUES (?, ?, ?)", [form, i + 1, source]);
   });
   return findEntriesByForm(db, word).map(
-    (entry) => entry.senses[0]!.translations[0],
+    (entry) => entry.senses[0]!.glosses[0],
   );
 };
 

@@ -75,6 +75,7 @@ type EntryState = {
   readonly id: number;
   readonly glosses: Set<string>;
   readonly prons: Set<string>;
+  readonly pages: Set<string>;
 };
 
 /**
@@ -106,10 +107,24 @@ export const makeWriter = (
   ) WITHOUT ROWID`);
 
   const insertEntry = sqlite.prepare(
-    "INSERT INTO entries (id, lemma, pos, source_pos, etymology, case_class, features) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO entries (id, lemma, pos, source_pos, etymology, case_class, features, pages) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
   );
+  const selectPages = sqlite.query<{ pages: string | null }, [number]>(
+    "SELECT pages FROM entries WHERE id = ?",
+  );
+  const updatePages = sqlite.prepare(
+    "UPDATE entries SET pages = ? WHERE id = ?",
+  );
+  /** Add Wiktionary pages to the ones entry `id` credits, after them, without repeats. */
+  const addPages = (id: number, pages: Iterable<string>) => {
+    const stored = selectPages.get(id)?.pages;
+    const old: ReadonlyArray<string> =
+      stored === null || stored === undefined ? [] : JSON.parse(stored);
+    const all = [...new Set([...old, ...pages])];
+    if (all.length > old.length) updatePages.run(JSON.stringify(all), id);
+  };
   const insertSense = sqlite.prepare(
-    "INSERT INTO senses (entry_id, idx, translations, see) VALUES (?, ?, ?, ?)",
+    "INSERT INTO senses (entry_id, idx, glosses, see) VALUES (?, ?, ?, ?)",
   );
   const insertPron = sqlite.prepare(
     "INSERT INTO pronunciations (entry_id, idx, kind, value) VALUES (?, ?, ?, ?)",
@@ -211,7 +226,12 @@ export const makeWriter = (
     const key = `${entry.lemma}\u0000${entry.sourcePos}\u0000${entry.etymology}\u0000${features ?? ""}`;
     let state = byKey.get(key);
     if (state === undefined) {
-      state = { id: ++lastId, glosses: new Set(), prons: new Set() };
+      state = {
+        id: ++lastId,
+        glosses: new Set(),
+        prons: new Set(),
+        pages: new Set([entry.page]),
+      };
       counts.entries++;
       byKey.set(key, state);
       insertEntry.run(
@@ -222,18 +242,23 @@ export const makeWriter = (
         entry.etymology,
         caseClass(entry.lemma),
         features ?? null,
+        JSON.stringify([entry.page]),
       );
       insertForm.run(lookupKey(entry.lemma), state.id, FormSource.Lemma);
     } else {
       counts.mergedLines++;
+      if (!state.pages.has(entry.page)) {
+        state.pages.add(entry.page);
+        addPages(state.id, [entry.page]);
+      }
     }
-    for (const { translations, see } of entry.senses) {
-      const k = translations.join("\u0000");
+    for (const { glosses, see } of entry.senses) {
+      const k = glosses.join("\u0000");
       if (state.glosses.has(k)) continue;
       insertSense.run(
         state.id,
         state.glosses.size,
-        JSON.stringify(translations),
+        JSON.stringify(glosses),
         see.length > 0 ? JSON.stringify(see) : null,
       );
       state.glosses.add(k);
@@ -292,6 +317,7 @@ export const makeWriter = (
         GRAMMAR_SOURCE_POS,
         0,
         caseClass(entry.lemma),
+        null,
         null,
       );
       insertForm.run(lookupKey(entry.lemma), id, FormSource.Lemma);
@@ -373,6 +399,7 @@ export const makeWriter = (
     counts,
     insertSense,
     insertForm,
+    addPages,
     optionalLetters,
     hasEntry,
     verbalNouns,

@@ -40,10 +40,7 @@ describe("German headwords", () => {
       {
         lemma: "die Mutter",
         pos: "NOUN",
-        senses: [
-          { translations: ["mother"] },
-          { translations: ["nut (for a bolt)"] },
-        ],
+        senses: [{ glosses: ["mother"] }, { glosses: ["nut (for a bolt)"] }],
       },
     ]);
   });
@@ -56,7 +53,7 @@ describe("German headwords", () => {
       ["der Hund"],
     );
     assert.deepStrictEqual(
-      lookup("die See").entries.map((e) => e.senses[0]!.translations),
+      lookup("die See").entries.map((e) => e.senses[0]!.glosses),
       [["sea"]],
     );
   });

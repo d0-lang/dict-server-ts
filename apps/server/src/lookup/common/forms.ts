@@ -30,7 +30,14 @@ export type TokenInfo = {
   readonly verb: boolean;
 };
 
-export type FormRow = { id: number; lemma: string; pos: UdPos; source: number };
+export type FormRow = {
+  id: number;
+  lemma: string;
+  pos: UdPos;
+  /** `entries.source_pos`: wiktextract's part of speech (`prefix`, `syllable`, ...). */
+  sourcePos: string;
+  source: number;
+};
 
 /**
  * Entries a normalized form belongs to, without the abbreviation fallback,
@@ -43,7 +50,7 @@ export const formRows = (
 ): ReadonlyArray<FormRow> =>
   db.$client
     .query<FormRow, [string, number]>(
-      `SELECT e.id AS id, e.lemma AS lemma, e.pos AS pos, f.source AS source FROM forms f JOIN entries e ON e.id = f.entry_id
+      `SELECT e.id AS id, e.lemma AS lemma, e.pos AS pos, e.source_pos AS sourcePos, f.source AS source FROM forms f JOIN entries e ON e.id = f.entry_id
        WHERE f.form = ?1 AND f.source <> ${FormSource.Abbreviation}
        ORDER BY
          CASE

@@ -41,7 +41,7 @@ layer(HandlersLayer)("DictApi", (it) => {
         query: { word: "Mutter", lang: "de_en" },
       });
       assert.deepStrictEqual(
-        result.entries.map((e) => e.senses[0]?.translations),
+        result.entries.map((e) => e.senses[0]?.glosses),
         [["mother"], ["nut (for a bolt)"]],
       );
     }),

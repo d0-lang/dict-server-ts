@@ -1,0 +1,30 @@
+# What Russian's labels mean, in English (the pair's target language), for
+# `/v1/get-labels`. Names come from `languages/labels.en.toml` unless given
+# here. `text` at most 1000 characters, plain text.
+
+[m]
+text = "Masculine nouns take masculine adjectives and past-tense forms: новый дом, он пришёл."
+
+[f]
+text = "Feminine nouns take feminine adjectives and past-tense forms: новая книга, она пришла."
+
+[n]
+text = "Neuter nouns take neuter adjectives and past-tense forms: новое окно, оно открылось."
+
+[c]
+text = "The noun is masculine or feminine according to who is meant: круглый сирота for a boy, круглая сирота for a girl."
+
+[anim]
+text = "The noun names a person or an animal. Its accusative is the same as its genitive in the plural, and in the singular of masculine nouns like брат: вижу брата, вижу сестёр."
+
+[inan]
+text = "The noun names a thing or an idea. Its accusative is the same as its nominative in the plural, and in the singular of masculine nouns like дом: вижу дом, вижу книги."
+
+[impf]
+text = "The action is seen as a process: going on, repeated or habitual, without saying whether it is finished. Most verbs come in pairs: писать (impf) and написать (pf)."
+
+[pf]
+text = "The action is seen as a whole, usually completed. Most verbs come in pairs: писать (impf) and написать (pf)."
+
+[pl]
+text = "The noun has no singular: ножницы (scissors), деньги (money). It takes plural adjectives and verbs."

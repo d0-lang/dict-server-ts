@@ -70,7 +70,7 @@ describe("importWiktextract", () => {
       const senses = (word: string) =>
         findEntriesByForm(db, word).map((e) => [
           e.lemma,
-          ...e.senses.map((s) => s.translations[0]),
+          ...e.senses.map((s) => s.glosses[0]),
         ]);
       // every meaning of the base, after the word's own
       assert.deepStrictEqual(senses("później"), [
@@ -158,7 +158,7 @@ describe("importWiktextract", () => {
         const senses = (word: string) =>
           findEntriesByForm(db, word).map((e) => [
             e.lemma,
-            ...e.senses.map((s) => s.translations[0]),
+            ...e.senses.map((s) => s.glosses[0]),
           ]);
         // `ein neuer Film`: the plain form of `neu`, as before; its table goes along
         assert.deepStrictEqual(senses("neuer"), [["neu", "new"]]);

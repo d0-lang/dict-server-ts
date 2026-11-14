@@ -12,10 +12,16 @@ import { hasPos, headOf, startOf, type Word } from "./words.ts";
 
 /** A word's entries as a whole, and its pieces as `segments`, each with its own entries. */
 
+/** `entries.source_pos` of entries that name a letter or a syllable, not a word. */
+const LETTERS = new Set(["character", "letter-name", "syllable"]);
+
 /** Parts of speech that take endings, so a word with endings keeps only these entries. */
 export const INFLECTING = new Set(["VERB", "ADJ", "AUX"]);
 
-/** A written piece of the answer with its entries' ids. `main`: it holds the click, so its entries rank first. */
+/**
+ * A written piece of the answer with its entries' ids. `main`: its entries
+ * rank first, because it holds the click or carries the word's meaning.
+ */
 export type Part = {
   readonly text: string;
   readonly ids: ReadonlyArray<number>;
@@ -158,10 +164,11 @@ export const morphemeParts = (
 ): ReadonlyArray<Part> => {
   const head = w.findIndex((m) => !hasPos(m.pos, c.settings.prefixes));
   const parts: Array<Part> = [];
-  const add = (text: string, ids: ReadonlyArray<number>) =>
+  const add = (text: string, ids: ReadonlyArray<number>, main = false) =>
     parts.push({
       text,
       ids: [...new Set(ids)].filter((id) => !shown.has(id)),
+      ...(main ? { main } : {}),
     });
   for (let i = 0; i < w.length;) {
     const group = head >= 0 && i > head ? endingGroup(c, w, i) : undefined;
@@ -197,9 +204,20 @@ export const morphemeParts = (
         : new Set(byBase.map((row) => lookupKey(row.lemma))).size === 1
           ? byBase
           : [];
+    // A prefix is shown by its entries as a prefix first (`御` "used to
+    // respectfully refer to…" for `お`), then as another word, and as a
+    // syllable or character last.
+    const rank = (row: FormRow) =>
+      row.sourcePos === "prefix" ? 0 : LETTERS.has(row.sourcePos) ? 2 : 1;
+    const ranked =
+      head >= 0 && i < head ? [...own].sort((a, b) => rank(a) - rank(b)) : own;
+    // The stem carries the word's meaning, so its entries rank first, even
+    // with a prefix written before it (`お|送り`, `お|名前`): the client
+    // opens on the segment of the first entry in one.
     add(
       morpheme.surface,
-      !isHead && grammar.length > 0 ? grammar : own.map((row) => row.id),
+      !isHead && grammar.length > 0 ? grammar : ranked.map((row) => row.id),
+      isHead,
     );
     i++;
   }

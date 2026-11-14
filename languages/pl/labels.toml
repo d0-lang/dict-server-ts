@@ -1,0 +1,27 @@
+# What Polish's labels mean, in English (the pair's target language), for
+# `/v1/get-labels`. Names come from `languages/labels.en.toml` unless given
+# here. `text` at most 1000 characters, plain text.
+
+[m]
+text = "Masculine nouns take masculine adjectives and past-tense forms: nowy dom, on przyszedł."
+
+[f]
+text = "Feminine nouns take feminine adjectives and past-tense forms: nowa książka, ona przyszła."
+
+[n]
+text = "Neuter nouns take neuter adjectives and past-tense forms: nowe okno, ono się otworzyło."
+
+[anim]
+text = "A masculine noun that names an animal or a person. Its accusative singular is the same as its genitive: widzę psa (pies)."
+
+[inan]
+text = "A masculine noun that names a thing or an idea. Its accusative singular is the same as its nominative: widzę dom."
+
+[impf]
+text = "The action is seen as a process: going on, repeated or habitual, without saying whether it is finished. Most verbs come in pairs: pisać (impf) and napisać (pf)."
+
+[pf]
+text = "The action is seen as a whole, usually completed. Most verbs come in pairs: pisać (impf) and napisać (pf)."
+
+[pl]
+text = "The noun has no singular: drzwi (door), nożyczki (scissors). It takes plural adjectives and verbs."

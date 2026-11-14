@@ -6,16 +6,24 @@ export class PublicKey extends Schema.Class<PublicKey>(
   key: Schema.String,
 }) {}
 
+/** Links to the hosted documents, and the sha256 of each one's source text. */
 export class Legal extends Schema.Class<Legal>("server/domain/Legal")({
-  privacy_hash: Schema.String,
-  tos_hash: Schema.String,
-  privacy_short: Schema.String,
-  tos_short: Schema.String,
   privacy_link: Schema.String,
-  tos_link: Schema.String,
+  privacy_hash: Schema.String,
   privacy_change: Schema.optionalKey(Schema.String),
+  tos_link: Schema.String,
+  tos_hash: Schema.String,
   tos_change: Schema.optionalKey(Schema.String),
 }) {}
+
+/** Whose material the answers are built from, so the client can credit it. */
+export const Source = Schema.Struct({
+  name: Schema.String,
+  url: Schema.String,
+  license: Schema.optionalKey(Schema.String),
+  license_url: Schema.optionalKey(Schema.String),
+  languages: Schema.optionalKey(Schema.Array(Schema.String)),
+});
 
 export class Meta extends Schema.Class<Meta>("server/domain/Meta")({
   name: Schema.String,
@@ -24,6 +32,7 @@ export class Meta extends Schema.Class<Meta>("server/domain/Meta")({
   legal: Schema.optionalKey(Legal),
   features: Schema.optionalKey(Schema.Array(Schema.String)),
   verification_urls: Schema.Array(Schema.String),
+  sources: Schema.optionalKey(Schema.Array(Source)),
 }) {}
 
 export const LookupEntry = Schema.Struct({
@@ -33,16 +42,26 @@ export const LookupEntry = Schema.Struct({
   pron: Schema.optionalKey(
     Schema.Struct({
       ipa: Schema.optionalKey(Schema.Array(Schema.String)),
-      audio: Schema.optionalKey(Schema.Array(Schema.String)),
+      audio: Schema.optionalKey(
+        Schema.Array(
+          Schema.Struct({
+            url: Schema.String,
+            /** The page that credits the recording (its Commons file page). */
+            source: Schema.optionalKey(Schema.String),
+          }),
+        ),
+      ),
       reading: Schema.optionalKey(Schema.String),
     }),
   ),
   senses: Schema.Array(
     Schema.Struct({
-      translations: Schema.Array(Schema.String),
+      glosses: Schema.Array(Schema.String),
       see: Schema.optionalKey(Schema.Array(Schema.String)),
     }),
   ),
+  /** Links to the pages the entry is built from (its Wiktionary page or pages). */
+  sources: Schema.optionalKey(Schema.Array(Schema.String)),
   /** The parts of `context` an entry the context adds covers (`context-match`). */
   match: Schema.optionalKey(Schema.Array(Schema.String)),
 });
@@ -65,6 +84,22 @@ export class LookupResponse extends Schema.Class<LookupResponse>(
 )({
   entries: Schema.Array(LookupEntry),
   segments: Schema.optionalKey(Schema.Array(LookupSegment)),
+}) {}
+
+/** What a label means: `name` at most 60 characters, `text` at most 1000. */
+export const LabelExplanation = Schema.Struct({
+  name: Schema.String,
+  text: Schema.optionalKey(Schema.String),
+});
+
+/** `/v1/get-labels`: per pair served, label string -> its explanation. */
+export class LabelsResponse extends Schema.Class<LabelsResponse>(
+  "server/domain/LabelsResponse",
+)({
+  labels: Schema.Record(
+    Schema.String,
+    Schema.Record(Schema.String, LabelExplanation),
+  ),
 }) {}
 
 export class LookupError extends Schema.Class<LookupError>(

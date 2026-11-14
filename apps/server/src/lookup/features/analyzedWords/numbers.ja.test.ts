@@ -115,7 +115,7 @@ describe("numbers and their counters", () => {
     ]);
     assert.strictEqual(
       lookupWord(numbers, language, "目", "じゃあ3つ目。", 1).entries[0]!
-        .senses[0]!.translations[0],
+        .senses[0]!.glosses[0],
       "-th",
     );
     assert.deepStrictEqual(shown("つ", "じゃあ3つ目。").entries, ["つ"]);
@@ -163,7 +163,7 @@ describe("numbers and their counters", () => {
     // written in kanji, every entry of the word answers
     assert.include(
       lookupWord(numbers, language, "十分", "十分です。", 1).entries.flatMap(
-        (entry) => entry.senses.flatMap((sense) => sense.translations),
+        (entry) => entry.senses.flatMap((sense) => sense.glosses),
       ),
       "enough",
     );

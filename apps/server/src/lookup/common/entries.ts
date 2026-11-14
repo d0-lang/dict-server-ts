@@ -9,6 +9,7 @@ import {
   type UdPos,
 } from "@dict/core/schema";
 import { asc, inArray } from "drizzle-orm";
+import { commonsFilePage } from "./sources.ts";
 
 /**
  * Entry in the shape of the protocol's `/v1/lookup` response. Until
@@ -25,13 +26,26 @@ export type LookupEntry = {
   readonly match?: ReadonlyArray<string>;
   readonly pron?: {
     readonly ipa?: ReadonlyArray<string>;
-    readonly audio?: ReadonlyArray<string>;
+    readonly audio?: ReadonlyArray<Audio>;
     readonly reading?: string;
   };
   readonly senses: ReadonlyArray<{
-    readonly translations: ReadonlyArray<string>;
+    readonly glosses: ReadonlyArray<string>;
     readonly see?: ReadonlyArray<string>;
   }>;
+  /**
+   * Until `presentResult`: the titles of the Wiktionary pages the entry is
+   * built from (`entries.pages`). After, `sources` links them.
+   */
+  readonly pages?: ReadonlyArray<string>;
+  /** Links to the pages the entry is built from. */
+  readonly sources?: ReadonlyArray<string>;
+};
+
+/** A recording: the file, and the page that credits it. */
+export type Audio = {
+  readonly url: string;
+  readonly source?: string;
 };
 
 type LookupSense = LookupEntry["senses"][number];
@@ -39,8 +53,8 @@ type LookupSense = LookupEntry["senses"][number];
 /** "synonym of x" with nothing else to read: no meaning in brackets, no parent. */
 const isBareSynonym = (sense: LookupSense): boolean =>
   sense.see !== undefined &&
-  sense.translations.length === 1 &&
-  /^synonym of [^(“]*$/i.test(sense.translations[0]!);
+  sense.glosses.length === 1 &&
+  /^synonym of [^(“]*$/i.test(sense.glosses[0]!);
 
 /**
  * Wiktionary's pointer from an idiom to its literal reading ("Used other than
@@ -48,10 +62,8 @@ const isBareSynonym = (sense: LookupSense): boolean =>
  * more, and context lookups show them right after the phrase.
  */
 const isLiteralPointer = (sense: LookupSense): boolean =>
-  sense.translations.length === 1 &&
-  sense.translations[0]!.startsWith(
-    "Used other than figuratively or idiomatically",
-  );
+  sense.glosses.length === 1 &&
+  sense.glosses[0]!.startsWith("Used other than figuratively or idiomatically");
 
 /** `entries` without literal pointers, and without entries left with no senses. */
 export const dropLiteralPointers = (
@@ -155,7 +167,7 @@ const rankedIds = (
          e.pos = 'VERB'
            AND EXISTS (
              SELECT 1 FROM senses ps
-             WHERE ps.entry_id = e.id AND ps.translations LIKE '%participle of %'
+             WHERE ps.entry_id = e.id AND ps.glosses LIKE '%participle of %'
            )
            AND EXISTS (
              SELECT 1 FROM forms af JOIN entries ae ON ae.id = af.entry_id
@@ -202,7 +214,14 @@ export const loadEntries = (
     const head = byId.get(id)!;
     const prons = pronRows.filter((p) => p.entryId === id);
     const ipa = prons.filter((p) => p.kind === "ipa").map((p) => p.value);
-    const audio = prons.filter((p) => p.kind === "audio").map((p) => p.value);
+    const audio = prons
+      .filter((p) => p.kind === "audio")
+      .map((p): Audio => {
+        const source = commonsFilePage(p.value);
+        return source === undefined
+          ? { url: p.value }
+          : { url: p.value, source };
+      });
     const reading = prons.find((p) => p.kind === "reading")?.value;
     const pron = {
       ...(ipa.length > 0 ? { ipa } : {}),
@@ -213,11 +232,14 @@ export const loadEntries = (
       lemma: head.lemma,
       pos: head.pos,
       ...(head.features !== null ? { features: head.features } : {}),
+      ...(head.pages !== null && head.pages.length > 0
+        ? { pages: head.pages }
+        : {}),
       ...(Object.keys(pron).length > 0 ? { pron } : {}),
       senses: senseRows
         .filter((s) => s.entryId === id)
         .map((s) => ({
-          translations: s.translations,
+          glosses: s.glosses,
           ...(s.see !== null ? { see: s.see } : {}),
         })),
     };

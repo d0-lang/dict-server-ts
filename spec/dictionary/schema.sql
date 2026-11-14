@@ -17,14 +17,15 @@ CREATE TABLE entries (
   source_pos TEXT NOT NULL,
   etymology  INTEGER NOT NULL,
   case_class INTEGER NOT NULL,
-  features   TEXT
+  features   TEXT,
+  pages      TEXT
 );
 
 CREATE TABLE senses (
-  entry_id     INTEGER NOT NULL,
-  idx          INTEGER NOT NULL,
-  translations TEXT NOT NULL,
-  see          TEXT,
+  entry_id INTEGER NOT NULL,
+  idx      INTEGER NOT NULL,
+  glosses  TEXT NOT NULL,
+  see      TEXT,
   PRIMARY KEY (entry_id, idx)
 ) WITHOUT ROWID;
 
