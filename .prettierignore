@@ -1,3 +1,6 @@
 node_modules
 data
 spec/language.schema.json
+# Prose and generated reports: edited by hand and by agents, with wide tables.
+*.md
+docs
