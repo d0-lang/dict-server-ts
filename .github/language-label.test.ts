@@ -45,6 +45,7 @@ describe("language-label workflow", () => {
   it.each([
     ["de_en", "German"],
     ["ja_en", "Japanese"],
+    ["jp", "Japanese"],
     ["pl", "Polish"],
     ["RU", "Russian"],
     ["uk_en", "Ukrainian"],

@@ -17,7 +17,7 @@ Closes #
 ```
 
 Needs re-import: yes/no
-Protocol change: yes/no <!-- if yes, the protocol repo's PR -->
+Protocol change: yes/no <!-- if yes, the matching PR in the extension repo -->
 Lookup diff: N of M lookups change <!-- from `bun run dump:lookups`, when lookups change; delete otherwise -->
 
 **Checked**

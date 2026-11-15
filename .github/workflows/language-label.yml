@@ -21,8 +21,9 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
         with:
           script: |
-            // A language code (the part before `_` in a pair such as `de_en`) and its label.
-            const LABELS = { de: "German", ja: "Japanese", pl: "Polish", ru: "Russian", uk: "Ukrainian" };
+            // A language code (the part before `_` in a pair such as `de_en`) and its label. `jp` is
+            // what people write for Japanese.
+            const LABELS = { de: "German", ja: "Japanese", jp: "Japanese", pl: "Polish", ru: "Russian", uk: "Ukrainian" };
 
             // The first line under `### Language`, up to the next heading: a pair (`de_en`),
             // a code (`de`) or a name (`German`), in any case. No match gives undefined.
