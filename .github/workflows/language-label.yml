@@ -1,0 +1,52 @@
+# Adds the language label (German, Japanese, ...) to a new issue from the value under its
+# "Language" heading, as the "Wrong or missing word" form writes it. The issue body is
+# untrusted: it reaches the script only through ISSUE_BODY, never in the script text.
+# .github/language-label.test.ts runs this script on sample bodies.
+name: Language label
+
+on:
+  issues:
+    types: [opened]
+
+permissions: {}
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        with:
+          script: |
+            // A language code (the part before `_` in a pair such as `de_en`) and its label.
+            const LABELS = { de: "German", ja: "Japanese", pl: "Polish", ru: "Russian", uk: "Ukrainian" };
+
+            // The first line under `### Language`, up to the next heading: a pair (`de_en`),
+            // a code (`de`) or a name (`German`), in any case. No match gives undefined.
+            const languageLabel = (body) => {
+              const lines = (body ?? "").split(/\r?\n/);
+              const start = lines.findIndex((line) => /^###\s+Language\s*$/.test(line));
+              if (start === -1) return undefined;
+              const end = lines.findIndex((line, i) => i > start && line.startsWith("### "));
+              const value = lines
+                .slice(start + 1, end === -1 ? undefined : end)
+                .map((line) => line.trim().replace(/^`+|`+$/g, "").trim().toLowerCase())
+                .find((line) => line !== "");
+              if (value === undefined) return undefined;
+              const code = value.split(/[_-]/)[0];
+              if (Object.hasOwn(LABELS, code)) return LABELS[code];
+              return Object.values(LABELS).find((name) => name.toLowerCase() === value);
+            };
+
+            const label = languageLabel(process.env.ISSUE_BODY);
+            if (label !== undefined) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: [label],
+              });
+            }
