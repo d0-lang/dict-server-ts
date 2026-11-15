@@ -1,0 +1,16 @@
+# What French's labels mean, in English (the pair's target language), for
+# `/v1/get-labels`. Names come from `languages/labels.en.toml` unless given
+# here. `text` at most 1000 characters, plain text.
+
+[m]
+text = "Masculine nouns take le, un and masculine adjectives: le petit chien, un grand homme. Before a vowel le is written l': l'homme, l'arbre, so the article doesn't show the gender there."
+
+[f]
+text = "Feminine nouns take la, une and feminine adjectives, which usually end in -e: la petite maison, une grande ville. Before a vowel la is written l': l'eau, l'idée, so the article doesn't show the gender there."
+
+["m/f"]
+name = "masculine or feminine"
+text = "The noun is masculine or feminine according to who is meant (un or une élève, le or la journaliste), or both genders are in use (un or une après-midi)."
+
+[pl]
+text = "The noun is used in the plural only, or only in the plural in this sense: les gens (people), les mœurs (customs). It takes plural articles, adjectives and verbs."
