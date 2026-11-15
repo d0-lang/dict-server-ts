@@ -1,0 +1,45 @@
+name: Wrong or missing word
+description: A word was not found, or what it showed was wrong.
+labels: [bug]
+body:
+  - type: input
+    id: lang
+    attributes:
+      label: Language
+      description: The language name or pair, e.g. `German` or `de_en`.
+    validations:
+      required: true
+  - type: input
+    id: word
+    attributes:
+      label: The word you looked up
+    validations:
+      required: true
+  - type: textarea
+    id: sentence
+    attributes:
+      label: The sentence it was in
+      description: Optional. Issues are public, so leave out anything private.
+    validations:
+      required: false
+  - type: textarea
+    id: shown
+    attributes:
+      label: What the popover showed
+      description: Copy the text, or paste a screenshot.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: The meaning you expected, or what was wrong.
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: App and version
+      description: Optional. A report link fills this in, e.g. `dadict/0.6.0`.
+    validations:
+      required: false
