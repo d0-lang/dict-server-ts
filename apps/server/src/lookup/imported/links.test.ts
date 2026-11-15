@@ -349,6 +349,51 @@ describe("importWiktextract", () => {
   );
 
   it.effect(
+    "writes no entry for a verb form whose gloss only names its grammar",
+    () =>
+      Effect.gen(function* () {
+        const dir = yield* tempDir;
+        const input = join(dir, "fr.jsonl");
+        const line = (
+          word: string,
+          pos: string,
+          senses: ReadonlyArray<object>,
+        ) => JSON.stringify({ word, pos, lang_code: "fr", senses });
+        yield* Effect.promise(() =>
+          writeFile(
+            input,
+            [
+              line("aimée", "verb", [
+                {
+                  glosses: ["feminine singular of aimé"],
+                  tags: ["form-of", "participle"],
+                  form_of: [{ word: "aimé" }],
+                },
+              ]),
+              line("aimé", "adj", [{ glosses: ["beloved"] }]),
+              line("aimé", "verb", [
+                {
+                  glosses: [
+                    "presubject first-person singular present indicative of aimer",
+                  ],
+                  links: [["aimer", "aimer#French"]],
+                },
+              ]),
+              line("aimer", "verb", [{ glosses: ["to love"] }]),
+            ].join("\n"),
+          ),
+        );
+        const out = join(dir, "fr_en.sqlite");
+        yield* importWiktextract({ lang: "fr", input, out, grammar: [] });
+        const db = yield* openDictionary(out);
+
+        assert.deepStrictEqual(lemmas(db, "aimé"), ["aimé/ADJ", "aimer/VERB"]);
+        // So `aimé` has no verb entry, and `aimée` reaches `aimer` through it.
+        assert.deepStrictEqual(lemmas(db, "aimée"), ["aimé/ADJ", "aimer/VERB"]);
+      }).pipe(Effect.scoped),
+  );
+
+  it.effect(
     "resolves marked spellings only for words that reach nothing else",
     () =>
       Effect.gen(function* () {

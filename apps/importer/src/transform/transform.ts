@@ -556,7 +556,9 @@ export const transformEntry = (
 ): TransformResult => {
   const lemma = cleanWord(raw.word);
   const lemmaKey = lookupKey(lemma);
-  if (raw.pos === "soft-redirect") {
+  // A page about a space (French has one for the narrow no-break space) has
+  // no word to look up.
+  if (raw.pos === "soft-redirect" || lemma === "") {
     return {
       entry: undefined,
       formOf: [],
@@ -568,10 +570,14 @@ export const transformEntry = (
         placeholder: 0,
       },
       droppedForms: 0,
-      redirect: {
-        form: lemmaKey,
-        targets: (raw.redirects ?? []).map(cleanWord),
-      },
+      ...(lemma !== ""
+        ? {
+            redirect: {
+              form: lemmaKey,
+              targets: (raw.redirects ?? []).map(cleanWord),
+            },
+          }
+        : {}),
     };
   }
   const shownLemma = rules.stressedLemmas
