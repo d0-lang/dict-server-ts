@@ -424,10 +424,13 @@ const collectForms = (
   let dropped = 0;
   // A table whose every cell is a dash (Ukrainian `монета`), not a missing
   // table: without one, the headword line holds other words too (German `der`
-  // for `CIA`).
+  // for `CIA`), except in languages whose words have no tables
+  // (`headwordInflections`: French `structure`, plural `structures`).
   const table = rawForms.filter((form) => form.source !== undefined);
   const noTable =
-    table.length > 0 && !table.some((form) => keepForm(rules, lemma, form));
+    table.length > 0
+      ? !table.some((form) => keepForm(rules, lemma, form))
+      : rules.headwordInflections === true;
   for (const form of rawForms) {
     if (!keepForm(rules, lemma, form, noTable)) {
       dropped++;

@@ -6,6 +6,7 @@ import type { WiktextractEntry } from "../source/wiktextract.ts";
 
 const pl = importRules(readLanguage("pl"));
 const de = importRules(readLanguage("de"));
+const fr = importRules(readLanguage("fr"));
 const ru = importRules(readLanguage("ru"));
 const uk = importRules(readLanguage("uk"));
 
@@ -144,6 +145,25 @@ describe("transformEntry", () => {
       }),
     );
     assert.deepStrictEqual(result.entry?.forms, []);
+  });
+
+  it("takes the headword line's numbers where words have no tables (French)", () => {
+    const forms = (rules: typeof fr) =>
+      transformEntry(
+        rules,
+        entry({
+          word: "structure",
+          pos: "noun",
+          lang_code: "fr",
+          senses: [{ glosses: ["structure"], tags: ["feminine"] }],
+          forms: [
+            { form: "structures", tags: ["plural"] },
+            { form: "structurette", tags: ["diminutive"] },
+          ],
+        }),
+      ).entry?.forms;
+    assert.deepStrictEqual(forms(fr), ["structures"]);
+    assert.deepStrictEqual(forms({ ...fr, headwordInflections: false }), []);
   });
 
   it("turns form-of and alt-of senses into fallback links, not entries", () => {
@@ -742,6 +762,34 @@ describe("transformEntry", () => {
       }),
     );
     assert.deepStrictEqual(result.entry?.forms, ["fiel"]);
+    // French: a compound tense's row that is only its auxiliary.
+    const passer = transformEntry(
+      fr,
+      entry({
+        word: "passer",
+        pos: "verb",
+        lang_code: "fr",
+        senses: [{ glosses: ["to pass"] }],
+        forms: [
+          {
+            form: "passé",
+            tags: ["participle", "past"],
+            source: "conjugation",
+          },
+          {
+            form: "ayant",
+            tags: ["gerund", "multiword-construction", "participle", "present"],
+            source: "conjugation",
+          },
+          {
+            form: "avoir",
+            tags: ["infinitive", "multiword-construction"],
+            source: "conjugation",
+          },
+        ],
+      }),
+    );
+    assert.deepStrictEqual(passer.entry?.forms, ["passé"]);
   });
 
   it("reads a noun's or verb's grammar wherever the language puts it", () => {

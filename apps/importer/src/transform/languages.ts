@@ -49,11 +49,14 @@ export type LanguageRules = {
     readonly ending: string;
     readonly endings: ReadonlyArray<string>;
     readonly onlyNew: boolean;
+    readonly sharedWithParticiple: boolean;
   };
   /** Form-gloss openings that keep an entry of their own (`passive`, `active participle`): see `isOwnEntryGloss`. */
   readonly ownEntryForms?: ReadonlyArray<string>;
   /** Reflexive senses become an entry with the particle before or after the lemma (`bawić się`). */
   readonly reflexive?: "before" | "after";
+  /** Without a table, the headword line's cases and numbers are forms (`structures` for `structure`). */
+  readonly headwordInflections?: boolean;
 };
 
 /**

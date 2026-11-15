@@ -289,10 +289,15 @@ export const isVerbalNounForm = (form: WiktextractForm): boolean =>
 
 /**
  * German verb tables list the perfect auxiliary (`haben`, `sein`) as a row, so
- * without this `haben` resolves to every verb that takes it.
+ * without this `haben` resolves to every verb that takes it. French tables
+ * write a compound tense's row as its auxiliary alone (`avoir`, `ayant`,
+ * tagged `multiword-construction`) where the verb takes either auxiliary, so
+ * `ayant` "having" resolved to `passer` and 250 other verbs.
  */
 const isAuxiliaryRow = (form: WiktextractForm): boolean =>
-  form.tags?.includes("auxiliary") ?? false;
+  (form.tags?.includes("auxiliary") ?? false) ||
+  ((form.tags?.includes("multiword-construction") ?? false) &&
+    !hasWhitespace(form.form));
 
 /**
  * Usage labels of a spelling outside the standard language. A form-of link or

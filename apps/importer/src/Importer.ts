@@ -126,6 +126,7 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     grammar,
     rules.optionalLetters,
     rules.reflexive !== undefined,
+    rules.participleDeclension?.sharedWithParticiple ?? false,
   );
   const tally = makeTally();
 

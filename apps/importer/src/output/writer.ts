@@ -95,6 +95,8 @@ export const makeWriter = (
   optionalLetters: ReadonlyArray<readonly [string, string]> = [],
   /** The language has reflexive entries (`bawić się`), which share their verb's forms. */
   reflexive = false,
+  /** `participleDeclension.sharedWithParticiple`. */
+  participlesSharedWithOwn = false,
 ) => {
   const sqlite = db.$client;
   sqlite.run(`CREATE TEMP TABLE form_of_pending (
@@ -404,6 +406,7 @@ export const makeWriter = (
     hasEntry,
     verbalNouns,
     participleForms,
+    participlesSharedWithOwn,
     derivedByEntry,
     degreeFormsByEntry,
   };
