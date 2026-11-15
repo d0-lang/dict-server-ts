@@ -44,6 +44,8 @@ export type AppConfigValues = {
   readonly tosFile: string;
   readonly privacyChange: string | undefined;
   readonly tosChange: string | undefined;
+  /** The page where users report a wrong or missing answer: `report_url`, left out when unset. */
+  readonly reportUrl: string | undefined;
   readonly identityFile: string;
 };
 
@@ -109,6 +111,7 @@ export const loadConfig = (): AppConfigValues => ({
   tosFile: envString("TOS_FILE", "legal/terms.example.md"),
   privacyChange: env("PRIVACY_CHANGE"),
   tosChange: env("TOS_CHANGE"),
+  reportUrl: env("REPORT_URL"),
   identityFile: envString("IDENTITY_FILE", "data/identity.json"),
 });
 

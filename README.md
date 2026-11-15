@@ -19,12 +19,12 @@ cp .env.example .env   # already gitignored; Bun loads it automatically
 bun run dev
 ```
 
-Settings live in `.env` (`PORT`, `SERVER_NAME`, `LANGUAGES`, `INCLUDE_LEGAL`, `CONTEXT`, the legal documents and links, `VERIFICATION_URLS`, `IDENTITY_FILE`). See `.env.example`.
+Settings live in `.env` (`PORT`, `SERVER_NAME`, `LANGUAGES`, `INCLUDE_LEGAL`, `CONTEXT`, the legal documents and links, `VERIFICATION_URLS`, `REPORT_URL`, `IDENTITY_FILE`). See `.env.example`.
 
 Ed25519 identity is stored at `IDENTITY_FILE` (default `data/identity.json`, gitignored). A rebuild/restart reloads that file instead of minting a new key.
 
 - `GET /v1/get-key` — unsigned Ed25519 public key (base64)
-- `GET /v1/get-meta` — signed metadata (`X-Nonce` required, `X-Signature` over exact body bytes); lists `"features": ["context", "context-match", "labels"]` (the first two unless `CONTEXT=false`) and `sources`
+- `GET /v1/get-meta` — signed metadata (`X-Nonce` required, `X-Signature` over exact body bytes); lists `"features": ["context", "context-match", "labels"]` (the first two unless `CONTEXT=false`) and `sources`, and `report_url` when `REPORT_URL` is set: the page where users report a wrong or missing answer, e.g. `https://github.com/d0-lang/dict-server-ts/issues/new?template=word.yml`. A client adds `word`, `lang` and `client` as query parameters, so the page should read them; the server refuses to start when it is set and is not an absolute `https` URL
 - `GET /v1/get-labels?lang=<pair>[,<pair>...]` — what the labels each served pair can show mean (`{"labels": {"ru_en": {"pf": {"name": "perfective", "text": "..."}}}}`), unsigned; `features` lists `"labels"`. The server reads which label strings a pair's entries have at startup (`apps/server/src/lookup/labels.ts`), and names each from `languages/<lang>/labels.toml`, then `languages/labels.<target>.toml`; a combination none lists (`m/f`) is named by its parts
 - `POST /v1/lookup` with a JSON body, `{"word": "<word>", "lang": "<pair>"[, "context": "<sentence>", "at": <n>]}` — entries from `data/<pair>.sqlite`, and `segments` for a split compound. Without `LANGUAGES`, every `data/<pair>.sqlite` is served; a pair listed in `LANGUAGES` needs its file: build it first, see below
 

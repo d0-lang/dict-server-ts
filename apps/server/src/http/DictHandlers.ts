@@ -1,7 +1,7 @@
 import { Effect, Layer } from "effect";
 import { HttpApiBuilder, HttpApiMiddleware } from "effect/http-api";
 import { Api, LookupBodyErrors } from "../api/Api.ts";
-import { AppConfig, loadConfig } from "../config.ts";
+import { AppConfig, loadConfig, type AppConfigValues } from "../config.ts";
 import { Dictionaries } from "../lookup/Dictionaries.ts";
 import {
   LabelsResponse,
@@ -13,6 +13,7 @@ import {
 import { Identity } from "../identity/Identity.ts";
 import { SOURCES } from "../lookup/common/sources.ts";
 import { legalSection } from "../legal.ts";
+import { reportUrl } from "../report.ts";
 import { lookupStub } from "./lookupStub.ts";
 import { signedMetaResponse } from "./signMeta.ts";
 
@@ -31,6 +32,8 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
 
     // A document that can't be read is fatal: its hash is what tells clients it changed.
     const legal = yield* legalSection(config).pipe(Effect.orDie);
+    // So is a report link that isn't an absolute https URL (index.ts checks both first).
+    const report_url = yield* reportUrl(config.reportUrl).pipe(Effect.orDie);
 
     return handlers.handleAll({
       getKey: () =>
@@ -48,6 +51,7 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
               ...(config.context ? ["context", "context-match"] : []),
               "labels",
             ],
+            ...(report_url !== undefined ? { report_url } : {}),
             ...(legal !== undefined ? { legal } : {}),
           }),
         ).pipe(Effect.orDie),
@@ -110,25 +114,33 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
 const clickedCopy = (at: unknown): number | undefined =>
   typeof at === "number" && Number.isInteger(at) && at > 0 ? at : undefined;
 
-/** In-memory handlers for tests: a stub dictionary and `de_en`, whatever is in `data/`. */
-export const DictHandlersMemory = DictHandlersNoDeps.pipe(
-  Layer.provide([
-    Identity.layerMemory,
-    Layer.sync(AppConfig, () =>
-      AppConfig.of({
-        ...loadConfig(),
-        languages: ["de_en"],
-        // The defaults: the templates and example.invalid links.
-        includeLegal: true,
+/**
+ * In-memory handlers for tests: a stub dictionary and `de_en`, whatever is in
+ * `data/`, the legal section on, no report link, and `config` over the rest.
+ */
+export const dictHandlersMemory = (config: Partial<AppConfigValues> = {}) =>
+  DictHandlersNoDeps.pipe(
+    Layer.provide([
+      Identity.layerMemory,
+      Layer.sync(AppConfig, () =>
+        AppConfig.of({
+          ...loadConfig(),
+          languages: ["de_en"],
+          // The defaults: the templates and example.invalid links.
+          includeLegal: true,
+          reportUrl: undefined,
+          ...config,
+        }),
+      ),
+      Layer.succeed(Dictionaries, {
+        lookup: (_pair, word) => lookupStub(word),
+        // German shows gender as the article; `c` is the rare common gender.
+        labels: () => ({ c: { name: "common gender" } }),
       }),
-    ),
-    Layer.succeed(Dictionaries, {
-      lookup: (_pair, word) => lookupStub(word),
-      // German shows gender as the article; `c` is the rare common gender.
-      labels: () => ({ c: { name: "common gender" } }),
-    }),
-  ]),
-);
+    ]),
+  );
+
+export const DictHandlersMemory = dictHandlersMemory();
 
 export const DictHandlers = DictHandlersNoDeps.pipe(
   Layer.provide([

@@ -3,6 +3,7 @@ import { Effect, References, Result } from "effect";
 import { DATA_DIR, loadConfig } from "./config.ts";
 import { makeWebHandler } from "./http/app.ts";
 import { legalSection } from "./legal.ts";
+import { reportUrl } from "./report.ts";
 
 const { handler } = makeWebHandler();
 const config = loadConfig();
@@ -38,6 +39,15 @@ if (Result.isFailure(legal)) {
 }
 if (legal.success === undefined) {
   console.log("INCLUDE_LEGAL is off: clients will treat this as a test server");
+}
+
+// So would a report link that isn't an absolute https URL.
+const report = await Effect.runPromise(
+  reportUrl(config.reportUrl).pipe(Effect.result),
+);
+if (Result.isFailure(report)) {
+  console.error(report.failure.message);
+  process.exit(1);
 }
 
 console.log(`serving ${languages.join(", ")}`);
