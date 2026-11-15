@@ -1,6 +1,6 @@
 {
   "name": "@dict/server",
-  "description": "The dictionary HTTP server (see ../../../Protocol.md).",
+  "description": "The dictionary HTTP server (see https://github.com/d0-lang/protocol).",
   "type": "module",
   "private": true,
   "dependencies": {

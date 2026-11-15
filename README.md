@@ -1,6 +1,6 @@
 # server
 
-Bun + Effect 4 dictionary protocol PoC: the HTTP server and the importer that builds its dictionaries, as Bun workspaces.
+Bun + Effect 4 dictionary protocol PoC: the HTTP server and the importer that builds its dictionaries, as Bun workspaces. The protocol is [d0-lang/protocol](https://github.com/d0-lang/protocol).
 
 | Path | What |
 |---|---|
@@ -93,3 +93,7 @@ With `context` (and `at`, which copy of the word was clicked), the entries match
 The phrase index is built at startup, about 0.5 s for German. A lookup with context takes about 0.7 ms on average for German and 0.35 ms for Polish, against 0.2 ms without.
 
 The format is described in `spec/dictionary/README.md`. Bump `SCHEMA_VERSION` (in `packages/core/src/schema.ts` and `spec/dictionary/format.json`) when the schema changes; it is stored as `PRAGMA user_version`, and `openDictionary` refuses files built for another version.
+
+## Contributing and licence
+
+[CONTRIBUTING.md](CONTRIBUTING.md) says what helps and how to send a change. The code is under the [MIT licence](LICENSE). Dictionary files built from Wiktionary are under CC BY-SA 4.0.

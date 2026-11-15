@@ -19,7 +19,7 @@ The browser's word splitter, `Intl.Segmenter` in ICU (Chromium and Bun agree), c
 
 A click on 食 sent 食 and showed "food". This decided most of tier 1:
 
-- **Protocol** (`../Protocol.md`, user's decision): the server returns the whole word as a one-string `match` on its first entry, and `segments` may split that match into logical pieces (`勉強|し|て|い|ます`). The extension accepts such a split (done in its own thread; the build is from 2026-11-07).
+- **Protocol** (`../protocol/README.md`, user's decision): the server returns the whole word as a one-string `match` on its first entry, and `segments` may split that match into logical pieces (`勉強|し|て|い|ます`). The extension accepts such a split (done in its own thread; the build is from 2026-11-07).
 - **Server: a morphological analyzer** (`context.analyzer`, `features/analyzedWords.ts`). This is Lindera with UniDic (npm `lindera-wasm-unidic`). It's a general mechanism: the dictionary and the joining rules are in `language.toml`, and Chinese, Korean or Thai can name their own.
   - **Words:** UniDic's short units are joined into words by the `join` rules: auxiliaries, the て form and the verb after it, conditional ば, たり, the する of a する-noun, numbers and their counters, and suffixes.
   - **Underline and parts:** the word around the clicked piece is the `match`, and its morphemes are the parts, each looked up by its base form. `match` is only sent with a sentence, only on entries the sentence adds, and always holds the clicked piece and more: a piece that is the whole word underlines nothing, and neither do the clicked word's own entries after a phrase (issue #4).
