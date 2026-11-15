@@ -4,7 +4,7 @@ import type { AppConfigValues } from "./config.ts";
 import { Legal } from "./domain/schemas.ts";
 
 /**
- * The metadata's `legal` section (Protocol.md, Legal): links to the privacy
+ * The metadata's `legal` section (the protocol, Legal): links to the privacy
  * policy and terms the operator publishes, and the sha256 of each one's
  * source text, read from the files `PRIVACY_FILE` and `TOS_FILE` name. A
  * changed file changes the hash, and clients then pause lookups until their

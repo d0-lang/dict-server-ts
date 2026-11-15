@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 
 /**
- * The metadata's `report_url` (Protocol.md, Reports): the page where users
+ * The metadata's `report_url` (the protocol, Reports): the page where users
  * report a wrong or missing answer, from `REPORT_URL`. A client adds `word`,
  * `lang` and `client` to it as query parameters, so the page should read them.
  * Undefined when unset; fails unless it is an absolute `https` URL.

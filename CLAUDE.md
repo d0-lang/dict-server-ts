@@ -1,5 +1,7 @@
 Default to Bun for install, run, and TypeScript. Use Effect 4 APIs from the `effect` package — HTTP and Schema live there, not in the old `@effect/platform` HTTP stack.
 
+The protocol the server implements is `../protocol/README.md` ([d0-lang/protocol](https://github.com/d0-lang/protocol)).
+
 ## Layout
 
 Bun workspaces: `apps/server` (`@dict/server`), `apps/importer` (`@dict/importer`), `packages/core` (`@dict/core`, the dictionary file format both share). The importer and the server import each other only through `@dict/core` (the server's tests may use the importer); `boundaries.test.ts` enforces it. Per-language data lives in `languages/<lang>/`: a language's settings go in its `language.toml`, not in TypeScript constants. After changing the `Language` schema (`packages/core/src/language.ts`), run `bun run spec`.
