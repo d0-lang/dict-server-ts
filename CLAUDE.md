@@ -32,3 +32,7 @@ Lookup code is split by feature (`apps/server/src/lookup/features/`), not by lan
 ```sh
 bun run test
 ```
+
+## Issues and PRs
+
+Issues and PRs follow the templates in `.github/` (`ISSUE_TEMPLATE/`, `PULL_REQUEST_TEMPLATE.md`; `PULL_REQUEST_TEMPLATE/language.md` for a language) and stay as short as the template.
