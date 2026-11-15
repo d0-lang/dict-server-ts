@@ -13,6 +13,7 @@ import {
   type LookupResult,
 } from "./common/entries.ts";
 import { findEntriesWithCompounds } from "./features/compounds/lookup.ts";
+import { elidedResult } from "./features/elision.ts";
 import {
   capitalisedInside,
   capitalisedNext,
@@ -26,14 +27,41 @@ import { articleLookup, presentResult } from "./headword.ts";
 
 /**
  * A lookup: the word's own entries (`common/entries.ts`), or its parts when it
- * has no entry and the language splits compounds (`features/compounds/`).
- * When the client sends `context`, the sentence adds entries first, one
+ * has no entry and the language splits compounds (`features/compounds/`) or
+ * writes elided words onto the next word (`features/elision.ts`). When the client sends `context`, the sentence adds entries first, one
  * feature per file in `features/`: the phrases the word is part of there, the
  * abbreviation or hyphen-joined word it is a piece of, and the separable verb
  * it belongs to, or, in a script without spaces, the whole word the clicked
  * piece is part of. Which features a language uses, and how, is in its
  * `language.toml`.
  */
+
+type Capitals = Parameters<typeof findEntriesWithCompounds>[3];
+
+/**
+ * The word's own entries: by its forms, or by its parts as a compound, or as
+ * an elided word and the word it is written onto (`l'homme`), where the
+ * language writes them as one (`features/elision.ts`).
+ */
+const ownEntries = (
+  db: DictionaryDb,
+  language: Language,
+  word: string,
+  capitals?: Capitals,
+): LookupResult => {
+  const whole = findEntriesWithCompounds(
+    db,
+    word,
+    compoundRules(language),
+    capitals,
+  );
+  if (!language.elision) return whole;
+  return (
+    elidedResult(db, word, whole, (host) =>
+      ownEntries(db, language, host, capitals),
+    ) ?? whole
+  );
+};
 
 /** Entries that read the same: same lemma (spacing aside: `и т. д.`, `и т.д.`), part of speech and senses. */
 const entryId = (entry: LookupEntry) =>
@@ -59,7 +87,7 @@ const contextLookup = (
   at?: number,
 ): LookupResult => {
   if (context === undefined || context.trim() === "") {
-    const plain = findEntriesWithCompounds(db, word, compoundRules(language));
+    const plain = ownEntries(db, language, word);
     // No sentence was sent and the word has no entry. If the language has an
     // analyzer, let it split the word by itself, as it would in a sentence:
     // `お送り` has no entry, but the analyzer reads it as the prefix `お` and
@@ -78,7 +106,7 @@ const contextLookup = (
   const capitalInside =
     language.context.capitalNouns &&
     capitalisedInside(context, tokens, clicked);
-  const base = findEntriesWithCompounds(db, word, compoundRules(language), {
+  const base = ownEntries(db, language, word, {
     capitalInside,
     capitalNext: capitalInside && capitalisedNext(tokens, clicked),
     nominalized:

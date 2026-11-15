@@ -31,6 +31,8 @@ export type WriterContext = {
   readonly verbalNouns: ReadonlyArray<{ form: string; entryId: number }>;
   /** Declined participles, indexed only where no other entry has the form. */
   readonly participleForms: ReadonlyArray<{ form: string; entryId: number }>;
+  /** A participle's own adjective or noun doesn't block its declined forms (`participleDeclension.sharedWithParticiple`). */
+  readonly participlesSharedWithOwn: boolean;
   /** entry id -> gloss -> its derived sense */
   readonly derivedByEntry: ReadonlyMap<
     number,

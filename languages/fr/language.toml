@@ -1,0 +1,40 @@
+#:schema ../../spec/language.schema.json
+# French. Settings left out take their defaults (spec/language.schema.json).
+
+code = "fr"
+name = "French"
+target = "en"
+
+# Articles, pronouns and conjunctions lose their vowel before a vowel and are
+# written onto the next word (`l'homme`, `d'une`, `qu'il`, `n'est`), and
+# segmenters keep the two as one word: 6% of the corpus's words, half of them
+# without an entry of their own. Such a word shows both: `homme`, then `le`.
+elision = true
+
+[import]
+# Old and Middle French are separate languages in the dump (fro, frm), not
+# tags on French senses.
+historicalStages = []
+standardPronNotes = []
+# Nouns and adjectives have no inflection tables: their plurals are on the
+# headword line, and Wiktionary often has no page for a regular plural, or one
+# with only a verb form (`structures`, `réformes`). 300 corpus words reached the
+# verb and missed their noun or adjective (`protons`, `combats`, `notions`).
+headwordInflections = true
+# Past participles agree like adjectives, but verb tables list the masculine
+# singular only: adopté also gives adoptée, adoptés, adoptées. Wiktionary lists
+# many participles as adjectives or nouns with other senses (`adopté` "male
+# adoptee"), whose forms then missed the verb (`adoptés` "adopted"), so those
+# don't block a form; another word's does (`plus` isn't `plu` + s, nor
+# `partie` `parti` + e: 464 popovers of `plus` gained `plaire` without this).
+participleDeclension = { tags = ["participle", "past"], ending = "", endings = ["e", "s", "es"], onlyNew = true, sharedWithParticiple = true }
+
+[context]
+# Words are hyphen-joined (`peut-être`, `c'est-à-dire`, `lui-même`), and the
+# segmenter splits them at the hyphen.
+hyphenWords = true
+# The prepositions de and à merge with the article after them (du, des, au,
+# aux, jusqu'au), and que and de are elided before a vowel. A phrase ending in
+# one of them still matches: `à partir du`, `parce qu'il`, `afin d'éviter`,
+# `en train d'essayer`, `grâce au`.
+contractions = { du = "de", des = "de", au = "à", aux = "à", "jusqu'au" = "jusqu'à", "jusqu'aux" = "jusqu'à", "d'" = "de", "qu'" = "que" }

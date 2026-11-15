@@ -1,0 +1,189 @@
+# French grammar words. One line per word as written + part of speech:
+# word <TAB> UD part of speech <TAB> senses separated by " | ".
+# The file replaces Wiktionary's determiner, pronoun, preposition, conjunction,
+# particle and auxiliary entries for every word listed here; nouns, verbs,
+# adverbs and other content words stay (`la` the note, `pas` "step"), unless a
+# line lists that part of speech too. A word's lines come first in the popover,
+# in this file's order, so its commonest use goes first. Case matters.
+# See apps/importer/src/grammar.ts.
+
+## Articles, and the contractions of à and de with them
+le	DET	the (masculine singular)
+le	PRON	him, it (object) | it, so (standing for a whole clause: je le sais, I know (it))
+la	DET	the (feminine singular)
+la	PRON	her, it (object)
+les	DET	the (plural)
+les	PRON	them (object)
+l'	DET	the (le or la before a vowel or mute h: l'homme, the man)
+l'	PRON	him, her, it (le or la before a vowel: je l'ai vu, I saw him/it)
+un	DET	a, an (masculine)
+un	PRON	one (l'un, one of them; les uns, some)
+uns	PRON	some, ones (les uns ... les autres, some ... others; les uns aux autres, (to) each other)
+une	DET	a, an (feminine)
+une	PRON	one (feminine: l'une, one of them)
+des	DET	some (plural of un, une; often not translated: des amis, friends)
+des	ADP	of the, from the (de + les)
+du	ADP	of the, from the (de + le)
+du	DET	some (partitive: du pain, (some) bread)
+au	ADP	to the, at the, in the (à + le) | with, made with (un croissant au beurre, a butter croissant)
+aux	ADP	to the, at the, in the (à + les) | with (le riz aux légumes, rice with vegetables; la fille aux yeux bleus, the girl with blue eyes)
+
+## Elided forms, written onto the next word (l'homme, qu'il)
+d'	ADP	of, from (de before a vowel: d'une, of a)
+d'	DET	any, some (after a negation: pas d'argent, no money)
+qu'	SCONJ	that (que before a vowel: qu'il vienne, that he come) | than (plus qu'avant, more than before) | only (ne ... qu'un, only one)
+qu'	PRON	what, which, that (que before a vowel: ce qu'il dit, what he says)
+j'	PRON	I (je before a vowel)
+n'	PART	not (ne before a vowel; usually with pas, plus, jamais, rien: je n'ai pas, I don't have)
+s'	PRON	himself, herself, itself, themselves, each other (se before a vowel: il s'appelle, he is called)
+s'	SCONJ	if (si before il, ils: s'il vient, if he comes)
+c'	PRON	it, this, that (ce before a vowel: c'est, it is)
+ç'	PRON	it, that (ce before a: ç'a été, it has been)
+m'	PRON	me, myself (me before a vowel)
+t'	PRON	you, yourself (te before a vowel)
+jusqu'	ADP	until, up to, as far as (jusque before a vowel: jusqu'à, until)
+lorsqu'	SCONJ	when (lorsque before a vowel)
+puisqu'	SCONJ	since, because (puisque before a vowel)
+quoiqu'	SCONJ	although (quoique before a vowel)
+
+## Possessives
+son	DET	his, her, its, their (before a masculine noun or a vowel)
+sa	DET	his, her, its, their (before a feminine noun)
+ses	DET	his, her, its, their (plural)
+mon	DET	my (before a masculine noun or a vowel)
+ma	DET	my (before a feminine noun)
+mes	DET	my (plural)
+ton	DET	your (informal; before a masculine noun or a vowel)
+ta	DET	your (informal; before a feminine noun)
+tes	DET	your (informal; plural)
+notre	DET	our
+nos	DET	our (plural)
+votre	DET	your (plural or formal)
+vos	DET	your (plural or formal; plural)
+leur	DET	their
+leur	PRON	(to) them
+leurs	DET	their (plural)
+
+## Demonstratives
+-là	PART	that, those (after a noun with ce, cet, cette or ces: ce jour-là, that day; ces articles-là, those articles) | there (celui-là, that one)
+-ci	PART	this, these (after a noun with ce, cet, cette or ces: ce livre-ci, this book) | here (celui-ci, this one)
+ce	DET	this, that (masculine)
+ce	PRON	it, this, that (c'est, it is) | what, that which (ce qui, ce que)
+cet	DET	this, that (masculine, before a vowel)
+cette	DET	this, that (feminine)
+ces	DET	these, those
+ça	PRON	that, it, this (informal cela)
+
+## Personal pronouns
+il	PRON	he, it | it, there (impersonal: il pleut, it rains; il y a, there is; il faut, one must)
+ils	PRON	they (masculine or mixed)
+elle	PRON	she, it | her (after a preposition)
+elles	PRON	they (feminine) | them (after a preposition)
+on	PRON	we (informal) | one, you, people, they (unspecified person: on dit, people say)
+nous	PRON	we | us, to us, ourselves
+vous	PRON	you (plural, or formal singular) | to you, yourself, yourselves
+je	PRON	I
+tu	PRON	you (informal singular)
+me	PRON	me, to me, myself
+te	PRON	you, to you, yourself (informal)
+se	PRON	himself, herself, itself, themselves, oneself, each other (reflexive: il se lave, he washes (himself)) | often not translated (se souvenir, to remember)
+lui	PRON	(to) him, (to) her, (to) it (indirect object: je lui parle, I speak to him/her) | him, it (after a preposition, or stressed: avec lui, with him)
+eux	PRON	them (masculine or mixed; after a preposition, or stressed)
+moi	PRON	me, I (stressed or after a preposition: avec moi, with me)
+toi	PRON	you (informal; stressed or after a preposition)
+y	PRON	there (j'y vais, I'm going there) | to it, about it, in it (j'y pense, I think about it)
+
+## Relatives and questions
+qui	PRON	who, whom | which, that (relative: le livre qui est là, the book that is there)
+que	SCONJ	that (je sais que, I know that) | than (plus grand que, bigger than) | only (ne ... que: il n'a que dix ans, he is only ten)
+que	PRON	what (que fais-tu ?, what are you doing?) | which, that, whom (relative object: le livre que je lis, the book I am reading)
+que	ADV	how (que c'est beau !, how beautiful it is!)
+dont	PRON	of which, of whom, whose (relative: la femme dont je parle, the woman I'm talking about) | including (dont deux enfants, including two children)
+où	PRON	where, in which | when (le jour où, the day when) | là où: where; whereas (contrasting)
+quoi	PRON	what (de quoi, about what; quoi ?, what?)
+
+## Prepositions
+de	ADP	of, 's (le livre de Paul, Paul's book) | from (de Paris, from Paris) | to (before an infinitive: essayer de, to try to) | by, with, in (cause, means, manner)
+de	DET	any, some (after a negation or before an adjective: pas de pain, no bread)
+à	ADP	to, at, in (à Paris, in Paris) | with (la fille aux yeux bleus, the girl with blue eyes) | for, -ing (une machine à laver, a washing machine) | by, per (à pied, on foot)
+en	ADP	in, into (en France, en 2020) | by (en voiture, by car) | made of (en bois, wooden) | while, by (with -ant: en marchant, while walking)
+en	PRON	of it, of them, some, any (j'en ai deux, I have two of them) | from there (j'en viens, I come from there)
+dès	ADP	from, as early as, starting from (dès 1990, from 1990 on) | as soon as (dès que)
+par	ADP	by (écrit par, written by) | through, via (par la fenêtre, through the window) | per, a (par jour, a day)
+
+## Conjunctions
+parce	SCONJ	because (parce que, parce qu'il: because he)
+et	CCONJ	and
+ou	CCONJ	or
+mais	CCONJ	but
+si	SCONJ	if, whether
+soit	CCONJ	either ... or (soit ... soit) | that is, namely (soit 20 %, i.e. 20%)
+soit	AUX	be (subjunctive of être: qu'il soit, that he be)
+
+## Negation and comparison
+pas	ADV	not (ne ... pas: je ne sais pas, I don't know; often alone in speech: je sais pas)
+plus	ADV	more, -er (plus grand, bigger) | most, -est (le plus grand, the biggest) | no more, no longer (ne ... plus: il n'est plus là, he is no longer here) | plus, in addition
+
+## Forms of être "to be" and avoir "to have" (also the auxiliaries of the past)
+est	AUX	is (il est, he is; être) | has, have (with a past participle: il est venu, he came)
+sont	AUX	are (ils sont, they are; être) | have (with a past participle: ils sont partis, they left)
+suis	AUX	am (je suis, I am; être) | have (with a past participle: je suis venu, I came)
+es	AUX	are (tu es, you are; être)
+sommes	AUX	are (nous sommes, we are; être)
+êtes	AUX	are (vous êtes, you are; être)
+était	AUX	was, were, used to be (il était; être) | had (with a past participle: il était parti, he had left)
+étaient	AUX	were, used to be (ils étaient; être)
+étais	AUX	was, used to be (j'étais, tu étais; être)
+été	AUX	been (past participle of être: il a été, he has been / he was)
+sera	AUX	will be (il sera; être)
+seront	AUX	will be (ils seront; être)
+serait	AUX	would be (il serait; être)
+seraient	AUX	would be (ils seraient; être)
+soient	AUX	be (subjunctive of être: qu'ils soient, that they be)
+a	AUX	has (il a, he has; avoir) | has, have (with a past participle: il a mangé, he ate / he has eaten) | there is (il y a)
+ont	AUX	have (ils ont; avoir) | have (with a past participle: ils ont vu, they saw / they have seen)
+ai	AUX	have (j'ai, I have; avoir) | have (with a past participle: j'ai vu, I saw / I have seen)
+as	AUX	have (tu as, you have; avoir)
+avons	AUX	have (nous avons; avoir)
+avez	AUX	have (vous avez; avoir)
+avait	AUX	had (il avait; avoir) | had (with a past participle: il avait vu, he had seen)
+avaient	AUX	had (ils avaient; avoir)
+avais	AUX	had (j'avais, tu avais; avoir)
+aura	AUX	will have (il aura; avoir)
+aurait	AUX	would have (il aurait; avoir)
+eu	AUX	had (past participle of avoir: j'ai eu, I had)
+ayant	AUX	having (present participle of avoir: ayant fini, having finished)
+étant	AUX	being (present participle of être: étant donné, given)
+fut	AUX	was (il fut; past historic of être, in writing) | was (with a past participle: il fut élu, he was elected)
+furent	AUX	were (ils furent; past historic of être, in writing)
+eut	AUX	had (il eut; past historic of avoir, in writing)
+
+## Words Wiktionary glosses misleadingly for a reader
+bah	INTJ	well, meh, oh well (hesitation or indifference)
+voire	ADV	or even, indeed (une heure, voire deux, an hour, or even two)
+donc	ADV	so, therefore, then | so, well (in speech, going on or summing up: donc voilà, so there you go)
+ainsi	ADV	in this way, like this, thus | so, thus (introducing a consequence) | ainsi que, ainsi qu': as well as; just as
+quelques	DET	a few, some (plural)
+encore	ADV	still, yet (pas encore, not yet) | again | more, another (encore un, one more) | even (encore plus, even more) | also, too (in addition)
+cool	ADJ	cool, great, nice (informal) | relaxed, laid-back
+là	ADV	there, here | then, at that point (à ce moment-là, at that moment) | that, those (after a noun with ce or ces, usually written -là: ces jours-là, those days) | (in speech, for emphasis: là, je suis fatigué, right now I'm tired)
+largement	ADV	widely, largely, mostly | by far, easily, comfortably (il a largement gagné, he won easily) | generously, amply
+
+## Set phrases English Wiktionary lacks, or glosses misleadingly
+plus tôt	ADV	earlier, sooner
+en un coup	ADV	in one go, all at once
+l'ensemble de	ADP	the whole of, all of (sur l'ensemble du parcours, over the whole route; l'ensemble des députés, all the deputies)
+au sens large	ADV	in the broad sense, broadly speaking
+aller à l'encontre de	VERB	to go against, to run counter to
+masse salariale	NOUN	payroll, total wage bill
+faux bourdon/faux bourdons	NOUN	drone (male bee)
+
+## Units, written after a number
+g	SYM	gram(s) (500 g)
+kg	SYM	kilogram(s)
+mg	SYM	milligram(s)
+km	SYM	kilometre(s)
+cm	SYM	centimetre(s)
+mm	SYM	millimetre(s)
+ml	SYM	millilitre(s)
+cl	SYM	centilitre(s)

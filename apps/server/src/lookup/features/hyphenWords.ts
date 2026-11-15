@@ -127,10 +127,11 @@ const hyphenWordIds = (
   ]
     .filter((affix) => affixes.has(affix))
     .flatMap((affix) => {
-      // The grammar file's endings are for numbers (`3-ой`), not for `о-ой`.
+      // The grammar file's endings (`X` lines) are for numbers (`3-ой`), not
+      // for `о-ой`. Its particles stay (French `-là` in `ces articles-là`).
       const endings = new Set(grammarIds(db, affix));
       return rows(affix).flatMap((row) =>
-        endings.has(row.id) ? [] : [row.id],
+        endings.has(row.id) && row.pos === "X" ? [] : [row.id],
       );
     });
   return at(affixIds, [clicked]);

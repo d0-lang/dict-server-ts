@@ -70,6 +70,13 @@ const Import = doc(
             ),
             false,
           ),
+          sharedWithParticiple: orDefault(
+            doc(
+              Schema.Boolean,
+              "With `onlyNew`: a form the participle's own adjective or noun has is added to the verb too, since only another word's form blocks it. French `adopté` \"male adoptee\" has `adoptés`, which is also `adopter`'s, while `plus` stays out of `plu` (of `plaire`) + `s`.",
+            ),
+            false,
+          ),
         }),
         "Adjectival participles decline like adjectives, but verb tables list only one form (`wymagany`, `ausgelegt`). A participle row with all of `tags` that ends in `ending` also gets its stem with each of `endings` as forms of the verb (`wymaganego`, `wymaganej`; `ausgelegte`, `ausgelegten`).",
       ),
@@ -85,6 +92,13 @@ const Import = doc(
       doc(
         Schema.Boolean,
         "Show the lemma with its stress marks: the headword's `canonical` form, when it spells the same word. Lookups still match unstressed text.",
+      ),
+      false,
+    ),
+    headwordInflections: orDefault(
+      doc(
+        Schema.Boolean,
+        "A word without an inflection table has the cases and numbers its headword line gives as its forms: French nouns and adjectives have no tables (`structure`, plural `structures`), and Wiktionary often has no page of its own for a regular plural. Off where headword lines also name other words (German `der` for `CIA`).",
       ),
       false,
     ),
@@ -159,6 +173,13 @@ const Context = doc(
         "With `capitalNouns`: words after which a capitalised infinitive is likely the verb used as a noun (`zum Binden`, `das Tragen`), so the verb keeps its place among the capitalised lemmas.",
       ),
       [],
+    ),
+    contractions: orDefault(
+      doc(
+        Schema.Record(Schema.String, Schema.String),
+        "Forms a phrase's last word takes when it merges with the word after it, by form: a preposition with the article (French `du` for `de`, so `à partir du siècle` is `à partir de`; Spanish `del` for `de`), or an elided word written onto the next one, keyed by its apostrophe form, which stands for any word starting with it (`qu'` for `que`: `parce qu'il` is `parce que`).",
+      ),
+      {},
     ),
     abbreviationLeads: orDefault(
       doc(
@@ -344,6 +365,13 @@ export const Language = doc(
         "Letters running text may write as another letter. Every form with `letter` is also indexed with `plain`, and compound stems may be written without it.",
       ),
       [],
+    ),
+    elision: orDefault(
+      doc(
+        Schema.Boolean,
+        "Elided words are written onto the next word with an apostrophe (French `l'homme`, `qu'il`; Italian `dell'anno`), and segmenters keep the two as one word. A word without an entry of its own is split after its first apostrophe when both parts have entries: the word after it comes first, then the elided word, each with its segment. Words with an entry of their own stay whole (`aujourd'hui`, `d'abord`).",
+      ),
+      false,
     ),
     import: orDefault(Import, {}),
     context: orDefault(Context, {}),
