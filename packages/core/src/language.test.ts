@@ -4,7 +4,7 @@ import { decodeLanguage, languageCodes, readLanguage } from "./language.ts";
 describe("language records", () => {
   it("reads every language.toml", () => {
     const codes = languageCodes();
-    assert.deepStrictEqual(codes, ["de", "ja", "pl", "ru", "uk"]);
+    assert.deepStrictEqual(codes, ["de", "fr", "ja", "pl", "ru", "uk"]);
     for (const code of codes) assert.strictEqual(readLanguage(code).code, code);
   });
 
@@ -17,6 +17,7 @@ describe("language records", () => {
       untrustedFormTags: [],
       ownEntryForms: [],
       stressedLemmas: false,
+      headwordInflections: false,
     });
     assert.deepStrictEqual(language.context, {
       verbBracket: false,
@@ -25,12 +26,14 @@ describe("language records", () => {
       maxGap: 1,
       separableVerbs: false,
       clauseConjunctions: [],
+      contractions: {},
       abbreviationLeads: [],
       reflexiveParticles: [],
       capitalNouns: false,
       nominalizers: [],
     });
     assert.isUndefined(language.compounds);
+    assert.strictEqual(language.elision, false);
     assert.deepStrictEqual(language.headword, {
       labels: ["Gender", "Animacy", "Aspect", "Number"],
     });
@@ -57,6 +60,6 @@ describe("language records", () => {
   });
 
   it("names the file and the known codes when a record is missing", () => {
-    assert.throws(() => readLanguage("xx"), /known: de, ja, pl, ru/);
+    assert.throws(() => readLanguage("xx"), /known: de, fr, ja, pl, ru/);
   });
 });
