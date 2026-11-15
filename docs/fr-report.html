@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>French (fr_en): language report</title>
+<style>
+:root{--bg:#fff;--fg:#1d1d1f;--muted:#6b6b70;--line:#e3e3e6;--card:#f6f6f8;--up:#1a7f37;--down:#b3261e;--accent:#2f5fd0}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--fg:#ececef;--muted:#9a9aa2;--line:#2c2c31;--card:#1c1c20;--up:#4ac26b;--down:#ff7b72;--accent:#7aa2ff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1060px;margin:0 auto;padding:32px 24px 64px}h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:40px 0 10px;padding-top:8px;border-top:1px solid var(--line)}h3{font-size:15px;margin:22px 0 8px}
+.sub{color:var(--muted);margin:0 0 20px}code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card);padding:1px 4px;border-radius:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}.kpi{background:var(--card);border-radius:10px;padding:12px 14px}.kpi .v{font-size:24px;font-weight:650}.kpi .l{color:var(--muted);font-size:13px}.kpi .d{font-size:13px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;margin:8px 0 4px}th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ul{padding-left:20px}li{margin:3px 0}.note{color:var(--muted);font-size:13px}
+.m{color:var(--muted)} .pass{color:var(--up);font-weight:600} .fail{color:var(--down);font-weight:600}
+@media (max-width:600px){main{padding:24px 16px 48px}}
+</style>
+</head><body><main>
+<h1>French (fr_en): tier 1</h1>
+<p class="sub">2026-11-15 · model only, unreviewed (no reader of French checked it) · judge: Haiku · run <code>r5</code></p>
+
+<div class="kpis">
+<div class="kpi"><div class="v pass">97.7%</div><div class="l">common grammar words (needs 97.5)</div><div class="d">88.7 in the plain import</div></div>
+<div class="kpi"><div class="v pass">93.1%</div><div class="l">common content words (needs 92.5)</div><div class="d">89.2 plain</div></div>
+<div class="kpi"><div class="v pass">87.7%</div><div class="l">random words (needs 87.5)</div><div class="d">80.7 plain; 90.1 without missing words</div></div>
+<div class="kpi"><div class="v">90.7%</div><div class="l">all 2,200 items understood</div><div class="d">82.2 in the plain import</div></div>
+</div>
+
+<h2>Summary</h2>
+<p>English Wiktionary's French is large (101,521 entries) and good. The plain import found an entry for 94.2% of corpus words. Most of what went wrong was in how French writes its words:</p>
+<ul>
+<li><b>Elision.</b> Articles, pronouns and conjunctions are written onto the next word (<code>l'homme</code>, <code>qu'il</code>, <code>n'est</code>). The browser keeps them as one word, which had no entry in 54% of cases.</li>
+<li><b>Contractions.</b> <code>du</code>, <code>au</code>, <code>des</code> (<code>de</code> or <code>à</code> plus the article) kept phrases from matching (<code>à partir du</code>).</li>
+<li><b>Missing forms.</b> Nouns and adjectives have no inflection tables, so plurals were missing. Participles agree, but the tables list only the masculine singular.</li>
+</ul>
+<p>All three gates pass, by thin margins (0.2 to 0.6 points, inside the judge's noise). The grammar gate counts 3 false positives as not failing.</p>
+
+<h2>Profile</h2>
+<ul>
+<li><b>Corpus:</b> 30 texts, 83,941 words, gathered for this run.
+<ul>
+<li>Spoken: 46,166 words from 15 videos (captions repaired by Haiku) in 7 genres.</li>
+<li>Written: 37,775 words from 12 Wikipedia articles and 3 service-public.fr guides, in 13 genres.</li>
+<li>No text over 12% of its kind.</li>
+</ul></li>
+<li><b>Headword:</b> gender labels (<code>m</code>, <code>f</code>, <code>m/f</code>, <code>pl</code>), explained in <code>labels.toml</code>, not an article. <code>le</code> and <code>la</code> both become <code>l'</code> before a vowel, so an article would hide the gender exactly where a learner needs it. 95% of nouns have a gender.</li>
+<li><b>Spelling:</b> no normalization needed. <code>’</code> already reads as <code>'</code>, and the corpus writes <code>œ</code> and accented capitals.</li>
+<li><b>Coverage:</b> 94.2% → 97.5% of corpus words with an entry (spoken 98.3%, written 96.5%). The rest is mostly names, formulas and centuries (<code>XIXe</code>).</li>
+</ul>
+
+<h2>Runs</h2>
+<p>The same 2,200 items in every run. Each cell gives understood %, then % without the words the judge called missing.</p>
+<div class="scroll"><table><tr><th>Run</th><th>Grammar</th><th>Content</th><th>Random</th><th>Change</th></tr>
+<tr><td><code>r0</code></td><td>88.7 <span class=m>/ 89.6</span></td><td>89.2 <span class=m>/ 89.3</span></td><td>80.7 <span class=m>/ 89.4</span></td><td>plain import</td></tr>
+<tr><td><code>r1</code></td><td>92.7</td><td>90.1 <span class=m>/ 90.3</span></td><td>86.4 <span class=m>/ 89.4</span></td><td>elision split, hyphen words, grammar file, listed words drop links to other listed words</td></tr>
+<tr><td><code>r2</code></td><td>95.3</td><td>92.7 <span class=m>/ 92.9</span></td><td>86.7 <span class=m>/ 89.6</span></td><td>contractions in phrases, contraction entries that only name their parts, auxiliary rows</td></tr>
+<tr><td><code>r3</code></td><td>96.1</td><td>92.9 <span class=m>/ 93.1</span></td><td>87.4 <span class=m>/ 90.1</span></td><td>headword plurals, <code>-là</code> kept</td></tr>
+<tr><td><code>r4</code></td><td>97.7</td><td>92.9 <span class=m>/ 93.1</span></td><td>87.4 <span class=m>/ 90.1</span></td><td>elided content words in verb phrases, phrase lines, 3 false positives</td></tr>
+<tr><td><code>r5</code></td><td><b>97.7</b></td><td><b>93.1</b> <span class=m>/ 93.2</span></td><td><b>87.7</b> <span class=m>/ 90.1</span></td><td>agreeing participles</td></tr>
+</table></div>
+<p class="note">Judging r0: 88 batches, $0.70. Later runs judged only the changed popovers (14, 3, 3, 1 and 2 batches). The full browser collection (82,294 words) agreed with the API on every popover the extension sent a sentence for. The only differences: 61 popovers for sentences over 500 characters, which go without context, and one Khmer word Chromium splits.</p>
+
+<h2>Accepted changes</h2>
+<h3>Server: lookup features (general; French sets them)</h3>
+<ul>
+<li><b><code>elision</code></b> (<code>features/elision.ts</code>): a word without an entry of its own splits after its first apostrophe when both parts have entries. The host word comes first, then the elided word, each with a segment: <code>l'homme</code> → homme, l'. Entries the word only reaches as a form (<code>qu'il</code> → que) or that only name its parts (<code>qu'on</code> "que + on") give way to the split. Tests: <code>elision.fr.test.ts</code> (5).</li>
+<li><b><code>context.contractions</code></b> (<code>common/contextRules.ts</code>, <code>phrases/match.ts</code>): a phrase's last word may be merged with the next word, as an article (<code>du</code> for <code>de</code>) or as an elided word (<code>qu'</code> for <code>que</code>). So <code>à partir du</code>, <code>parce qu'il</code>, <code>afin d'éviter</code> and <code>en train d'essayer</code> match. Spanish, Italian and Portuguese work the same way. Tests: <code>phrases.fr.test.ts</code>.</li>
+<li><b>Elided content words in verb phrases:</b> with elision, <code>l'encontre</code> counts as content when <code>encontre</code> does, so a verb standing apart finds its phrase (<code>va ainsi à l'encontre de</code>, <code>a toujours l'air</code>). Test in <code>phrases.fr.test.ts</code>.</li>
+<li><b>Hyphen affixes</b> (<code>features/hyphenWords.ts</code>): grammar-file lines for an affix are skipped only if they're endings (<code>X</code>), so <code>-là</code> in <code>ces articles-là</code> shows its line. Test: <code>hyphenWords.fr.test.ts</code>.</li>
+</ul>
+<h3>Importer (general)</h3>
+<ul>
+<li><b>Listed grammar words</b> (<code>passes/grammar.ts</code>) drop Wiktionary's form-of links to another listed word's lines: <code>des</code> no longer shows the lines for <code>de</code> and <code>un</code> after its own. A link that spells the other word without its optional letters stays (Russian <code>все</code> = <code>всё</code>). Tests: <code>passes/grammar.test.ts</code> (2).</li>
+<li><b>Auxiliary rows</b> (<code>transform/rules.ts</code>): a one-word row of a <code>multiword-construction</code> is its auxiliary, not a form. <code>avoir</code> and <code>ayant</code> had reached 250 verbs. Test in <code>transform.test.ts</code>.</li>
+<li><b><code>import.headwordInflections</code></b>: without a table, the headword line's numbers and cases are forms (<code>structures</code>, <code>protons</code>). Test in <code>transform.test.ts</code>.</li>
+<li><b><code>participleDeclension.sharedWithParticiple</code></b> (<code>passes/participles.ts</code>): the participle's own adjective or noun doesn't block a declined form, while another word still does. <code>adoptés</code> reaches <code>adopter</code>, and <code>plus</code> isn't <code>plu</code> + s. Tests: <code>passes/participles.test.ts</code> (2).</li>
+</ul>
+<h3>Language files</h3>
+<ul><li><code>languages/fr/language.toml</code>, <code>grammar.tsv</code> (155 lines: articles and contractions, elided forms, pronouns, être and avoir, units, 7 set phrases), <code>labels.toml</code>, <code>profile.md</code> with the round log.</li></ul>
+<h3>Outside this repo (uncommitted)</h3>
+<ul>
+<li><code>../extension</code>: a split word opens on the part with the server's first entry, as the protocol says (<code>firstTab</code>, test <code>reply.test.ts</code>). Before, <code>l'homme</code> opened on "the".</li>
+<li><code>../corpus/eval</code>, for the extension's popover changes of 2026-11-14:
+<ul>
+<li><code>collect.ts</code> reads <code>glosses</code>, not <code>translations</code>;</li>
+<li><code>collect-browser.ts</code> finds the groups inside their new wrapper and compares parts of speech by the names the popover now shows;</li>
+<li><code>popover.ts</code> lists the opening part first.</li>
+</ul>
+Without the first two, every browser popover read "no entries".</li>
+<li><code>../corpus</code>: 30 French texts, <code>sources.json</code>, <code>videos.json</code>.</li>
+</ul>
+
+<h2>Other languages</h2>
+<p>Each corpus was collected through the API before and after the general importer changes, and every changed popover was read.</p>
+<div class="scroll"><table><tr><th>Language</th><th class="n">Words changed</th><th>What</th></tr>
+<tr><td>German</td><td class="n">59</td><td><code>unsere</code>, <code>unserer</code>, <code>unserem</code>, <code>keinem</code> … show only their own line; <code>einigen</code> drops <code>einige</code>, keeps its verb</td></tr>
+<tr><td>Polish</td><td class="n">482</td><td><code>tej</code>, <code>tą</code>, <code>tę</code>, <code>tymi</code> drop the lines for <code>ta</code></td></tr>
+<tr><td>Ukrainian</td><td class="n">57</td><td><code>такі</code> drops <code>такий</code></td></tr>
+<tr><td>Japanese</td><td class="n">27</td><td><code>て</code> in <code>てきて</code>, <code>てもらった</code> no longer opens on <code>ている</code></td></tr>
+<tr><td>Russian</td><td class="n">0</td><td>after the optional-letters exception (the first run lost <code>всё</code> for <code>все</code>)</td></tr>
+</table></div>
+
+<h2>What got worse, and why it stays</h2>
+<ul>
+<li><b>Verb before the participle's own noun or adjective:</b> <code>pavés</code> (salmon <code>pavé</code>) and <code>déglinguées</code> open on the verb. For <code>adoptés</code> and <code>accusés</code> the same order is right.</li>
+<li><b>Ties between an adjective and a noun:</b> <code>vidéos</code> opens on the adjective "video", <code>marines</code> on the noun "navy".</li>
+<li><b>Rare second readings</b> from the new plurals and participles: <code>gens</code> gains <code>gent</code> "folk", <code>étés</code> "summers" gains <code>être</code>, <code>points</code> gains <code>poindre</code>.</li>
+<li><b>Ranking:</b> <code>oublie</code> "wafer", a lemma noun, ranks before the verb <code>oublier</code> (tier 2).</li>
+<li><b>Sentences over 500 characters</b> reach the server without context. This affects 3 common-word failures, whose phrases the API finds (<code>peu à peu</code>, <code>d'une part</code>, <code>par rapport à</code>). It's an extension limit.</li>
+</ul>
+
+<h2>False positives and hand patches</h2>
+<p>False positives (3), in <code>../corpus/eval/out/fr/false-positives.jsonl</code>:</p>
+<ul>
+<li><code>point</code>: English "point" also means an item under discussion.</li>
+<li><code>littéralement</code>: English "literally" is an intensifier too.</li>
+<li><code>l'Assemblée</code>: "the Assembly" names it in context.</li>
+</ul>
+<p>Without them the grammar gate would be 97.2%. Two words labelled names are words (<code>qu'en</code>, <code>Réveillon</code>); counted as failures, the gates still pass (97.6%, 87.6%).</p>
+<p><b>Hand-patch list:</b>
+<ul>
+<li><b>Words English Wiktionary lacks:</b> <code>rejouabilité</code>, <code>metroidvania</code>, <code>biosynthétiser</code>, <code>photoinduit</code>, <code>mésophylle</code>, <code>holoarctique</code>, <code>agrimonétaire</code>.</li>
+<li><b>Senses:</b> <code>ensemble</code> "the whole", <code>temps</code> in <code>un temps</code>, <code>compte</code> in <code>unité de compte</code>, <code>droit</code> "body of law", <code>service</code> "department", <code>évident</code> "easy" (negated), <code>gruau</code> "fine flour".</li>
+<li><b>Phrases:</b> <code>hôtel de ville</code>, <code>assurance maladie</code>, <code>droits d'auteur</code>, <code>flagrant délit</code>, <code>de part et d'autre</code>.</li>
+</ul>
+Details are in the profile.</p>
+
+<h2>Tier 2</h2>
+<p>Not started. Candidates:</p>
+<ul>
+<li>pronominal verbs (<code>s'inscrire dans</code>, <code>s'effacer</code>);</li>
+<li>ranking verb forms against rare lemma nouns;</li>
+<li>phrases with an elided word other than the last;</li>
+<li>the 500-character sentence limit.</li>
+</ul>
+</main></body></html>
