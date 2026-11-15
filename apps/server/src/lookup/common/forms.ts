@@ -40,8 +40,27 @@ export type FormRow = {
 };
 
 /**
+ * SQL that leaves out an acronym (an all-caps lemma, `e`) for a word written
+ * in lowercase, when the word has another entry: `ne` is not `NE`
+ * (Neuchâtel), nor `ces` `CES`, while `onu` with nothing else still finds
+ * `ONU`. Capitalised lemmas stay, since people type names in lowercase.
+ * `form` and `wordClass` are the query's parameters, `sources` a condition
+ * on the other entry's form row `o`.
+ */
+export const notAnAcronym = (
+  form: string,
+  wordClass: string,
+  sources: string,
+): string =>
+  `NOT (${wordClass} = ${CaseClass.Lower} AND e.case_class = ${CaseClass.AllCaps} AND EXISTS (
+     SELECT 1 FROM forms o JOIN entries oe ON oe.id = o.entry_id
+     WHERE o.form = ${form} AND oe.case_class <> ${CaseClass.AllCaps} AND ${sources}
+   ))`;
+
+/**
  * Entries a normalized form belongs to, without the abbreviation fallback,
- * ranked like `rankedIds` in `entries.ts` for a word written as `wordClass`.
+ * ranked like `rankedIds` in `entries.ts` for a word written as `wordClass`,
+ * and like it without acronyms for a lowercase word (`notAnAcronym`).
  */
 export const formRows = (
   db: DictionaryDb,
@@ -52,6 +71,7 @@ export const formRows = (
     .query<FormRow, [string, number]>(
       `SELECT e.id AS id, e.lemma AS lemma, e.pos AS pos, e.source_pos AS sourcePos, f.source AS source FROM forms f JOIN entries e ON e.id = f.entry_id
        WHERE f.form = ?1 AND f.source <> ${FormSource.Abbreviation}
+         AND ${notAnAcronym("?1", "?2", `o.source <> ${FormSource.Abbreviation}`)}
        ORDER BY
          CASE
            WHEN ?2 = ${CaseClass.AllCaps} THEN e.case_class <> ${CaseClass.AllCaps}

@@ -9,6 +9,7 @@ import {
   type UdPos,
 } from "@dict/core/schema";
 import { asc, inArray } from "drizzle-orm";
+import { notAnAcronym } from "./forms.ts";
 import { commonsFilePage } from "./sources.ts";
 
 /**
@@ -98,7 +99,8 @@ const dropRedundantSynonyms = (
 
 /**
  * Entry ids for a normalized form, best first. One query, using what the
- * import stored:
+ * import stored. A lowercase word is no acronym, so all-caps lemmas are left
+ * out when it has another entry (`notAnAcronym`: `ne` without `NE`).
  *
  * 1. Case: `rank` is 0 for a lemma whose `case_class` suits the word as written,
  *    1 for one that suits it less, 2 for an acronym the word doesn't spell in
@@ -148,6 +150,7 @@ const rankedIds = (
     .query<{ id: number }, [string, number, number, number, number, number]>(
       `SELECT f.entry_id AS id FROM forms f JOIN entries e ON e.id = f.entry_id
        WHERE f.form = ?1 AND (?3 = 1 OR f.source <> ${FormSource.Abbreviation})
+         AND ${notAnAcronym("?1", "?2", `(?3 = 1 OR o.source <> ${FormSource.Abbreviation})`)}
        ORDER BY
          CASE
            WHEN ?2 = ${CaseClass.AllCaps} THEN e.case_class <> ${CaseClass.AllCaps}
