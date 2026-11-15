@@ -38,26 +38,40 @@ type Matcher = {
   readonly conjunctions: ReadonlySet<string>;
   /** Particles of reflexive verbs (`context.reflexiveParticles`). */
   readonly reflexiveParticles: ReadonlySet<string>;
+  /** The word a contraction stands for as a phrase's last word (`context.contractions`). */
+  readonly contracted: (key: string) => string | undefined;
+  /** Elided words are written onto the next word (`elision`). */
+  readonly elision: boolean;
   /** Every context word and its lemmas: a phrase with a word outside it can't match. */
   readonly available: ReadonlySet<string>;
 };
 
 /**
- * The word `word` of `phrase` can stand for the context word at `at`: as
+ * The word at `p` of `phrase` can stand for the context word at `at`: as
  * written, as a reflexive, or inflected if it is the verb of a verb phrase
  * (`miało miejsce` for `mieć miejsce`), or any word of a negated one
  * (`не имеет значения`). Other words only match the phrase's own forms, so
- * `niczego` doesn't make the interjection `to nic`.
+ * `niczego` doesn't make the interjection `to nic`. The last word may also be
+ * merged with the word after it (`à partir du` for `à partir de`, `parce
+ * qu'il` for `parce que`).
  */
 const wordMatches = (
   m: Matcher,
   phrase: Phrase,
-  word: string,
+  p: number,
   at: number,
 ): boolean => {
+  const word = phrase.tokens[p]!;
   const token = m.tokens[at];
   if (token === undefined) return false;
   if (token.key === word) return true;
+  if (
+    p === phrase.tokens.length - 1 &&
+    phrase.tokens.length > 1 &&
+    m.contracted(token.key) === word
+  ) {
+    return true;
+  }
   if (
     m.reflexives !== undefined &&
     word === "sich" &&
@@ -103,7 +117,7 @@ const runMatches = (
   positions.every((p, offset) => {
     const at = start + offset;
     const token = m.tokens[at];
-    if (token === undefined || !wordMatches(m, phrase, phrase.tokens[p]!, at)) {
+    if (token === undefined || !wordMatches(m, phrase, p, at)) {
       return false;
     }
     return (
@@ -137,6 +151,17 @@ const splitConjunction = (
   p === phrase.tokens.length - 1 &&
   phrase.tokens.length >= MIN_SPLIT_PHRASE_WORDS &&
   m.info(phrase.tokens[p]!).conjunction;
+
+/**
+ * The context word is a content word, or an elided word written onto one
+ * (`l'encontre` in `va ainsi à l'encontre de`, `l'air` in `a toujours l'air`).
+ */
+const isContent = (m: Matcher, token: Token): boolean => {
+  if (m.info(token.key, token.caseClass).content) return true;
+  if (!m.elision) return false;
+  const host = token.key.slice(token.key.indexOf("'") + 1);
+  return host !== token.key && host !== "" && m.info(host).content;
+};
 
 /** The context word at `i` is part of a hyphen-joined word. */
 const inHyphenWord = (m: Matcher, i: number): boolean =>
@@ -228,10 +253,7 @@ const placePhrase = (
       // The rest needs a content word, or a reflexive verb's particle
       // (`się` of `bawić się`), which stands apart from its verb.
       if (
-        !at.some((i) => {
-          const token = m.tokens[i]!;
-          return m.info(token.key, token.caseClass).content;
-        }) &&
+        !at.some((i) => isContent(m, m.tokens[i]!)) &&
         !at.every((i) => m.reflexiveParticles.has(m.tokens[i]!.key))
       ) {
         continue;
@@ -240,7 +262,7 @@ const placePhrase = (
         (i) =>
           !at.includes(i) &&
           !inHyphenWord(m, i) &&
-          wordMatches(m, phrase, phrase.tokens[verb]!, i),
+          wordMatches(m, phrase, verb, i),
       );
       const covers = at.includes(clicked) || verbAt.includes(clicked);
       if (!covers || verbAt.length === 0) continue;
@@ -332,14 +354,17 @@ export const phraseEntryIds = (
   const index = phraseIndex(db, language);
   const info = tokenInfos(db);
   const available = new Set<string>();
+  const rules = contextRules(language);
   for (const token of tokens) {
     available.add(token.key);
     for (const lemma of info(token.key).lemmas) available.add(lemma);
+    const contracted = rules.contracted(token.key);
+    if (contracted !== undefined) available.add(contracted);
   }
   const m: Matcher = {
     tokens,
     info,
-    ...contextRules(language),
+    ...rules,
     negated: false,
     available,
   };
