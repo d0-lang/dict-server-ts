@@ -29,10 +29,12 @@ export class Meta extends Schema.Class<Meta>("server/domain/Meta")({
   name: Schema.String,
   nonce: Schema.String,
   languages: Schema.Array(Schema.String),
-  legal: Schema.optionalKey(Legal),
   features: Schema.optionalKey(Schema.Array(Schema.String)),
   verification_urls: Schema.Array(Schema.String),
   sources: Schema.optionalKey(Schema.Array(Source)),
+  /** Where users report a wrong or missing answer (Protocol.md, Reports). */
+  report_url: Schema.optionalKey(Schema.String),
+  legal: Schema.optionalKey(Legal),
 }) {}
 
 export const LookupEntry = Schema.Struct({

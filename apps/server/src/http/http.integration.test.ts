@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterAll, assert, describe, it } from "@effect/vitest";
 import { Base64 } from "effect/encoding";
-import { DictHandlersMemory } from "./DictHandlers.ts";
+import { DictHandlersMemory, dictHandlersMemory } from "./DictHandlers.ts";
 import { makeWebHandler } from "./app.ts";
 
 const verifyEd25519 = async (
@@ -113,6 +113,63 @@ describe("HTTP API", () => {
         signature!,
       ),
     );
+  });
+
+  const REPORT_URL =
+    "https://github.com/d0-lang/dict-server-ts/issues/new?template=word.yml";
+
+  const getMeta = (h: typeof handler) =>
+    h(
+      new Request("http://localhost/v1/get-meta", {
+        headers: { "X-Nonce": "report-nonce" },
+      }),
+    );
+
+  it("GET /v1/get-meta leaves report_url out when REPORT_URL is unset", async () => {
+    const body = await (await getMeta(handler)).text();
+    assert.notProperty(JSON.parse(body), "report_url");
+  });
+
+  it("GET /v1/get-meta signs report_url, after sources and before legal", async () => {
+    const withReport = makeWebHandler(
+      dictHandlersMemory({ reportUrl: REPORT_URL }),
+    );
+    try {
+      const response = await getMeta(withReport.handler);
+      const body = await response.text();
+      const parsed = JSON.parse(body) as Record<string, unknown>;
+      assert.strictEqual(parsed["report_url"], REPORT_URL);
+      assert.deepStrictEqual(Object.keys(parsed).slice(-3), [
+        "sources",
+        "report_url",
+        "legal",
+      ]);
+      const keyResponse = await withReport.handler(
+        new Request("http://localhost/v1/get-key"),
+      );
+      const { key } = (await keyResponse.json()) as { key: string };
+      assert.isTrue(
+        await verifyEd25519(
+          key,
+          new TextEncoder().encode(body),
+          response.headers.get("x-signature")!,
+        ),
+      );
+    } finally {
+      await withReport.dispose();
+    }
+  });
+
+  it("refuses a REPORT_URL that isn't an absolute https URL", async () => {
+    const withReport = makeWebHandler(
+      dictHandlersMemory({ reportUrl: "http://example.org/report" }),
+    );
+    try {
+      const response = await getMeta(withReport.handler).catch(() => undefined);
+      assert.notStrictEqual(response?.status, 200);
+    } finally {
+      await withReport.dispose();
+    }
   });
 
   const lookupRaw = (body: string) =>
