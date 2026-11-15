@@ -45,6 +45,23 @@ describe("elision", () => {
     assert.deepStrictEqual(lemmas(french, "fr_en", "l'xyz"), []);
   });
 
+  it("splits a noun made from a clause, its own entry last", () => {
+    // `j'aime` is "a like", but "I like" in running text.
+    const result = lookupWord(french, languageOf("fr_en"), "j'aime");
+    assert.deepStrictEqual(
+      result.entries.map((entry) => entry.lemma),
+      ["aimer", "je", "j'aime"],
+    );
+    assert.deepStrictEqual(result.segments, [
+      { text: "j'", entries: [1] },
+      { text: "aime", entries: [0] },
+    ]);
+    // A noun whose host isn't a verb stays whole.
+    assert.deepStrictEqual(lemmas(french, "fr_en", "presqu'île"), [
+      "presqu'île",
+    ]);
+  });
+
   it("leaves languages without elision alone", () => {
     assert.deepStrictEqual(lemmas(french, "de_en", "l'homme"), []);
   });

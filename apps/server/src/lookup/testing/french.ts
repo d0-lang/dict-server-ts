@@ -40,4 +40,11 @@ export const french = dictionary([
   ["air", "NOUN", [], ["air"]],
   ["avoir l'air", "VERB", [], ["to seem"]],
   ["toujours", "ADV", [], ["always"]],
+  // Nouns written with an elided word: one made from a clause, two not.
+  ["j'aime", "NOUN", [], ["a like"]],
+  ["je", "PRON", ["j'"], ["I"]],
+  ["aimer", "VERB", ["aime"], ["to like"]],
+  ["presqu'île", "NOUN", [], ["peninsula"]],
+  ["presque", "ADV", ["presqu'"], ["almost"]],
+  ["île", "NOUN", [], ["island"]],
 ]);

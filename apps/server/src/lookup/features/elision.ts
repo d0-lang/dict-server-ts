@@ -32,6 +32,11 @@ const namesParts = (entry: LookupEntry): boolean => {
  * to the split: `qu'il` is listed as a form of `que`, which leaves out `il`.
  * So do entries of its own that only name its parts (`qu'on` "que + on",
  * `s'est` "se + est"), which the parts' entries explain.
+ *
+ * A noun made from a clause (`j'aime` "a like") is split all the same when
+ * the host reads as a verb, and follows the split: in running text `j'aime`
+ * is "I like". Nouns whose host isn't a verb stay whole (`presqu'île`,
+ * `m'sieur`).
  */
 export const elidedResult = (
   db: DictionaryDb,
@@ -40,13 +45,11 @@ export const elidedResult = (
   lookupHost: (host: string) => LookupResult,
 ): LookupResult | undefined => {
   const key = lookupKey(word);
-  if (
-    whole.entries.some(
-      (entry) => lookupKey(entry.lemma) === key && !namesParts(entry),
-    )
-  ) {
-    return undefined;
-  }
+  const own = whole.entries.filter(
+    (entry) => lookupKey(entry.lemma) === key && !namesParts(entry),
+  );
+  const clause = own.length > 0 && own.every((entry) => entry.pos === "NOUN");
+  if (own.length > 0 && !clause) return undefined;
   const at = word.search(APOSTROPHE);
   if (at < 1) return undefined;
   const elided = word.slice(0, at + 1);
@@ -56,6 +59,7 @@ export const elidedResult = (
   if (clitics.length === 0) return undefined;
   const found = lookupHost(host);
   if (found.entries.length === 0) return undefined;
+  if (clause && found.entries[0]?.pos !== "VERB") return undefined;
   const first = found.entries.length;
   const segments: ReadonlyArray<Segment> = [
     { text: elided, entries: clitics.map((_, i) => first + i) },
@@ -63,5 +67,5 @@ export const elidedResult = (
       { text: host, entries: found.entries.map((_, i) => i) },
     ]),
   ];
-  return { entries: [...found.entries, ...clitics], segments };
+  return { entries: [...found.entries, ...clitics, ...own], segments };
 };
