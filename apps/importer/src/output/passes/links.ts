@@ -2,8 +2,19 @@ import { FormSource } from "@dict/core/schema";
 import type { WriterContext } from "./context.ts";
 import { MAX_CHAIN_STEPS } from "./context.ts";
 
-/** `tańsi -> tańszy` and `tańszy -> tani` also give `tańsi -> tani`. */
+/**
+ * `tańsi -> tańszy` and `tańszy -> tani` also give `tańsi -> tani`. A chain
+ * goes on through a word with no entry of the link's part of speech, and
+ * there only by that word's links of the same part of speech: the verb form
+ * `partie` is "feminine singular of parti", whose own entries are an
+ * adjective and a noun, and whose verb line says "past participle of partir",
+ * so `partie` also reaches `partir`. (`resolveFormOf` still gives it those
+ * entries of `parti`, for want of a verb.)
+ */
 export const followLinkChains = ({ sqlite }: WriterContext) => {
+  const entryOf = (pos: string) =>
+    `SELECT 1 FROM forms f JOIN entries e ON e.id = f.entry_id
+     WHERE f.form = p.lemma AND f.source = ${FormSource.Lemma}${pos}`;
   for (let step = 1; step < MAX_CHAIN_STEPS; step++) {
     const added = sqlite.run(
       `INSERT OR IGNORE INTO form_of_pending (form, lemma, source_pos, pointer, marked)
@@ -11,10 +22,8 @@ export const followLinkChains = ({ sqlite }: WriterContext) => {
        FROM form_of_pending p
        JOIN form_of_pending q ON q.form = p.lemma
        WHERE q.lemma <> p.form
-         AND NOT EXISTS (
-           SELECT 1 FROM forms f
-           WHERE f.form = p.lemma AND f.source = ${FormSource.Lemma}
-         )`,
+         AND NOT EXISTS (${entryOf(" AND e.source_pos = p.source_pos")})
+         AND (q.source_pos = p.source_pos OR NOT EXISTS (${entryOf("")}))`,
     ).changes;
     if (added === 0) break;
   }
