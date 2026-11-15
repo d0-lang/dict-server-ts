@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Problem on a web page (the browser extension)
+    url: https://github.com/d0-lang/extension/issues/new/choose
+    about: The popover does not open, or a page looks broken.
