@@ -6,8 +6,9 @@ import type { Language } from "@dict/core/language";
  * A morphological analyzer (Lindera, compiled to WebAssembly, with its
  * dictionary inside), for scripts without spaces: it cuts a sentence into
  * morphemes and gives each its part of speech and base form. A language names
- * its dictionary in `context.analyzer`. Each dictionary is loaded once, on
- * first use, and stays loaded: UniDic takes about a second and 600 MB.
+ * its dictionary in `context.analyzer`. Each dictionary is loaded once, when
+ * the server opens the language (`loadAnalyzer`), and stays loaded: UniDic
+ * takes about a second and 600 MB.
  */
 
 export type Morpheme = {
@@ -115,6 +116,16 @@ const utf16At = (text: string): Map<number, number> => {
   }
   at.set(bytes, index);
   return at;
+};
+
+/**
+ * Loads the language's analyzer dictionary now, so no lookup waits for it
+ * (every request would, since lookups are synchronous). Throws when its
+ * package can't be loaded.
+ */
+export const loadAnalyzer = (language: Language): void => {
+  const settings = language.context.analyzer;
+  if (settings !== undefined) tokenizerFor(settings.dictionary);
 };
 
 const analyzers = new WeakMap<Language, Analyzer>();

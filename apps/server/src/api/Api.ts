@@ -28,7 +28,8 @@ export class DictApi extends HttpApiGroup.make("dict")
     }),
     HttpApiEndpoint.get("getMeta", "/get-meta", {
       headers: {
-        "x-nonce": Schema.String,
+        // The protocol names no limit; a UUID is 36 characters.
+        "x-nonce": Schema.String.check(Schema.isMaxLength(128)),
       },
       success: HttpApiSchema.WithHeaders(Meta, {
         "x-signature": Schema.String,

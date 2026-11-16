@@ -48,6 +48,17 @@ describe("HTTP API", () => {
     assert.strictEqual(response.status, 400);
   });
 
+  it("GET /v1/get-meta refuses an X-Nonce over 128 characters", async () => {
+    const meta = (nonce: string) =>
+      handler(
+        new Request("http://localhost/v1/get-meta", {
+          headers: { "X-Nonce": nonce },
+        }),
+      );
+    assert.strictEqual((await meta("n".repeat(128))).status, 200);
+    assert.strictEqual((await meta("n".repeat(129))).status, 400);
+  });
+
   it("GET /v1/get-meta signs the exact JSON body", async () => {
     const nonce = "black-box-nonce";
     const metaResponse = await handler(
@@ -267,15 +278,41 @@ describe("HTTP API", () => {
     assert.strictEqual(body.entries.length, 2);
   });
 
-  it("POST /v1/lookup ignores fields it does not know and a bad `at`", async () => {
+  it("POST /v1/lookup ignores fields it does not know", async () => {
     const response = await lookup({
       word: "Mutter",
       lang: "de_en",
       context: "Meine Mutter kocht.",
-      at: "second",
       later: true,
     });
     assert.strictEqual(response.status, 200);
+  });
+
+  it("POST /v1/lookup takes `word` and `context` up to the protocol's caps", async () => {
+    const response = await lookup({
+      word: "M".repeat(64),
+      lang: "de_en",
+      context: "M".repeat(500),
+      at: 500,
+    });
+    assert.strictEqual(response.status, 200);
+  });
+
+  it("POST /v1/lookup rejects what is over the caps, and a bad `at`", async () => {
+    for (const body of [
+      { word: "M".repeat(65), lang: "de_en" },
+      // UTF-16 code units: 33 characters outside the BMP are 66 units.
+      { word: "𝕄".repeat(33), lang: "de_en" },
+      { word: "Mutter", lang: "de_en", context: "M".repeat(501) },
+      { word: "Mutter", lang: "de_en", context: "Mutter", at: "second" },
+      { word: "Mutter", lang: "de_en", context: "Mutter", at: 0 },
+      { word: "Mutter", lang: "de_en", context: "Mutter", at: 1.5 },
+      { word: "Mutter", lang: "de_en", context: "Mutter", at: 501 },
+    ]) {
+      const response = await lookup(body);
+      assert.strictEqual(response.status, 400);
+      assert.deepStrictEqual(await response.json(), { error: "bad_request" });
+    }
   });
 
   it("POST /v1/lookup returns no entries for an unknown word", async () => {

@@ -52,8 +52,25 @@ if (Result.isFailure(report)) {
 
 console.log(`serving ${languages.join(", ")}`);
 
+// Open the dictionaries and load the analyzers before listening, so the first
+// lookups don't wait for them and a load that fails stops the server here,
+// not every request after.
+try {
+  await handler(new Request("http://localhost/v1/get-key"));
+} catch (error) {
+  console.error(error);
+  process.exit(1);
+}
+
 Bun.serve({
   port,
+  // A lookup body is a few KB at most (64 + 500 code units, JSON-escaped);
+  // Bun's default is 128 MB.
+  maxRequestBodySize: 16 * 1024,
+  // Above nginx's default upstream keepalive (60 s), so a proxy in front
+  // closes an idle connection before the server does. Bun's default of 10 s
+  // made clients wait under load.
+  idleTimeout: 75,
   fetch: (request) => handler(request),
 });
 

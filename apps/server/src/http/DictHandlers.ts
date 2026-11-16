@@ -83,12 +83,18 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
       },
       lookup: ({ payload }) => {
         const { word, lang, context, at } = payload;
+        // Checked before any lookup work: the length of `word` and `context`
+        // is what makes a lookup expensive.
         if (
           typeof word !== "string" ||
           word === "" ||
+          word.length > MAX_WORD ||
           typeof lang !== "string" ||
           lang === "" ||
-          (context !== undefined && typeof context !== "string")
+          (context !== undefined && typeof context !== "string") ||
+          (config.context &&
+            ((context !== undefined && context.length > MAX_CONTEXT) ||
+              (at !== undefined && !isClickedCopy(at))))
         ) {
           return Effect.fail(new LookupError({ error: "bad_request" }));
         }
@@ -101,7 +107,7 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
               lang,
               word,
               config.context ? context : undefined,
-              config.context ? clickedCopy(at) : undefined,
+              config.context && isClickedCopy(at) ? at : undefined,
             ),
           ),
         );
@@ -110,9 +116,13 @@ export const DictHandlersNoDeps = HttpApiBuilder.group(
   }),
 ).pipe(Layer.provideMerge(LookupBodyErrorsLive));
 
-/** `at` as sent; anything but a positive integer is ignored, as if it weren't sent. */
-const clickedCopy = (at: unknown): number | undefined =>
-  typeof at === "number" && Number.isInteger(at) && at > 0 ? at : undefined;
+/** The protocol's caps, in UTF-16 code units, which is what `length` counts. */
+const MAX_WORD = 64;
+const MAX_CONTEXT = 500;
+
+/** `at` names a copy of `word` in `context`, so it is at most the sentence's length. */
+const isClickedCopy = (at: unknown): at is number =>
+  typeof at === "number" && Number.isInteger(at) && at > 0 && at <= MAX_CONTEXT;
 
 /**
  * In-memory handlers for tests: a stub dictionary and `de_en`, whatever is in

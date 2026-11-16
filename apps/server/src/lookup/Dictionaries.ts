@@ -9,6 +9,7 @@ import { warmCompounds } from "./features/compounds/stems.ts";
 import type { LabelExplanation } from "@dict/core/labels";
 import type { LookupBody } from "../domain/schemas.ts";
 import { pairLabels } from "./labels.ts";
+import { loadAnalyzer } from "./common/analyzer.ts";
 
 /** The dictionary files of the language pairs this server lists. */
 export class Dictionaries extends Context.Service<
@@ -36,6 +37,7 @@ export class Dictionaries extends Context.Service<
    * is none); a missing file or an invalid record is fatal.
    * With `context` on, the phrase index is built here, not on the first lookup.
    * So are the label explanations, and an invalid labels file is fatal too.
+   * The language's analyzer loads here as well, and one that can't is fatal.
    */
   static readonly layer = (dir = DATA_DIR) =>
     Layer.effect(
@@ -53,6 +55,11 @@ export class Dictionaries extends Context.Service<
         for (const pair of languages) {
           const db = yield* openDictionary(`${dir}/${pair}.sqlite`);
           const language = yield* pairLanguage(pair);
+          yield* Effect.try({
+            try: () => loadAnalyzer(language),
+            catch: (cause) =>
+              new Error(`analyzer of ${pair}: ${String(cause)}`, { cause }),
+          });
           if (context) phraseIndex(db, language);
           const rules = compoundRules(language);
           if (rules !== undefined) warmCompounds(db, rules);
