@@ -35,9 +35,10 @@ export const replaceGrammarWords = ({
        SELECT f.form FROM forms f JOIN entries e ON e.id = f.entry_id
        WHERE f.source = ${FormSource.Lemma} AND e.source_pos = '${GRAMMAR_SOURCE_POS}'
      )
-     AND entry_id IN (
-       SELECT id FROM entries
-       WHERE source_pos <> '${GRAMMAR_SOURCE_POS}'
+     AND EXISTS (
+       SELECT 1 FROM entries
+       WHERE id = forms.entry_id
+         AND source_pos <> '${GRAMMAR_SOURCE_POS}'
          AND (
            pos IN (${[...GRAMMAR_POS].map((p) => `'${p}'`).join(", ")})
            OR source_pos = 'contraction'

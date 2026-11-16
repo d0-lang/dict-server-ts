@@ -419,6 +419,9 @@ export const makeWriter = (
    * `writeBatch`. `formOfFallback: false` skips only the link fallback.
    */
   const finish = (formOfFallback: boolean): FormOfResult => {
+    // The passes find and move forms by entry; the shipped file has no use for
+    // that index, so it is dropped again before the file is compacted.
+    sqlite.run("CREATE INDEX forms_entry_tmp ON forms(entry_id)");
     // Words that depend on others, which may come later in the dump.
     restoreHistoricalEntries();
     followLinkChains(ctx);
@@ -442,6 +445,7 @@ export const makeWriter = (
       addLetterVariants(ctx);
     })();
     sqlite.run("DROP TABLE form_of_pending");
+    sqlite.run("DROP INDEX forms_entry_tmp");
     return { added, unresolved };
   };
 
