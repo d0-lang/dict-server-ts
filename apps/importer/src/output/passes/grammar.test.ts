@@ -4,12 +4,22 @@ import { FormSource, GRAMMAR_SOURCE_POS } from "@dict/core/schema";
 import type { WriterContext } from "./context.ts";
 import { replaceGrammarWords } from "./grammar.ts";
 
-/** A file with `entries` ([id, lemma, pos, sourcePos]) and `forms` ([form, id, source]). */
+/**
+ * A file with `entries` ([id, lemma, pos, sourcePos]), `forms` ([form, id,
+ * source]) and the links they came from (`links`: [form, lemma, sourcePos]).
+ */
 const file = (
   entries: ReadonlyArray<readonly [number, string, string, string]>,
   forms: ReadonlyArray<readonly [string, number, number]>,
+  links: ReadonlyArray<readonly [string, string, string]> = [],
 ) => {
   const db = createDictionaryFile(":memory:");
+  db.$client.run(
+    "CREATE TEMP TABLE form_of_pending (form TEXT, lemma TEXT, source_pos TEXT)",
+  );
+  for (const row of links) {
+    db.$client.run("INSERT INTO form_of_pending VALUES (?, ?, ?)", [...row]);
+  }
   for (const [id, lemma, pos, sourcePos] of entries) {
     db.$client.run(
       "INSERT INTO entries VALUES (?, ?, ?, ?, 0, 0, NULL, NULL)",
@@ -65,6 +75,59 @@ describe("replaceGrammarWords", () => {
     run(sqlite);
     assert.deepStrictEqual(reached(sqlite, "des"), ["des DET", "dé NOUN"]);
     assert.deepStrictEqual(reached(sqlite, "du"), ["de ADP"]);
+  });
+
+  it("drops the other listed word's own entries that only the link's fallback reached", () => {
+    const sqlite = file(
+      [
+        [1, "la", "DET", GRAMMAR_SOURCE_POS],
+        [2, "l'", "DET", GRAMMAR_SOURCE_POS],
+        [3, "un", "DET", GRAMMAR_SOURCE_POS],
+        [4, "une", "DET", GRAMMAR_SOURCE_POS],
+        [5, "la", "NOUN", "noun"],
+        [6, "un", "NUM", "num"],
+      ],
+      [
+        ["la", 1, FormSource.Lemma],
+        ["l'", 2, FormSource.Lemma],
+        ["un", 3, FormSource.Lemma],
+        ["une", 4, FormSource.Lemma],
+        ["la", 5, FormSource.Lemma],
+        ["un", 6, FormSource.Lemma],
+        // The article `l'` links to `la`, which has no article entry.
+        ["l'", 5, FormSource.FormOf],
+        // The numeral `une` links to the numeral `un`.
+        ["une", 6, FormSource.FormOf],
+      ],
+      [
+        ["l'", "la", "article"],
+        ["une", "un", "num"],
+      ],
+    );
+    run(sqlite);
+    assert.deepStrictEqual(reached(sqlite, "l'"), ["l' DET"]);
+    assert.deepStrictEqual(reached(sqlite, "une"), ["une DET", "un NUM"]);
+  });
+
+  it("replaces Wiktionary's contraction entry of a listed word", () => {
+    const sqlite = file(
+      [
+        [1, "n'", "PART", GRAMMAR_SOURCE_POS],
+        [2, "a", "AUX", GRAMMAR_SOURCE_POS],
+        [3, "n'", "X", "contraction"],
+        [4, "a", "X", "character"],
+      ],
+      [
+        ["n'", 1, FormSource.Lemma],
+        ["a", 2, FormSource.Lemma],
+        ["n'", 3, FormSource.Lemma],
+        ["a", 4, FormSource.Lemma],
+      ],
+    );
+    run(sqlite);
+    assert.deepStrictEqual(reached(sqlite, "n'"), ["n' PART"]);
+    // Other `X` entries stay: `a` is also the letter.
+    assert.deepStrictEqual(reached(sqlite, "a"), ["a AUX", "a X"]);
   });
 
   it("keeps a link that spells the other word without its optional letters", () => {

@@ -33,6 +33,8 @@ export type WriterContext = {
   readonly participleForms: ReadonlyArray<{ form: string; entryId: number }>;
   /** A participle's own adjective or noun doesn't block its declined forms (`participleDeclension.sharedWithParticiple`). */
   readonly participlesSharedWithOwn: boolean;
+  /** A verb form's chain goes on through a word with no verb entry (`verbChainsThroughEntries`). */
+  readonly verbChainsThroughEntries: boolean;
   /** entry id -> gloss -> its derived sense */
   readonly derivedByEntry: ReadonlyMap<
     number,

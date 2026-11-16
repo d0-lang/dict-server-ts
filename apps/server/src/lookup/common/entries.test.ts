@@ -90,6 +90,31 @@ describe("findEntriesByForm ranking", () => {
     );
   });
 
+  it("leaves acronyms out for a lowercase word with another entry", () => {
+    const words = [
+      ["ne", "PART", "particle", "ne", FormSource.Lemma],
+      ["NE", "PROPN", "name", "ne", FormSource.Lemma],
+      ["Ne", "NOUN", "noun", "ne", FormSource.Lemma, "neon"],
+    ] as const;
+    assert.deepStrictEqual(ranked(words, "ne"), ["ne PART", "Ne NOUN"]);
+    // Written in capitals, or capitalised, it may be one.
+    assert.deepStrictEqual(ranked(words, "NE"), [
+      "NE PROPN",
+      "ne PART",
+      "Ne NOUN",
+    ]);
+    assert.deepStrictEqual(ranked(words, "Ne"), [
+      "ne PART",
+      "Ne NOUN",
+      "NE PROPN",
+    ]);
+    // With nothing else, it still finds the acronym.
+    assert.deepStrictEqual(
+      ranked([["ONU", "PROPN", "name", "onu", FormSource.Lemma]], "onu"),
+      ["ONU PROPN"],
+    );
+  });
+
   it("puts letters and one-letter letter names after the word", () => {
     assert.deepStrictEqual(
       ranked(

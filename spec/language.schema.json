@@ -97,7 +97,7 @@
             },
             "sharedWithParticiple": {
               "type": "boolean",
-              "description": "With `onlyNew`: a form the participle's own adjective or noun has is added to the verb too, since only another word's form blocks it. French `adopté` \"male adoptee\" has `adoptés`, which is also `adopter`'s, while `plus` stays out of `plu` (of `plaire`) + `s`."
+              "description": "With `onlyNew`: a form the participle's own adjective or noun has is added to the verb too, since only another word's form blocks it. French `adopté` \"male adoptee\" has `adoptés`, which is also `adopter`'s, and the noun `arrivée` \"arrival\" is `arrivé` + `e`, so it is `arriver`'s too, while `plus` the adverb stays out of `plu` (of `plaire`) + `s`."
             }
           },
           "required": [
@@ -121,6 +121,10 @@
         "headwordInflections": {
           "type": "boolean",
           "description": "A word without an inflection table has the cases and numbers its headword line gives as its forms: French nouns and adjectives have no tables (`structure`, plural `structures`), and Wiktionary often has no page of its own for a regular plural. Off where headword lines also name other words (German `der` for `CIA`)."
+        },
+        "verbChainsThroughEntries": {
+          "type": "boolean",
+          "description": "A verb form's chain of links goes on through a word with entries but no verb entry, by that word's own verb links: French `partie` is \"feminine singular of parti\", whose entries are an adjective and a noun and whose verb line is \"past participle of partir\", so `partie` also reaches `partir`. Otherwise a chain stops at any word with an entry. Off where a participle used as an adjective is mostly read as one: the verb it reaches then ranks with the adjective, and often first (German `naheliegende`, Russian `удаленный`)."
         }
       },
       "additionalProperties": false,
@@ -189,6 +193,34 @@
             "type": "string"
           },
           "description": "Forms a phrase's last word takes when it merges with the word after it, by form: a preposition with the article (French `du` for `de`, so `à partir du siècle` is `à partir de`; Spanish `del` for `de`), or an elided word written onto the next one, keyed by its apostrophe form, which stands for any word starting with it (`qu'` for `que`: `parce qu'il` is `parce que`)."
+        },
+        "verbAfter": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Words a verb follows (subject and object pronouns, the negation): after one, in its clause, a word's one-word verb and auxiliary entries come before its others (French `je passe` opens on `passer`, not the noun `passe`), a verb whose lemma is the word itself after the verbs it is a form of (`dire` before `dit` \"called\"). With `elision`, an elided word counts in either place: the host of `n'oublie` follows `n'`, and the word after `qu'il` follows `il`."
+        },
+        "verbBeforeJoined": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Words a hyphen joins to the verb before them (French inverted subjects and imperative objects: `dit-il`, `donne-moi`, `vas-y`): before one, a word's verb and auxiliary entries come before its others, as after `verbAfter`."
+        },
+        "noVerbAfter": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Words no verb follows (determiners that are never a pronoun: French `des`, `ces`, `mon`): after one, in its clause, a word's one-word verb entries come after its others (`des mesures` opens on the noun, not `mesurer`)."
+        },
+        "participleEndings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Endings of past participles (French `é`, `i`, `it`). After a word that can be an auxiliary (it has an `AUX` entry), with at most two adverbs between, a word shaped like a past participle of a verb it is a form of shows that verb before its first noun entry, passing no adjective or adverb (`elle est partie`: `partir` before `partie` \"part\"). Shaped like one: the word, with one of `import.participleDeclension.endings` or nothing taken off, ends in one of these and is itself a form of that verb, so `j'ai envie` keeps the noun (`envi` is no form of `envier`). These hints apply with `context` only, to the word's own entries: a participle after an auxiliary first, then a verb after `verbAfter` or before `verbBeforeJoined`, then `noVerbAfter`."
         },
         "abbreviationLeads": {
           "type": "array",

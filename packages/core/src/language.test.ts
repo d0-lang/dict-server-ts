@@ -18,6 +18,7 @@ describe("language records", () => {
       ownEntryForms: [],
       stressedLemmas: false,
       headwordInflections: false,
+      verbChainsThroughEntries: false,
     });
     assert.deepStrictEqual(language.context, {
       verbBracket: false,
@@ -27,6 +28,10 @@ describe("language records", () => {
       separableVerbs: false,
       clauseConjunctions: [],
       contractions: {},
+      verbAfter: [],
+      verbBeforeJoined: [],
+      noVerbAfter: [],
+      participleEndings: [],
       abbreviationLeads: [],
       reflexiveParticles: [],
       capitalNouns: false,

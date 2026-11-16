@@ -46,6 +46,21 @@ describe("transformEntry", () => {
     });
   });
 
+  it("writes no entry for a word that is only a space", () => {
+    const space = (word: string) =>
+      transformEntry(
+        fr,
+        entry({
+          word,
+          pos: "punct",
+          lang_code: "fr",
+          senses: [{ glosses: ["A narrow non-breaking space"] }],
+        }),
+      ).entry?.lemma;
+    assert.strictEqual(space("\u202f"), undefined);
+    assert.strictEqual(space("«"), "«");
+  });
+
   it("maps unknown parts of speech to X", () => {
     const result = transformEntry(
       pl,
@@ -640,6 +655,26 @@ describe("transformEntry", () => {
       result.formOf.map((l) => l.lemma),
       ["sens", "prosty"],
     );
+    // A verb form, which wiktextract doesn't read when it names two.
+    const verb = transformEntry(
+      fr,
+      entry({
+        word: "content",
+        pos: "verb",
+        lang_code: "fr",
+        senses: [
+          {
+            glosses: ["third-person plural present/subjunctive of conter"],
+            links: [["conter", "conter#French"]],
+          },
+        ],
+      }),
+    );
+    assert.strictEqual(verb.entry, undefined);
+    assert.deepStrictEqual(
+      verb.formOf.map((l) => l.lemma),
+      ["conter"],
+    );
   });
 
   it("drops a grammar parent, keeps its children and links to its target", () => {
@@ -675,6 +710,17 @@ describe("transformEntry", () => {
       const result = transformEntry(pl, entry({ senses: [{ glosses }] }));
       assert.deepStrictEqual(glossesOf(result), [glosses]);
     }
+    // A verbal noun is a word of its own, though "gerund" is grammar.
+    const gerund = ["gerund of essen"];
+    const result = transformEntry(
+      de,
+      entry({
+        word: "Essen",
+        lang_code: "de",
+        senses: [{ glosses: gerund, links: [["essen", "essen#German"]] }],
+      }),
+    );
+    assert.deepStrictEqual(glossesOf(result), [gerund]);
   });
 
   it("cleans headings off form-of targets", () => {

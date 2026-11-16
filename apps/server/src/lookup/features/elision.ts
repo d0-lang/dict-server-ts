@@ -28,10 +28,18 @@ const namesParts = (entry: LookupEntry): boolean => {
  *
  * Undefined when `whole`, the word's own lookup, has an entry for the word
  * itself (`aujourd'hui`, `d'abord`, `c'est`), or when either part has no
- * entry. Entries the word only reaches as a form of something else give way
- * to the split: `qu'il` is listed as a form of `que`, which leaves out `il`.
+ * entry. One-word entries the word only reaches as a form of something else
+ * give way to the split: `qu'il` is listed as a form of `que`, which leaves
+ * out `il`.
  * So do entries of its own that only name its parts (`qu'on` "que + on",
  * `s'est` "se + est"), which the parts' entries explain.
+ *
+ * An entry of several words the word is a form of stays, since neither part
+ * shows it: `s'agit` is `s'agir` "to be about", not only `agir` "to act". A
+ * one-word entry is a part already shown, in full (`que` for `qu'`) or by the
+ * host's lemma (`être` for `s'est`). It comes first when its lemma starts
+ * with the same elided word (`s'agir`), and after the split otherwise: `il
+ * m'appelle` is "he calls me", though `m'appelle` is a form of `s'appeler`.
  *
  * A noun made from a clause (`j'aime` "a like") is split all the same when
  * the host reads as a verb, and follows the split: in running text `j'aime`
@@ -60,12 +68,30 @@ export const elidedResult = (
   const found = lookupHost(host);
   if (found.entries.length === 0) return undefined;
   if (clause && found.entries[0]?.pos !== "VERB") return undefined;
+  const severalWords = whole.entries.filter(
+    (entry) => lookupKey(entry.lemma) !== key && /[\s']/u.test(entry.lemma),
+  );
+  const elidedKey = lookupKey(elided);
+  const lead = severalWords.filter((entry) =>
+    lookupKey(entry.lemma).startsWith(elidedKey),
+  );
+  const after = whole.entries.filter(
+    (entry) =>
+      own.includes(entry) ||
+      (severalWords.includes(entry) && !lead.includes(entry)),
+  );
+  const shift = (i: number) => lead.length + i;
   const first = found.entries.length;
   const segments: ReadonlyArray<Segment> = [
-    { text: elided, entries: clitics.map((_, i) => first + i) },
-    ...(found.segments ?? [
-      { text: host, entries: found.entries.map((_, i) => i) },
-    ]),
+    { text: elided, entries: clitics.map((_, i) => shift(first + i)) },
+    ...(found.segments?.map((segment) =>
+      segment.entries === undefined
+        ? segment
+        : { ...segment, entries: segment.entries.map(shift) },
+    ) ?? [{ text: host, entries: found.entries.map((_, i) => shift(i)) }]),
   ];
-  return { entries: [...found.entries, ...clitics, ...own], segments };
+  return {
+    entries: [...lead, ...found.entries, ...clitics, ...after],
+    segments,
+  };
 };

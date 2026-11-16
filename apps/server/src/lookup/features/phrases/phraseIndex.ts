@@ -7,6 +7,8 @@ import { tokenize } from "../../common/tokenize.ts";
 export type Phrase = {
   readonly tokens: ReadonlyArray<string>;
   readonly breaks: ReadonlyArray<boolean>;
+  /** A hyphen joins the word to the one before it: `ce` of `est-ce que`. */
+  readonly joined: ReadonlyArray<boolean>;
   readonly entryIds: ReadonlyArray<number>;
   /** Its verb may inflect and stand apart: a verb entry, or an untyped phrase with a verb. */
   readonly verb: boolean;
@@ -89,6 +91,7 @@ export const phraseIndex = (
     const phrase: Phrase = {
       tokens: tokens.map((token) => token.key),
       breaks: tokens.map((token) => token.breakBefore),
+      joined: tokens.map((token) => token.joinedBefore),
       entryIds: ids,
       verb,
       verbEntry,

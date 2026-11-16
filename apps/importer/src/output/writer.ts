@@ -97,6 +97,8 @@ export const makeWriter = (
   reflexive = false,
   /** `participleDeclension.sharedWithParticiple`. */
   participlesSharedWithOwn = false,
+  /** `verbChainsThroughEntries`. */
+  verbChainsThroughEntries = false,
 ) => {
   const sqlite = db.$client;
   sqlite.run(`CREATE TEMP TABLE form_of_pending (
@@ -407,6 +409,7 @@ export const makeWriter = (
     verbalNouns,
     participleForms,
     participlesSharedWithOwn,
+    verbChainsThroughEntries,
     derivedByEntry,
     degreeFormsByEntry,
   };
@@ -429,8 +432,8 @@ export const makeWriter = (
     addParticipleForms(ctx);
     // After every form spelled so, which decide what has an entry of its own.
     addRedirects(ctx);
-    sqlite.run("DROP TABLE form_of_pending");
-    // Then the steps that need every form in place.
+    // Then the steps that need every form in place (and `replaceGrammarWords`
+    // the links, to tell which rows only the fallback added).
     sqlite.transaction(() => {
       replaceGrammarWords(ctx);
       dropUnreachedEntries(ctx);
@@ -438,6 +441,7 @@ export const makeWriter = (
       addAbbreviations(ctx);
       addLetterVariants(ctx);
     })();
+    sqlite.run("DROP TABLE form_of_pending");
     return { added, unresolved };
   };
 

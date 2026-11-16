@@ -162,8 +162,27 @@ const GRAMMAR_CASES: ReadonlySet<string> = new Set([
   "vocative",
 ]);
 
+/** A verb form's person, which names it as surely as a case names a noun's. */
+const GRAMMAR_PERSONS: ReadonlySet<string> = new Set([
+  "first-person",
+  "second-person",
+  "third-person",
+]);
+
 const GRAMMAR_WORDS: ReadonlySet<string> = new Set([
   ...GRAMMAR_CASES,
+  ...GRAMMAR_PERSONS,
+  // Tense and mood, as French verb glosses combine them ("third-person plural
+  // present/subjunctive of conter"; "presubject" is `aimé` in `aimé-je`).
+  "present",
+  "imperfect",
+  "past",
+  "historic",
+  "conditional",
+  "indicative",
+  "subjunctive",
+  "imperative",
+  "presubject",
   "singular",
   "plural",
   "masculine",
@@ -214,9 +233,12 @@ export const isMisreadTarget = (
 };
 
 /**
- * The target of a gloss like "vocative/locative singular of sens", which has no
- * `form-of` tag. Every word before "of" must be grammar and the rest must be a
- * link, so "forms genitive singular of neuter nouns" is not one.
+ * The target of a gloss like "vocative/locative singular of sens" or
+ * "third-person plural present/subjunctive of conter", which has no `form-of`
+ * tag (wiktextract doesn't read combined forms). Every word before "of" must
+ * be grammar, one of them a case or a person, and the rest must be a link, so
+ * "forms genitive singular of neuter nouns" is not one, nor German "gerund of
+ * essen", a word of its own.
  */
 export const grammarPointerTarget = (
   language: LanguageRules,
@@ -227,7 +249,9 @@ export const grammarPointerTarget = (
   if (match === null) return undefined;
   const words = match[1]!.toLowerCase().split(/[\s/]+/);
   if (
-    !words.some((word) => GRAMMAR_CASES.has(word)) ||
+    !words.some(
+      (word) => GRAMMAR_CASES.has(word) || GRAMMAR_PERSONS.has(word),
+    ) ||
     !words.every((word) => GRAMMAR_WORDS.has(word))
   ) {
     return undefined;

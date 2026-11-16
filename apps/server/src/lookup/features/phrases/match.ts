@@ -47,13 +47,49 @@ type Matcher = {
 };
 
 /**
+ * The word an elided word is written onto, with `elision`: `en` of `j'en`.
+ * Undefined for a word with no elided word before it.
+ */
+const elidedHost = (elision: boolean, key: string): string | undefined => {
+  if (!elision) return undefined;
+  const host = key.slice(key.indexOf("'") + 1);
+  return host !== key && /\p{L}/u.test(host) ? host : undefined;
+};
+
+/** The word at `p` of `phrase` can be the context word `key` (`wordMatches`). */
+const keyMatches = (
+  m: Matcher,
+  phrase: Phrase,
+  p: number,
+  key: string,
+): boolean => {
+  const word = phrase.tokens[p]!;
+  if (key === word) return true;
+  if (
+    p === phrase.tokens.length - 1 &&
+    phrase.tokens.length > 1 &&
+    m.contracted(key) === word
+  ) {
+    return true;
+  }
+  if (m.reflexives !== undefined && word === "sich" && m.reflexives.has(key)) {
+    return true;
+  }
+  if (!phrase.verb || !m.info(key).lemmas.has(word)) return false;
+  return m.negated || m.info(word).verbLemma;
+};
+
+/**
  * The word at `p` of `phrase` can stand for the context word at `at`: as
  * written, as a reflexive, or inflected if it is the verb of a verb phrase
  * (`miało miejsce` for `mieć miejsce`), or any word of a negated one
  * (`не имеет значения`). Other words only match the phrase's own forms, so
  * `niczego` doesn't make the interjection `to nic`. The last word may also be
  * merged with the word after it (`à partir du` for `à partir de`, `parce
- * qu'il` for `parce que`).
+ * qu'il` for `parce que`), and the first written onto an elided word before
+ * it (`j'en ai marre` for `en avoir marre`, `il m'en veut` for `en vouloir`),
+ * unless the phrase joins its next word to it with a hyphen: `c'est ce que`
+ * is not `est-ce que`.
  */
 const wordMatches = (
   m: Matcher,
@@ -61,26 +97,14 @@ const wordMatches = (
   p: number,
   at: number,
 ): boolean => {
-  const word = phrase.tokens[p]!;
   const token = m.tokens[at];
   if (token === undefined) return false;
-  if (token.key === word) return true;
-  if (
-    p === phrase.tokens.length - 1 &&
-    phrase.tokens.length > 1 &&
-    m.contracted(token.key) === word
-  ) {
-    return true;
-  }
-  if (
-    m.reflexives !== undefined &&
-    word === "sich" &&
-    m.reflexives.has(token.key)
-  ) {
-    return true;
-  }
-  if (!phrase.verb || !m.info(token.key).lemmas.has(word)) return false;
-  return m.negated || m.info(word).verbLemma;
+  if (keyMatches(m, phrase, p, token.key)) return true;
+  const host =
+    p === 0 && phrase.joined[1] !== true
+      ? elidedHost(m.elision, token.key)
+      : undefined;
+  return host !== undefined && keyMatches(m, phrase, p, host);
 };
 
 /**
@@ -158,9 +182,8 @@ const splitConjunction = (
  */
 const isContent = (m: Matcher, token: Token): boolean => {
   if (m.info(token.key, token.caseClass).content) return true;
-  if (!m.elision) return false;
-  const host = token.key.slice(token.key.indexOf("'") + 1);
-  return host !== token.key && host !== "" && m.info(host).content;
+  const host = elidedHost(m.elision, token.key);
+  return host !== undefined && m.info(host).content;
 };
 
 /** The context word at `i` is part of a hyphen-joined word. */
@@ -355,11 +378,21 @@ export const phraseEntryIds = (
   const info = tokenInfos(db);
   const available = new Set<string>();
   const rules = contextRules(language);
+  // What a context word can be in a phrase: itself and its lemmas, the word
+  // merged into it (`de` of `du`, which needn't be its lemma), and the word
+  // written onto an elided one (`en` of `j'en`) with its lemmas.
+  const words = (key: string): ReadonlyArray<string> => {
+    const contracted = rules.contracted(key);
+    const host = elidedHost(rules.elision, key);
+    return [
+      key,
+      ...info(key).lemmas,
+      ...(contracted === undefined ? [] : [contracted]),
+      ...(host === undefined ? [] : [host, ...info(host).lemmas]),
+    ];
+  };
   for (const token of tokens) {
-    available.add(token.key);
-    for (const lemma of info(token.key).lemmas) available.add(lemma);
-    const contracted = rules.contracted(token.key);
-    if (contracted !== undefined) available.add(contracted);
+    for (const word of words(token.key)) available.add(word);
   }
   const m: Matcher = {
     tokens,
@@ -372,7 +405,7 @@ export const phraseEntryIds = (
   for (const clicked of positions) {
     const key = tokens[clicked]!.key;
     const candidates = new Set<Phrase>();
-    for (const lemma of [key, ...m.info(key).lemmas]) {
+    for (const lemma of words(key)) {
       for (const phrase of index.get(lemma) ?? []) candidates.add(phrase);
     }
     for (const phrase of candidates) {

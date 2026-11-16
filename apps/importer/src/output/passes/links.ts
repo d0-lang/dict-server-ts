@@ -1,20 +1,43 @@
-import { FormSource } from "@dict/core/schema";
+import { FormSource, GRAMMAR_SOURCE_POS } from "@dict/core/schema";
 import type { WriterContext } from "./context.ts";
 import { MAX_CHAIN_STEPS } from "./context.ts";
 
-/** `tańsi -> tańszy` and `tańszy -> tani` also give `tańsi -> tani`. */
-export const followLinkChains = ({ sqlite }: WriterContext) => {
+/**
+ * `tańsi -> tańszy` and `tańszy -> tani` also give `tańsi -> tani`. A chain
+ * stops at a word with an entry. With `verbChainsThroughEntries`, a verb's
+ * goes on through a word with no verb entry, by that word's verb links (off
+ * elsewhere, as the verb then ranks with the adjective a participle also is:
+ * German `naheliegende`, Russian `удаленный`). The verb form `partie` is
+ * "feminine singular of parti", whose own entries are an adjective and a
+ * noun, and whose verb line says "past participle of partir", so `partie`
+ * also reaches `partir`. (`resolveFormOf` still gives it those entries of
+ * `parti`, for want of a verb.) Only verbs, whose participles decline: the
+ * noun `Spielens` is the genitive of `Spielen` "playing", which is spelled
+ * like a dative plural of `Spiel` and has only the verb's entry. A word the
+ * grammar file lists is an entry of every part of speech (`нее` is `неё`,
+ * not also `она`, `он` and `они`, which `неё` is a form of).
+ */
+export const followLinkChains = ({
+  sqlite,
+  verbChainsThroughEntries,
+}: WriterContext) => {
+  const entryOf = (pos: string) =>
+    `SELECT 1 FROM forms f JOIN entries e ON e.id = f.entry_id
+     WHERE f.form = p.lemma AND f.source = ${FormSource.Lemma}${pos}`;
+  const goesOn = verbChainsThroughEntries
+    ? `NOT EXISTS (${entryOf(` AND e.source_pos IN (p.source_pos, '${GRAMMAR_SOURCE_POS}')`)})
+         AND (
+           (p.source_pos = 'verb' AND q.source_pos = 'verb')
+           OR NOT EXISTS (${entryOf("")})
+         )`
+    : `NOT EXISTS (${entryOf("")})`;
   for (let step = 1; step < MAX_CHAIN_STEPS; step++) {
     const added = sqlite.run(
       `INSERT OR IGNORE INTO form_of_pending (form, lemma, source_pos, pointer, marked)
        SELECT p.form, q.lemma, p.source_pos, max(p.pointer, q.pointer), max(p.marked, q.marked)
        FROM form_of_pending p
        JOIN form_of_pending q ON q.form = p.lemma
-       WHERE q.lemma <> p.form
-         AND NOT EXISTS (
-           SELECT 1 FROM forms f
-           WHERE f.form = p.lemma AND f.source = ${FormSource.Lemma}
-         )`,
+       WHERE q.lemma <> p.form AND ${goesOn}`,
     ).changes;
     if (added === 0) break;
   }

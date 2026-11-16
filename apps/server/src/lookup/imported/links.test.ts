@@ -288,6 +288,165 @@ describe("importWiktextract", () => {
     }).pipe(Effect.scoped),
   );
 
+  it.effect("follows a verb's chain through a word with no verb entry", () =>
+    Effect.gen(function* () {
+      const dir = yield* tempDir;
+      const input = join(dir, "fr.jsonl");
+      const line = (word: string, pos: string, senses: ReadonlyArray<object>) =>
+        JSON.stringify({ word, pos, lang_code: "fr", senses });
+      const link = (gloss: string, target: string) => ({
+        glosses: [gloss],
+        tags: ["form-of"],
+        form_of: [{ word: target }],
+      });
+      yield* Effect.promise(() =>
+        writeFile(
+          input,
+          [
+            line("partie", "noun", [{ glosses: ["part"] }]),
+            line("partie", "verb", [
+              link("feminine singular of parti", "parti"),
+            ]),
+            line("parties", "noun", [link("plural of partie", "partie")]),
+            line("parti", "adj", [{ glosses: ["drunk"] }]),
+            line("parti", "noun", [{ glosses: ["party"] }]),
+            line("parti", "verb", [
+              link("past participle of partir", "partir"),
+            ]),
+            line("partir", "verb", [{ glosses: ["to leave"] }]),
+            line("sortie", "verb", [
+              link("feminine singular of sorti", "sorti"),
+            ]),
+            line("sorti", "verb", [
+              link("past participle of sortir", "sortir"),
+            ]),
+            line("sortir", "verb", [{ glosses: ["to go out"] }]),
+            // A noun's link to a word that only has a verb's entry.
+            line("Spielens", "noun", [
+              link("genitive singular of Spielen", "Spielen"),
+            ]),
+            line("spielen", "verb", [{ glosses: ["to play"] }]),
+            line("Spielen", "noun", [link("dative plural of Spiel", "Spiel")]),
+            line("Spiel", "noun", [{ glosses: ["game"] }]),
+            // A link to a word the grammar file lists.
+            line("nee", "pron", [link("alternative form of née", "née")]),
+            line("née", "pron", [link("genitive of elle", "elle")]),
+            line("elle", "pron", [{ glosses: ["she"] }]),
+          ].join("\n"),
+        ),
+      );
+      const out = join(dir, "fr_en.sqlite");
+      yield* importWiktextract({
+        lang: "fr",
+        input,
+        out,
+        grammar: [{ lemma: "née", pos: "PRON", senses: ["her"] }],
+      });
+      const db = yield* openDictionary(out);
+
+      // `parti` has no verb entry: the chain goes on to `partir`, and
+      // `parti`'s own entries stay, after the word's own.
+      assert.deepStrictEqual(lemmas(db, "partie"), [
+        "partie/NOUN",
+        "parti/ADJ",
+        "parti/NOUN",
+        "partir/VERB",
+      ]);
+      // `partie` has a noun entry, so its plural stops there.
+      assert.deepStrictEqual(lemmas(db, "parties"), ["partie/NOUN"]);
+      // through a word with no entry at all, as before
+      assert.deepStrictEqual(lemmas(db, "sortie"), ["sortir/VERB"]);
+      // Only a verb's chain goes on through another word's entry.
+      assert.deepStrictEqual(lemmas(db, "spielens"), ["spielen/VERB"]);
+      // A word of the grammar file ends a chain like any entry.
+      assert.deepStrictEqual(lemmas(db, "nee"), ["née/PRON"]);
+    }).pipe(Effect.scoped),
+  );
+
+  it.effect(
+    "stops a verb's chain at another word's entry without verbChainsThroughEntries",
+    () =>
+      Effect.gen(function* () {
+        const dir = yield* tempDir;
+        const input = join(dir, "pl.jsonl");
+        const line = (
+          word: string,
+          pos: string,
+          senses: ReadonlyArray<object>,
+        ) => JSON.stringify({ word, pos, lang_code: "pl", senses });
+        const link = (gloss: string, target: string) => ({
+          glosses: [gloss],
+          tags: ["form-of"],
+          form_of: [{ word: target }],
+        });
+        yield* Effect.promise(() =>
+          writeFile(
+            input,
+            [
+              line("partie", "verb", [
+                link("feminine singular of parti", "parti"),
+              ]),
+              line("parti", "adj", [{ glosses: ["drunk"] }]),
+              line("parti", "verb", [
+                link("past participle of partir", "partir"),
+              ]),
+              line("partir", "verb", [{ glosses: ["to leave"] }]),
+            ].join("\n"),
+          ),
+        );
+        const out = join(dir, "pl_en.sqlite");
+        yield* importWiktextract({ lang: "pl", input, out, grammar: [] });
+        const db = yield* openDictionary(out);
+
+        assert.deepStrictEqual(lemmas(db, "partie"), ["parti/ADJ"]);
+      }).pipe(Effect.scoped),
+  );
+
+  it.effect(
+    "writes no entry for a verb form whose gloss only names its grammar",
+    () =>
+      Effect.gen(function* () {
+        const dir = yield* tempDir;
+        const input = join(dir, "fr.jsonl");
+        const line = (
+          word: string,
+          pos: string,
+          senses: ReadonlyArray<object>,
+        ) => JSON.stringify({ word, pos, lang_code: "fr", senses });
+        yield* Effect.promise(() =>
+          writeFile(
+            input,
+            [
+              line("aimée", "verb", [
+                {
+                  glosses: ["feminine singular of aimé"],
+                  tags: ["form-of", "participle"],
+                  form_of: [{ word: "aimé" }],
+                },
+              ]),
+              line("aimé", "adj", [{ glosses: ["beloved"] }]),
+              line("aimé", "verb", [
+                {
+                  glosses: [
+                    "presubject first-person singular present indicative of aimer",
+                  ],
+                  links: [["aimer", "aimer#French"]],
+                },
+              ]),
+              line("aimer", "verb", [{ glosses: ["to love"] }]),
+            ].join("\n"),
+          ),
+        );
+        const out = join(dir, "fr_en.sqlite");
+        yield* importWiktextract({ lang: "fr", input, out, grammar: [] });
+        const db = yield* openDictionary(out);
+
+        assert.deepStrictEqual(lemmas(db, "aimé"), ["aimé/ADJ", "aimer/VERB"]);
+        // So `aimé` has no verb entry, and `aimée` reaches `aimer` through it.
+        assert.deepStrictEqual(lemmas(db, "aimée"), ["aimé/ADJ", "aimer/VERB"]);
+      }).pipe(Effect.scoped),
+  );
+
   it.effect(
     "resolves marked spellings only for words that reach nothing else",
     () =>
