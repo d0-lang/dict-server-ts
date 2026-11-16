@@ -30,6 +30,13 @@ describe("the neighbouring word orders the word's entries", () => {
     );
   });
 
+  it("leaves a pronoun that stands before the verb", () => {
+    assert.deepStrictEqual(lemmas(french, "fr_en", "lui", "Il lui dit non."), [
+      "lui",
+      "luire",
+    ]);
+  });
+
   it("reads the elided word of the clicked token as the word before its host", () => {
     const result = lookupWord(
       french,

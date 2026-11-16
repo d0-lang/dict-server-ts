@@ -105,7 +105,9 @@ const permute = (
  *   the verb and auxiliary entries come first. Among them, a verb whose
  *   lemma is the word itself follows the verbs it is a form of: such a verb is
  *   an infinitive or a participle used alone (`dit` "called"), while here the
- *   word is a verb's finite form (`dire`).
+ *   word is a verb's finite form (`dire`). A word of either list is itself
+ *   a pronoun on the way to the verb, so it keeps its order: `il lui dit` is
+ *   no `luire`.
  * - After one of `noVerbAfter` (`des mesures`), the verb entries come last.
  *   Only verbs move, so `un petit chien` keeps the adjective first.
  *
@@ -160,6 +162,8 @@ export const orderByNeighbours = (
   if (subject.length < 2) return result;
   const key = lookupKey(host?.text ?? word);
   const own = subject.map((i) => result.entries[i]!);
+  // One of the pronouns that stand before the verb (`lui` in `il lui dit`).
+  const pronoun = verbAfter.has(key) || verbBeforeJoined.has(key);
 
   // Indexes into `own` of the verbs the word is a past participle of.
   let participles: ReadonlyArray<number> | undefined;
@@ -204,7 +208,10 @@ export const orderByNeighbours = (
       }
     }
     const prev = before(i);
-    if ((prev !== undefined && verbAfter.has(prev)) || joinedNext) {
+    if (
+      !pronoun &&
+      ((prev !== undefined && verbAfter.has(prev)) || joinedNext)
+    ) {
       return "verb";
     }
     if (prev !== undefined && noVerbAfter.has(prev)) return "noVerb";
