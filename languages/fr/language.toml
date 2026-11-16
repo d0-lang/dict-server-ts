@@ -38,3 +38,26 @@ hyphenWords = true
 # one of them still matches: `à partir du`, `parce qu'il`, `afin d'éviter`,
 # `en train d'essayer`, `grâce au`.
 contractions = { du = "de", des = "de", au = "à", aux = "à", "jusqu'au" = "jusqu'à", "jusqu'aux" = "jusqu'à", "d'" = "de", "qu'" = "que" }
+# The noun whose lemma a word is ranks before the verb whose form it is
+# (`passe` "pass" before `passer`, `oublie` "wafer" before `oublier`). The
+# neighbouring word says which one the sentence means.
+# A verb follows subject pronouns (je, tu, il, elle, on, ils, elles), the
+# negation (ne, n') and the object pronouns that are nothing else (me, te,
+# se), and qui, the subject of the verb after it: `je passe`, `n'oublie`,
+# `qui dit`. Left out: le, la, les, l' and en (also articles and a
+# preposition), lui, leur, nous, vous (also stressed pronouns or a
+# determiner) and y: `je vais le dire` keeps its order anyway.
+verbAfter = ["je", "j'", "tu", "il", "elle", "on", "ils", "elles", "ne", "n'", "me", "m'", "te", "t'", "se", "s'", "qui"]
+# A verb stands before an inverted subject (`dit-il`, `va-t-il`, with the t
+# put in before a vowel) or an imperative's object (`donne-moi`,
+# `dépêche-toi`, `vas-y`, `prends-en`), joined by a hyphen.
+verbBeforeJoined = ["je", "tu", "il", "elle", "on", "nous", "vous", "ils", "elles", "moi", "toi", "le", "la", "les", "lui", "leur", "y", "en", "t"]
+# Determiners that are never a pronoun: no verb follows them, so `des
+# mesures` opens on the noun, not `mesurer`. Left out: le, la, les, l' and
+# leur, also object pronouns (`je vais le dire`), and de (`de dire`).
+noVerbAfter = ["un", "une", "des", "du", "au", "aux", "ce", "cet", "cette", "ces", "mon", "ton", "son", "ma", "ta", "sa", "mes", "tes", "ses", "notre", "votre", "nos", "vos", "leurs", "quelques", "plusieurs", "chaque"]
+# All but one of the past participles in the dump's verb tables end in one
+# of these (8,306 of 8,307: é 7,399, i 445, u 250, it 86, is 48, int 33, ert 12, us 12, û 6,
+# os 6, ï 7, ort 2), so after être or avoir `partie`, `dit`, `mis` and `vue`
+# open on their verb, not the noun.
+participleEndings = ["é", "i", "u", "û", "ï", "is", "it", "int", "ert", "ort", "os", "us"]

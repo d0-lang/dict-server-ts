@@ -181,6 +181,34 @@ const Context = doc(
       ),
       {},
     ),
+    verbAfter: orDefault(
+      doc(
+        strings,
+        "Words a verb follows (subject and object pronouns, the negation): after one, in its clause, a word's one-word verb and auxiliary entries come before its others (French `je passe` opens on `passer`, not the noun `passe`), a verb whose lemma is the word itself after the verbs it is a form of (`dire` before `dit` \"called\"). With `elision`, an elided word counts in either place: the host of `n'oublie` follows `n'`, and the word after `qu'il` follows `il`.",
+      ),
+      [],
+    ),
+    verbBeforeJoined: orDefault(
+      doc(
+        strings,
+        "Words a hyphen joins to the verb before them (French inverted subjects and imperative objects: `dit-il`, `donne-moi`, `vas-y`): before one, a word's verb and auxiliary entries come before its others, as after `verbAfter`.",
+      ),
+      [],
+    ),
+    noVerbAfter: orDefault(
+      doc(
+        strings,
+        "Words no verb follows (determiners that are never a pronoun: French `des`, `ces`, `mon`): after one, in its clause, a word's one-word verb entries come after its others (`des mesures` opens on the noun, not `mesurer`).",
+      ),
+      [],
+    ),
+    participleEndings: orDefault(
+      doc(
+        strings,
+        "Endings of past participles (French `é`, `i`, `it`). After a word that can be an auxiliary (it has an `AUX` entry), with at most two adverbs between, a word shaped like a past participle of a verb it is a form of shows that verb before its first noun entry, passing no adjective or adverb (`elle est partie`: `partir` before `partie` \"part\"). Shaped like one: the word, with one of `import.participleDeclension.endings` or nothing taken off, ends in one of these and is itself a form of that verb, so `j'ai envie` keeps the noun (`envi` is no form of `envier`). These hints apply with `context` only, to the word's own entries: a participle after an auxiliary first, then a verb after `verbAfter` or before `verbBeforeJoined`, then `noVerbAfter`.",
+      ),
+      [],
+    ),
     abbreviationLeads: orDefault(
       doc(
         strings,

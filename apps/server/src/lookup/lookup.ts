@@ -14,6 +14,7 @@ import {
 } from "./common/entries.ts";
 import { findEntriesWithCompounds } from "./features/compounds/lookup.ts";
 import { elidedResult } from "./features/elision.ts";
+import { orderByNeighbours } from "./features/neighbours.ts";
 import {
   capitalisedInside,
   capitalisedNext,
@@ -76,7 +77,8 @@ const entryId = (entry: LookupEntry) =>
  * first: the phrases the word is part of there, then the abbreviation it is a
  * piece of (`т` in `т.д.`), then the hyphen-joined word it is part of (`что`
  * in `что-нибудь`), then the separable verb it belongs to, then the word's
- * own entries (and their segments, re-indexed).
+ * own entries (and their segments, re-indexed), in the order its neighbours
+ * give them (`features/neighbours.ts`).
  * An own entry already shown that way is dropped.
  */
 const contextLookup = (
@@ -106,13 +108,22 @@ const contextLookup = (
   const capitalInside =
     language.context.capitalNouns &&
     capitalisedInside(context, tokens, clicked);
-  const base = ownEntries(db, language, word, {
-    capitalInside,
-    capitalNext: capitalInside && capitalisedNext(tokens, clicked),
-    nominalized:
-      capitalInside &&
-      preceded(tokens, clicked, new Set(language.context.nominalizers)),
-  });
+  // The word's own entries, ordered by its neighbours where the language
+  // says how (`je passe` opens on `passer`).
+  const base = orderByNeighbours(
+    db,
+    language,
+    word,
+    tokens,
+    clicked,
+    ownEntries(db, language, word, {
+      capitalInside,
+      capitalNext: capitalInside && capitalisedNext(tokens, clicked),
+      nominalized:
+        capitalInside &&
+        preceded(tokens, clicked, new Set(language.context.nominalizers)),
+    }),
+  );
 
   const among = (hits: ReadonlyArray<ContextHit>) => (hit: ContextHit) =>
     hits.some((other) => other.id === hit.id);
