@@ -80,15 +80,19 @@ All runs are in `../corpus/eval/out/fr/` on the same 2,200 items (sample from `r
 | r2 | contractions in phrases, contraction entries that name their parts split, auxiliary rows dropped, 14 grammar lines | 95.3% | 92.7% | 86.7% |
 | r3 | `headwordInflections`, `-là` kept, `encore`, `où`, `cool`, `plus tôt` | 96.1% | 92.9% | 87.4% |
 | r4 | elided content words in verb phrases, 7 phrase lines, `là`, `largement`, 3 false positives | 97.7% | 92.9% | 87.4% |
-| r5 | `participleDeclension` with `sharedWithParticiple` | **97.7%** | **93.1%** | **87.7%** |
+| r5 | `participleDeclension` with `sharedWithParticiple` | 97.7% | 93.1% | 87.7% |
+| r6 | neighbour hints (`verbAfter`, `verbBeforeJoined`, `noVerbAfter`, `participleEndings`), participles reach their verb (`partie`, `arrivée`), phrases from an elided word's host, pointer-only verb entries and acronyms under lowercase words dropped, `il y a`, `le temps de` | **97.6%** | **93.6%** | **88.0%** |
+
+r6 is measured against main re-collected the same day (97.7% / 92.9% / 87.9%, which has the elision fixes made after r5). Senses flagged as junk fell from 4.2% to 3.3%.
 
 Judging r0 cost $0.70 (88 batches, about 30 minutes, with 8 retries). Later runs only judged changed popovers (14, 3, 3, 1 and 2 batches).
 
-Classified diffs of the gate sample (Haiku, words per verdict): r0→r1 233 better, 27 worse; r1→r2 32 better, 2 worse; r2→r3 19 better, 11 worse; r3→r4 9 better, 0 worse; r4→r5 19 better, 4 worse. The worse ones were read. Most rate the old segment order (fixed after r1) or contradict their own reasoning ("judged worse … so this is better"). What stays:
+Classified diffs of the gate sample (Haiku, words per verdict): r0→r1 233 better, 27 worse; r1→r2 32 better, 2 worse; r2→r3 19 better, 11 worse; r3→r4 9 better, 0 worse; r4→r5 19 better, 4 worse; main→r6 38 better, 33 worse. The worse ones were read. Most rate the old segment order (fixed after r1) or contradict their own reasoning ("judged worse … so this is better"). What stays:
 - **the verb before the participle's own noun or adjective:** `pavés` (a salmon `pavé`) and `déglinguées` now open on the verb (r5).
 - **ties between an adjective and a noun:** `vidéos` opens on the adjective "video", `marines` on the noun "navy" (r3, from the headword plurals).
 - **a rare second reading:** `gens` gains `gent` "folk", `étés` "summers" gains `être` (r3, r5).
-- **`oublie` the wafer** ranks before `oublier`, in `n'oublie` too: the dump's lemma noun beats the verb form. Tier 2 (ranking).
+- **r6's 33 worse:** 14 rate the verb now first where the sentence has the verb (`on réserve`, `il court`, `je reste`, `sont prises`), 8 an order change below the first entry, 4 an acronym or the letter `à` gone, and 3 a phrase that fits (`tels qu'un` finds `tel que`). The 4 that stay are false phrase matches, now also from an elided word's host or a merged word: `c'est à la fin` finds `être à`, `que d'autres` `que de`, `jusqu'au départ` `au départ`, `vous n'y avez pas joué` `y avoir` (and in the full diff `l'histoire de la baguette` finds `histoire de`). The same phrases already matched the text written apart.
+- **an adjective keeps its place before the participle's verb:** `j'ai passé` still opens on `passé` "past", `j'ai pris` on `pris` "taken", with the verb second. After `avoir` it could go first; the hint doesn't tell `avoir` from `être`.
 
 Other languages: every corpus was collected through the API on imports from before and after the general importer changes (`data/fr-grammar-before/` against `data/`), and the diffs were read:
 - **German:** 59 words. `unsere`, `unserer`, `unserem`, `unseren`, `unseres` and `keinem` show only their own line, without `unser` or `keines` after it. `einigen` drops `einige` and keeps its verb.
@@ -130,5 +134,6 @@ In `../corpus/eval/out/fr/false-positives.jsonl`:
 Not started. Candidates:
 - phrases whose last word is elided onto a word other than `de` or `que`;
 - pronominal verbs (`s'inscrire dans`, `s'effacer`);
-- ranking a verb form before a rare lemma noun (`oublie`, `pavés`);
+- ranking a verb form before a rare lemma noun where no neighbour decides (r6 covers the word after a subject pronoun, a determiner or an auxiliary), and telling `avoir` from `être` before a participle;
+- phrase entries that match ordinary text (`être à`, `histoire de`, `que de`, `à la`);
 - the 500-character sentence limit in the extension.
