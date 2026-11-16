@@ -53,6 +53,8 @@ export type ImportOptions = {
   readonly limit?: number;
   /** log progress every N target-language lines (0 = off) */
   readonly progressEvery?: number;
+  /** the dump snapshot the input comes from (`dump-2026-10-30`), kept in `meta` as `dump` */
+  readonly dump?: string;
   /** grammar entries to use instead of `languages/<lang>/grammar.tsv` (tests) */
   readonly grammar?: ReadonlyArray<GrammarEntry>;
 };
@@ -168,6 +170,7 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     pair: languagePair(rules),
     lang_code: rules.code,
     source: isUrl(options.input) ? options.input : "local wiktextract file",
+    ...(options.dump !== undefined ? { dump: options.dump } : {}),
     imported_at: new Date().toISOString(),
     limit: options.limit === undefined ? "none" : String(options.limit),
     form_of_fallback: formOfFallback ? "on" : "off",

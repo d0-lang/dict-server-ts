@@ -1,5 +1,6 @@
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { Console, Effect } from "effect";
+import { languageCodes } from "@dict/core/language";
 import { Command, Flag } from "effect/cli";
 import { filterDump } from "./filterDump.ts";
 
@@ -7,8 +8,10 @@ const command = Command.make(
   "filter",
   {
     lang: Flag.String("lang").pipe(
-      Flag.withDescription("wiktextract lang_code to keep"),
-      Flag.withDefault("pl"),
+      Flag.withDescription(
+        "wiktextract lang_codes to keep, comma-separated, or `all` for every language in languages/",
+      ),
+      Flag.withDefault("all"),
     ),
     input: Flag.String("input").pipe(
       Flag.withAlias("i"),
@@ -16,22 +19,30 @@ const command = Command.make(
         "raw wiktextract dump: local path or URL, plain or .gz",
       ),
     ),
-    out: Flag.String("out").pipe(
+    outDir: Flag.String("out-dir").pipe(
       Flag.withAlias("o"),
-      Flag.withDescription("output JSONL file"),
+      Flag.withDescription("directory for one <lang>.jsonl per language"),
+      Flag.withDefault("data/raw"),
     ),
     force: Flag.Boolean("force").pipe(
-      Flag.withDescription("overwrite the output file if it already exists"),
+      Flag.withDescription("overwrite files that already exist"),
       Flag.withDefault(false),
     ),
   },
-  Effect.fn(function* (options) {
-    const stats = yield* filterDump(options);
+  Effect.fn(function* ({ lang, input, outDir, force }) {
+    const langs =
+      lang.trim() === "all"
+        ? languageCodes()
+        : lang
+            .split(",")
+            .map((code) => code.trim())
+            .filter((code) => code !== "");
+    const stats = yield* filterDump({ langs, input, outDir, force });
     yield* Console.log(JSON.stringify(stats, null, 2));
   }),
 ).pipe(
   Command.withDescription(
-    "Copy one language's lines out of the raw wiktextract dump",
+    "Copy languages' lines out of the raw wiktextract dump, in one pass",
   ),
 );
 

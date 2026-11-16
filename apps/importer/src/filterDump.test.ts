@@ -18,9 +18,16 @@ describe("filterDump", () => {
     Effect.gen(function* () {
       const dir = yield* tempDir;
       const out = join(dir, "pl.jsonl");
-      const stats = yield* filterDump({ lang: "pl", input: FIXTURE, out });
+      const stats = yield* filterDump({
+        langs: ["pl"],
+        input: FIXTURE,
+        outDir: dir,
+      });
       assert.strictEqual(stats.linesScanned, 18);
-      assert.strictEqual(stats.languageLines, 17);
+      assert.deepStrictEqual(
+        stats.languages.map((l) => [l.lang, l.out, l.languageLines]),
+        [["pl", out, 17]],
+      );
 
       const original = yield* Effect.promise(() => readFile(FIXTURE, "utf8"));
       const filtered = yield* Effect.promise(() => readFile(out, "utf8"));
@@ -43,23 +50,63 @@ describe("filterDump", () => {
     }).pipe(Effect.scoped),
   );
 
+  it.effect("splits several languages in one pass", () =>
+    Effect.gen(function* () {
+      const dir = yield* tempDir;
+      const polish = yield* Effect.promise(() => readFile(FIXTURE, "utf8"));
+      // Two Polish lines passed off as German.
+      const german = polish
+        .trimEnd()
+        .split("\n")
+        .filter((line) => line.includes('"lang_code": "pl"'))
+        .slice(0, 2)
+        .map((line) =>
+          line
+            .replace('"lang_code": "pl"', '"lang_code": "de"')
+            .replace('"lang": "Polish"', '"lang": "German"'),
+        );
+      const input = join(dir, "dump.jsonl");
+      yield* Effect.promise(() =>
+        writeFile(input, polish + german.join("\n") + "\n"),
+      );
+
+      const stats = yield* filterDump({
+        langs: ["pl", "de"],
+        input,
+        outDir: join(dir, "raw"),
+      });
+      assert.strictEqual(stats.linesScanned, 20);
+      assert.deepStrictEqual(
+        stats.languages.map((l) => [l.lang, l.languageLines]),
+        [
+          ["pl", 17],
+          ["de", 2],
+        ],
+      );
+      const kept = yield* Effect.promise(() =>
+        readFile(join(dir, "raw", "de.jsonl"), "utf8"),
+      );
+      assert.deepStrictEqual(kept.trimEnd().split("\n"), german);
+    }).pipe(Effect.scoped),
+  );
+
   it.effect("refuses to overwrite an existing file unless forced", () =>
     Effect.gen(function* () {
       const dir = yield* tempDir;
       const out = join(dir, "pl.jsonl");
       yield* Effect.promise(() => writeFile(out, "existing"));
       const refused = yield* Effect.flip(
-        filterDump({ lang: "pl", input: FIXTURE, out }),
+        filterDump({ langs: ["pl"], input: FIXTURE, outDir: dir }),
       );
       assert.include(refused.message, "already exists");
 
       const stats = yield* filterDump({
-        lang: "pl",
+        langs: ["pl"],
         input: FIXTURE,
-        out,
+        outDir: dir,
         force: true,
       });
-      assert.strictEqual(stats.languageLines, 17);
+      assert.strictEqual(stats.languages[0]?.languageLines, 17);
     }).pipe(Effect.scoped),
   );
 });

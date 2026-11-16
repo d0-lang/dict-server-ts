@@ -53,14 +53,16 @@ curl -LO https://kaikki.org/dictionary/raw-wiktextract-data.jsonl.gz
 bun run import --lang pl --input raw-wiktextract-data.jsonl.gz --out data/pl_en.sqlite
 ```
 
-Flags: `--lang` (default `pl`; a language needs `languages/<lang>/language.toml`), `--input` (path or URL, default the raw dump URL), `--out` (default `data/<lang>_en.sqlite`), `--force` (overwrite `--out` if it exists; without it the import stops before doing any work), `--no-form-of-fallback`, `--limit <n>` (stop after n lines of the language, for samples). The file is built as `<out>.tmp` and renamed when the import succeeds, so a running server never sees a half-written file. A JSON summary (counts, size, time) is printed at the end.
+Flags: `--lang` (default `pl`; a language needs `languages/<lang>/language.toml`), `--input` (path or URL, default the raw dump URL), `--out` (default `data/<lang>_en.sqlite`), `--force` (overwrite `--out` if it exists; without it the import stops before doing any work), `--no-form-of-fallback`, `--dump <snapshot>` (the dump snapshot the input comes from, such as `dump-2026-10-30`, kept in the file's `meta` as `dump`), `--limit <n>` (stop after n lines of the language, for samples). The file is built as `<out>.tmp` and renamed when the import succeeds, so a running server never sees a half-written file. A JSON summary (counts, size, time) is printed at the end.
 
-To avoid scanning the whole dump on every run, copy one language's lines into their own file and import that (`data/` is gitignored):
+To avoid scanning the whole dump on every run, copy each language's lines into its own file and import that (`data/` is gitignored). One pass over the dump writes every language asked for, as `<out-dir>/<lang>.jsonl`:
 
 ```bash
-bun run filter --lang pl --input raw-wiktextract-data.jsonl.gz --out data/raw/pl.jsonl
+bun run filter --lang pl,de --input raw-wiktextract-data.jsonl.gz --out-dir data/raw
 bun run import --lang pl --input data/raw/pl.jsonl
 ```
+
+`--lang` takes a comma-separated list, or `all` (the default) for every language in `languages/`; `--out-dir` defaults to `data/raw`; `--force` overwrites files that exist.
 
 For Polish, a run over the full local dump takes about 60 s (about 15 s from a pre-filtered `pl` JSONL) and produces a ~43 MB file. German is about the same: 371,793 lines, 99,321 entries, ~44 MB, about 19 s from `data/raw/de.jsonl`.
 
