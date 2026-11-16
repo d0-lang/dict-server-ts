@@ -75,6 +75,34 @@ describe("reportComparisons", () => {
     );
   });
 
+  it("adds each language's diff, its examples folded away", () => {
+    const report = reportComparisons([
+      {
+        lang: "de",
+        old: stats({}),
+        new: stats({}),
+        diff: {
+          entries: { added: 1, removed: 0, changed: 0 },
+          forms: { added: 1200, removed: 0 },
+          examples: {
+            addedEntries: ["Hund (NOUN)"],
+            removedEntries: [],
+            changedEntries: [],
+            addedForms: ["Hunde -> Hund (NOUN)"],
+            removedForms: [],
+          },
+        },
+      },
+    ]);
+    assert.include(
+      report,
+      "<details><summary><b>de</b>: entries 1 added, 0 removed, 0 changed; forms 1,200 added, 0 removed</summary>",
+    );
+    assert.include(report, "Entries added:\n\n- Hund (NOUN)\n");
+    assert.include(report, "Forms added:\n\n- Hunde -> Hund (NOUN)\n");
+    assert.notInclude(report, "Entries removed:");
+  });
+
   it("lists unpinned languages and failed imports under the table", () => {
     const report = reportComparisons([
       { lang: "es", new: stats({}) },

@@ -1,7 +1,7 @@
 # The dump canary. kaikki.org replaces its wiktextract dump about once a week and keeps no
 # old ones, so every new dump is stored here as a snapshot: a pre-release `dump-<date>` with
 # one gzipped <lang>.jsonl per language in languages/. Each language is then imported from
-# that snapshot and from the one dumps.toml pins it to, and the counts are compared. A PR
+# that snapshot and from the one dumps.toml pins it to, and the two builds are compared. A PR
 # moves the pins when every import works; an issue says which failed when one doesn't.
 # Nothing ships until that PR is merged.
 name: Dump canary
@@ -172,6 +172,8 @@ jobs:
           gh release download "$pinned" --repo "$GITHUB_REPOSITORY" --pattern "$LANG_CODE.jsonl.gz" --dir "$RUNNER_TEMP/old"
           bun run --silent import --lang "$LANG_CODE" --input "$RUNNER_TEMP/old/$LANG_CODE.jsonl.gz" \
             --out "$RUNNER_TEMP/old.sqlite" --dump "$pinned" > "stats/$LANG_CODE.old.json"
+          # Entries and forms added, removed and changed, built file against built file.
+          bun run --silent dumps diff "$RUNNER_TEMP/old.sqlite" "$RUNNER_TEMP/new.sqlite" > "stats/$LANG_CODE.diff.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
