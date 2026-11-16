@@ -1,0 +1,258 @@
+# The dump canary. kaikki.org replaces its wiktextract dump about once a week and keeps no
+# old ones, so every new dump is stored here as a snapshot: a pre-release `dump-<date>` with
+# one gzipped <lang>.jsonl per language in languages/. Each language is then imported from
+# that snapshot and from the one dumps.toml pins it to, and the counts are compared. A PR
+# moves the pins when every import works; an issue says which failed when one doesn't.
+# Nothing ships until that PR is merged.
+name: Dump canary
+
+on:
+  schedule:
+    # Mondays, 04:17 UTC.
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+    inputs:
+      compare:
+        description: Import and compare even when the dump is already stored
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: dump-canary
+  cancel-in-progress: false
+
+env:
+  DUMP_URL: https://kaikki.org/dictionary/raw-wiktextract-data.jsonl.gz
+  DUMP_PAGE: https://kaikki.org/dictionary/rawdata.html
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      snapshot: ${{ steps.dump.outputs.snapshot }}
+      etag: ${{ steps.dump.outputs.etag }}
+      modified: ${{ steps.dump.outputs.modified }}
+      stored: ${{ steps.dump.outputs.stored }}
+      run: ${{ steps.dump.outputs.run }}
+      languages: ${{ steps.languages.outputs.languages }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: languages
+        run: |
+          languages=$(find languages -mindepth 2 -maxdepth 2 -name language.toml | cut -d/ -f2 | sort | jq -Rsc 'split("\n") | map(select(. != ""))')
+          echo "languages=$languages" >> "$GITHUB_OUTPUT"
+      - id: dump
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMPARE: ${{ inputs.compare || false }}
+        run: |
+          headers=$(curl -sfIL --retry 3 "$DUMP_URL" | tr -d '\r')
+          etag=$(printf '%s\n' "$headers" | awk 'tolower($1) == "etag:" { v = $2 } END { print v }')
+          modified=$(printf '%s\n' "$headers" | awk 'tolower($1) == "last-modified:" { $1 = ""; v = substr($0, 2) } END { print v }')
+          if [ -z "$etag" ] || [ -z "$modified" ]; then
+            echo "::error::kaikki sent no ETag or Last-Modified for the dump"
+            exit 1
+          fi
+          snapshot="dump-$(date -u -d "$modified" +%F)"
+          stored=false
+          if body=$(gh release view "$snapshot" --repo "$GITHUB_REPOSITORY" --json body --jq .body 2>/dev/null); then
+            if ! printf '%s' "$body" | grep -qF "$etag"; then
+              echo "::error::$snapshot is stored from another dump (ETag $etag is not in its notes)"
+              exit 1
+            fi
+            stored=true
+          fi
+          run=true
+          if [ "$stored" = true ] && [ "$COMPARE" != true ]; then run=false; fi
+          {
+            echo "snapshot=$snapshot"
+            echo "etag=$etag"
+            echo "modified=$modified"
+            echo "stored=$stored"
+            echo "run=$run"
+          } >> "$GITHUB_OUTPUT"
+          echo "$snapshot, ETag $etag, stored: $stored, run: $run" >> "$GITHUB_STEP_SUMMARY"
+
+  # Downloads the dump once, keeps each language's lines and stores them as the snapshot.
+  snapshot:
+    needs: check
+    if: needs.check.outputs.run == 'true' && needs.check.outputs.stored == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      SNAPSHOT: ${{ needs.check.outputs.snapshot }}
+      ETAG: ${{ needs.check.outputs.etag }}
+      MODIFIED: ${{ needs.check.outputs.modified }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - name: Download the dump
+        run: |
+          curl -fL --retry 5 --retry-all-errors -D "$RUNNER_TEMP/headers" -o "$RUNNER_TEMP/dump.jsonl.gz" "$DUMP_URL"
+          got=$(tr -d '\r' < "$RUNNER_TEMP/headers" | awk 'tolower($1) == "etag:" { v = $2 } END { print v }')
+          if [ "$got" != "$ETAG" ]; then
+            echo "::error::the dump changed while this run went on ($ETAG, then $got); the next run takes the new one"
+            exit 1
+          fi
+      - name: Filter every language in one pass
+        run: |
+          bun run --silent filter --input "$RUNNER_TEMP/dump.jsonl.gz" --out-dir "$RUNNER_TEMP/snapshot" > "$RUNNER_TEMP/filter.json"
+          rm "$RUNNER_TEMP/dump.jsonl.gz"
+      - name: Gzip and checksum
+        working-directory: ${{ runner.temp }}/snapshot
+        run: |
+          # -n leaves the name and time out, so the same lines give the same bytes.
+          ls *.jsonl | xargs -P 4 -n 1 gzip -n -6
+          sha256sum *.jsonl.gz > SHA256SUMS
+      - name: Store the snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # kaikki's own words on what the dump is, when its page still says it the same way.
+          about=$(curl -sfL --retry 3 "$DUMP_PAGE" | sed 's/<[^>]*>//g' | grep -o 'extracted on [0-9-]* from the enwiktionary dump dated [0-9-]* using wiktextract ([^)]*)' | head -1 || true)
+          {
+            echo "The English Wiktionary as extracted by [wiktextract](https://github.com/tatuylonen/wiktextract) and published on [kaikki.org](https://kaikki.org/dictionary/rawdata.html), one file per language in \`languages/\`. Wiktionary's text is under CC BY-SA 4.0 and the GFDL."
+            echo
+            echo "- Source: $DUMP_URL"
+            echo "- ETag: \`$ETAG\`"
+            echo "- Last-Modified: $MODIFIED"
+            [ -n "$about" ] && echo "- kaikki: $about"
+            echo
+            echo "| Language | Lines | Size (MB, plain) |"
+            echo "| --- | ---: | ---: |"
+            jq -r '.languages[] | "| \(.lang) | \(.languageLines) | \(.fileBytes / 1e6 | floor) |"' "$RUNNER_TEMP/filter.json"
+          } > "$RUNNER_TEMP/notes.md"
+          gh release create "$SNAPSHOT" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease \
+            --title "Dump snapshot $SNAPSHOT" --notes-file "$RUNNER_TEMP/notes.md" \
+            "$RUNNER_TEMP"/snapshot/*.jsonl.gz "$RUNNER_TEMP/snapshot/SHA256SUMS"
+
+  # Imports one language from the new snapshot and from its pinned one.
+  import:
+    needs: [check, snapshot]
+    if: always() && needs.check.outputs.run == 'true' && (needs.snapshot.result == 'success' || needs.snapshot.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        lang: ${{ fromJSON(needs.check.outputs.languages) }}
+    env:
+      LANG_CODE: ${{ matrix.lang }}
+      SNAPSHOT: ${{ needs.check.outputs.snapshot }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - name: Import from the new snapshot
+        run: |
+          mkdir -p "$RUNNER_TEMP/new" stats
+          gh release download "$SNAPSHOT" --repo "$GITHUB_REPOSITORY" --pattern "$LANG_CODE.jsonl.gz" --dir "$RUNNER_TEMP/new"
+          bun run --silent import --lang "$LANG_CODE" --input "$RUNNER_TEMP/new/$LANG_CODE.jsonl.gz" \
+            --out "$RUNNER_TEMP/new.sqlite" --dump "$SNAPSHOT" > "stats/$LANG_CODE.new.json"
+      - name: Import from the pinned snapshot
+        run: |
+          pinned=$(bun run --silent dumps pinned "$LANG_CODE")
+          if [ -z "$pinned" ] || [ "$pinned" = "$SNAPSHOT" ]; then
+            echo "Nothing to compare: pinned to '${pinned:-nothing}'."
+            exit 0
+          fi
+          mkdir -p "$RUNNER_TEMP/old"
+          gh release download "$pinned" --repo "$GITHUB_REPOSITORY" --pattern "$LANG_CODE.jsonl.gz" --dir "$RUNNER_TEMP/old"
+          bun run --silent import --lang "$LANG_CODE" --input "$RUNNER_TEMP/old/$LANG_CODE.jsonl.gz" \
+            --out "$RUNNER_TEMP/old.sqlite" --dump "$pinned" > "stats/$LANG_CODE.old.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stats-${{ matrix.lang }}
+          path: stats/
+          if-no-files-found: ignore
+
+  # Opens or updates the PR that pins every language to the new snapshot, or an issue when an
+  # import failed.
+  propose:
+    needs: [check, import]
+    if: always() && needs.check.outputs.run == 'true' && needs.import.result != 'skipped'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    env:
+      SNAPSHOT: ${{ needs.check.outputs.snapshot }}
+      IMPORTS: ${{ needs.import.result }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        # No stats at all when every import failed; the report then lists them all.
+        continue-on-error: true
+        with:
+          pattern: stats-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/stats
+      - name: Compare
+        run: |
+          mkdir -p "$RUNNER_TEMP/stats"
+          bun run --silent dumps report "$RUNNER_TEMP/stats" > "$RUNNER_TEMP/report.md"
+          cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Open an issue for a failed import
+        if: needs.import.result != 'success'
+        run: |
+          title="Dump canary: $SNAPSHOT does not import"
+          {
+            echo "The import from snapshot $SNAPSHOT failed for at least one language: $RUN_URL"
+            echo
+            cat "$RUNNER_TEMP/report.md"
+          } > "$RUNNER_TEMP/issue.md"
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/issue.md"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file "$RUNNER_TEMP/issue.md"
+          fi
+          exit 1
+      - name: Open or update the pin PR
+        run: |
+          bun run --silent dumps pin "$SNAPSHOT"
+          if git diff --quiet -- dumps.toml; then
+            echo "Every language is already pinned to $SNAPSHOT." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          branch="dumps/$SNAPSHOT"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git commit -m "Pin the dictionaries to $SNAPSHOT" -- dumps.toml
+          git push --force origin "$branch"
+          {
+            echo "The dump canary found a new kaikki dump and stored it as snapshot [$SNAPSHOT]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$SNAPSHOT). This pins every language to it. Imports compared in $RUN_URL:"
+            echo
+            cat "$RUNNER_TEMP/report.md"
+            echo
+            echo "Part of #32"
+            echo
+            echo "A PR opened by a workflow does not start CI: close and reopen it, or push to it, before merging."
+          } > "$RUNNER_TEMP/pr.md"
+          if gh pr view "$branch" --repo "$GITHUB_REPOSITORY" --json state --jq .state 2>/dev/null | grep -q OPEN; then
+            gh pr edit "$branch" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/pr.md"
+          else
+            gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$branch" \
+              --title "Pin the dictionaries to $SNAPSHOT" --body-file "$RUNNER_TEMP/pr.md"
+          fi
