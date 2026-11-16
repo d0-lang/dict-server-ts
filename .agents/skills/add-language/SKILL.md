@@ -17,7 +17,7 @@ A plain import with sane decisions gets most of the way: Russian reached 90% und
 - The Wiktionary dump at `data/raw-wiktextract-data.jsonl` (or `.gz`).
 - The extension built in `../extension` (`bun run build`), and Chromium at `/usr/bin/chromium`. The corpus checks go through the real extension, so they test what a reader sees.
 - Texts in `../corpus/<lang>`, or `yt-dlp` and network access to gather them: see Corpus.
-- Nothing is committed or pushed unless the user asks. A PR for the language follows `.github/PULL_REQUEST_TEMPLATE/language.md` (open it with `?template=language.md`), with the gate figures from the report.
+- Nothing is committed or pushed on `main`. On any other branch or worktree, commit and push as the work lands, and while working on an open PR add what changed to its description. A PR for the language follows `.github/PULL_REQUEST_TEMPLATE/language.md` (open it with `?template=language.md`), with the gate figures from the report.
 
 Before spending tokens (generation, judging, classifying), tell the user the number of agents or batches and the estimated tokens, and wait for their go.
 
