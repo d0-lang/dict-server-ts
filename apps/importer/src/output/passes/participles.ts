@@ -28,6 +28,10 @@ export const addParticipleForms = ({
   sqlite.transaction(() => {
     for (const { form, entryId } of participleForms) pending.run(form, entryId);
   })();
+  // The query below looks the pending rows up by form, once per row.
+  sqlite.run(
+    "CREATE INDEX participle_pending_form ON participle_pending(form)",
+  );
   counts.participleForms = sqlite.run(
     `INSERT OR IGNORE INTO forms (form, entry_id, source)
      SELECT DISTINCT p.form, p.entry_id, ${FormSource.Inflection} FROM participle_pending p
