@@ -364,6 +364,45 @@ describe("importWiktextract", () => {
   );
 
   it.effect(
+    "stops a verb's chain at another word's entry without verbChainsThroughEntries",
+    () =>
+      Effect.gen(function* () {
+        const dir = yield* tempDir;
+        const input = join(dir, "pl.jsonl");
+        const line = (
+          word: string,
+          pos: string,
+          senses: ReadonlyArray<object>,
+        ) => JSON.stringify({ word, pos, lang_code: "pl", senses });
+        const link = (gloss: string, target: string) => ({
+          glosses: [gloss],
+          tags: ["form-of"],
+          form_of: [{ word: target }],
+        });
+        yield* Effect.promise(() =>
+          writeFile(
+            input,
+            [
+              line("partie", "verb", [
+                link("feminine singular of parti", "parti"),
+              ]),
+              line("parti", "adj", [{ glosses: ["drunk"] }]),
+              line("parti", "verb", [
+                link("past participle of partir", "partir"),
+              ]),
+              line("partir", "verb", [{ glosses: ["to leave"] }]),
+            ].join("\n"),
+          ),
+        );
+        const out = join(dir, "pl_en.sqlite");
+        yield* importWiktextract({ lang: "pl", input, out, grammar: [] });
+        const db = yield* openDictionary(out);
+
+        assert.deepStrictEqual(lemmas(db, "partie"), ["parti/ADJ"]);
+      }).pipe(Effect.scoped),
+  );
+
+  it.effect(
     "writes no entry for a verb form whose gloss only names its grammar",
     () =>
       Effect.gen(function* () {

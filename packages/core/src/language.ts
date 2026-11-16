@@ -102,6 +102,13 @@ const Import = doc(
       ),
       false,
     ),
+    verbChainsThroughEntries: orDefault(
+      doc(
+        Schema.Boolean,
+        'A verb form\'s chain of links goes on through a word with entries but no verb entry, by that word\'s own verb links: French `partie` is "feminine singular of parti", whose entries are an adjective and a noun and whose verb line is "past participle of partir", so `partie` also reaches `partir`. Otherwise a chain stops at any word with an entry. Off where a participle used as an adjective is mostly read as one: the verb it reaches then ranks with the adjective, and often first (German `naheliegende`, Russian `удаленный`).',
+      ),
+      false,
+    ),
   }),
   "How the importer reads this language's wiktextract data.",
 );

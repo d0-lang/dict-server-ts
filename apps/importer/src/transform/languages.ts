@@ -57,6 +57,8 @@ export type LanguageRules = {
   readonly reflexive?: "before" | "after";
   /** Without a table, the headword line's cases and numbers are forms (`structures` for `structure`). */
   readonly headwordInflections?: boolean;
+  /** A verb form's chain goes on through a word with no verb entry (`partie` -> `parti` -> `partir`). */
+  readonly verbChainsThroughEntries?: boolean;
 };
 
 /**

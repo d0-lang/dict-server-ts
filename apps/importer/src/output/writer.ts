@@ -97,6 +97,8 @@ export const makeWriter = (
   reflexive = false,
   /** `participleDeclension.sharedWithParticiple`. */
   participlesSharedWithOwn = false,
+  /** `verbChainsThroughEntries`. */
+  verbChainsThroughEntries = false,
 ) => {
   const sqlite = db.$client;
   sqlite.run(`CREATE TEMP TABLE form_of_pending (
@@ -407,6 +409,7 @@ export const makeWriter = (
     verbalNouns,
     participleForms,
     participlesSharedWithOwn,
+    verbChainsThroughEntries,
     derivedByEntry,
     degreeFormsByEntry,
   };

@@ -21,6 +21,11 @@ standardPronNotes = []
 # with only a verb form (`structures`, `réformes`). 300 corpus words reached the
 # verb and missed their noun or adjective (`protons`, `combats`, `notions`).
 headwordInflections = true
+# A participle declines (`partie` is "feminine singular of parti"), and
+# Wiktionary gives its masculine an adjective or noun entry (`parti` "party")
+# with only a verb line for the verb, so a declined form reached `parti` and
+# never `partir` (`elle est partie`). Its chain goes on to the verb.
+verbChainsThroughEntries = true
 # Past participles agree like adjectives, but verb tables list the masculine
 # singular only: adopté also gives adoptée, adoptés, adoptées. Wiktionary lists
 # many participles as adjectives or nouns with other senses (`adopté` "male

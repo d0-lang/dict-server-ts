@@ -121,6 +121,10 @@
         "headwordInflections": {
           "type": "boolean",
           "description": "A word without an inflection table has the cases and numbers its headword line gives as its forms: French nouns and adjectives have no tables (`structure`, plural `structures`), and Wiktionary often has no page of its own for a regular plural. Off where headword lines also name other words (German `der` for `CIA`)."
+        },
+        "verbChainsThroughEntries": {
+          "type": "boolean",
+          "description": "A verb form's chain of links goes on through a word with entries but no verb entry, by that word's own verb links: French `partie` is \"feminine singular of parti\", whose entries are an adjective and a noun and whose verb line is \"past participle of partir\", so `partie` also reaches `partir`. Otherwise a chain stops at any word with an entry. Off where a participle used as an adjective is mostly read as one: the verb it reaches then ranks with the adjective, and often first (German `naheliegende`, Russian `удаленный`)."
         }
       },
       "additionalProperties": false,
