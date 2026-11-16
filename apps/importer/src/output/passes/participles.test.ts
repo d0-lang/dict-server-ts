@@ -6,8 +6,13 @@ import { addParticipleForms } from "./participles.ts";
 
 const ADOPTER = 1;
 const PLAIRE = 3;
+const ARRIVER = 6;
 
-/** `adopter` (table: `adopté`), the noun `adopté` with its plural, `plaire` (`plu`), and `plus`. */
+/**
+ * `adopter` (table: `adopté`), the noun `adopté` with its plural, `plaire`
+ * (`plu`) and `plus`, an adverb and a noun, and `arriver` with the noun
+ * `arrivée`.
+ */
 const file = () => {
   const db = createDictionaryFile(":memory:");
   const entries: ReadonlyArray<readonly [number, string, string]> = [
@@ -15,6 +20,9 @@ const file = () => {
     [2, "adopté", "NOUN"],
     [PLAIRE, "plaire", "VERB"],
     [4, "plus", "ADV"],
+    [5, "plus", "NOUN"],
+    [ARRIVER, "arriver", "VERB"],
+    [7, "arrivée", "NOUN"],
   ];
   for (const [id, lemma, pos] of entries) {
     db.$client.run(
@@ -30,6 +38,10 @@ const file = () => {
     ["plaire", PLAIRE, FormSource.Lemma],
     ["plu", PLAIRE, FormSource.Inflection],
     ["plus", 4, FormSource.Lemma],
+    ["plus", 5, FormSource.Lemma],
+    ["arriver", ARRIVER, FormSource.Lemma],
+    ["arrivé", ARRIVER, FormSource.Inflection],
+    ["arrivée", 7, FormSource.Lemma],
   ];
   for (const row of forms) {
     db.$client.run("INSERT INTO forms VALUES (?, ?, ?)", [...row]);
@@ -46,6 +58,7 @@ const run = (shared: boolean) => {
       { form: "adoptés", entryId: ADOPTER },
       { form: "adoptées", entryId: ADOPTER },
       { form: "plus", entryId: PLAIRE },
+      { form: "arrivée", entryId: ARRIVER },
     ],
     participlesSharedWithOwn: shared,
   } as unknown as WriterContext);
@@ -63,12 +76,18 @@ describe("addParticipleForms", () => {
     const reached = run(false);
     assert.deepStrictEqual(reached("adoptées"), [ADOPTER]);
     assert.deepStrictEqual(reached("adoptés"), [2]);
-    assert.deepStrictEqual(reached("plus"), [4]);
+    assert.deepStrictEqual(reached("plus"), [4, 5]);
+    assert.deepStrictEqual(reached("arrivée"), [7]);
   });
 
   it("lets the participle's own noun share it, not another word", () => {
     const reached = run(true);
     assert.deepStrictEqual(reached("adoptés"), [ADOPTER, 2]);
-    assert.deepStrictEqual(reached("plus"), [4]);
+    assert.deepStrictEqual(reached("plus"), [4, 5]);
+  });
+
+  it("lets a noun spelled like the declined participle share it", () => {
+    const reached = run(true);
+    assert.deepStrictEqual(reached("arrivée"), [ARRIVER, 7]);
   });
 });

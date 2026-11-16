@@ -25,8 +25,9 @@ headwordInflections = true
 # singular only: adopté also gives adoptée, adoptés, adoptées. Wiktionary lists
 # many participles as adjectives or nouns with other senses (`adopté` "male
 # adoptee"), whose forms then missed the verb (`adoptés` "adopted"), so those
-# don't block a form; another word's does (`plus` isn't `plu` + s, nor
-# `partie` `parti` + e: 464 popovers of `plus` gained `plaire` without this).
+# don't block a form, nor does a noun spelled like it (`arrivée` "arrival" in
+# `elle est arrivée`); another word's does (`plus` the adverb isn't `plu` + s:
+# 464 popovers of `plus` gained `plaire` without this).
 participleDeclension = { tags = ["participle", "past"], ending = "", endings = ["e", "s", "es"], onlyNew = true, sharedWithParticiple = true }
 
 [context]

@@ -73,7 +73,7 @@ const Import = doc(
           sharedWithParticiple: orDefault(
             doc(
               Schema.Boolean,
-              "With `onlyNew`: a form the participle's own adjective or noun has is added to the verb too, since only another word's form blocks it. French `adopté` \"male adoptee\" has `adoptés`, which is also `adopter`'s, while `plus` stays out of `plu` (of `plaire`) + `s`.",
+              "With `onlyNew`: a form the participle's own adjective or noun has is added to the verb too, since only another word's form blocks it. French `adopté` \"male adoptee\" has `adoptés`, which is also `adopter`'s, and the noun `arrivée` \"arrival\" is `arrivé` + `e`, so it is `arriver`'s too, while `plus` the adverb stays out of `plu` (of `plaire`) + `s`.",
             ),
             false,
           ),

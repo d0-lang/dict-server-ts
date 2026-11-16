@@ -8,7 +8,9 @@ import type { WriterContext } from "./context.ts";
  * `bestehend`'s, not `bestehen`'s). A verb and its reflexive entry share
  * theirs. With `participlesSharedWithOwn`, only another word blocks a form:
  * an entry whose lemma is itself a form of the verb is the participle's own
- * (`adopté` "male adoptee", so `adoptés` is `adopter`'s too), and `plus` stays
+ * (`adopté` "male adoptee", so `adoptés` is `adopter`'s too), and so is a noun
+ * spelled like the declined form, the participle used as a noun (`arrivée`
+ * "arrival", so `elle est arrivée` reaches `arriver`). `plus` the adverb stays
  * `plus`, not `plu` + `s`. Runs after every other pass that adds forms.
  */
 export const addParticipleForms = ({
@@ -37,7 +39,9 @@ export const addParticipleForms = ({
              ? `AND NOT EXISTS (
                   SELECT 1 FROM entries own JOIN forms verb ON verb.form = lower(own.lemma)
                   WHERE own.id = f.entry_id AND verb.entry_id = p.entry_id
-                )`
+                )
+                AND NOT (f.source = ${FormSource.Lemma} AND 'NOUN' =
+                  (SELECT own.pos FROM entries own WHERE own.id = f.entry_id))`
              : ""
          }
      )`,
