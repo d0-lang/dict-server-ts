@@ -35,12 +35,26 @@ const command = Command.make(
       ),
       Flag.withDefault(false),
     ),
+    dump: Flag.String("dump").pipe(
+      Flag.withDescription(
+        "the dump snapshot the input comes from (dump-2026-10-30), recorded in the file's meta",
+      ),
+      Flag.optional,
+    ),
     limit: Flag.Int("limit").pipe(
       Flag.withDescription("stop after this many lines of the language"),
       Flag.optional,
     ),
   },
-  Effect.fn(function* ({ lang, input, out, force, noFormOfFallback, limit }) {
+  Effect.fn(function* ({
+    lang,
+    input,
+    out,
+    force,
+    noFormOfFallback,
+    dump,
+    limit,
+  }) {
     const rules = yield* languageRules(lang);
     const outPath = Option.getOrElse(
       out,
@@ -53,6 +67,7 @@ const command = Command.make(
       out: outPath,
       force,
       formOfFallback: !noFormOfFallback,
+      dump: Option.getOrUndefined(dump),
       limit: Option.getOrUndefined(limit),
       progressEvery: 20_000,
     });

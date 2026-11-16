@@ -94,7 +94,7 @@ A new setting goes in the `Language` schema (`packages/core/src/language.ts`). G
 ### 1. Import
 
 1. Write `languages/<lang>/language.toml`, starting from the closest finished language's (Ukrainian from Russian, Czech from Polish, Dutch from German). The importer refuses a language without one. Check each setting against the data before you keep it.
-2. `bun run filter --lang <lang> --input data/raw-wiktextract-data.jsonl --out data/raw/<lang>.jsonl`, then `bun run import --lang <lang> --input data/raw/<lang>.jsonl`.
+2. `bun run filter --lang <lang> --input data/raw-wiktextract-data.jsonl` (writes `data/raw/<lang>.jsonl`), then `bun run import --lang <lang> --input data/raw/<lang>.jsonl`.
 3. Check normalization against real text before anything else: marks the dump writes and texts don't (stress, vowel points, macrons), letter variants (`ё`/`е`), apostrophes, case rules (Turkish `İ/ı`, German nouns). If a common form doesn't match, fix `lookupKey` or the importer first, because every later number depends on it. A `lookupKey` change needs a new `SCHEMA_VERSION` and a vector in `spec/dictionary/lookup-key.jsonl`.
 
 ### 2. Profile
