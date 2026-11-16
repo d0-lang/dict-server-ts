@@ -1,0 +1,68 @@
+# A release, started by pushing a tag like v0.7.0. It builds nothing: it takes the newest
+# candidate of that version (v0.7.0-rc.N, from release-candidate.yml), checks the release
+# tag is on the same commit, and publishes the candidate's .sqlite files as the release and
+# its image as ghcr.io/<repo>:<tag> and :latest. So what was tested is what ships.
+name: Release
+
+on:
+  push:
+    tags: ["v*", "!v*-rc*"]
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  TAG: ${{ github.ref_name }}
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The tags, to compare the candidate's commit with this one.
+          fetch-depth: 0
+      - name: Find the candidate
+        id: candidate
+        run: |
+          # The highest N among this version's published candidates.
+          candidate=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 200 --json tagName --jq '.[].tagName' \
+            | grep -E "^${TAG//./\\.}-rc\.[0-9]+$" | sort -t. -k4 -n | tail -1 || true)
+          if [ -z "$candidate" ]; then
+            echo "::error::no published candidate for $TAG: tag $TAG-rc.1 first and let it pass"
+            exit 1
+          fi
+          if [ "$(git rev-parse "$candidate^{commit}")" != "$(git rev-parse "$TAG^{commit}")" ]; then
+            echo "::error::$TAG is not on the commit of $candidate, the candidate that was tested"
+            exit 1
+          fi
+          echo "candidate=$candidate" >> "$GITHUB_OUTPUT"
+          echo "Promoting $candidate" >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish the release
+        env:
+          CANDIDATE: ${{ steps.candidate.outputs.candidate }}
+        run: |
+          mkdir dist
+          gh release download "$CANDIDATE" --repo "$GITHUB_REPOSITORY" --dir dist
+          (cd dist && sha256sum --check SHA256SUMS)
+          gh release view "$CANDIDATE" --repo "$GITHUB_REPOSITORY" --json body --jq .body \
+            | sed -e "s/^Release candidate $CANDIDATE, built/$TAG, promoted unchanged from $CANDIDATE, built/" \
+                  -e '/^Tag the version without/d' > notes.md
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --latest \
+            --title "$TAG" --notes-file notes.md dist/*.sqlite dist/SHA256SUMS
+      - name: Tag the image
+        env:
+          CANDIDATE: ${{ steps.candidate.outputs.candidate }}
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          echo "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          # New names for the same image; nothing is pulled or rebuilt.
+          docker buildx imagetools create --tag "$image:$TAG" --tag "$image:latest" "$image:$CANDIDATE"

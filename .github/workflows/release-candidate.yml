@@ -1,0 +1,187 @@
+# A release candidate, started by pushing a tag like v0.7.0-rc.1. It imports every language
+# from the dump snapshot dumps.toml pins it to, builds the image, starts that image with
+# those dictionaries and checks it the way a client would (apps/server/eval/smoke.ts), then
+# publishes a pre-release with the .sqlite files and pushes the image as
+# ghcr.io/<repo>:<tag>. Tagging v0.7.0 on the same commit then promotes exactly these
+# (release.yml), so what was tested is what ships.
+name: Release candidate
+
+on:
+  push:
+    tags: ["v*-rc*"]
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  TAG: ${{ github.ref_name }}
+
+jobs:
+  # Every language in languages/ with the snapshot it is pinned to; a missing pin fails here.
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      languages: ${{ steps.plan.outputs.languages }}
+      image: ${{ steps.plan.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - id: plan
+        run: |
+          plan='[]'
+          missing=''
+          for lang in $(find languages -mindepth 2 -maxdepth 2 -name language.toml | cut -d/ -f2 | sort); do
+            snapshot=$(bun run --silent dumps pinned "$lang")
+            if [ -z "$snapshot" ]; then missing="$missing $lang"; continue; fi
+            plan=$(jq -c --arg lang "$lang" --arg snapshot "$snapshot" '. + [{lang: $lang, snapshot: $snapshot}]' <<< "$plan")
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::not pinned in dumps.toml:$missing (the dump canary pins them)"
+            exit 1
+          fi
+          echo "languages=$plan" >> "$GITHUB_OUTPUT"
+          # Image names are lowercase.
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+          jq -r '.[] | "- \(.lang): \(.snapshot)"' <<< "$plan" >> "$GITHUB_STEP_SUMMARY"
+
+  # One job per language: the snapshot's file, checked against its checksum, imported.
+  dictionaries:
+    needs: plan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.languages) }}
+    env:
+      LANG_CODE: ${{ matrix.lang }}
+      SNAPSHOT: ${{ matrix.snapshot }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - name: Download from the snapshot
+        working-directory: ${{ runner.temp }}
+        run: |
+          gh release download "$SNAPSHOT" --repo "$GITHUB_REPOSITORY" --pattern "$LANG_CODE.jsonl.gz" --pattern SHA256SUMS
+          sha256sum --check --ignore-missing SHA256SUMS
+      - name: Import
+        run: |
+          mkdir -p dist
+          # Into data/<pair>.sqlite, the pair as the language names it (de_en).
+          bun run --silent import --lang "$LANG_CODE" --input "$RUNNER_TEMP/$LANG_CODE.jsonl.gz" \
+            --dump "$SNAPSHOT" > "dist/$LANG_CODE.stats.json"
+          mv data/*.sqlite dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dictionary-${{ matrix.lang }}
+          path: dist/
+
+  image:
+    needs: plan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE: ${{ needs.plan.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and push
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          # The source label ties the package to this repo, so it gets the repo's access.
+          docker build --tag "$IMAGE:$TAG" \
+            --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.version=$TAG" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" .
+          docker push "$IMAGE:$TAG"
+
+  # The built image with the built dictionaries, checked as a client would.
+  smoke:
+    needs: [plan, dictionaries, image]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    env:
+      IMAGE: ${{ needs.plan.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dictionary-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/dist
+      - name: Start the image
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/data"
+          cp "$RUNNER_TEMP"/dist/*.sqlite "$RUNNER_TEMP/data/"
+          echo "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          # A throwaway key inside the container; the dictionaries read-only, as in compose.yaml.
+          docker run --detach --name dict-server --publish 3000:3000 \
+            --env PORT=3000 --env IDENTITY_FILE=/tmp/identity.json \
+            --volume "$RUNNER_TEMP/data:/app/data:ro" "$IMAGE:$TAG"
+      - name: Check it as a client
+        run: bun apps/server/eval/smoke.ts --url http://localhost:3000 --data "$RUNNER_TEMP/data"
+      - name: Server log
+        if: always()
+        run: docker logs dict-server 2>&1 | tail -50
+
+  publish:
+    needs: [plan, smoke]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      IMAGE: ${{ needs.plan.outputs.image }}
+      PLAN: ${{ needs.plan.outputs.languages }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dictionary-*
+          merge-multiple: true
+          path: dist
+      - name: Publish the pre-release
+        working-directory: dist
+        run: |
+          sha256sum *.sqlite > SHA256SUMS
+          {
+            echo "Release candidate $TAG, built from $GITHUB_SHA."
+            echo
+            echo "- Image: \`$IMAGE:$TAG\`"
+            echo "- Dictionaries: the \`.sqlite\` files below, checked with \`SHA256SUMS\`"
+            echo
+            echo "| Language | Dump snapshot | Entries | Size (MB) |"
+            echo "| --- | --- | ---: | ---: |"
+            for lang in $(jq -r '.[].lang' <<< "$PLAN"); do
+              snapshot=$(jq -r --arg lang "$lang" '.[] | select(.lang == $lang) | .snapshot' <<< "$PLAN")
+              jq -r --arg snapshot "$snapshot" --arg lang "$lang" \
+                '"| \($lang) | \($snapshot) | \(.entries) | \(.fileBytes / 1e6 | floor) |"' "$lang.stats.json"
+            done
+            echo
+            echo "Tag the version without \`-rc.N\` on the same commit to promote these files and this image unchanged."
+          } > notes.md
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --prerelease \
+            --title "$TAG" --notes-file notes.md ./*.sqlite SHA256SUMS
