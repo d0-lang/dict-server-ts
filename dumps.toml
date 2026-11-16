@@ -1,0 +1,6 @@
+# Which dump snapshot each language is imported from: a pre-release of this
+# repo, `dump-<date>`, with one gzipped <lang>.jsonl per language. The dump
+# canary (.github/workflows/canary.yml) makes the snapshots and opens the PR
+# that moves these pins.
+
+[languages]
