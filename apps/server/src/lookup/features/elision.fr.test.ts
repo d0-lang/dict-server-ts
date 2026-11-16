@@ -30,6 +30,25 @@ describe("elision", () => {
     assert.deepStrictEqual(lemmas(french, "fr_en", "qu'il"), ["il", "que"]);
   });
 
+  it("keeps an entry of several words the word is a form of", () => {
+    // First when it starts with the same elided word.
+    const result = lookupWord(french, languageOf("fr_en"), "s'agit");
+    assert.deepStrictEqual(
+      result.entries.map((entry) => entry.lemma),
+      ["s'agir", "agir", "se"],
+    );
+    assert.deepStrictEqual(result.segments, [
+      { text: "s'", entries: [2] },
+      { text: "agit", entries: [1] },
+    ]);
+    // After the split otherwise: `il m'appelle` is "he calls me".
+    assert.deepStrictEqual(lemmas(french, "fr_en", "m'appelle"), [
+      "appeler",
+      "me",
+      "s'appeler",
+    ]);
+  });
+
   it("splits a word whose own entry only names its parts", () => {
     assert.deepStrictEqual(lemmas(french, "fr_en", "qu'on"), ["on", "que"]);
     // An entry that says what the word means stays.
