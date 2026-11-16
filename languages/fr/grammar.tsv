@@ -177,6 +177,8 @@ au sens large	ADV	in the broad sense, broadly speaking
 aller à l'encontre de	VERB	to go against, to run counter to
 masse salariale	NOUN	payroll, total wage bill
 faux bourdon/faux bourdons	NOUN	drone (male bee)
+# Wiktionary's `il y a` is only "ago", and came before `y avoir` "there be".
+il y a	ADP	there is, there are (il y a un problème, there is a problem) | ago (il y a deux ans, two years ago)
 
 ## Units, written after a number
 g	SYM	gram(s) (500 g)
