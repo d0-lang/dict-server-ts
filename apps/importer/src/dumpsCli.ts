@@ -5,6 +5,7 @@ import { languageCodes } from "@dict/core/language";
 import { Console, Effect } from "effect";
 import { Argument, Command } from "effect/cli";
 import { isSnapshot, readPins, reportComparisons, writePins } from "./dumps.ts";
+import { diffDictionaries, type DictDiff } from "./dictDiff.ts";
 import type { ImportStats } from "./stats.ts";
 
 const pinned = Command.make(
@@ -39,10 +40,21 @@ const pin = Command.make(
   ),
 );
 
-const readStats = (file: string): ImportStats | undefined =>
-  existsSync(file)
-    ? (JSON.parse(readFileSync(file, "utf8")) as ImportStats)
-    : undefined;
+const readJson = <A>(file: string): A | undefined =>
+  existsSync(file) ? (JSON.parse(readFileSync(file, "utf8")) as A) : undefined;
+
+const diff = Command.make(
+  "diff",
+  { before: Argument.String("before"), after: Argument.String("after") },
+  Effect.fn(function* ({ before, after }) {
+    const result = yield* Effect.sync(() => diffDictionaries(before, after));
+    yield* Console.log(JSON.stringify(result, null, 2));
+  }),
+).pipe(
+  Command.withDescription(
+    "What changed between two builds of a dictionary file, as JSON",
+  ),
+);
 
 const report = Command.make(
   "report",
@@ -50,20 +62,21 @@ const report = Command.make(
   Effect.fn(function* ({ dir }) {
     const comparisons = languageCodes().map((lang) => ({
       lang,
-      old: readStats(join(dir, `${lang}.old.json`)),
-      new: readStats(join(dir, `${lang}.new.json`)),
+      old: readJson<ImportStats>(join(dir, `${lang}.old.json`)),
+      new: readJson<ImportStats>(join(dir, `${lang}.new.json`)),
+      diff: readJson<DictDiff>(join(dir, `${lang}.diff.json`)),
     }));
     yield* Console.log(reportComparisons(comparisons));
   }),
 ).pipe(
   Command.withDescription(
-    "Compare <dir>/<lang>.old.json with <lang>.new.json (import summaries) as a Markdown table",
+    "Report <dir>/<lang>.old.json against <lang>.new.json (import summaries) and <lang>.diff.json in Markdown",
   ),
 );
 
 Command.make("dumps").pipe(
   Command.withDescription("The dump snapshots pinned in dumps.toml"),
-  Command.withSubcommands([pinned, pin, report]),
+  Command.withSubcommands([pinned, pin, diff, report]),
   Command.run({ version: "0.1.0" }),
   Effect.provide(NodeServices.layer),
   NodeRuntime.runMain,
