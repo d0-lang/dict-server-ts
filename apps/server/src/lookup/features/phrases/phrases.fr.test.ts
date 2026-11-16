@@ -9,6 +9,11 @@ describe("phrases ending in a contracted word", () => {
       lemmas(french, "fr_en", "partir", "À partir du siècle suivant."),
       ["à partir de", "partir"],
     );
+    // Also from the merged word, which is no form of `de`.
+    assert.deepStrictEqual(
+      lemmas(french, "fr_en", "du", "À partir du siècle suivant."),
+      ["à partir de", "du"],
+    );
   });
 
   it("match an elided word written onto the next one", () => {
@@ -63,6 +68,15 @@ describe("phrases ending in a contracted word", () => {
       "en avoir marre",
       "marre",
     ]);
+    // A phrase that joins its second word with a hyphen needs it so.
+    assert.deepStrictEqual(
+      lemmas(french, "fr_en", "que", "Est-ce que tu pars ?"),
+      ["est-ce que", "que"],
+    );
+    assert.deepStrictEqual(
+      lemmas(french, "fr_en", "que", "C'est ce que je dis."),
+      ["que"],
+    );
     // Without elision, `j'en` is no `en`.
     assert.deepStrictEqual(lemmas(french, "de_en", "marre", "J'en ai marre."), [
       "marre",

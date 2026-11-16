@@ -90,4 +90,9 @@ export const french = dictionary([
   ["en avoir marre", "VERB", [], ["to be fed up"]],
   ["vouloir", "VERB", ["veut"], ["to want"]],
   ["en vouloir", "VERB", [], ["to hold a grudge"]],
+  ["ce", "PRON", [], ["this"]],
+  ["est-ce que", "PART", [], ["(starts a question)"]],
+  // A pronoun before the verb that is also a verb's form.
+  ["lui", "PRON", [], ["to him"]],
+  ["luire", "VERB", ["lui"], ["to shine"]],
 ]);

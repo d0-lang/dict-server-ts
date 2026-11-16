@@ -87,7 +87,9 @@ const keyMatches = (
  * `niczego` doesn't make the interjection `to nic`. The last word may also be
  * merged with the word after it (`à partir du` for `à partir de`, `parce
  * qu'il` for `parce que`), and the first written onto an elided word before
- * it (`j'en ai marre` for `en avoir marre`, `il m'en veut` for `en vouloir`).
+ * it (`j'en ai marre` for `en avoir marre`, `il m'en veut` for `en vouloir`),
+ * unless the phrase joins its next word to it with a hyphen: `c'est ce que`
+ * is not `est-ce que`.
  */
 const wordMatches = (
   m: Matcher,
@@ -98,7 +100,10 @@ const wordMatches = (
   const token = m.tokens[at];
   if (token === undefined) return false;
   if (keyMatches(m, phrase, p, token.key)) return true;
-  const host = p === 0 ? elidedHost(m.elision, token.key) : undefined;
+  const host =
+    p === 0 && phrase.joined[1] !== true
+      ? elidedHost(m.elision, token.key)
+      : undefined;
   return host !== undefined && keyMatches(m, phrase, p, host);
 };
 
@@ -373,17 +378,21 @@ export const phraseEntryIds = (
   const info = tokenInfos(db);
   const available = new Set<string>();
   const rules = contextRules(language);
-  // The words written onto an elided word (`en` of `j'en`), and theirs.
+  // What a context word can be in a phrase: itself and its lemmas, the word
+  // merged into it (`de` of `du`, which needn't be its lemma), and the word
+  // written onto an elided one (`en` of `j'en`) with its lemmas.
   const words = (key: string): ReadonlyArray<string> => {
+    const contracted = rules.contracted(key);
     const host = elidedHost(rules.elision, key);
-    return host === undefined
-      ? [key, ...info(key).lemmas]
-      : [key, ...info(key).lemmas, host, ...info(host).lemmas];
+    return [
+      key,
+      ...info(key).lemmas,
+      ...(contracted === undefined ? [] : [contracted]),
+      ...(host === undefined ? [] : [host, ...info(host).lemmas]),
+    ];
   };
   for (const token of tokens) {
     for (const word of words(token.key)) available.add(word);
-    const contracted = rules.contracted(token.key);
-    if (contracted !== undefined) available.add(contracted);
   }
   const m: Matcher = {
     tokens,
