@@ -1,0 +1,49 @@
+# Runs a dictionary server from the published image. `docker compose up -d` first
+# downloads the dictionaries of the image's release into a volume, checks them against
+# the release's SHA256SUMS, then starts the server on them. A newer image fetches its
+# own dictionaries on the next `docker compose pull && docker compose up -d`.
+#
+# DICT_VERSION picks the image: latest (default) or a release such as v0.1.0.
+# DICT_PORT is the port on this machine, default 3000.
+name: dict-server
+
+services:
+  dictionaries:
+    image: ghcr.io/d0-lang/dict-server-ts:${DICT_VERSION:-latest}
+    command: ["bun", "apps/server/src/fetchDictionaries.ts"]
+    environment:
+      # Only while the repository is private: a token that can read it.
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+    volumes:
+      - dictionaries:/app/data
+
+  server:
+    image: ghcr.io/d0-lang/dict-server-ts:${DICT_VERSION:-latest}
+    restart: unless-stopped
+    depends_on:
+      dictionaries:
+        condition: service_completed_successfully
+    environment:
+      PORT: "3000"
+      # Kept apart from the dictionaries, so the key survives a new release.
+      IDENTITY_FILE: /app/identity/identity.json
+    # More settings (SERVER_NAME, LANGUAGES, INCLUDE_LEGAL, ...) in .env next to this file;
+    # the server's README lists them.
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      # This machine only; put a reverse proxy in front to serve others.
+      - "127.0.0.1:${DICT_PORT:-3000}:3000"
+    volumes:
+      - dictionaries:/app/data:ro
+      - identity:/app/identity
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  dictionaries:
+  identity:
