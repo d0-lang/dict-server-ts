@@ -413,6 +413,7 @@ const collectForms = (
   rules: LanguageRules,
   lemma: string,
   rawForms: ReadonlyArray<WiktextractForm>,
+  pos: string,
 ): {
   readonly forms: ReadonlyArray<string>;
   readonly participles: ReadonlyArray<string>;
@@ -431,15 +432,41 @@ const collectForms = (
     table.length > 0
       ? !table.some((form) => keepForm(rules, lemma, form))
       : rules.headwordInflections === true;
+  // The cells (tag sets) that have a form without stress marks already, so
+  // a marked variant beside it (`vòi` next to `vuoi`) gets no unmarked twin.
+  const cell = (form: WiktextractForm) =>
+    [...(form.tags ?? [])].sort().join(" ");
+  const unmarkedCells = new Set(
+    rules.unmarkedStressForms
+      ? rawForms
+          .filter((form) => {
+            const key = lookupKey(form.form);
+            return withoutInnerStress(key) === key;
+          })
+          .map(cell)
+      : [],
+  );
   for (const form of rawForms) {
-    if (!keepForm(rules, lemma, form, noTable)) {
+    if (!keepForm(rules, lemma, form, noTable, pos)) {
       dropped++;
       continue;
     }
     const key = lookupKey(form.form);
-    if (key !== lemmaKey) forms.add(key);
-    for (const declined of participleForms(rules, key, form.tags ?? [])) {
-      (rules.participleDeclension?.onlyNew ? participles : forms).add(declined);
+    const keys =
+      rules.unmarkedStressForms && !unmarkedCells.has(cell(form))
+        ? [...new Set([key, withoutInnerStress(key)])]
+        : [key];
+    for (const spelling of keys) {
+      if (spelling !== lemmaKey) forms.add(spelling);
+      for (const declined of participleForms(
+        rules,
+        spelling,
+        form.tags ?? [],
+      )) {
+        (rules.participleDeclension?.onlyNew ? participles : forms).add(
+          declined,
+        );
+      }
     }
   }
   return {
@@ -450,6 +477,17 @@ const collectForms = (
     dropped,
   };
 };
+
+/** A vowel with a stress mark, followed by another letter of its word. */
+const INNER_STRESS = /[àèéìíòóùú](?=\p{L})/gu;
+
+/**
+ * The spelling without the stress marks before a word's last letter
+ * (`bisógna` -> `bisogna`, `abbandonerèbbe` -> `abbandonerebbe`), for
+ * `unmarkedStressForms`; a final accent is spelling (`città`, `perché`).
+ */
+export const withoutInnerStress = (word: string): string =>
+  word.replace(INNER_STRESS, (vowel) => vowel.normalize("NFD").charAt(0));
 
 /**
  * The declined forms of an adjectival participle the table lists in one form
@@ -674,6 +712,7 @@ export const transformEntry = (
     rules,
     lemma,
     raw.forms ?? [],
+    raw.pos,
   );
   // `man` on the headword line of `Mann` ("obsolete"): the variant points here
   // only if it turns out to be no word of its own.

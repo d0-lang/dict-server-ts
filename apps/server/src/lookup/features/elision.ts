@@ -13,6 +13,13 @@ const APOSTROPHE = /['‘’ʼ]/u;
 /** A gloss that only names a contraction's parts: `que + on`, `se + est (… of être)`. */
 const PARTS_GLOSS = /^[\p{L}'’-]+ \+ [\p{L}'’-]+(?: \(.*\))?$/u;
 
+/** Typographic apostrophes, written as `'` to compare spellings. */
+const TYPOGRAPHIC = /[‘’ʼ]/gu;
+
+/** The spelling with its case, apostrophes made plain. */
+const asWritten = (word: string): string =>
+  word.normalize("NFC").trim().replace(TYPOGRAPHIC, "'");
+
 /** The entry's first sense only names the word's parts. */
 const namesParts = (entry: LookupEntry): boolean => {
   const gloss = entry.senses[0]?.glosses[0];
@@ -41,6 +48,10 @@ const namesParts = (entry: LookupEntry): boolean => {
  * with the same elided word (`s'agir`), and after the split otherwise: `il
  * m'appelle` is "he calls me", though `m'appelle` is a form of `s'appeler`.
  *
+ * A name keeps the word whole only when the text writes it with the name's
+ * capitals: Italian `dell'acqua` is `acqua` and `dell'`, and the surname
+ * `Dell'Acqua` follows the split; `Dell'Acqua` written so is the name.
+ *
  * A noun made from a clause (`j'aime` "a like") is split all the same when
  * the host reads as a verb, and follows the split: in running text `j'aime`
  * is "I like". Nouns whose host isn't a verb stay whole (`presqu'île`,
@@ -56,8 +67,13 @@ export const elidedResult = (
   const own = whole.entries.filter(
     (entry) => lookupKey(entry.lemma) === key && !namesParts(entry),
   );
-  const clause = own.length > 0 && own.every((entry) => entry.pos === "NOUN");
-  if (own.length > 0 && !clause) return undefined;
+  const written = asWritten(word);
+  const keeps = own.filter(
+    (entry) => entry.pos !== "PROPN" || asWritten(entry.lemma) === written,
+  );
+  const clause =
+    keeps.length > 0 && keeps.every((entry) => entry.pos === "NOUN");
+  if (keeps.length > 0 && !clause) return undefined;
   const at = word.search(APOSTROPHE);
   if (at < 1) return undefined;
   const elided = word.slice(0, at + 1);

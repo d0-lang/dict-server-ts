@@ -31,6 +31,31 @@ untrustedFormTags = ["error-unrecognized-form"]
 # are on the headword line (`casa`, plural `case`). 60,942 of 120,607 noun
 # entries have only headword-line forms, and 59,665 none at all.
 headwordInflections = true
+# Adjectives and determiners have their genders on the headword line too
+# (`bancario`: `bancaria`, `bancari`, `bancarie`), and 8,498 of those 54,231
+# forms reached no entry of their word: `altri` (whose own page Wiktionary
+# tags archaic), `piccole` (only "plural of piccola", a small beer), `nostra`
+# (only the pronoun). Tried on French and Spanish (2026-11-17): 4,645 and
+# 6,682 forms more, but there most have pages of their own, and 63 corpus
+# words opened on a rare adjective first (`journaux` "daily", `facetas`
+# "witty"), so it stays off there.
+headwordGenders = true
+# Verb tables and headword lines write a stress mark on most forms
+# (`abbandonerèbbe`, `dàto`, `casétta`), which texts don't: 428,853 of
+# 1,074,976 form rows. Most also have an unmarked row, but 102,122 don't,
+# among them every form of verbs whose table failed to render (`bisógna` of
+# `bisognare`, "one must"). An accent on the last letter is spelling and
+# stays (`città`, `perché`).
+unmarkedStressForms = true
+# Past participles agree like adjectives (`stato`, `stata`, `stati`,
+# `state`), but verb tables list the masculine singular only, and the other
+# forms reach the verb only through their own pages, which are often missing
+# or a noun's: `data` "date" never reached `dare`, `messa` "Mass" never
+# `mettere`, `stata` and `stati` never `essere`. Only forms no other word has
+# are added (and those of the participle's own adjective or noun): with all
+# of them, `tratta` reached `trarre` before `trattare` in `si tratta di`, and
+# `idea` the adjective `ideo`. So `data` and `messa` stay the nouns' alone.
+participleDeclension = { tags = ["participle", "past"], ending = "o", endings = ["a", "i", "e"], onlyNew = true, sharedWithParticiple = true }
 
 [context]
 # The prepositions di, a, da, in, su and con merge with the article after
@@ -41,3 +66,27 @@ headwordInflections = true
 # in `a causa del`, `grazie all'aiuto`, `rispetto ai`. `d'` is di elided
 # (`prima d'ora`).
 contractions = { del = "di", dello = "di", della = "di", dei = "di", degli = "di", delle = "di", "dell'" = "di", "d'" = "di", al = "a", allo = "a", alla = "a", ai = "a", agli = "a", alle = "a", "all'" = "a", dal = "da", dallo = "da", dalla = "da", dai = "da", dagli = "da", dalle = "da", "dall'" = "da", nel = "in", nello = "in", nella = "in", nei = "in", negli = "in", nelle = "in", "nell'" = "in", sul = "su", sullo = "su", sulla = "su", sui = "su", sugli = "su", sulle = "su", "sull'" = "su", col = "con", coi = "con" }
+# The noun whose lemma a word is ranks before the verb whose form it is
+# (`parte` "part" before `partire`, `volta` "time" before `voltare`). The
+# neighbouring word says which one the sentence means.
+# A verb follows the clitic pronouns, which stand right before it (mi, ti,
+# si, ci, vi, ne, li), and the subject pronouns io and tu: `si parte`, `ci
+# vediamo`, `ne parla`. Left out: lo, la, le, gli and l' (also articles);
+# non, which also negates a word that isn't a verb (`non solo`); and lui,
+# lei, noi, voi, loro, which also stand after a preposition (`con lui`).
+verbAfter = ["mi", "ti", "si", "ci", "vi", "ne", "li", "io", "tu"]
+# Determiners that are never a pronoun, and the prepositions merged with
+# one: no verb follows them, so `il potere` opens on the noun "power", not
+# `potere`. Left out: lo, la, le, gli and l' (also object pronouns), and
+# dai (also "come on!" and "you give").
+noVerbAfter = ["il", "i", "un", "uno", "una", "un'", "del", "dello", "della", "dei", "degli", "delle", "dell'", "al", "allo", "alla", "ai", "agli", "alle", "all'", "dal", "dallo", "dalla", "dagli", "dalle", "dall'", "nel", "nello", "nella", "nei", "negli", "nelle", "nell'", "sul", "sullo", "sulla", "sui", "sugli", "sulle", "sull'", "col", "coi", "mio", "mia", "miei", "mie", "tuo", "tua", "tuoi", "tue", "suo", "sua", "suoi", "sue", "nostro", "nostra", "nostri", "nostre", "vostro", "vostra", "vostri", "vostre", "ogni", "qualche"]
+# The dump's verb tables give 27,287 one-word past participles (masculine
+# singular, written with stress marks: `dàto`). Without the marks, all but
+# the 5,260 with a clitic attached (`lavàtosi`) and 99 dashes end in -to
+# (21,074: andato, finito, venuto, fatto, visto, vinto, morto) or -so (858:
+# preso, chiuso, messo). They agree in gender and number after essere
+# (`è stata`, `sono andati`). So after essere or avere, `stato`, `fatto` and
+# `detto` open on their verb, not the noun. Listed by the letters before
+# -to: -nto (265, vinto) is left out, since `-nti` also ends present
+# participles and verb forms (`sono presenti` opened on `presentare`).
+participleEndings = ["ato", "ata", "ati", "ate", "ito", "ita", "iti", "ite", "uto", "uta", "uti", "ute", "tto", "tta", "tti", "tte", "sto", "sta", "sti", "ste", "rto", "rta", "rti", "rte", "lto", "lta", "lti", "lte", "so", "sa", "si", "se"]

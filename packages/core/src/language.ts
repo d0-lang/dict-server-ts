@@ -95,6 +95,20 @@ const Import = doc(
       ),
       false,
     ),
+    headwordGenders: orDefault(
+      doc(
+        Schema.Boolean,
+        'With `headwordInflections`, an adjective or determiner also has the genders its headword line gives as forms (Italian `bancario`, feminine `bancaria`, `bancari`, `bancarie`), where Wiktionary often has no page for them or only a noun\'s (`piccole` "plural of piccola", a small beer). A noun\'s other gender stays another word (`attore`, `attrice`). Off where most of those forms have pages of their own: a form both reach then opens on the adjective, by dump order (French `journaux` on "daily").',
+      ),
+      false,
+    ),
+    unmarkedStressForms: orDefault(
+      doc(
+        Schema.Boolean,
+        "Forms carry stress marks texts don't write: an accented vowel before another letter of the word (Italian tables write `bisógna`, `dàto`; texts `bisogna`, `dato`). Each such form is also indexed without those marks, unless a form with the same tags is written without any (`vuoi` beside the variant `vòi`). An accent on a word's last letter is spelling and stays (`città`, `perché`).",
+      ),
+      false,
+    ),
     headwordInflections: orDefault(
       doc(
         Schema.Boolean,
