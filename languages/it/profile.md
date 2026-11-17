@@ -94,3 +94,13 @@ prepositions, after the r0 judge run shows how often they're read wrong.
 ## Log
 
 - 2026-11-17: first import, settings above.
+- 2026-11-17, tier 1 runs (corpus: 16 videos, 46k words; 15 written texts, 108k words; judge Haiku, same 2,200 items from r0):
+
+| Run | Change | Common grammar | Common content | Random |
+|---|---|---|---|---|
+| r0 | plain import | 92.3% | 91.8% | 89.4% |
+| r1 | grammar file, labels, neighbour settings, elision names, `headwordGenders`, `unmarkedStressForms`, participle declension | 95.7% | 94.4% | 91.4% |
+| r2 | grammar senses and phrases; declension `onlyNew` (reverted in r3) | 98.8% | 94.4% | 91.1% |
+| r3 | declension of every participle, `-nto` endings, `si tratta di` | **99.0%** | **94.7%** | **91.3%** |
+
+Still to write up in this profile: the classified diffs (r1 219 better / 46 worse, r3 12 / 5), the hand-patch list (`gente`, `carcere`: Wiktionary tags their only senses archaic), and the report.

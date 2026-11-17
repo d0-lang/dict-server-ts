@@ -51,11 +51,11 @@ unmarkedStressForms = true
 # `state`), but verb tables list the masculine singular only, and the other
 # forms reach the verb only through their own pages, which are often missing
 # or a noun's: `data` "date" never reached `dare`, `messa` "Mass" never
-# `mettere`, `stata` and `stati` never `essere`. Only forms no other word has
-# are added (and those of the participle's own adjective or noun): with all
-# of them, `tratta` reached `trarre` before `trattare` in `si tratta di`, and
-# `idea` the adjective `ideo`. So `data` and `messa` stay the nouns' alone.
-participleDeclension = { tags = ["participle", "past"], ending = "o", endings = ["a", "i", "e"], onlyNew = true, sharedWithParticiple = true }
+# `mettere`, `stata` and `stati` never `essere`. Every declined form is
+# added, since many feminine participles are nouns too (`proposta`,
+# `richiesta`, `posta`, `messa`): with only forms no other word has (r2),
+# `proposte`, `posta`, `detta` and `messa` lost their verbs.
+participleDeclension = { tags = ["participle", "past"], ending = "o", endings = ["a", "i", "e"] }
 
 [context]
 # The prepositions di, a, da, in, su and con merge with the article after
@@ -87,6 +87,7 @@ noVerbAfter = ["il", "i", "un", "uno", "una", "un'", "del", "dello", "della", "d
 # preso, chiuso, messo). They agree in gender and number after essere
 # (`è stata`, `sono andati`). So after essere or avere, `stato`, `fatto` and
 # `detto` open on their verb, not the noun. Listed by the letters before
-# -to: -nto (265, vinto) is left out, since `-nti` also ends present
-# participles and verb forms (`sono presenti` opened on `presentare`).
-participleEndings = ["ato", "ata", "ati", "ate", "ito", "ita", "iti", "ite", "uto", "uta", "uti", "ute", "tto", "tta", "tti", "tte", "sto", "sta", "sti", "ste", "rto", "rta", "rti", "rte", "lto", "lta", "lti", "lte", "so", "sa", "si", "se"]
+# -to, and -nto (265, vinto) only as -nto and -nta: `-nti` and `-nte` also
+# end present participles and verb forms (`sono presenti` opened on
+# `presentare`).
+participleEndings = ["ato", "ata", "ati", "ate", "ito", "ita", "iti", "ite", "uto", "uta", "uti", "ute", "tto", "tta", "tti", "tte", "sto", "sta", "sti", "ste", "rto", "rta", "rti", "rte", "lto", "lta", "lti", "lte", "nto", "nta", "so", "sa", "si", "se"]
