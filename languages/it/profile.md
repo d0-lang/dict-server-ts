@@ -57,20 +57,30 @@ predictable from the ending (-o, -a) but not for -e nouns (`il fiore`, `la
 chiave`). Decision: open; `[headword] labels = ["Gender"]` or articles
 (`il`/`la` need `lo`/`l'` by the next sound, so labels are the simpler fit).
 
+- **Names block the elision split.** Through the server, lowercase
+  `dell'acqua` and `dell'anno` open only on the surnames `Dell'Acqua` and
+  `Dell'Anno`: a word with an entry of its own stays whole, and the
+  capitalised name counts as one. 153 names contain an apostrophe, 121 of
+  them one word (`D'Angelo`, `D'Amico`, `Dall'Olio`, `Dell'Utri`).
+  `nell'anno` and `un'altra` split as they should. Decision: **to fix** in the
+  elision feature, as a general rule: a name doesn't keep a lowercase word
+  whole. Not started (time).
+- **Phrases through contractions** work on the server: `a causa della` opens
+  on `a causa di`, `grazie all'aiuto` on `grazie a`, `rispetto al` on
+  `rispetto a`.
+
 ## Ranking (to check at r0)
 
-Contractions share spellings with other words, and the popover order isn't
-right for a beginner yet:
+On the server, `dei` opens on the contraction, then `dio`; `alla` on the
+contraction, then `a`. Two open on the wrong word for a beginner:
 
 | Word | Opens on now | Should open on |
 |---|---|---|
-| `dei` | `dio` (plural of god) | `di` + i |
-| `alla` | `A` (letter) | a + la |
-| `sulla` | `sulla` (plant) | su + la |
-| `dai` | `dare` | da + i, then `dare` |
+| `sulla` | `sulla` (a plant) | su + la |
+| `dai` | `dai` (interjection "come on!"), then `dare` | da + i, then the others |
 
 Decision: grammar lines in `languages/it/grammar.tsv` for the articulated
-prepositions, after the r0 judge run.
+prepositions, after the r0 judge run shows how often they're read wrong.
 
 ## Not done yet
 
