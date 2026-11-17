@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spanish (es_en): language report</title>
+<style>
+:root{--bg:#fff;--fg:#1d1d1f;--muted:#6b6b70;--line:#e3e3e6;--card:#f6f6f8;--up:#1a7f37;--down:#b3261e;--accent:#2f5fd0}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--fg:#ececef;--muted:#9a9aa2;--line:#2c2c31;--card:#1c1c20;--up:#4ac26b;--down:#ff7b72;--accent:#7aa2ff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1060px;margin:0 auto;padding:32px 24px 64px}h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:40px 0 10px;padding-top:8px;border-top:1px solid var(--line)}h3{font-size:15px;margin:22px 0 8px}
+.sub{color:var(--muted);margin:0 0 20px}code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card);padding:1px 4px;border-radius:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}.kpi{background:var(--card);border-radius:10px;padding:12px 14px}.kpi .v{font-size:24px;font-weight:650}.kpi .l{color:var(--muted);font-size:13px}.kpi .d{font-size:13px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;margin:8px 0 4px}th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ul{padding-left:20px}li{margin:3px 0}.note{color:var(--muted);font-size:13px}
+.m{color:var(--muted)} .pass{color:var(--up);font-weight:600} .fail{color:var(--down);font-weight:600}
+@media (max-width:600px){main{padding:24px 16px 48px}}
+</style>
+</head><body><main>
+<h1>Spanish (es_en): tier 1</h1>
+<p class="sub">2026-11-17 · model only, unreviewed (no reader of Spanish checked it) · judge: Haiku · run <code>r3</code></p>
+
+<div class="kpis">
+<div class="kpi"><div class="v pass">98.4%</div><div class="l">common grammar words (needs 97.5)</div><div class="d">90.6 in the plain import; 97.7 counting the false positives</div></div>
+<div class="kpi"><div class="v pass">95.0%</div><div class="l">common content words (needs 92.5)</div><div class="d">93.1 plain</div></div>
+<div class="kpi"><div class="v pass">91.6%</div><div class="l">random words (needs 87.5)</div><div class="d">91.1 plain; 92.4 without missing words</div></div>
+<div class="kpi"><div class="v">92.9%</div><div class="l">all 2,200 items understood</div><div class="d">90.3 in the plain import</div></div>
+</div>
+
+<h2>Summary</h2>
+<p>English Wiktionary's Spanish is the largest so far (126,354 entries) and good. Its verb tables list every form, including the clitic combinations written onto the verb (<code>hablándolo</code>) and all four forms of the participle. The plain import found an entry for 97.6% of corpus words, and already passed the content and random gates. What failed were the grammar words:</p>
+<ul>
+<li><b>Grammar words.</b> Letter names first (<code>de</code>, <code>te</code>, <code>ese</code>), misleading glosses (<code>su</code> "used to express an approximate number", <code>me</code> "an expletive"), and forms of <i>ser</i>, <i>estar</i> and <i>haber</i> opening on a noun (<code>son</code> "tone", <code>era</code> "age"). The grammar file fixes them.</li>
+<li><b>Phrases.</b> Wiktionary's short phrases match ordinary text and gloss it wrongly (<code>verdad es que</code> "it may be true that", <code>así es</code> "so it goes"). Longer grammar-file phrases come first.</li>
+<li><b>Nouns before verbs.</b> <code>trata</code> "trafficking" before <code>tratar</code>, <code>hace</code> "ago" before <code>hacer</code>. French's neighbour settings, with Spanish lists, put the verb first after a clitic and the noun first after an article.</li>
+</ul>
+<p>No code changed: Spanish uses settings French added, and three files of its own. All three gates pass; the grammar gate by 0.9 points, or 0.2 without the 4 false positives.</p>
+
+<h2>Profile</h2>
+<ul>
+<li><b>Corpus:</b> 31 texts, 94,315 words, gathered for this run.
+<ul>
+<li>Spoken: 51,342 words from 16 videos (captions repaired by Haiku, 21 parts) in 10 genres, mostly from Spain, also Argentina, Colombia and Mexico.</li>
+<li>Written: 42,973 words from 12 Wikipedia articles and 3 Spanish government guides, in 13 genres.</li>
+<li>No text over 12% of its kind.</li>
+</ul></li>
+<li><b>Headword:</b> gender labels (<code>m</code>, <code>f</code>, <code>m/f</code>, <code>pl</code>) on 91% of nouns, explained in <code>labels.toml</code>, not an article: feminine nouns starting with a stressed a take <code>el</code> (<code>el agua</code>).</li>
+<li><b>Spelling:</b> no normalization. Accents tell words apart (<code>el</code>/<code>él</code>, <code>si</code>/<code>sí</code>), texts write them, and <code>lookupKey</code> keeps them.</li>
+<li><b>Coverage:</b> 97.6% → 97.7% of corpus words with an entry (spoken 98.4%, written 96.8%). The rest is mostly names, Roman numerals, units, English words and diminutives without a page (<code>saborcito</code>).</li>
+</ul>
+
+<h2>Runs</h2>
+<p>The same 2,200 items in every run. Each cell gives understood %, then % without the words the judge called missing.</p>
+<div class="scroll"><table><tr><th>Run</th><th>Grammar</th><th>Content</th><th>Random</th><th>Change</th></tr>
+<tr><td><code>r0</code></td><td>90.6 <span class=m>/ 90.7</span></td><td>93.1 <span class=m>/ 93.2</span></td><td>91.1 <span class=m>/ 92.3</span></td><td>plain import: <code>headwordInflections</code>, <code>untrustedFormTags</code>, <code>contractions</code></td></tr>
+<tr><td><code>r1</code></td><td>96.4</td><td>95.0</td><td>91.5 <span class=m>/ 92.3</span></td><td>grammar file (135 lines)</td></tr>
+<tr><td><code>r2</code></td><td>97.7</td><td>95.0</td><td>91.5 <span class=m>/ 92.3</span></td><td>10 phrase lines</td></tr>
+<tr><td><code>r3</code></td><td><b>98.4</b></td><td><b>95.0</b></td><td><b>91.6</b> <span class=m>/ 92.4</span></td><td>neighbour hints; 4 false positives</td></tr>
+</table></div>
+<p class="note">Judging r0: 88 batches, $0.72. Later runs judged only the changed popovers (8, 1 and 1 batches). The full browser collection (92,740 words) agreed with the API on every word the extension sent a sentence for; 1,706 words are in sentences over 500 characters, which it sends without one. Caption repair: 21 Haiku workers, about 1.35M tokens.</p>
+
+<h2>Accepted changes</h2>
+<h3>Language files</h3>
+<ul>
+<li><code>languages/es/language.toml</code>:
+<ul>
+<li><code>import.headwordInflections</code>: plurals and feminines from the headword line, since nouns and adjectives have no tables.</li>
+<li><code>import.untrustedFormTags</code>: drops 604 misparsed rows (<code>vete</code> under <code>ver</code>, <code>este</code> as a form of <code>ese</code>).</li>
+<li><code>context.contractions</code>: <code>del</code> and <code>al</code>, so <code>a partir del</code> finds <code>a partir de</code>. Test: <code>phrases.es.test.ts</code>.</li>
+<li><code>context.verbAfter</code> (clitics, <code>yo</code>, <code>tú</code>, <code>usted</code>, <code>ustedes</code>), <code>noVerbAfter</code> (articles and possessives), <code>participleEndings</code> (from the dump's tables). Test: <code>neighbours.es.test.ts</code>, including what the lists leave out.</li>
+</ul></li>
+<li><code>grammar.tsv</code>, 145 lines: articles and contractions, pronouns (with <code>vosotros</code> and <code>os</code>, which the import lost), possessives, demonstratives, forms of <i>ser</i>, <i>estar</i>, <i>haber</i>, <i>ir</i> and <i>poder</i>, two-verb forms (<code>creo</code>, <code>sé</code>), hesitation, units, and 17 set phrases.</li>
+<li><code>labels.toml</code>, <code>profile.md</code> with the round log.</li>
+<li><code>apps/server/src/lookup/testing/spanish.ts</code>: the in-memory dictionary for the tests.</li>
+</ul>
+<h3>Outside this repo (uncommitted)</h3>
+<ul>
+<li><code>../corpus</code>: 31 Spanish texts, <code>sources.json</code>, <code>videos.json</code>, the raw captions.</li>
+</ul>
+
+<h2>Other languages</h2>
+<p>No code changed, so no other language's lookups change. <code>language.test.ts</code> now lists <code>es</code>.</p>
+
+<h2>What got worse, and why it stays</h2>
+<ul>
+<li><b>A verb after <code>yo</code></b> that isn't one: <code>para</code> once opens on <code>parar</code>. <code>yo</code> is followed by a verb far more often.</li>
+<li><b>Transcription slips</b> after a clitic (<code>uno</code> on <code>unir</code>, <code>además</code> on <code>ademar</code>): the caption text is wrong there.</li>
+<li><b>Two phrases of two words tie:</b> <code>en fuego</code> "on fire" comes before <code>fuego alto</code> "high heat" in <code>en fuego alto</code>.</li>
+<li><b>Phrase entries that match ordinary text</b> stay: <code>una de</code> "a great deal of" (81 popovers), <code>de una</code> (117), <code>de esta</code> (56), <code>se puede</code> "may I?" (72), <code>ser de</code> (78). The word's own entries follow, and none failed in the gate sample. Tier 2.</li>
+<li><b>Sentences over 500 characters</b> reach the server without context: 4 common-word failures (<code>así como</code>, <code>por ejemplo</code>, <code>en torno a</code>, <code>más allá de</code>), which the API answers right. It's an extension limit.</li>
+</ul>
+
+<h2>False positives and hand patches</h2>
+<p>False positives (4), in <code>../corpus/eval/out/es/false-positives.jsonl</code>:</p>
+<ul>
+<li><code>alto</code> in <code>más alto</code>: the comparative comes from <code>más</code>, which the reader clicks.</li>
+<li><code>términos</code> in <code>en términos críticos</code>: "in critical terms".</li>
+<li><code>lugar</code> in <code>su lugar</code>: "its place", standing.</li>
+<li><code>X</code>: a product model name.</li>
+</ul>
+<p>Without them the grammar gate would be 97.7%.</p>
+<p><b>Hand-patch list:</b>
+<ul>
+<li><b>Words:</b> <code>vosotros</code> (its only sense is tagged archaic), <code>izquierdas</code>, diminutives (<code>tranquilita</code>, <code>saborcito</code>, <code>lentejitas</code>), <code>hogadito</code>, <code>cts</code>.</li>
+<li><b>Senses:</b> <code>hacer penitencia</code> "to do penance" (only "to diet"), <code>poder</code> "branch of government", <code>menor</code> "lesser", <code>opinión</code> "public opinion", Roman numerals.</li>
+<li><b>Phrases:</b> <code>por no decir</code>, <code>a nivel general</code>, <code>dar una ducha</code>, <code>poner en vigor</code>, <code>a la orden del día</code>, <code>buena parte</code>, <code>de primeras</code>, <code>aprendizaje automático</code>, <code>bien de interés cultural</code>, <code>pasar a la historia</code>, <code>hacer fotos</code>, <code>con motivo de</code>, <code>hasta la próxima</code>, <code>tomar una decisión</code>, <code>balance de blancos</code>, <code>dar la razón</code>.</li>
+</ul>
+Details are in the profile.</p>
+
+<h2>Tier 2</h2>
+<p>Not started. Candidates:</p>
+<ul>
+<li>pronominal verb phrases (<code>hacerse cargo de</code> for <code>se hizo cargo de</code>);</li>
+<li>phrase entries that match ordinary text (<code>una de</code>, <code>de una</code>, <code>se puede</code>);</li>
+<li>diminutives without a page of their own (<code>-ito</code>, <code>-ita</code>, <code>-illo</code>);</li>
+<li>Roman numerals, shared with French;</li>
+<li>the 500-character sentence limit.</li>
+</ul>
+</main></body></html>
