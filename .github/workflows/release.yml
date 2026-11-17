@@ -58,7 +58,7 @@ jobs:
                   -e '/^Tag the version without/d' > notes.md
           # The self-host compose file, pinned to this release's image; releases/latest/download/compose.yaml
           # is then always the newest one.
-          sed 's/${DICT_VERSION:-latest}/${DICT_VERSION:-'"$TAG"'}/' self-host/compose.yaml > dist/compose.yaml
+          sed 's/${DICT_VERSION:-latest}/${DICT_VERSION:-'"$TAG"'}/' compose.yaml > dist/compose.yaml
           grep -qF "dict-server-ts:\${DICT_VERSION:-$TAG}" dist/compose.yaml
           gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --latest \
             --title "$TAG" --notes-file notes.md dist/*.sqlite dist/SHA256SUMS dist/compose.yaml

@@ -1,6 +1,6 @@
 // Downloads the dictionaries of the release this image was built for into DATA_DIR,
 // checked against the release's SHA256SUMS. The one-shot `dictionaries` service in
-// self-host/compose.yaml runs it before the server starts.
+// compose.yaml runs it before the server starts.
 //
 // DICT_RELEASE  the release tag, baked into the image by CI (Dockerfile ARG VERSION)
 // DICT_REPO     where the releases are, default d0-lang/dict-server-ts

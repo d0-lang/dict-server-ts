@@ -30,6 +30,17 @@ Ed25519 identity is stored at `IDENTITY_FILE` (default `data/identity.json`, git
 
 The server writes one log line per request: the time, the method, the path without its query string, and the status (Effect's request logger, which `HttpRouter.toWebHandler` adds; no IP address). A lookup's `word` and `context` travel in the request body, which neither this log nor a web server or proxy in front writes by default. No tracer is set up; if you add one, keep request bodies out of it. An unknown route gets a plain 404, so its query string stays out of the log too: that covers a client that still sends lookups as GET. A web server or proxy in front does log the full address of such a request by default, and Docker keeps the server's lines without limit unless log rotation is set.
 
+## Running with Docker
+
+`compose.yaml` runs a published image: a one-shot `dictionaries` service downloads the `.sqlite` files of the image's release into a volume and checks them against its `SHA256SUMS` (`apps/server/src/fetchDictionaries.ts`), then the server starts on them. Each release attaches a copy pinned to its image, so the newest is always at `https://github.com/d0-lang/dict-server-ts/releases/latest/download/compose.yaml`. Settings go in `.env` next to it; `DICT_PORT` changes the port (default 3000). To try an image built from this checkout:
+
+```bash
+docker build --build-arg VERSION=v0.1.0-rc.3 --tag ghcr.io/d0-lang/dict-server-ts:local .
+DICT_VERSION=local docker compose up
+```
+
+`VERSION` is the release whose dictionaries it downloads.
+
 ## Legal texts
 
 `legal/privacy.example.md` and `legal/terms.example.md` are templates of the privacy policy and terms for anyone who runs a public server; `legal/README.md` says what to fill in and what your setup has to do for the texts to be true (proxy logs, log rotation, CDN, other sources). `INCLUDE_LEGAL` is off by default, so clients treat the server as a test server. Turned on, the templates and `example.invalid` links stand in for the documents (`PRIVACY_FILE`, `TOS_FILE`, `PRIVACY_LINK`, `TOS_LINK`), which is enough to try the legal flow. For a public server, copy the templates outside git, fill them in, publish them at `PRIVACY_LINK` and `TOS_LINK`, and point `PRIVACY_FILE` and `TOS_FILE` at the copies (in Docker, mount them into the container). `/v1/get-meta` sends the sha256 of each file as `privacy_hash` and `tos_hash`, so any edit makes clients pause lookups until the user has seen the notice; `PRIVACY_CHANGE` and `TOS_CHANGE` (at most 500 characters) summarise the change. The server refuses to start when a document can't be read, and warns while one still has `[[...]]` placeholders.
