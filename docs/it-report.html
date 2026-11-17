@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Italian (it_en): language report</title>
+<style>
+:root{--bg:#fff;--fg:#1d1d1f;--muted:#6b6b70;--line:#e3e3e6;--card:#f6f6f8;--up:#1a7f37;--down:#b3261e;--accent:#2f5fd0}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--fg:#ececef;--muted:#9a9aa2;--line:#2c2c31;--card:#1c1c20;--up:#4ac26b;--down:#ff7b72;--accent:#7aa2ff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1060px;margin:0 auto;padding:32px 24px 64px}h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:40px 0 10px;padding-top:8px;border-top:1px solid var(--line)}h3{font-size:15px;margin:22px 0 8px}
+.sub{color:var(--muted);margin:0 0 20px}code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card);padding:1px 4px;border-radius:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}.kpi{background:var(--card);border-radius:10px;padding:12px 14px}.kpi .v{font-size:24px;font-weight:650}.kpi .l{color:var(--muted);font-size:13px}.kpi .d{font-size:13px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;margin:8px 0 4px}th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ul{padding-left:20px}li{margin:3px 0}.note{color:var(--muted);font-size:13px}
+.m{color:var(--muted)} .pass{color:var(--up);font-weight:600} .fail{color:var(--down);font-weight:600}
+@media (max-width:600px){main{padding:24px 16px 48px}}
+</style>
+</head><body><main>
+<h1>Spanish (es_en): tier 1</h1>
+<p class="sub">2026-11-17 · model only, unreviewed (no reader of Spanish checked it) · judge: Haiku · run <code>r3</code></p>
+
+<h1>Italian (it_en): tier 1</h1>
+<p class="sub">2026-11-17 · model only, unreviewed (no reader of Italian checked it) · judge: Haiku · run <code>r3</code></p>
+
+<div class="kpis">
+<div class="kpi"><div class="v pass">99.0%</div><div class="l">common grammar words (needs 97.5)</div><div class="d">92.3 in the plain import</div></div>
+<div class="kpi"><div class="v pass">94.7%</div><div class="l">common content words (needs 92.5)</div><div class="d">91.8 plain; 94.8 without missing words</div></div>
+<div class="kpi"><div class="v pass">91.3%</div><div class="l">random words (needs 87.5)</div><div class="d">89.4 plain; 93.1 without missing words</div></div>
+<div class="kpi"><div class="v">93.0%</div><div class="l">all 2,200 items understood</div><div class="d">89.3 in the plain import</div></div>
+</div>
+
+<h2>Summary</h2>
+<p>English Wiktionary's Italian is large (164,562 entries) and its tables are complete, but they are written for a dictionary, not for running text. The plain import found an entry for 96.9% of corpus words and passed the random gate; the common words failed on four things:</p>
+<ul>
+<li><b>Forms written differently from texts.</b> Tables mark the stress (<code>diàmo</code>, <code>bisógna</code>), list participles in the masculine only (<code>dato</code>, not <code>data</code>), and adjectives' genders on the headword line were dropped as "related words" (<code>altri</code> had no entry at all). Three import settings fix them.</li>
+<li><b>Grammar words.</b> Forms of <i>essere</i> and <i>avere</i> glossed only as forms (<code>ha</code> "third-person singular present indicative"), <code>fu</code> "deceased", the articulated prepositions on odd senses (<code>al</code> "with (an ingredient)", <code>sulla</code> a plant), clitics on letter names (<code>ti</code> "T"). The grammar file fixes them.</li>
+<li><b>Elided words.</b> Surnames spelled like an elided word and its host (<code>Dell'Acqua</code>) kept <code>dell'acqua</code> from splitting. Fixed in the elision feature, for every language.</li>
+<li><b>Nouns before verbs.</b> <code>parte</code> before <code>partire</code>, <code>stato</code> "state" before "been". French's neighbour settings, with Italian lists from the dump's tables.</li>
+</ul>
+<p>All three gates pass, the grammar gate by 1.5 points, with no false positives.</p>
+
+<h2>Profile</h2>
+<ul>
+<li><b>Corpus:</b> 31 texts, 154,650 words, gathered for this run.
+<ul>
+<li>Spoken: 46,480 words from 16 videos (captions repaired by Haiku, 21 parts) in 9 genres, at most two per channel.</li>
+<li>Written: 108,170 words from 12 Wikipedia articles and 3 INPS guides, in 11 genres. No news: the sites tried refused automated fetches.</li>
+<li>No text over 17% of its kind.</li>
+</ul></li>
+<li><b>Headword:</b> gender labels (<code>m</code>, <code>f</code>, <code>m/f</code>, <code>pl</code>) on 96% of nouns, explained in <code>labels.toml</code>, not an article (<code>il</code>, <code>lo</code>, <code>l'</code> by the next sound).</li>
+<li><b>Spelling:</b> final accents are spelling and tell words apart (<code>è</code>/<code>e</code>, <code>dà</code>/<code>da</code>), so <code>lookupKey</code> keeps them; inner stress marks are a dictionary's (<code>unmarkedStressForms</code>).</li>
+<li><b>Coverage:</b> 96.9% → 97.1% of corpus words with an entry (spoken 98.3%, written 96.6%). The rest is mostly names and brands, English, Roman numerals, chemistry and acronyms.</li>
+</ul>
+
+<h2>Runs</h2>
+<p>The same 2,200 items in every run. Each cell gives understood %, then % without the words the judge called missing.</p>
+<div class="scroll"><table><tr><th>Run</th><th>Grammar</th><th>Content</th><th>Random</th><th>Change</th></tr>
+<tr><td><code>r0</code></td><td>92.3</td><td>91.8 <span class=m>/ 92.8</span></td><td>89.4 <span class=m>/ 91.8</span></td><td>plain import: <code>elision</code>, <code>contractions</code>, <code>headwordInflections</code>, <code>untrustedFormTags</code></td></tr>
+<tr><td><code>r1</code></td><td>95.7</td><td>94.4 <span class=m>/ 94.5</span></td><td>91.4 <span class=m>/ 93.1</span></td><td>grammar file, labels, neighbour hints, elision names, <code>headwordGenders</code>, <code>unmarkedStressForms</code>, participle declension</td></tr>
+<tr><td><code>r2</code></td><td>98.8</td><td>94.4 <span class=m>/ 94.8</span></td><td>91.1 <span class=m>/ 93.0</span></td><td>grammar senses and phrases; stress marks per cell; declension <code>onlyNew</code></td></tr>
+<tr><td><code>r3</code></td><td><b>99.0</b></td><td><b>94.7</b> <span class=m>/ 94.8</span></td><td><b>91.3</b> <span class=m>/ 93.1</span></td><td>every participle declined again, <code>-nto</code>, <code>si tratta di</code></td></tr>
+</table></div>
+<p class="note">Judging r0: 88 batches, $0.75. Later runs judged only the changed popovers (18, 2 and 2 batches; $0.18, $0.02, $0.00). The browser collection of the sample agreed with the API except for 4 to 6 elided words whose phrase entry sits on the elided part, which <code>collect.ts</code> renders in another order; the judge reads the extension's. Caption repair: 22 Haiku workers, about 1.3M tokens.</p>
+
+<h2>Accepted changes</h2>
+<h3>Code (every language)</h3>
+<ul>
+<li><b>Elision: names follow the split.</b> A name keeps a word whole only when the text writes it with the name's capitals: <code>dell'acqua</code> is <code>acqua</code>, <code>dell'</code>, then <code>Dell'Acqua</code>; <code>Dell'Acqua</code> stays the name. Tests: <code>elision.it.test.ts</code>.</li>
+<li><b><code>import.unmarkedStressForms</code></b> (new): a form with stress marks before its last letter is also indexed without them, when its table cell has no unmarked spelling (<code>bisógna</code> → <code>bisogna</code>; not <code>vòi</code> beside <code>vuoi</code>). Default off. Test: <code>transform.test.ts</code>.</li>
+<li><b><code>import.headwordGenders</code></b> (new): with <code>headwordInflections</code>, an adjective's or determiner's headword genders are its forms (<code>bancaria</code> of <code>bancario</code>); a noun's other gender stays another word (<code>attrice</code>). Default off. Test: <code>transform.test.ts</code>.</li>
+</ul>
+<h3>Language files</h3>
+<ul>
+<li><code>languages/it/language.toml</code>:
+<ul>
+<li><code>elision</code>; <code>context.contractions</code> for the 38 articulated prepositions, so <code>a causa della</code> finds <code>a causa di</code>. Test: <code>phrases.it.test.ts</code>.</li>
+<li><code>import.headwordInflections</code>, <code>headwordGenders</code>, <code>unmarkedStressForms</code>, <code>untrustedFormTags</code> (81 misparsed rows), <code>participleDeclension</code> (<code>-o</code> → <code>-a</code>, <code>-i</code>, <code>-e</code>, every form).</li>
+<li><code>context.verbAfter</code> (clitics, <code>io</code>, <code>tu</code>), <code>noVerbAfter</code> (articles, articulated prepositions, possessives), <code>participleEndings</code> (from 27,287 table participles).</li>
+</ul></li>
+<li><code>grammar.tsv</code>, 143 entries: articles, the articulated prepositions, clitic pronouns, forms of <i>essere</i> and <i>avere</i> (with "been"), determiners, relatives, Wiktionary gaps (<code>gente</code>, <code>quest'</code>, <code>ok</code>), units, and 11 set phrases.</li>
+<li><code>labels.toml</code>, <code>profile.md</code> with the round log.</li>
+<li><code>apps/server/src/lookup/testing/italian.ts</code>: the in-memory dictionary for the tests.</li>
+</ul>
+<h3>Outside this repo (uncommitted)</h3>
+<ul>
+<li><code>../corpus</code>: 31 Italian texts, <code>sources.json</code>, <code>videos.json</code>, the raw captions.</li>
+</ul>
+
+<h2>Other languages</h2>
+<ul>
+<li><b>French:</b> only the elision fix changes lookups: <code>l'ascension</code>, which gave only the place name <code>L'Ascension</code>, now also gives "ascent" (the name still comes first in context).</li>
+<li><b>Spanish:</b> none. <code>headwordGenders</code> was tried on French and Spanish: 4,645 and 6,682 forms more, but 63 corpus words opened on a rare adjective first (<code>journaux</code> "daily", <code>facetas</code> "witty"), so it is off there.</li>
+<li><code>language.test.ts</code> lists <code>it</code>.</li>
+</ul>
+
+<h2>What got worse, and why it stays</h2>
+<ul>
+<li><b>Adjective before noun</b> where both have the form: <code>caratteristiche</code>, <code>dipendenti</code>, <code>letterati</code> open on the adjective (<code>headwordGenders</code>, dump order). It is the same word, and the noun follows.</li>
+<li><b>Variant spellings in a cell of their own</b> still get an unmarked twin: <code>voi</code> shows <code>volere</code> second, after the pronoun.</li>
+<li><b>Participles of two verbs:</b> <code>volte</code> shows <code>volgere</code> after <code>volta</code>; <code>capito</code> has a line for <code>capire</code> before <code>capitare</code>.</li>
+<li><b>An elided phrase after a participle</b>: <code>all'ordine del giorno</code> after <code>stata</code> opens on <code>stare a</code>. One item.</li>
+</ul>
+
+<h2>False positives and hand patches</h2>
+<p>No false positives were added. Of the 7 common grammar words still failing, 4 are idioms (<code>passare di mano</code>, <code>cantar vittoria</code>, <code>in forma</code>, <code>dietro suggerimento di</code>), 1 is a thin <code>con</code>, and 2 are model names.</p>
+<p><b>Hand-patch list:</b>
+<ul>
+<li><b>Words:</b> <code>carcere</code> "prison" (its only senses are tagged archaic; <code>gente</code> was the same and is patched in the grammar file), participles with a clitic (<code>posizionatasi</code>), <code>gestirsela</code>, <code>nasconderselo</code>.</li>
+<li><b>Senses:</b> <code>campo</code> "camp", <code>destra</code> "the right (politics)", <code>ragazzi</code> "kids", <code>senti</code> "listen, hey", <code>metterci</code> "to take (time)", <code>chiamarsi</code> "to be called", <code>super</code> "great".</li>
+<li><b>Phrases:</b> <code>in termini di</code>, <code>a metà strada</code>, <code>mettere in crisi</code>, <code>entrare a far parte</code>, <code>prendere il nome di</code>, <code>fare uso di</code>, <code>passare di mano</code>, <code>cantar vittoria</code>, <code>fatte salve</code>.</li>
+</ul>
+Details are in the profile.</p>
+
+<h2>Tier 2</h2>
+<p>Not started. Candidates:</p>
+<ul>
+<li>verb phrases with a clitic (<code>metterci</code>, <code>chiamarsi</code>, <code>trovarsi</code> for <code>si trova</code>);</li>
+<li>idioms the phrase matcher can't place yet (<code>passare di mano</code>, <code>fare uso di</code>);</li>
+<li>Roman numerals, shared with French and Spanish;</li>
+<li>the eval's order for an elided phrase (<code>collect.ts</code> against the extension).</li>
+</ul>
+</main></body></html>

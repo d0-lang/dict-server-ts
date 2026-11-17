@@ -364,14 +364,33 @@ export const isMarkedAlternative = (form: WiktextractForm): boolean =>
   isMarked(form.tags);
 
 /** A headword-line form that names a case or number of the word itself (`моне́ти` genitive). */
-const isHeadwordInflection = (tags: ReadonlyArray<string>): boolean =>
-  tags.some((t) => GRAMMAR_CASES.has(t) || t === "plural") &&
+const isHeadwordInflection = (
+  tags: ReadonlyArray<string>,
+  agrees: boolean,
+): boolean =>
+  tags.some(
+    (t) => GRAMMAR_CASES.has(t) || t === "plural" || (agrees && GENDERS.has(t)),
+  ) &&
   !tags.some(
     (t) =>
-      HEADWORD_FORM_TAGS.relatedWord.has(t) ||
+      (HEADWORD_FORM_TAGS.relatedWord.has(t) && !(agrees && GENDERS.has(t))) ||
       t === "definite" ||
       t === "indefinite",
   );
+
+/** Genders: a noun's other gender is another word, an adjective's a form. */
+const GENDERS: ReadonlySet<string> = new Set([
+  "masculine",
+  "feminine",
+  "neuter",
+]);
+
+/**
+ * Parts of speech that agree with their noun in gender, so the genders their
+ * headword line gives are their forms (Italian `bancario`, feminine
+ * `bancaria`), while a noun's are other words (`attore`, feminine `attrice`).
+ */
+const AGREEING_POS: ReadonlySet<string> = new Set(["adj", "det"]);
 
 /**
  * Whether a raw form is indexed as a form of its lemma. `noTable`: the entry's
@@ -384,6 +403,7 @@ export const keepForm = (
   lemma: string,
   form: WiktextractForm,
   noTable = false,
+  pos = "",
 ): boolean => {
   const word = form.form.trim();
   if (word === "" || word === "-" || word === "—") return false;
@@ -400,7 +420,8 @@ export const keepForm = (
   if (isHistorical(language, tags)) return false;
   if (form.source === undefined) {
     if (isMarkedAlternative(form)) return false;
-    if (noTable && isHeadwordInflection(tags)) return true;
+    const agrees = language.headwordGenders === true && AGREEING_POS.has(pos);
+    if (noTable && isHeadwordInflection(tags, agrees)) return true;
     return (
       tags.some((t) => HEADWORD_FORM_TAGS.sameWord.has(t)) &&
       !tags.some((t) => HEADWORD_FORM_TAGS.relatedWord.has(t))

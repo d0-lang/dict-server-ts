@@ -7,6 +7,7 @@ import type { WiktextractEntry } from "../source/wiktextract.ts";
 const pl = importRules(readLanguage("pl"));
 const de = importRules(readLanguage("de"));
 const fr = importRules(readLanguage("fr"));
+const italian = importRules(readLanguage("it"));
 const ru = importRules(readLanguage("ru"));
 const uk = importRules(readLanguage("uk"));
 
@@ -179,6 +180,98 @@ describe("transformEntry", () => {
       ).entry?.forms;
     assert.deepStrictEqual(forms(fr), ["structures"]);
     assert.deepStrictEqual(forms({ ...fr, headwordInflections: false }), []);
+  });
+
+  it("also indexes a form without the stress marks texts don't write (Italian)", () => {
+    const rules = { ...italian, participleDeclension: undefined };
+    const forms = (
+      rules: typeof italian,
+      rows: NonNullable<WiktextractEntry["forms"]>,
+    ) =>
+      transformEntry(
+        rules,
+        entry({
+          word: "bisognare",
+          pos: "verb",
+          lang_code: "it",
+          senses: [{ glosses: ["one must"] }],
+          forms: rows,
+        }),
+      ).entry?.forms;
+    const third = ["present", "singular", "third-person"];
+    // A final accent is spelling (`bisognò`).
+    assert.deepStrictEqual(
+      forms(rules, [
+        { form: "bisógna", tags: third, source: "conjugation" },
+        { form: "bisognò", tags: ["past"], source: "conjugation" },
+      ]),
+      ["bisógna", "bisogna", "bisognò"],
+    );
+    assert.deepStrictEqual(
+      forms({ ...rules, unmarkedStressForms: false }, [
+        { form: "bisógna", tags: third, source: "conjugation" },
+      ]),
+      ["bisógna"],
+    );
+    // A marked variant beside an unmarked form of its cell (`vòi` next to
+    // `vuoi`) gets no twin.
+    assert.deepStrictEqual(
+      forms(rules, [
+        { form: "vuoi", tags: third, source: "conjugation" },
+        { form: "vòi", tags: third, source: "conjugation" },
+      ]),
+      ["vuoi", "vòi"],
+    );
+  });
+
+  it("takes an adjective's genders from its headword line, not a noun's (Italian)", () => {
+    const forms = (
+      word: string,
+      pos: string,
+      rows: WiktextractEntry["forms"],
+    ) =>
+      transformEntry(
+        italian,
+        entry({
+          word,
+          pos,
+          lang_code: "it",
+          senses: [{ glosses: [word] }],
+          forms: rows,
+        }),
+      ).entry?.forms;
+    assert.deepStrictEqual(
+      forms("bancario", "adj", [
+        { form: "bancaria", tags: ["feminine"] },
+        { form: "bancari", tags: ["masculine", "plural"] },
+        { form: "bancarie", tags: ["feminine", "plural"] },
+        { form: "bancarissimo", tags: ["superlative"] },
+        { form: "bancariuccio", tags: ["diminutive"] },
+      ]),
+      ["bancaria", "bancari", "bancarie", "bancarissimo"],
+    );
+    // Only with `headwordGenders`.
+    assert.deepStrictEqual(
+      transformEntry(
+        { ...italian, headwordGenders: false },
+        entry({
+          word: "bancario",
+          pos: "adj",
+          lang_code: "it",
+          senses: [{ glosses: ["bancario"] }],
+          forms: [{ form: "bancaria", tags: ["feminine"] }],
+        }),
+      ).entry?.forms,
+      [],
+    );
+    // A noun's feminine is another word: `attrice` isn't a form of `attore`.
+    assert.deepStrictEqual(
+      forms("attore", "noun", [
+        { form: "attori", tags: ["plural"] },
+        { form: "attrice", tags: ["feminine"] },
+      ]),
+      ["attori"],
+    );
   });
 
   it("turns form-of and alt-of senses into fallback links, not entries", () => {

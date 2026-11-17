@@ -43,6 +43,10 @@ export type LanguageRules = {
    * match unstressed text, since `lookupKey` drops the marks.
    */
   readonly stressedLemmas?: boolean;
+  /** With `headwordInflections`, an adjective's or determiner's headword genders are forms too (`bancaria` of `bancario`). */
+  readonly headwordGenders?: boolean;
+  /** Forms are also indexed without the stress marks before their last letter (`bisógna` -> `bisogna`). */
+  readonly unmarkedStressForms?: boolean;
   /** Declined forms of adjectival participles, which tables list in the nominative only. */
   readonly participleDeclension?: {
     readonly tags: ReadonlyArray<string>;

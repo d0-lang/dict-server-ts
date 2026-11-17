@@ -1,0 +1,16 @@
+# What Italian's labels mean, in English (the pair's target language), for
+# `/v1/get-labels`. Names come from `languages/labels.en.toml` unless given
+# here. `text` at most 1000 characters, plain text.
+
+[m]
+text = "Masculine nouns take il (lo before s + consonant, z, gn, ps, x, y; l' before a vowel), un (uno before the same sounds) and masculine adjectives: il libro rosso, lo studente, un buon amico. Most nouns ending in -o are masculine (but la mano, the hand), and so are many ending in -e (il fiore, il mare) and words for males ending in -a (il poeta, il problema). Plural article: i, or gli before a vowel and the lo sounds."
+
+[f]
+text = "Feminine nouns take la (l' before a vowel), una (un' before a vowel) and feminine adjectives, which usually end in -a: la casa bianca, un'idea. Most nouns ending in -a are feminine, and so are those ending in -zione, -tà and -tù (la nazione, la città), and some ending in -e (la chiave, la notte). Plural article: le."
+
+["m/f"]
+name = "masculine or feminine"
+text = "The noun is masculine or feminine according to who is meant (il or la giornalista, il or la cantante), or both genders are in use."
+
+[pl]
+text = "The noun is used in the plural only, or only in the plural in this sense: gli occhiali (glasses), le forbici (scissors). It takes plural articles, adjectives and verbs."
