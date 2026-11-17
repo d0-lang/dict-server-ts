@@ -3,7 +3,9 @@
 # one gzipped <lang>.jsonl per language in languages/. Each language is then imported from
 # that snapshot and from the one dumps.toml pins it to, and the two builds are compared. A PR
 # moves the pins when every import works; an issue says which failed when one doesn't.
-# Nothing ships until that PR is merged.
+# Nothing ships until that PR is merged. A language added after its dump was stored has no
+# file in that snapshot yet; the next run filters the same dump again for just those
+# languages and adds their files to it, so they can be pinned too.
 name: Dump canary
 
 on:
@@ -37,6 +39,7 @@ jobs:
       etag: ${{ steps.dump.outputs.etag }}
       modified: ${{ steps.dump.outputs.modified }}
       stored: ${{ steps.dump.outputs.stored }}
+      missing: ${{ steps.dump.outputs.missing }}
       run: ${{ steps.dump.outputs.run }}
       languages: ${{ steps.languages.outputs.languages }}
     steps:
@@ -49,6 +52,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           COMPARE: ${{ inputs.compare || false }}
+          LANGUAGES: ${{ steps.languages.outputs.languages }}
         run: |
           headers=$(curl -sfIL --retry 3 "$DUMP_URL" | tr -d '\r')
           etag=$(printf '%s\n' "$headers" | awk 'tolower($1) == "etag:" { v = $2 } END { print v }')
@@ -59,28 +63,34 @@ jobs:
           fi
           snapshot="dump-$(date -u -d "$modified" +%F)"
           stored=false
-          if body=$(gh release view "$snapshot" --repo "$GITHUB_REPOSITORY" --json body --jq .body 2>/dev/null); then
-            if ! printf '%s' "$body" | grep -qF "$etag"; then
+          missing=$LANGUAGES
+          if release=$(gh release view "$snapshot" --repo "$GITHUB_REPOSITORY" --json body,assets 2>/dev/null); then
+            if ! printf '%s' "$release" | jq -r .body | grep -qF "$etag"; then
               echo "::error::$snapshot is stored from another dump (ETag $etag is not in its notes)"
               exit 1
             fi
             stored=true
+            # Languages added since the snapshot was stored have no file in it yet.
+            missing=$(printf '%s' "$release" | jq -c --argjson langs "$LANGUAGES" \
+              '$langs - [.assets[].name | select(endswith(".jsonl.gz")) | rtrimstr(".jsonl.gz")]')
           fi
           run=true
-          if [ "$stored" = true ] && [ "$COMPARE" != true ]; then run=false; fi
+          if [ "$stored" = true ] && [ "$missing" = "[]" ] && [ "$COMPARE" != true ]; then run=false; fi
           {
             echo "snapshot=$snapshot"
             echo "etag=$etag"
             echo "modified=$modified"
             echo "stored=$stored"
+            echo "missing=$missing"
             echo "run=$run"
           } >> "$GITHUB_OUTPUT"
-          echo "$snapshot, ETag $etag, stored: $stored, run: $run" >> "$GITHUB_STEP_SUMMARY"
+          echo "$snapshot, ETag $etag, stored: $stored, missing: $missing, run: $run" >> "$GITHUB_STEP_SUMMARY"
 
-  # Downloads the dump once, keeps each language's lines and stores them as the snapshot.
+  # Downloads the dump once, keeps each language's lines and stores them as the snapshot, or
+  # adds the languages it lacks to a snapshot already stored from the same dump.
   snapshot:
     needs: check
-    if: needs.check.outputs.run == 'true' && needs.check.outputs.stored == 'false'
+    if: needs.check.outputs.run == 'true' && needs.check.outputs.missing != '[]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -88,6 +98,8 @@ jobs:
       SNAPSHOT: ${{ needs.check.outputs.snapshot }}
       ETAG: ${{ needs.check.outputs.etag }}
       MODIFIED: ${{ needs.check.outputs.modified }}
+      STORED: ${{ needs.check.outputs.stored }}
+      MISSING: ${{ needs.check.outputs.missing }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -102,9 +114,10 @@ jobs:
             echo "::error::the dump changed while this run went on ($ETAG, then $got); the next run takes the new one"
             exit 1
           fi
-      - name: Filter every language in one pass
+      - name: Filter the missing languages in one pass
         run: |
-          bun run --silent filter --input "$RUNNER_TEMP/dump.jsonl.gz" --out-dir "$RUNNER_TEMP/snapshot" > "$RUNNER_TEMP/filter.json"
+          bun run --silent filter --lang "$(jq -r 'join(",")' <<< "$MISSING")" \
+            --input "$RUNNER_TEMP/dump.jsonl.gz" --out-dir "$RUNNER_TEMP/snapshot" > "$RUNNER_TEMP/filter.json"
           rm "$RUNNER_TEMP/dump.jsonl.gz"
       - name: Gzip and checksum
         working-directory: ${{ runner.temp }}/snapshot
@@ -112,7 +125,22 @@ jobs:
           # -n leaves the name and time out, so the same lines give the same bytes.
           ls *.jsonl | xargs -P 4 -n 1 gzip -n -6
           sha256sum *.jsonl.gz > SHA256SUMS
+      - name: Add the missing languages to the stored snapshot
+        if: env.STORED == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/stored"
+          gh release download "$SNAPSHOT" --repo "$GITHUB_REPOSITORY" --pattern SHA256SUMS --dir "$RUNNER_TEMP/stored"
+          cat "$RUNNER_TEMP/stored/SHA256SUMS" "$RUNNER_TEMP/snapshot/SHA256SUMS" | sort -k 2 > "$RUNNER_TEMP/SHA256SUMS"
+          # The notes end with the language table; the new languages go under it.
+          gh release view "$SNAPSHOT" --repo "$GITHUB_REPOSITORY" --json body --jq '.body | sub("\\s+$"; "")' > "$RUNNER_TEMP/notes.md"
+          jq -r '.languages[] | "| \(.lang) | \(.languageLines) | \(.fileBytes / 1e6 | floor) |"' "$RUNNER_TEMP/filter.json" >> "$RUNNER_TEMP/notes.md"
+          gh release upload "$SNAPSHOT" --repo "$GITHUB_REPOSITORY" "$RUNNER_TEMP"/snapshot/*.jsonl.gz
+          gh release upload "$SNAPSHOT" --repo "$GITHUB_REPOSITORY" --clobber "$RUNNER_TEMP/SHA256SUMS"
+          gh release edit "$SNAPSHOT" --repo "$GITHUB_REPOSITORY" --notes-file "$RUNNER_TEMP/notes.md"
       - name: Store the snapshot
+        if: env.STORED == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
