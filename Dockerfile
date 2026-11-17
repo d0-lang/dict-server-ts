@@ -16,7 +16,13 @@ COPY languages languages
 # your filled-in copies and point PRIVACY_FILE and TOS_FILE at them.
 COPY legal legal
 
-# Dictionaries and the identity key are mounted at /app/data, see compose.yaml.
+# The release this image is, so compose.yaml fetches its dictionaries.
+ARG VERSION=""
+ENV DICT_RELEASE=$VERSION
+
+# Dictionaries are mounted at /app/data and the key at /app/identity, see compose.yaml.
+# Created here so named volumes mounted on them start out writable by bun.
+RUN mkdir -p /app/data /app/identity && chown bun:bun /app/data /app/identity
 USER bun
 EXPOSE 3000
 CMD ["bun", "apps/server/src/index.ts"]

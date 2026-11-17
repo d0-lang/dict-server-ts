@@ -32,3 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker build --tag dict-server .
+      # compose.yaml is attached to each release; it has to stay valid.
+      - run: docker compose config --quiet
+      # As release.yml pins it: the image line must still be there to rewrite.
+      - run: grep -qF 'dict-server-ts:${DICT_VERSION:-latest}' compose.yaml
