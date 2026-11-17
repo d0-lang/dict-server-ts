@@ -1,0 +1,43 @@
+#:schema ../../spec/language.schema.json
+# Italian. Settings left out take their defaults (spec/language.schema.json).
+
+code = "it"
+name = "Italian"
+target = "en"
+
+# Articles, prepositions merged with an article, and some determiners lose
+# their vowel before a vowel and are written onto the next word (`l'anno`,
+# `dell'anno`, `un'altra`, `quest'anno`, `c'è`). The dump has entries for the
+# elided forms themselves (`l'`, `dell'`, `nell'`, `all'`, `un'`, `quest'`,
+# `c'`, `d'`), so the split finds both parts. Words with an entry of their
+# own stay whole (`po'`, `c'è` where the dump has one).
+elision = true
+
+[import]
+# Old Italian is a separate language in the dump (roa-oit), not tags on
+# Italian senses: the Italian entries carry only `archaic` (3,202 senses,
+# dropped like every language's) and `obsolete` (1,717).
+historicalStages = []
+# Only `traditional` (219), `regional` (83) and `standard` (17) notes occur;
+# too few to pick a standard by.
+standardPronNotes = []
+# 81 table rows are tagged `error-unrecognized-form`, and they are wrong: 53
+# under the idiom `avere gli occhi foderati di prosciutto`, 20 regional or
+# poetic truncations under `essere` (`són`, `siàm`, `fùron`) and 8 under
+# `bello`. The 170 `error-unknown-tag` rows are real forms (`ossi`, `grida`,
+# `castella`) and stay.
+untrustedFormTags = ["error-unrecognized-form"]
+# Nouns and adjectives have no inflection tables: their plurals and feminines
+# are on the headword line (`casa`, plural `case`). 60,942 of 120,607 noun
+# entries have only headword-line forms, and 59,665 none at all.
+headwordInflections = true
+
+[context]
+# The prepositions di, a, da, in, su and con merge with the article after
+# them (del, della, dei, al, alla, nel, sul, col…), and the merged forms
+# elide before a vowel (dell', all', nell'). The dump has 14 phrases ending
+# in one of these prepositions (`a causa di`, `grazie a`, `rispetto a`,
+# `a partire da`, `nei confronti di`, `sulla base di`), so they still match
+# in `a causa del`, `grazie all'aiuto`, `rispetto ai`. `d'` is di elided
+# (`prima d'ora`).
+contractions = { del = "di", dello = "di", della = "di", dei = "di", degli = "di", delle = "di", "dell'" = "di", "d'" = "di", al = "a", allo = "a", alla = "a", ai = "a", agli = "a", alle = "a", "all'" = "a", dal = "da", dallo = "da", dalla = "da", dai = "da", dagli = "da", dalle = "da", "dall'" = "da", nel = "in", nello = "in", nella = "in", nei = "in", negli = "in", nelle = "in", "nell'" = "in", sul = "su", sullo = "su", sulla = "su", sui = "su", sugli = "su", sulle = "su", "sull'" = "su", col = "con", coi = "con" }
