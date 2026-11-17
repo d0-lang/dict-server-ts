@@ -1,0 +1,16 @@
+# What Spanish's labels mean, in English (the pair's target language), for
+# `/v1/get-labels`. Names come from `languages/labels.en.toml` unless given
+# here. `text` at most 1000 characters, plain text.
+
+[m]
+text = "Masculine nouns take el, un and masculine adjectives: el libro rojo, un buen día. Most nouns ending in -o are masculine, but not all (la mano, the hand), and many ending in -a are too (el día, el problema, el mapa)."
+
+[f]
+text = "Feminine nouns take la, una and feminine adjectives, which usually end in -a: la casa blanca, una buena idea. Most nouns ending in -a, -ción, -dad and -tud are feminine. Before a stressed a they take el and un in the singular, but stay feminine: el agua fría, the cold water; las aguas."
+
+["m/f"]
+name = "masculine or feminine"
+text = "The noun is masculine or feminine according to who is meant (el or la estudiante, el or la periodista), or both genders are in use (el or la mar, the sea)."
+
+[pl]
+text = "The noun is used in the plural only, or only in the plural in this sense: las gafas (glasses), los víveres (provisions). It takes plural articles, adjectives and verbs."

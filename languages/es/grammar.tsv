@@ -1,0 +1,187 @@
+# Spanish grammar words. One line per word as written + part of speech:
+# word <TAB> UD part of speech <TAB> senses separated by " | ".
+# The file replaces Wiktionary's determiner, pronoun, preposition, conjunction,
+# particle and auxiliary entries for every word listed here; nouns, verbs,
+# adverbs and other content words stay (`de` the letter, `son` "tone"), unless
+# a line lists that part of speech too. A word's lines come first in the
+# popover, in this file's order, so its commonest use goes first. Case matters.
+# See apps/importer/src/grammar.ts.
+
+## Articles, and the contractions of a and de with el
+el	DET	the (masculine singular; also before a feminine noun starting with a stressed a: el agua, the water)
+la	DET	the (feminine singular)
+la	PRON	her, it (object: la veo, I see her/it)
+los	DET	the (masculine plural)
+los	PRON	them (masculine object: los veo, I see them)
+las	DET	the (feminine plural)
+las	PRON	them (feminine object: las veo, I see them)
+lo	DET	the (before an adjective: lo bueno, the good thing; lo que, what, the thing that)
+lo	PRON	him, it (object: lo veo, I see him/it) | it, so (standing for a clause: lo sé, I know (it))
+un	DET	a, an (masculine)
+una	DET	a, an (feminine)
+una	PRON	one (feminine: una de ellas, one of them)
+unos	DET	some (masculine plural) | about, around (before a number: unos diez, about ten)
+unas	DET	some (feminine plural) | about, around (before a number: unas diez, about ten)
+del	ADP	of the, from the (de + el)
+al	ADP	to the, at the (a + el) | on, upon, when (before an infinitive: al llegar, on arriving)
+
+## Personal pronouns
+yo	PRON	I
+tú	PRON	you (informal singular, subject)
+él	PRON	he, him (also after a preposition: para él, for him) | it (masculine)
+ella	PRON	she, her (also after a preposition: con ella, with her) | it (feminine)
+ello	PRON	it, that (neuter: por ello, for that reason)
+nosotros	PRON	we, us (after a preposition: con nosotros, with us)
+nosotras	PRON	we, us (feminine)
+vosotros	PRON	you (informal plural, used in Spain: vosotros sois, you are)
+vosotras	PRON	you (informal plural, feminine, used in Spain)
+ellos	PRON	they, them (masculine or mixed; also after a preposition: para ellos, for them)
+ellas	PRON	they, them (feminine)
+me	PRON	me, to me (object: me ve, he sees me; me dio, he gave me) | myself (me lavo, I wash (myself))
+te	PRON	you, to you (object of tú: te veo, I see you) | yourself (te lavas, you wash (yourself))
+nos	PRON	us, to us (object: nos ve, he sees us) | ourselves, each other (nos vemos, see you, we'll see each other)
+os	PRON	you, to you (object of vosotros, Spain: os veo, I see you all) | yourselves, each other
+le	PRON	to him, to her, to it, to you (formal) (indirect object: le dije, I told him/her) | him, you (formal) (object, in Spain: le veo, I see him)
+les	PRON	to them, to you (plural) (indirect object: les dije, I told them)
+mí	PRON	me (after a preposition: para mí, for me)
+ti	PRON	you (after a preposition: para ti, for you)
+
+## Possessives
+mi	DET	my
+mis	DET	my (plural possessee: mis amigos, my friends)
+tu	DET	your (informal singular)
+tus	DET	your (informal singular; plural possessee: tus amigos, your friends)
+su	DET	his, her, its, their, your (formal) (the owner is told by the context: su casa, his/her/their house)
+sus	DET	his, her, its, their, your (formal) (plural possessee: sus amigos, his/her/their friends)
+
+## Demonstratives
+este	DET	this (masculine)
+este	PRON	this one (masculine)
+esta	DET	this (feminine)
+esta	PRON	this one (feminine)
+estos	DET	these (masculine)
+estos	PRON	these (ones) (masculine)
+estas	DET	these (feminine)
+estas	PRON	these (ones) (feminine)
+esto	PRON	this (neuter: esto es, this is; todo esto, all this)
+ese	DET	that (masculine)
+ese	PRON	that one (masculine)
+esa	DET	that (feminine)
+esa	PRON	that one (feminine)
+esos	DET	those (masculine)
+esos	PRON	those (ones) (masculine)
+esas	DET	those (feminine)
+esas	PRON	those (ones) (feminine)
+eso	PRON	that (neuter: eso es, that's it; por eso, that's why; a eso de, at about (a time))
+aquel	DET	that (over there, or long ago; masculine)
+aquella	DET	that (over there, or long ago; feminine)
+aquellos	DET	those (over there, or long ago; masculine)
+aquellas	DET	those (over there, or long ago; feminine)
+aquello	PRON	that (neuter, over there or long ago)
+
+## Relatives
+cual	PRON	which, who (after an article: el cual, la cual, lo cual, which) | like, as (literary: cual niño, like a child)
+cuales	PRON	which, who (after an article: los cuales, las cuales, which)
+
+## Prepositions
+ante	ADP	before, in front of (ante el juez, before the judge) | in the face of, faced with, given (ante eso, in view of that) | compared to
+de	ADP	of; 's (la casa de Juan, Juan's house) | from (de Madrid, from Madrid) | about (hablar de, to talk about) | made of (de madera, wooden) | than (before a number: más de diez, more than ten) | with, in, by (describing: la chica de azul, the girl in blue)
+
+## Conjunctions
+sino	CCONJ	but (rather), after a negative (no es rojo sino azul, it isn't red but blue) | except, only (no hace sino quejarse, he does nothing but complain)
+mientras	SCONJ	while, as long as (mientras comes, while you eat) | mientras que: whereas
+mientras	ADV	meanwhile (mientras tanto, in the meantime)
+
+## Adverbs
+muy	ADV	very, too (muy grande, very big)
+
+## Forms of ser and estar "to be", and haber "to have" (also the auxiliary of the past) and "there is"
+es	AUX	is (ser: es grande, it is big)
+son	AUX	are (ser: son grandes, they are big)
+soy	AUX	am (ser)
+eres	AUX	are (ser: tú eres, you are)
+somos	AUX	are (ser: nosotros somos, we are)
+era	AUX	was, used to be (ser: era grande, it was big)
+eran	AUX	were, used to be (ser)
+fue	AUX	was (ser: fue un éxito, it was a success) | went (ir: fue a Madrid, he went to Madrid)
+fueron	AUX	were (ser) | went (ir)
+sea	AUX	be (subjunctive of ser: que sea, that it be; o sea, I mean, that is) | sea ... sea: whether ... or (sea en casa, sea en la calle, whether at home or in the street)
+será	AUX	will be (ser)
+sería	AUX	would be (ser)
+está	AUX	is (estar: está en casa, he is at home; está cansado, he is tired) | is (with a gerund: está comiendo, he is eating)
+están	AUX	are (estar) | are (with a gerund: están comiendo, they are eating)
+estoy	AUX	am (estar) | am (with a gerund: estoy comiendo, I am eating)
+estamos	AUX	are (estar: nosotros estamos, we are) | are (with a gerund: estamos comiendo, we are eating)
+estaba	AUX	was (estar) | was (with a gerund: estaba comiendo, he was eating)
+hay	AUX	there is, there are (hay que + infinitive: one has to, you have to)
+ha	AUX	has (with a past participle: ha dicho, he/she has said)
+han	AUX	have (with a past participle: han dicho, they have said)
+he	AUX	have (with a past participle: he dicho, I have said)
+has	AUX	have (with a past participle: has dicho, you have said)
+hemos	AUX	have (with a past participle: hemos dicho, we have said)
+había	AUX	had (with a past participle: había dicho, had said) | there was, there were (había mucha gente, there were a lot of people)
+habían	AUX	had (with a past participle: habían dicho, they had said)
+haya	AUX	have, has (subjunctive, with a past participle: que haya dicho, that he has said) | there be (subjunctive: que haya, that there be)
+hubo	AUX	there was, there were | had (with a past participle, literary)
+hubiera/hubiese	AUX	had (past subjunctive, with a past participle: si hubiera sabido, if I had known) | would have (with a past participle: lo hubiera hecho, I would have done it) | there were (subjunctive: si hubiera tiempo, if there were time)
+habría	AUX	would have (with a past participle: habría dicho, would have said) | there would be
+habrá	AUX	there will be | will have (with a past participle: habrá dicho, will have said)
+
+## Forms of ir "to go" (ir a + infinitive is the near future) and poder "can"
+voy	AUX	I go, I'm going (ir) | voy a + infinitive: I'm going to (voy a comer, I'm going to eat)
+va	AUX	goes, is going (ir) | va a + infinitive: is going to (va a llover, it's going to rain)
+vamos	AUX	we go, we're going (ir) | vamos a + infinitive: we're going to; let's (vamos a ver, let's see)
+iba	AUX	was going, used to go (ir) | iba a + infinitive: was going to (iba a llamar, I was going to call)
+iban	AUX	were going, used to go (ir) | iban a + infinitive: were going to
+van	AUX	go, are going (ir) | van a + infinitive: are going to
+podía	AUX	could, was able to (poder: no podía dormir, I couldn't sleep)
+podría	AUX	could, might, would be able to (poder: podría llover, it might rain)
+puede	AUX	can, may (poder: puede venir, he can come; puede ser, it may be)
+pueden	AUX	can, may (poder: pueden venir, they can come)
+
+## Verb forms of two verbs, the commoner first
+creo	VERB	I think, I believe (creer: creo que sí, I think so) | I create (crear)
+gustaría	VERB	would like (gustar: me gustaría, I would like; le gustaría, he/she would like)
+sé	VERB	I know (saber: no sé, I don't know) | be! (imperative of ser: sé bueno, be good)
+
+## Words Wiktionary glosses misleadingly for a reader
+vale	INTJ	okay, all right (Spain: ¿vale?, okay?)
+ah	INTJ	ah (relief, realization, awe) | uh, er (hesitation, in speech)
+hecho	NOUN	fact (el hecho de que, the fact that) | act, deed (hechos, not words) | event, incident (los hechos, what happened)
+a golpe de	ADP	by (means of), with (a golpe de dedito, with a tap of the finger) | by dint of, through repeated (a golpe de talonario, by throwing money at it)
+
+## Set phrases English Wiktionary lacks, or glosses misleadingly
+# Wiktionary's `así es` is "so it is: so it goes", `lo mismo` only "perhaps",
+# `verdad es que` "it may be true that".
+así es	INTJ	that's right, exactly, that's how it is
+eso sí	ADV	mind you, that said, granted (eso sí, es caro, mind you, it's expensive) | (that) for sure (eso sí que no, that's definitely not happening)
+lo mismo	PRON	the same (thing) (lo mismo que, the same as) | perhaps, maybe (colloquial: lo mismo llueve, it may rain)
+la verdad es que	ADV	the truth is (that), to be honest, actually
+el hecho de/el hecho de que	NOUN	the fact that, the fact of (el hecho de que llueva, the fact that it rains)
+# Wiktionary's `es que` has only the explaining sense, and matches every
+# literal `es que` (lo malo es que, the bad thing is that).
+es que	SCONJ	is that (lo malo es que, the bad thing is that) | it's just that, the thing is (explaining: es que no puedo, it's just that I can't)
+ahora sí	ADV	now (at last), now for real (ahora sí, vamos, now we're off)
+y demás	PRON	and so on, and the rest, etc.
+de cara a	ADP	facing | with a view to, ahead of (de cara a las elecciones, ahead of the elections) | when it comes to, as for
+inicio de sesión	NOUN	login, sign-in (starting a session on a computer)
+cabeza fría	NOUN	a cool head, composure (mantener la cabeza fría, to keep a cool head)
+fuego alto	NOUN	high heat (cooking)
+fuego medio	NOUN	medium heat (cooking)
+fuego bajo	NOUN	low heat (cooking)
+mil por mil	ADV	absolutely, a hundred percent (colloquial)
+mayoría simple	NOUN	simple majority (more votes for than against)
+
+## Hesitation, in speech
+hm/hmm/mm/mmm	INTJ	hmm (hesitation or thinking)
+ehm/em/eeh	INTJ	um, er (hesitation)
+
+## Units, written after a number
+g	SYM	gram, grams
+kg	SYM	kilogram, kilograms
+mg	SYM	milligram, milligrams
+km	SYM	kilometre, kilometres
+cm	SYM	centimetre, centimetres
+mm	SYM	millimetre, millimetres
+nm	SYM	nanometre, nanometres
+ml	SYM	millilitre, millilitres

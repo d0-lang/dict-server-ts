@@ -1,0 +1,49 @@
+#:schema ../../spec/language.schema.json
+# Spanish. Settings left out take their defaults (spec/language.schema.json).
+
+code = "es"
+name = "Spanish"
+target = "en"
+
+[import]
+# Old Spanish is a separate language in the dump (osp), not tags on Spanish
+# senses.
+historicalStages = []
+# Only 1% of entries have a pronunciation at all, and their notes are regional
+# (Spain, Andalusia, Latin America): nothing to keep as the standard.
+standardPronNotes = []
+# 604 table rows are tagged `error-unrecognized-form`, and they are wrong: the
+# combined forms of one-syllable verbs (`vete` and `vele` under `ver`, `date`
+# under `dar`, `sete` under `ser`) and `este`, `aquel` as forms of `ese`.
+untrustedFormTags = ["error-unrecognized-form"]
+# Nouns and adjectives have no inflection tables: their plurals and feminines
+# are on the headword line (`es-noun`, `es-adj`). 60,451 of 130,820 noun
+# entries have no forms row besides it.
+headwordInflections = true
+
+[context]
+# The prepositions de and a merge with the article el (del, al). A phrase
+# ending in one of them still matches: `a partir del`, `además del`,
+# `debido al`, `junto al`.
+contractions = { del = "de", al = "a" }
+# The noun whose lemma a word is ranks before the verb whose form it is
+# (`trata` "trafficking" before `tratar`, `cuenta` "account" before
+# `contar`). The neighbouring word says which one the sentence means.
+# A verb follows the object pronouns, which stand right before it (me, te,
+# se, nos, os, le, les), and the subject pronouns yo, tú, usted, ustedes:
+# `se trata`, `les digo`, `me sale`. Left out: lo, la, los, las (also
+# articles); no, which also negates a word that isn't a verb (`no como obra
+# seria`, not `comer`); and él, ella, ellos, ellas, nosotros, vosotros, which
+# also stand after a preposition (`entre ellos uno`, not `unir`).
+verbAfter = ["me", "te", "se", "nos", "os", "le", "les", "yo", "tú", "usted", "ustedes"]
+# Determiners that are never a pronoun: no verb follows them, so `el poder`
+# opens on the noun "power", not `poder`. Left out: la, los, las (also object
+# pronouns), the demonstratives (also pronouns: `esto es`), and al (al +
+# infinitive: `al llegar`, on arriving).
+noVerbAfter = ["el", "un", "una", "unos", "unas", "del", "mi", "mis", "tu", "tus", "su", "sus", "nuestro", "nuestra", "nuestros", "nuestras", "vuestro", "vuestra", "vuestros", "vuestras", "cada"]
+# Of the 9,263 masculine singular past participles in the dump's verb
+# tables, 7,966 end in -ado, 1,060 in -ido, 57 in -ído, 140 in -to (visto,
+# puesto), 25 in -cho (hecho, dicho) and 3 in -so (impreso); they agree in
+# gender and number after ser and estar (`está cerrada`). So after haber,
+# ser or estar, `estado` and `partido` open on their verb, not the noun.
+participleEndings = ["ado", "ada", "ados", "adas", "ido", "ida", "idos", "idas", "ído", "ída", "ídos", "ídas", "to", "ta", "tos", "tas", "cho", "cha", "chos", "chas", "so", "sa", "sos", "sas"]
