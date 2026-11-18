@@ -182,8 +182,10 @@ export const analyzerFor = (language: Language): Analyzer | undefined => {
   };
   // The same sentence is analyzed again for each word clicked in it (a
   // reader clicks several; a corpus collection sends every word), and one
-  // lookup analyzes it several times: the most recent sentences are kept.
+  // lookup analyzes it, and the lemmas it finds, several times: the most
+  // recent analyses are kept, up to `RECENT_CHARS` characters of text.
   const recent = new Map<string, ReadonlyArray<Morpheme>>();
+  let chars = 0;
   const analyze: Analyzer = (text) => {
     const cached = recent.get(text);
     if (cached !== undefined) {
@@ -192,9 +194,13 @@ export const analyzerFor = (language: Language): Analyzer | undefined => {
       return cached;
     }
     const morphemes = tokenize(text);
+    if (text.length > RECENT_CHARS) return morphemes;
     recent.set(text, morphemes);
-    if (recent.size > RECENT_TEXTS) {
-      recent.delete(recent.keys().next().value!);
+    chars += text.length;
+    for (const oldest of recent.keys()) {
+      if (chars <= RECENT_CHARS) break;
+      recent.delete(oldest);
+      chars -= oldest.length;
     }
     return morphemes;
   };
@@ -202,5 +208,10 @@ export const analyzerFor = (language: Language): Analyzer | undefined => {
   return analyze;
 };
 
-/** How many analyzed texts each language keeps, most recently used first. */
-const RECENT_TEXTS = 1024;
+/**
+ * How much analyzed text each language keeps. An analysis takes about 200
+ * bytes of memory per character (measured on Japanese with UniDic), so
+ * 64k characters stay under about 13 MB, however long the sentences: about
+ * 1,300 sentences of average length, against the few a lookup needs.
+ */
+const RECENT_CHARS = 64_000;
