@@ -69,6 +69,10 @@ export class Dictionaries extends Context.Service<
               new Error(`labels of ${pair}: ${String(cause)}`, { cause }),
           });
           files.set(pair, { db, language, labels });
+          // Building the indexes leaves garbage that Bun doesn't collect
+          // while startup runs on: with every pair it held up to 3 GB
+          // before listening, against about 1 GB after.
+          Bun.gc(true);
         }
         return Dictionaries.of({
           lookup: (pair, word, sentence, at) => {
