@@ -55,7 +55,9 @@ jobs:
           (cd dist && sha256sum --check SHA256SUMS)
           gh release view "$CANDIDATE" --repo "$GITHUB_REPOSITORY" --json body --jq .body \
             | sed -e "s/^Release candidate $CANDIDATE, built/$TAG, promoted unchanged from $CANDIDATE, built/" \
+                  -e "/^- Image: /s|:$CANDIDATE\`|:$TAG\` and \`:latest\`, the image of $CANDIDATE|" \
                   -e '/^Tag the version without/d' > notes.md
+          grep -qF ":$TAG\` and \`:latest\`" notes.md
           # The self-host compose file, pinned to this release's image; releases/latest/download/compose.yaml
           # is then always the newest one.
           sed 's/${DICT_VERSION:-latest}/${DICT_VERSION:-'"$TAG"'}/' compose.yaml > dist/compose.yaml
