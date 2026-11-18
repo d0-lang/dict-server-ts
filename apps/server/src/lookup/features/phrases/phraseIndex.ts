@@ -42,22 +42,22 @@ export const phraseIndex = (
   // Wiktionary files many verb idioms as untyped phrases (`стелить соломку`,
   // `ihre Tage haben`), so a phrase with a verb's dictionary form counts as a
   // verb phrase too. Not proverbs, which are quoted, not inflected.
-  const verbLemmas = new Set(
-    db.$client
-      .query<{ form: string }, []>(
-        `SELECT DISTINCT f.form AS form FROM forms f JOIN entries e ON e.id = f.entry_id
-         WHERE f.source = ${FormSource.Lemma} AND e.pos IN ('VERB', 'AUX')`,
-      )
-      .all()
-      .map((row) => row.form),
-  );
+  const verbLemmas = new Set<string>();
+  for (const { form } of db.$client
+    .query<{ form: string }, []>(
+      `SELECT DISTINCT f.form AS form FROM forms f JOIN entries e ON e.id = f.entry_id
+       WHERE f.source = ${FormSource.Lemma} AND e.pos IN ('VERB', 'AUX')`,
+    )
+    .iterate()) {
+    verbLemmas.add(form);
+  }
   const rows = db.$client
     .query<{ form: string; id: number; pos: UdPos; sourcePos: string }, []>(
       `SELECT f.form AS form, e.id AS id, e.pos AS pos, e.source_pos AS sourcePos FROM forms f JOIN entries e ON e.id = f.entry_id
        WHERE instr(f.form, ' ') > 0 AND instr(e.lemma, ' ') > 0 AND f.source <> ${FormSource.Abbreviation}
        ORDER BY f.form, e.id`,
     )
-    .all();
+    .iterate();
   const byForm = new Map<
     string,
     {

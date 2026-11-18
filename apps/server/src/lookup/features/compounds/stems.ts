@@ -39,7 +39,7 @@ const stemIndex = (
        WHERE pos IN ('NOUN', 'ADJ', 'NUM') AND instr(lemma, ' ') = 0 AND instr(lemma, '-') = 0
        ORDER BY id`,
     )
-    .all();
+    .iterate();
   const index = new Map<string, Array<number>>();
   const add = (stem: string, id: number) => {
     if ([...stem].length < MIN_PART) return;
@@ -81,27 +81,25 @@ const verbEndingIndexes = new WeakMap<DictionaryDb, ReadonlySet<string>>();
 const verbEndings = (db: DictionaryDb): ReadonlySet<string> => {
   const cached = verbEndingIndexes.get(db);
   if (cached !== undefined) return cached;
-  const rows = db.$client
-    .query<{ form: string; verb: number }, []>(
-      `SELECT f.form AS form, min(e.pos = 'VERB') AS verb
-       FROM forms f JOIN entries e ON e.id = f.entry_id
-       WHERE instr(f.form, ' ') = 0 GROUP BY f.form`,
-    )
-    .all();
-  const counts = new Map<string, { forms: number; verbs: number }>();
-  for (const { form, verb } of rows) {
-    const ending = [...form].slice(-ENDING_LENGTH).join("");
-    const count = counts.get(ending) ?? { forms: 0, verbs: 0 };
-    count.forms++;
-    count.verbs += verb;
-    counts.set(ending, count);
-  }
+  // Counted in SQL: Russian has about a million forms, and reading them
+  // one by one left some 800 MB of garbage at startup. `substr` counts
+  // characters, as `[...form]` does.
   const endings = new Set(
-    [...counts].flatMap(([ending, { forms, verbs }]) =>
-      forms >= MIN_ENDING_FORMS && verbs / forms >= VERBAL_SHARE
-        ? [ending]
-        : [],
-    ),
+    db.$client
+      .query<{ ending: string }, []>(
+        `SELECT ending FROM (
+           SELECT substr(form, -${ENDING_LENGTH}) AS ending, count(*) AS forms, sum(verb) AS verbs
+           FROM (
+             SELECT f.form AS form, min(e.pos = 'VERB') AS verb
+             FROM forms f JOIN entries e ON e.id = f.entry_id
+             WHERE instr(f.form, ' ') = 0 GROUP BY f.form
+           )
+           GROUP BY ending
+         )
+         WHERE forms >= ${MIN_ENDING_FORMS} AND CAST(verbs AS REAL) / forms >= ${VERBAL_SHARE}`,
+      )
+      .all()
+      .map((row) => row.ending),
   );
   verbEndingIndexes.set(db, endings);
   return endings;
@@ -147,10 +145,11 @@ const combiningForms = (db: DictionaryDb): ReadonlySet<string> => {
     .query<{ lemma: string; pos: string }, []>(
       `SELECT lemma, pos FROM entries WHERE instr(lemma, ' ') = 0 AND instr(lemma, '-') = 0`,
     )
-    .all()
-    .map(({ lemma, pos }) => ({ key: lookupKey(lemma), verb: pos === "VERB" }));
+    .iterate();
   const counts = new Map<string, { lemmas: number; verbs: number }>();
-  for (const { key, verb } of lemmas) {
+  for (const { lemma, pos } of lemmas) {
+    const key = lookupKey(lemma);
+    const verb = pos === "VERB";
     const chars = [...key];
     // Every prefix of the lemma that leaves a stem of three letters or more.
     for (let cut = 1; cut <= chars.length - MIN_PART; cut++) {
