@@ -154,7 +154,7 @@ const Import = doc(
           Schema.String,
           Schema.Tuple([FeatureName, Schema.String]),
         ),
-        'This language\'s wiktextract tags that give a headword feature, besides the shared ones (`masculine`, `perfective`), for a line all of whose senses have the tag: `godan = ["VerbClass", "Godan"]`. They apply to any part of speech (`-na` on a Japanese な-adjective). The value must be one of the feature\'s values in `packages/core/src/features.ts`.',
+        'This language\'s wiktextract tags that give a headword feature, besides the shared ones (`masculine`, `perfective`), for a line all of whose senses have the tag: `godan = ["VerbClass", "Godan"]`. They apply to nouns, verbs and adjectives (`-na` on a Japanese な-adjective), not to suffixes, where a tag may mean something else. The value must be one of the feature\'s values in `packages/core/src/features.ts`.',
       ),
       {},
     ),
