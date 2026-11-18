@@ -6,10 +6,11 @@ import {
   derivedWord,
   INFLECTING,
   morphemeParts,
+  type Part,
   splitResult,
   wholeIds,
 } from "./parts.ts";
-import { endOf, startOf } from "./words.ts";
+import { endOf, hasPos, startOf } from "./words.ts";
 
 /**
  * The word around the piece (`食べました` for `食`), or the piece itself read
@@ -43,10 +44,12 @@ export const aroundWord = (c: Click): Answer => {
       ? PLAIN
       : { entries: wholeEntries.map((entry) => ({ ...entry, ...match })) };
   }
-  const parts = morphemeParts(c, found, new Set(whole));
-  if (derived && parts.every((part) => part.ids.length === 0)) {
+  const split = morphemeParts(c, found, new Set(whole));
+  if (derived && split.every((part) => part.ids.length === 0)) {
     return PLAIN;
   }
+  // A word shown by its parts (`電化|製品`) opens on the clicked one.
+  const parts = derived ? clickedFirst(c, split) : split;
   // A form ending closes the head (`並んで`): the word's entries are that
   // part's, with the form's label (`並ぶ` [て form]), not the whole word's.
   const formed = parts.find((part) => part.main === true && part.form);
@@ -69,4 +72,43 @@ export const aroundWord = (c: Click): Answer => {
     return splitResult(c.db, [], moved, match);
   }
   return splitResult(c.db, wholeEntries, parts, match);
+};
+
+/**
+ * `parts` with the one that holds most of the clicked piece as `main`
+ * (`製品` in `電化|製品`, `企業` for `中小企業`), unless it is one prefix
+ * or suffix (`お` of `お|星|さま`, `たち` of `選手|たち`): the stem carries
+ * the meaning then.
+ */
+const clickedFirst = (
+  c: Click,
+  parts: ReadonlyArray<Part>,
+): ReadonlyArray<Part> => {
+  const spans: Array<{ readonly from: number; readonly to: number }> = [];
+  let at = startOf(c.found);
+  for (const part of parts) {
+    spans.push({ from: at, to: at + part.text.length });
+    at += part.text.length;
+  }
+  const overlap = (k: number) =>
+    Math.min(spans[k]!.to, c.piece.end) -
+    Math.max(spans[k]!.from, c.piece.start);
+  let clicked = -1;
+  parts.forEach((_, k) => {
+    if (overlap(k) > 0 && (clicked < 0 || overlap(k) > overlap(clicked))) {
+      clicked = k;
+    }
+  });
+  if (clicked < 0) return parts;
+  // One morpheme that is a prefix or suffix; `製|品`, two of them, is a word.
+  const inside = c.found.filter(
+    (m) => m.start >= spans[clicked]!.from && m.end <= spans[clicked]!.to,
+  );
+  const affix =
+    inside.length === 1 &&
+    hasPos(inside[0]!.pos, [...c.settings.prefixes, ...c.settings.suffixes]);
+  if (affix) return parts;
+  return parts.map(({ main: _, ...part }, k) =>
+    k === clicked ? { ...part, main: true } : part,
+  );
 };

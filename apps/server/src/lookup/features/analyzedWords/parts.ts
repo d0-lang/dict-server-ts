@@ -238,11 +238,20 @@ export const morphemeParts = (
       from,
       to,
     });
+  const runs = derivedWord(c, w) ? knownRuns(c, w, Math.max(head, 0)) : NONE;
   for (let i = 0; i < w.length;) {
     const group = head >= 0 && i > head ? endingGroup(c, w, i) : undefined;
     if (group !== undefined) {
       add(i, group.end, group.ids);
       i = group.end;
+      continue;
+    }
+    // A word made with suffixes splits into the pieces the dictionary has
+    // (`電化|製品`, not `電化|製|品`).
+    const known = runs.get(i);
+    if (known !== undefined) {
+      add(i, known.end, known.ids, i === head);
+      i = known.end;
       continue;
     }
     const morpheme = w[i]!;
@@ -299,6 +308,50 @@ export const morphemeParts = (
     i++;
   }
   return withFormEndings(c, w, head, parts, shown);
+};
+
+const NONE: ReadonlyMap<
+  number,
+  { readonly end: number; readonly ids: ReadonlyArray<number> }
+> = new Map();
+
+/**
+ * Runs of two or more morphemes from `from` on that the dictionary has as
+ * a word (`製|品` is `製品`, a spelling of `制品`), by where each starts.
+ * Found from the word's end, the longest first, since a compound ends in
+ * its head: `日本|国内`, not `日本国|内`; `帽子屋|さん`.
+ */
+const knownRuns = (
+  c: Click,
+  w: Word,
+  from: number,
+): ReadonlyMap<
+  number,
+  { readonly end: number; readonly ids: ReadonlyArray<number> }
+> => {
+  const runs = new Map<
+    number,
+    { readonly end: number; readonly ids: ReadonlyArray<number> }
+  >();
+  let end = w.length;
+  while (end - from >= 2) {
+    let found = false;
+    for (let start = from; start <= end - 2; start++) {
+      const text = w
+        .slice(start, end)
+        .map((m) => m.surface)
+        .join("");
+      const ids = c.rows(text).map((row) => row.id);
+      if (ids.length > 0) {
+        runs.set(start, { end, ids: [...new Set(ids)] });
+        end = start;
+        found = true;
+        break;
+      }
+    }
+    if (!found) end--;
+  }
+  return runs;
 };
 
 /**
