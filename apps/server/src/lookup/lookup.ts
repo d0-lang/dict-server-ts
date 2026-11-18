@@ -29,12 +29,21 @@ import { articleLookup, presentResult } from "./headword.ts";
 /**
  * A lookup: the word's own entries (`common/entries.ts`), or its parts when it
  * has no entry and the language splits compounds (`features/compounds/`) or
- * writes elided words onto the next word (`features/elision.ts`). When the client sends `context`, the sentence adds entries first, one
- * feature per file in `features/`: the phrases the word is part of there, the
- * abbreviation or hyphen-joined word it is a piece of, and the separable verb
- * it belongs to, or, in a script without spaces, the whole word the clicked
- * piece is part of. Which features a language uses, and how, is in its
- * `language.toml`.
+ * writes elided words onto the next word (`features/elision.ts`). When the
+ * client sends `context`, the sentence adds entries first, one feature per
+ * file in `features/`. A language takes one of two paths there:
+ *
+ * - With an analyzer (`context.analyzer`, a script without spaces), the
+ *   analyzer's features alone (`features/analyzedWords/`): the whole word the
+ *   clicked piece is part of, and the phrases and constructions around it.
+ * - Otherwise, the features of a language written with spaces: the phrases
+ *   the word is part of, the abbreviation or hyphen-joined word it is a piece
+ *   of, the separable verb it belongs to, and its neighbours' say in the
+ *   order of its own entries.
+ *
+ * The two never call each other (`paths.test.ts`), so a change for one kind
+ * of language leaves the other alone. Which features a language uses, and
+ * how, is in its `language.toml`.
  */
 
 type Capitals = Parameters<typeof findEntriesWithCompounds>[3];
@@ -73,13 +82,8 @@ const entryId = (entry: LookupEntry) =>
   ]);
 
 /**
- * The entries for `word`, before they become headwords. With `context`, the entries that match it come
- * first: the phrases the word is part of there, then the abbreviation it is a
- * piece of (`т` in `т.д.`), then the hyphen-joined word it is part of (`что`
- * in `что-нибудь`), then the separable verb it belongs to, then the word's
- * own entries (and their segments, re-indexed), in the order its neighbours
- * give them (`features/neighbours.ts`).
- * An own entry already shown that way is dropped.
+ * The entries for `word`, before they become headwords: with `context`, by
+ * the language's path (the analyzer's, or `spacedLookup`), else its own.
  */
 const contextLookup = (
   db: DictionaryDb,
@@ -88,20 +92,43 @@ const contextLookup = (
   context?: string,
   at?: number,
 ): LookupResult => {
+  const analyzed = language.context.analyzer !== undefined;
   if (context === undefined || context.trim() === "") {
     const plain = ownEntries(db, language, word);
     // No sentence was sent and the word has no entry. If the language has an
     // analyzer, let it split the word by itself, as it would in a sentence:
     // `お送り` has no entry, but the analyzer reads it as the prefix `お` and
     // `送り`, a form of `送る`, so the lookup shows `送る`.
-    if (plain.entries.length > 0 || language.context.analyzer === undefined) {
-      return plain;
-    }
+    if (plain.entries.length > 0 || !analyzed) return plain;
     return analyzedLookup(db, word, word, language) ?? plain;
   }
-  // In a script without spaces, the word the analyzer finds around the click.
-  const unspaced = analyzedLookup(db, word, context, language, at);
-  if (unspaced !== undefined) return unspaced;
+  // The word the analyzer finds around the click; when that is just the
+  // word, its own entries.
+  if (analyzed) {
+    return (
+      analyzedLookup(db, word, context, language, at) ??
+      ownEntries(db, language, word)
+    );
+  }
+  return spacedLookup(db, language, word, context, at);
+};
+
+/**
+ * The entries for `word` in `context`, in a language written with spaces:
+ * the entries that match the sentence come first, the phrases the word is
+ * part of there, then the abbreviation it is a piece of (`т` in `т.д.`), then
+ * the hyphen-joined word it is part of (`что` in `что-нибудь`), then the
+ * separable verb it belongs to, then the word's own entries (and their
+ * segments, re-indexed), in the order its neighbours give them
+ * (`features/neighbours.ts`). An own entry already shown that way is dropped.
+ */
+const spacedLookup = (
+  db: DictionaryDb,
+  language: Language,
+  word: string,
+  context: string,
+  at?: number,
+): LookupResult => {
   // The features' token indexes are into this same tokenization.
   const tokens = tokenize(context, language.code);
   const clicked = positionsOf(tokens, word, language.code, { context, at });
