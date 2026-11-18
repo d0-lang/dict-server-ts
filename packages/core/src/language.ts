@@ -337,6 +337,32 @@ const Context = doc(
             ),
             [],
           ),
+          constructions: orDefault(
+            doc(
+              Schema.Array(
+                Schema.Struct({
+                  line: doc(
+                    Schema.String,
+                    "The grammar-file line shown for it, by its word (`お…する`).",
+                  ),
+                  before: doc(
+                    strings,
+                    "Spellings of the morpheme before the slot (`お`, `ご`).",
+                  ),
+                  slot: doc(
+                    strings,
+                    "Parts of speech of the one morpheme in the slot, as in `join` (`動詞`, `名詞-普通名詞-サ変可能`).",
+                  ),
+                  after: doc(
+                    strings,
+                    "What follows the slot, its last morpheme written or in its base form (`する`, `になる`, `ください`).",
+                  ),
+                }),
+              ),
+              "Constructions with a word in them, which no fixed spelling finds: `お` + a verb's stem + `する` is humble (`お待ちします`, `ご案内します`). The run shows `line` first, then the clicked word's entries. Phrases the dictionary spells out come first (`お願いします`).",
+            ),
+            [],
+          ),
           formEndings: orDefault(
             doc(
               Schema.Array(
