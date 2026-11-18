@@ -1,4 +1,5 @@
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
+import { hiragana, isKana } from "@dict/core/kana";
 import { lookupKey } from "@dict/core/lookupKey";
 import {
   loadEntries,
@@ -15,6 +16,18 @@ import { hasPos, headOf, startOf, type Word } from "./words.ts";
 
 /** `entries.source_pos` of entries that name a letter or a syllable, not a word. */
 const LETTERS = new Set(["character", "letter-name", "syllable"]);
+
+/** UD's open classes, and the function words a content word is not (`し` the verb, not the particle). */
+const CONTENT_UPOS = new Set(["NOUN", "PROPN", "VERB", "ADJ", "ADV"]);
+const FUNCTION_UPOS = new Set([
+  "PART",
+  "PRON",
+  "ADP",
+  "CCONJ",
+  "SCONJ",
+  "DET",
+  "INTJ",
+]);
 
 /** Parts of speech that take endings, so a word with endings keeps only these entries. */
 export const INFLECTING = new Set(["VERB", "ADJ", "AUX"]);
@@ -120,7 +133,25 @@ export const wholeIds = (
       const at = head.bases.map(lookupKey).lastIndexOf(lookupKey(row.lemma));
       return at < 0 ? head.bases.length : head.bases.length - 1 - at;
     };
-    const ranked = [...kept].sort((a, b) => priority(a) - priority(b));
+    // An entry read otherwise than the analyzer reads the head goes after
+    // the others (`嫌` read いや: `いや`, not `や`, whose kana spelling
+    // redirects there). A kana lemma is its own reading (`なる`).
+    const reading =
+      head.reading === undefined ? undefined : hiragana(head.reading);
+    const misread = (row: FormRow) => {
+      const readings = [
+        ...c.infoOf(row.id).readings,
+        ...(isKana(row.lemma) ? [hiragana(row.lemma)] : []),
+      ];
+      return reading !== undefined &&
+        readings.length > 0 &&
+        !readings.includes(reading)
+        ? 1
+        : 0;
+    };
+    const ranked = [...kept].sort(
+      (a, b) => misread(a) - misread(b) || priority(a) - priority(b),
+    );
     return [...new Set(ranked.map((row) => row.id))];
   }
   return [];
@@ -207,6 +238,7 @@ export const morphemeParts = (
       from,
       to,
     });
+  const runs = derivedWord(c, w) ? knownRuns(c, w, Math.max(head, 0)) : NONE;
   for (let i = 0; i < w.length;) {
     const group = head >= 0 && i > head ? endingGroup(c, w, i) : undefined;
     if (group !== undefined) {
@@ -214,8 +246,22 @@ export const morphemeParts = (
       i = group.end;
       continue;
     }
+    // A word made with suffixes splits into the pieces the dictionary has
+    // (`電化|製品`, not `電化|製|品`).
+    const known = runs.get(i);
+    if (known !== undefined) {
+      add(i, known.end, known.ids, i === head);
+      i = known.end;
+      continue;
+    }
     const morpheme = w[i]!;
-    const grammar = morpheme.bases.flatMap((base) => grammarIds(c.db, base));
+    // By its spelling first, when the grammar file has a line for it (`な`
+    // after a な-adjective, whose base is `だ`), else by its base forms.
+    const bySpelling = grammarIds(c.db, lookupKey(morpheme.surface));
+    const grammar =
+      bySpelling.length > 0
+        ? bySpelling
+        : morpheme.bases.flatMap((base) => grammarIds(c.db, base));
     const isHead = i === head;
     const forms = isHead
       ? [morpheme.surface, ...morpheme.bases]
@@ -229,12 +275,20 @@ export const morphemeParts = (
     // Only when they find one lemma: `とく` (casual `ておく`) would bring
     // `解く`, `説く` and `得`.
     const byBase = morpheme.bases.flatMap((base) => c.rows(base));
-    const own =
+    const found =
       byLemma.length > 0
         ? byLemma
         : new Set(byBase.map((row) => lookupKey(row.lemma))).size === 1
           ? byBase
           : [];
+    // A content word to the analyzer is no function word: `し` the verb is
+    // not the particle or the pronoun. Other readings stay (`送り` the noun
+    // for the verb's stem).
+    const upos = c.uposOf(morpheme);
+    const content = [...upos].some((tag) => CONTENT_UPOS.has(tag));
+    const own = found.filter(
+      (row) => !content || upos.has(row.pos) || !FUNCTION_UPOS.has(row.pos),
+    );
     // A prefix is shown by its entries as a prefix first (`御` "used to
     // respectfully refer to…" for `お`), then as another word, and as a
     // syllable or character last.
@@ -254,6 +308,50 @@ export const morphemeParts = (
     i++;
   }
   return withFormEndings(c, w, head, parts, shown);
+};
+
+const NONE: ReadonlyMap<
+  number,
+  { readonly end: number; readonly ids: ReadonlyArray<number> }
+> = new Map();
+
+/**
+ * Runs of two or more morphemes from `from` on that the dictionary has as
+ * a word (`製|品` is `製品`, a spelling of `制品`), by where each starts.
+ * Found from the word's end, the longest first, since a compound ends in
+ * its head: `日本|国内`, not `日本国|内`; `帽子屋|さん`.
+ */
+const knownRuns = (
+  c: Click,
+  w: Word,
+  from: number,
+): ReadonlyMap<
+  number,
+  { readonly end: number; readonly ids: ReadonlyArray<number> }
+> => {
+  const runs = new Map<
+    number,
+    { readonly end: number; readonly ids: ReadonlyArray<number> }
+  >();
+  let end = w.length;
+  while (end - from >= 2) {
+    let found = false;
+    for (let start = from; start <= end - 2; start++) {
+      const text = w
+        .slice(start, end)
+        .map((m) => m.surface)
+        .join("");
+      const ids = c.rows(text).map((row) => row.id);
+      if (ids.length > 0) {
+        runs.set(start, { end, ids: [...new Set(ids)] });
+        end = start;
+        found = true;
+        break;
+      }
+    }
+    if (!found) end--;
+  }
+  return runs;
 };
 
 /**
@@ -329,4 +427,51 @@ const withFormEndings = (
     }
   }
   return out;
+};
+
+/**
+ * A word of a run over several words as parts: an inflected word the
+ * dictionary doesn't list as written by its morphemes, with the word's own
+ * entries in its head's part (`接続` with `接続する`, in
+ * `接続|して|しまった`); any other word as one part (`だった`, `いけない`,
+ * `2900年`). The head's part is `main` when `main` is set. `shown` entries
+ * are left out.
+ */
+export const wordParts = (
+  c: Click,
+  w: Word,
+  shown: ReadonlySet<number>,
+  main: boolean,
+): ReadonlyArray<Part> => {
+  const whole = wholeIds(c, w, c.textOf(w)).filter((id) => !shown.has(id));
+  // A verb or adjective in it (`し` of `接続|し|て`, the head a noun).
+  const inflected = w.some((m) =>
+    [...c.uposOf(m)].some((tag) => INFLECTING.has(tag)),
+  );
+  if (w.length === 1 || !inflected || c.rows(c.textOf(w)).length > 0) {
+    return [{ text: c.textOf(w), ids: whole, ...(main ? { main } : {}) }];
+  }
+  const parts = morphemeParts(c, w, new Set([...shown, ...whole]));
+  const head = parts.find((part) => part.main === true) ?? parts[0]!;
+  return parts.map((withMain) => {
+    const { main: _, ...part } = withMain;
+    return withMain === head
+      ? {
+          ...part,
+          ids: [...whole, ...part.ids],
+          ...(part.form !== undefined
+            ? {
+                form: {
+                  ...part.form,
+                  ids: [
+                    ...whole.filter((id) => INFLECTING.has(c.infoOf(id).pos)),
+                    ...part.form.ids,
+                  ],
+                },
+              }
+            : {}),
+          ...(main ? { main } : {}),
+        }
+      : part;
+  });
 };

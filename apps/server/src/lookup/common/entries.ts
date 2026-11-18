@@ -4,6 +4,7 @@ import {
   CaseClass,
   entries,
   FormSource,
+  GRAMMAR_SOURCE_POS,
   pronunciations,
   senses,
   type UdPos,
@@ -120,7 +121,8 @@ const dropRedundantSynonyms = (
  * 2. Letters: an entry for the letter itself, or a one-letter noun that only
  *    names it, comes after the word's others, so `в` gives "in" before "the
  *    third letter of the alphabet" and `и` gives "and" before "the name of
- *    the letter И".
+ *    the letter И". So does a grammar-file `X` line, which only adds: `な`
+ *    gives the particle before "the form of だ before a noun".
  * 3. Spelling: the entry whose own lemma is this form (`forms.source` =
  *    lemma) before the entries it is a form of, so the noun `Frage` comes
  *    before the verb `fragen`. For one word, an entry of several words it is a
@@ -163,6 +165,8 @@ const rankedIds = (
            ELSE 0
          END,
          e.source_pos IN ('character', 'letter-name', 'syllable'),
+         -- a grammar-file ending that only adds (な after a な-adjective)
+         e.source_pos = '${GRAMMAR_SOURCE_POS}' AND e.pos = 'X',
          -- a redirect spells the word itself, in kana, so it ranks with the lemma
          f.source NOT IN (${FormSource.Lemma}, ${FormSource.Redirect}),
          instr(?1, ' ') = 0 AND instr(e.lemma, ' ') > 0,

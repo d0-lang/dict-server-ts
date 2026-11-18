@@ -4,6 +4,7 @@ import type { LookupResult } from "../../common/entries.ts";
 import { acrossWords, knownPiece } from "./acrossWords.ts";
 import { aroundWord } from "./aroundWord.ts";
 import { type Answer, type Click, clickOf, PLAIN } from "./click.ts";
+import { constructionLookup } from "./constructions.ts";
 import { numberLookup } from "./numbers.ts";
 import { phraseLookup } from "./phrases.ts";
 import { singleWord } from "./singleWord.ts";
@@ -35,6 +36,8 @@ import { singleWord } from "./singleWord.ts";
 const STEPS: ReadonlyArray<(click: Click) => Answer> = [
   // a phrase over several words (`手に入る`)
   phraseLookup,
+  // a construction with a word in it (`お|待ち|し|ます`)
+  constructionLookup,
   // a piece over several words that the dictionary knows (`そうですね`, `年代`)
   knownPiece,
   // a number and its counter (`10|月`)

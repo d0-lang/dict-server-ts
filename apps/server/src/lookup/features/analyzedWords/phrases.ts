@@ -127,10 +127,14 @@ const phraseAt = (
       !readings.some((reading) => numbers.some((n) => reading.includes(n)))
     );
   };
+  // A grammar-file line found over these words is a phrase, even if the
+  // analyzer reads its spelling alone as one word (`がする`, a verb to it).
+  const grammar = (row: FormRow) =>
+    c.infoOf(row.id).sourcePos === GRAMMAR_SOURCE_POS;
   const fits = (row: FormRow) =>
-    c.severalWords(row) &&
+    (c.severalWords(row) || grammar(row)) &&
     !otherName(row) &&
-    (!grammarOnly || c.infoOf(row.id).sourcePos === GRAMMAR_SOURCE_POS);
+    (!grammarOnly || grammar(row));
   for (const { form, written } of forms) {
     const phrase = c.rows(form).filter(fits);
     if (phrase.length === 0) continue;

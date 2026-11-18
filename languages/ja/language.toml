@@ -57,6 +57,36 @@ suffixes = ["接尾辞"]
 # 使わ|れて|います, not 並ん|で|い|ます. That piece's entries are labelled.
 formEndings = [{ pos = ["助詞-接続助詞"], surface = ["て", "で"], label = "て form" }]
 
+# Constructions with a word in them, shown by their grammar-file line.
+# お/ご + a verb's stem or a する-noun + する: humble (お待ちします, ご案内します).
+[[context.analyzer.constructions]]
+line = "お…する"
+before = ["お", "ご"]
+slot = ["動詞", "名詞-普通名詞-サ変可能"]
+after = ["する", "致す", "いたす"]
+
+# お + a verb's stem + になる: honorific (お書きになった).
+[[context.analyzer.constructions]]
+line = "お…になる"
+before = ["お", "ご"]
+slot = ["動詞", "名詞-普通名詞-サ変可能"]
+after = ["になる"]
+
+# お/ご + a verb's stem + ください: please (お待ちください, ご確認ください).
+[[context.analyzer.constructions]]
+line = "お…ください"
+before = ["お", "ご"]
+slot = ["動詞", "名詞-普通名詞-サ変可能"]
+after = ["ください", "くださる", "下さい", "下さる"]
+
+# な after a な-adjective, which makes it modify a noun: 静か|な. Not after
+# よう, そう, みたい (形状詞-助動詞語幹), whose stems the dictionary then
+# misreads (そうな as 壮 "magnificent").
+[[context.analyzer.join]]
+pos = ["助動詞"]
+surface = ["な"]
+after = ["形状詞-一般"]
+
 # Auxiliaries after a verb, adjective or auxiliary: 食べ|まし|た, 行か|ない.
 [[context.analyzer.join]]
 pos = ["助動詞"]

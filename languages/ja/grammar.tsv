@@ -34,6 +34,7 @@
 # has a line here is one segment, with the line's senses (endingGroup in
 # apps/server/src/lookup/features/analyzedWords/parts.ts). "→ word" links a
 # sense to that word's line.
+します/しました/しません/しませんでした/しましょう	AUX	polite する: do (勉強します, (I) study; しました, did; しません, don't; しましょう, let's do) → する
 なかった	AUX	past of ない: didn't, wasn't (言えなかった, couldn't say; 行かなかった, didn't go; 高くなかった, wasn't expensive) → ない
 なければ	AUX	ば form of ない: if not, unless (行かなければ, if (you) don't go) → ない | なければならない, なければいけない: must, have to (行かなければならない, (I) have to go)
 なくて	AUX	て form of ない: not ... and; because (it) doesn't (分からなくて, not understanding, ...) → ない | なくてもいい: don't have to (行かなくてもいい, (you) don't have to go)
@@ -52,6 +53,10 @@
 てくれる	AUX	(someone) does ... for me or us (教えてくれた, (he) taught me)
 てもらう	AUX	have (someone) do ... for me (教えてもらった, (I) had (her) teach me)
 てあげる	AUX	do ... for (someone) (教えてあげる, (I'll) teach you)
+
+## Endings after a な-adjective
+# X: only adds, so な keeps Wiktionary's particle entries (行くな, "don't").
+な	X	the form of だ before a noun, after a な-adjective (静かな部屋, a quiet room; 好きな人, a person (I) like) → だ
 
 ## Particles
 と	PART	and (between nouns: 犬と猫, a dog and a cat) | with (友達と行く, go with a friend) | quoting: that, "..." (行くと言った, said (he) would go; とされる, is said to be) | when, if (after a verb: 押すと開く, it opens when you push it)
@@ -118,6 +123,10 @@
 てはいけない	AUX	must not (食べてはいけない, (you) must not eat)
 ちゃいけない	AUX	must not (casual てはいけない: 食べちゃいけない, (you) mustn't eat)
 わけにはいかない	AUX	can't very well, can't afford to (休むわけにはいかない, (I) can't very well take a day off)
+わけだ/わけです	AUX	that's why, no wonder; so it means (だから遅れたわけだ, so that's why (he) was late) | the thing is, you see (explaining: こういうわけです, this is how it is)
+わけではない/わけじゃない	AUX	it's not that ..., not necessarily (嫌いなわけではない, it's not that (I) dislike it; 全部わかるわけじゃない, (I) don't understand all of it)
+わけがない/わけない	AUX	there's no way that, it can't be (そんなわけがない, no way; 勝てるわけがない, (we) can't possibly win)
+わけで	CCONJ	so, for that reason (そういうわけで, so, that's why)
 はずだ	AUX	should, is expected to (来るはずだ, (he) should come; 知っているはずだ, (she) must know)
 つもりだ	AUX	intend to, plan to (行くつもりだ, (I) intend to go)
 ばいい	AUX	should, it would be good to (どうすればいい?, what should I do?)
@@ -126,6 +135,17 @@
 このようにして	ADV	in this way, like this (このようにして世界は…, in this way the world …)
 という	DET	called, named (山田という人, a person called Yamada) | that: what a noun says (雨が降るという予報, the forecast that it will rain) | というか: or rather, I mean | というのは, というのも: that is because, the thing is | と + 言う: say that (行くという, (he) says (he) will go) → 言う
 ということ	AUX	that, the fact that (行くということ, (the fact) that (he) will go) | that is to say, which means
+
+## Constructions with する and なる
+# お…する and the like have a word in them: `context.analyzer.constructions`
+# in language.toml finds them, and shows the line named here.
+お…する	AUX	humble: (I) do ... (for you) (お待ちします, I'll wait; お持ちします, I'll carry it for you; ご案内します, I'll show you around)
+お…になる	AUX	honorific: (someone) does ... (お書きになる, (he) writes; お帰りになりました, (she) has gone home)
+お…ください	AUX	please do ... (polite: お待ちください, please wait; ご確認ください, please check)
+にする	AUX	decide on, choose (コーヒーにする, I'll have coffee) | make, turn into (静かにする, be quiet; 半分にする, cut in half) | treat as, use as (大切にする, treat with care; 参考にする, use as a reference)
+くする	AUX	make ...er (after an adjective: 安くする, make cheaper; 早くする, hurry up)
+がする	AUX	there is a sound, smell or taste (音がする, there's a sound; いい匂いがする, it smells good) | 気がする: have a feeling (that) | がされる: (something) is done (説明がされる, an explanation is given)
+とする	AUX	suppose, assume (行くとすると, supposing (we) go; 来るとしたら, if (he) comes) | treat as, regard as; とされる: is said to be, is regarded as (AをBとする, take A as B; 名作とされる, is regarded as a masterpiece) | state, hold that (…としている, (they) say that ...) | after a word for how something looks or feels: be ... (しっかりとした, solid; ゆったりとした, roomy)
 
 ## Adverbs and fillers
 ほぼ	ADV	almost, nearly (ほぼ毎日, almost every day; ほぼゼロ, nearly zero) | about, approximately
