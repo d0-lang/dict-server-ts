@@ -54,6 +54,10 @@
 てもらう	AUX	have (someone) do ... for me (教えてもらった, (I) had (her) teach me)
 てあげる	AUX	do ... for (someone) (教えてあげる, (I'll) teach you)
 
+## Endings after a な-adjective
+# X: only adds, so な keeps Wiktionary's particle entries (行くな, "don't").
+な	X	the form of だ before a noun, after a な-adjective (静かな部屋, a quiet room; 好きな人, a person (I) like) → だ
+
 ## Particles
 と	PART	and (between nouns: 犬と猫, a dog and a cat) | with (友達と行く, go with a friend) | quoting: that, "..." (行くと言った, said (he) would go; とされる, is said to be) | when, if (after a verb: 押すと開く, it opens when you push it)
 って	PART	quoting, casual と: that, "..." (行くって言った, said (he) would go) | as for, speaking of: casual topic (人間って怖い, humans are scary) | I hear, they say (雨だって, I hear it'll rain) | called (田中って人, a person called Tanaka)
@@ -119,6 +123,10 @@
 てはいけない	AUX	must not (食べてはいけない, (you) must not eat)
 ちゃいけない	AUX	must not (casual てはいけない: 食べちゃいけない, (you) mustn't eat)
 わけにはいかない	AUX	can't very well, can't afford to (休むわけにはいかない, (I) can't very well take a day off)
+わけだ/わけです	AUX	that's why, no wonder; so it means (だから遅れたわけだ, so that's why (he) was late) | the thing is, you see (explaining: こういうわけです, this is how it is)
+わけではない/わけじゃない	AUX	it's not that ..., not necessarily (嫌いなわけではない, it's not that (I) dislike it; 全部わかるわけじゃない, (I) don't understand all of it)
+わけがない/わけない	AUX	there's no way that, it can't be (そんなわけがない, no way; 勝てるわけがない, (we) can't possibly win)
+わけで	CCONJ	so, for that reason (そういうわけで, so, that's why)
 はずだ	AUX	should, is expected to (来るはずだ, (he) should come; 知っているはずだ, (she) must know)
 つもりだ	AUX	intend to, plan to (行くつもりだ, (I) intend to go)
 ばいい	AUX	should, it would be good to (どうすればいい?, what should I do?)

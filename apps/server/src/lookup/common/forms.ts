@@ -80,6 +80,8 @@ export const formRows = (
            ELSE 0
          END,
          e.source_pos IN ('character', 'letter-name', 'syllable'),
+         -- a grammar-file ending that only adds (な after a な-adjective)
+         e.source_pos = '${GRAMMAR_SOURCE_POS}' AND e.pos = 'X',
          -- a redirect spells the word itself, in kana, so it ranks with the lemma
          f.source NOT IN (${FormSource.Lemma}, ${FormSource.Redirect}),
          f.source = ${FormSource.LetterVariant},

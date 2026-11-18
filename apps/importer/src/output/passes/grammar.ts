@@ -6,7 +6,8 @@ import type { WriterContext } from "./context.ts";
  * A word in the grammar file shows none of Wiktionary's grammar-word entries,
  * nor its entries with a part of speech the file gives that word (`здесь ADV`
  * replaces Wiktionary's adverb `здесь`; `всё`, listed as a pronoun and a
- * determiner, keeps its adverb "still"). `X` lines (endings like `-го`) only add.
+ * determiner, keeps its adverb "still"). `X` lines (endings like `-го`, and
+ * `な` after a な-adjective) only add: `な` keeps Wiktionary's particle.
  * A contraction of grammar words is one too (`n'` "Prevocalic form of ne.",
  * which Wiktionary files under neither a pronoun nor a particle).
  * Nor does it keep Wiktionary's form-of links to another word the file lists:
@@ -34,6 +35,7 @@ export const replaceGrammarWords = ({
      WHERE form IN (
        SELECT f.form FROM forms f JOIN entries e ON e.id = f.entry_id
        WHERE f.source = ${FormSource.Lemma} AND e.source_pos = '${GRAMMAR_SOURCE_POS}'
+         AND e.pos <> 'X'
      )
      AND EXISTS (
        SELECT 1 FROM entries
@@ -52,7 +54,8 @@ export const replaceGrammarWords = ({
   ).changes;
   sqlite.run(`CREATE TEMP TABLE listed AS
     SELECT DISTINCT f.form AS form FROM forms f JOIN entries e ON e.id = f.entry_id
-    WHERE f.source = ${FormSource.Lemma} AND e.source_pos = '${GRAMMAR_SOURCE_POS}'`);
+    WHERE f.source = ${FormSource.Lemma} AND e.source_pos = '${GRAMMAR_SOURCE_POS}'
+      AND e.pos <> 'X'`);
   counts.grammarReplaced += sqlite.run(
     `DELETE FROM forms WHERE (form, entry_id) IN (
        SELECT f.form, e.id FROM forms f JOIN entries e ON e.id = f.entry_id

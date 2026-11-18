@@ -79,6 +79,14 @@ before = ["お", "ご"]
 slot = ["動詞", "名詞-普通名詞-サ変可能"]
 after = ["ください", "くださる", "下さい", "下さる"]
 
+# な after a な-adjective, which makes it modify a noun: 静か|な. Not after
+# よう, そう, みたい (形状詞-助動詞語幹), whose stems the dictionary then
+# misreads (そうな as 壮 "magnificent").
+[[context.analyzer.join]]
+pos = ["助動詞"]
+surface = ["な"]
+after = ["形状詞-一般"]
+
 # Auxiliaries after a verb, adjective or auxiliary: 食べ|まし|た, 行か|ない.
 [[context.analyzer.join]]
 pos = ["助動詞"]
