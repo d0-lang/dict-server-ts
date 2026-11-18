@@ -552,15 +552,19 @@ const degreeOnlyForms = (
  * not plural-only because one sense is).
  */
 const lineFeatures = (
+  rules: LanguageRules,
   raw: WiktextractEntry,
   pos: UdPos,
 ): string | undefined => {
-  if (!FEATURE_POS.has(pos)) return undefined;
+  const own = rules.featureTags ?? {};
+  // The shared tags for nouns and verbs; a language's own for any word.
+  const sharedTags = FEATURE_POS.has(pos);
+  if (!sharedTags && Object.keys(own).length === 0) return undefined;
   const senses = (raw.senses ?? []).filter(
     (sense) =>
       !sense.tags?.includes("form-of") && !sense.tags?.includes("alt-of"),
   );
-  const shared = senses.reduce<ReadonlySet<string> | undefined>(
+  const common = senses.reduce<ReadonlySet<string> | undefined>(
     (common, sense) => {
       const tags = new Set(sense.tags ?? []);
       return common === undefined
@@ -573,7 +577,11 @@ const lineFeatures = (
     .filter((form) => form.tags?.includes("canonical"))
     .flatMap((form) => form.tags ?? []);
   return formatFeatures(
-    featuresOfTags([...(raw.tags ?? []), ...canonical, ...(shared ?? [])]),
+    featuresOfTags(
+      [...(raw.tags ?? []), ...canonical, ...(common ?? [])],
+      own,
+      sharedTags,
+    ),
   );
 };
 
@@ -758,7 +766,7 @@ export const transformEntry = (
       });
     }
   }
-  const features = lineFeatures(raw, toUdPos(raw.pos));
+  const features = lineFeatures(rules, raw, toUdPos(raw.pos));
   const makeEntry = (
     entrySenses: ReadonlyArray<ImportSense>,
     derivedSenses: ReadonlyArray<DerivedSense>,

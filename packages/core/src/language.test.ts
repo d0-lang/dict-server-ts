@@ -32,6 +32,7 @@ describe("language records", () => {
       verbChainsThroughEntries: false,
       skippedPos: [],
       formlessPos: [],
+      featureTags: {},
       lemmaSuffixes: {},
     });
     assert.deepStrictEqual(language.context, {

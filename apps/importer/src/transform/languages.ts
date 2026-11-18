@@ -1,3 +1,4 @@
+import type { FeatureName } from "@dict/core/features";
 import type { Language } from "@dict/core/language";
 
 /**
@@ -69,6 +70,10 @@ export type LanguageRules = {
   readonly formlessPos?: ReadonlyArray<string>;
   /** `lookupKey`s of the grammar file's words, set by the importer. */
   readonly grammarWords?: ReadonlySet<string>;
+  /** This language's tags that give a headword feature, for any part of speech (`godan`, `-na`). */
+  readonly featureTags?: Readonly<
+    Record<string, readonly [FeatureName, string]>
+  >;
   /** Head template name -> what the lemma gets added (`ja-verb-suru` -> `する`). */
   readonly lemmaSuffixes?: Readonly<Record<string, string>>;
 };

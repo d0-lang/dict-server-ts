@@ -36,3 +36,21 @@ text = "The verb has one form for both aspects: the context shows whether the ac
 [pl]
 name = "plural only"
 text = "The noun has no singular. It takes plural verbs and adjectives even when it means one thing."
+
+[godan]
+name = "godan verb"
+
+[ichidan]
+name = "ichidan verb"
+
+[irregular]
+name = "irregular verb"
+
+[vt]
+name = "transitive"
+
+[vi]
+name = "intransitive"
+
+["na-adj"]
+name = "na-adjective"
