@@ -1,5 +1,5 @@
 import { lookupKey } from "@dict/core/lookupKey";
-import { FormSource } from "@dict/core/schema";
+import { FormSource, GRAMMAR_SOURCE_POS } from "@dict/core/schema";
 import type { Morpheme } from "../../common/analyzer.ts";
 import { loadEntries } from "../../common/entries.ts";
 import { type Answer, type Click, PLAIN } from "./click.ts";
@@ -10,8 +10,9 @@ import {
   type Part,
   splitResult,
   wholeIds,
+  wordParts,
 } from "./parts.ts";
-import { endOf, startOf } from "./words.ts";
+import { endOf, startOf, type Word } from "./words.ts";
 
 /**
  * A piece that is several words (`よ|ね`, `年|前`, `明治|天皇`), or is cut
@@ -46,13 +47,13 @@ export const acrossWords = (c: Click): Answer => {
   const shown = new Set(own);
   const parts = touched.flatMap((w): ReadonlyArray<Part> => {
     if (!derivedWord(c, w)) {
-      return [
-        {
-          text: c.textOf(w),
-          ids: wholeIds(c, w, c.textOf(w)).filter((id) => !shown.has(id)),
-          main: w === found,
-        },
-      ];
+      // Each word by its own parts (`接続|して|しまった`), a grammar
+      // phrase that starts with it first (`わけです` for `わけ`).
+      const [first, ...rest] = wordParts(c, w, shown, w === found);
+      const phrase = grammarAfter(c, w).filter((id) => !shown.has(id));
+      return first === undefined
+        ? []
+        : [{ ...first, ids: [...new Set([...phrase, ...first.ids])] }, ...rest];
     }
     // Of a word shown by its parts, the ones inside the piece come first
     // (`上` of `保全|上` for `上の`).
@@ -170,4 +171,33 @@ const clauseEdgeIds = (c: Click): ReadonlyArray<number> => {
         .map((row) => row.id),
     ),
   ];
+};
+
+/**
+ * The grammar-file lines a word starts, over it and up to two words after
+ * it, the last written or in its base form (`わけ|です`, `わけ|が|ない`):
+ * for a word of a piece cut across words, which the phrase lookup leaves
+ * out, since the phrase starts after the piece does.
+ */
+const grammarAfter = (c: Click, w: Word): ReadonlyArray<number> => {
+  const at = c.words.indexOf(w);
+  const ids: Array<number> = [];
+  let written = c.textOf(w);
+  for (const next of c.words.slice(at + 1, at + 3)) {
+    if (startOf(next) !== endOf(c.words[c.words.indexOf(next) - 1]!)) break;
+    const head = next.find((m) => m.bases.length > 0) ?? next[0]!;
+    const forms = [
+      written + c.textOf(next),
+      ...head.bases.map(
+        (base) => written + c.context.slice(startOf(next), head.start) + base,
+      ),
+    ];
+    for (const form of forms) {
+      for (const row of c.rows(form)) {
+        if (c.infoOf(row.id).sourcePos === GRAMMAR_SOURCE_POS) ids.push(row.id);
+      }
+    }
+    written += c.textOf(next);
+  }
+  return [...new Set(ids)];
 };
