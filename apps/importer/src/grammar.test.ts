@@ -28,9 +28,11 @@ describe("parseGrammarFile", () => {
         see: [["ない"], []],
       },
     );
-    assert.throws(
-      () => parseGrammarFile("なかった\tAUX\tpast → ない", "t.tsv"),
-      /t\.tsv:1: → ない/,
+    // A word the file does not list is the dictionary's (`言う`); the
+    // import keeps it only if it has an entry (`resolveSee`).
+    assert.deepStrictEqual(
+      parseGrammarFile("という\tDET\tcalled → 言う", "t.tsv")[0]?.see,
+      [["言う"]],
     );
   });
 
