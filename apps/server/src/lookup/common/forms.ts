@@ -31,12 +31,12 @@ export type TokenInfo = {
 };
 
 export type FormRow = {
-  id: number;
-  lemma: string;
-  pos: UdPos;
+  readonly id: number;
+  readonly lemma: string;
+  readonly pos: UdPos;
   /** `entries.source_pos`: wiktextract's part of speech (`prefix`, `syllable`, ...). */
-  sourcePos: string;
-  source: number;
+  readonly sourcePos: string;
+  readonly source: number;
 };
 
 /**
@@ -58,14 +58,47 @@ export const notAnAcronym = (
    ))`;
 
 /**
+ * Most forms whose rows are kept per file. Their rows don't change while the
+ * file is open, and the commonest words come back in nearly every sentence:
+ * a phrase lookup asks for every word of it. Past this many, the kept rows
+ * are dropped and gathered again.
+ */
+const KEPT_FORMS = 50_000;
+
+const keptRows = new WeakMap<
+  DictionaryDb,
+  Map<string, ReadonlyArray<FormRow>>
+>();
+
+/**
  * Entries a normalized form belongs to, without the abbreviation fallback,
  * ranked like `rankedIds` in `entries.ts` for a word written as `wordClass`,
- * and like it without acronyms for a lowercase word (`notAnAcronym`).
+ * and like it without acronyms for a lowercase word (`notAnAcronym`). Kept
+ * per file (`KEPT_FORMS`), so callers must not change the rows.
  */
 export const formRows = (
   db: DictionaryDb,
   key: string,
   wordClass: CaseClass = CaseClass.Capitalised,
+): ReadonlyArray<FormRow> => {
+  let kept = keptRows.get(db);
+  if (kept === undefined) {
+    kept = new Map();
+    keptRows.set(db, kept);
+  }
+  const keptKey = `${wordClass}\u0000${key}`;
+  const found = kept.get(keptKey);
+  if (found !== undefined) return found;
+  if (kept.size >= KEPT_FORMS) kept.clear();
+  const rows = queryFormRows(db, key, wordClass);
+  kept.set(keptKey, rows);
+  return rows;
+};
+
+const queryFormRows = (
+  db: DictionaryDb,
+  key: string,
+  wordClass: CaseClass,
 ): ReadonlyArray<FormRow> =>
   db.$client
     .query<FormRow, [string, number]>(

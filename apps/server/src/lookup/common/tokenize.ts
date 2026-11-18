@@ -49,11 +49,33 @@ const segmenterFor = (locale: string): Intl.Segmenter => {
   return segmenter;
 };
 
+/**
+ * Most tokenizations kept. A lookup tokenizes its sentence once per feature
+ * (phrases, abbreviations, hyphen-joined words, separable verbs), and a
+ * reader clicks several words of one sentence: the most recent are kept, the
+ * oldest dropped first. At most 500 characters each, as the extension sends.
+ */
+const RECENT_TOKENIZATIONS = 4096;
+
+const recentTokens = new Map<string, ReadonlyArray<Token>>();
+
 /** The words of `text`, normalized with `lookupKey`. */
 export const tokenize = (
   text: string,
   locale: string,
 ): ReadonlyArray<Token> => {
+  const key = `${locale}\u0000${text}`;
+  const kept = recentTokens.get(key);
+  if (kept !== undefined) return kept;
+  const tokens = wordsOf(text, locale);
+  if (recentTokens.size >= RECENT_TOKENIZATIONS) {
+    recentTokens.delete(recentTokens.keys().next().value!);
+  }
+  recentTokens.set(key, tokens);
+  return tokens;
+};
+
+const wordsOf = (text: string, locale: string): ReadonlyArray<Token> => {
   const tokens: Array<Token> = [];
   let clause = 0;
   let between = "";

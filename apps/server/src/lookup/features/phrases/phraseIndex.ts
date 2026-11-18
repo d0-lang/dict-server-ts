@@ -20,17 +20,28 @@ export type Phrase = {
   readonly verbEntry: boolean;
   /** Every entry is an interjection, which only means that as a clause of its own. */
   readonly interjection: boolean;
+  /** Its place in the index: each list holds its phrases in this order. */
+  readonly order: number;
 };
 
-/** Phrases by each of their words. */
-type PhraseIndex = ReadonlyMap<string, ReadonlyArray<Phrase>>;
+export type PhraseIndex = {
+  /** Phrases by each of their words. */
+  readonly byWord: ReadonlyMap<string, ReadonlyArray<Phrase>>;
+  /**
+   * Each phrase once, under its word with the fewest phrases (not `sich`,
+   * which stands for any reflexive). A phrase matches only where all its
+   * words are, so the sentence's words find every phrase that can match
+   * there, without the thousands under `die` or `haben`.
+   */
+  readonly byRarest: ReadonlyMap<string, ReadonlyArray<Phrase>>;
+};
 
 const indexes = new WeakMap<DictionaryDb, PhraseIndex>();
 
 /**
  * Every multi-word form of a multi-word entry (`in Kraft treten`, `vor allem`,
- * and inflected rows like `Vereinigten Staaten`), indexed by its words. Built
- * once per file, on first use.
+ * and inflected rows like `Vereinigten Staaten`), indexed by its words and by
+ * its rarest word. Built once per file, on first use.
  */
 export const phraseIndex = (
   db: DictionaryDb,
@@ -84,7 +95,8 @@ export const phraseIndex = (
     phrase.interjection &&= row.pos === "INTJ";
     byForm.set(row.form, phrase);
   }
-  const index = new Map<string, Array<Phrase>>();
+  const byWord = new Map<string, Array<Phrase>>();
+  const phrases: Array<Phrase> = [];
   for (const [form, { ids, verb, verbEntry, interjection }] of byForm) {
     const tokens = tokenize(form, locale);
     if (tokens.length < 2) continue;
@@ -96,13 +108,27 @@ export const phraseIndex = (
       verb,
       verbEntry,
       interjection,
+      order: phrases.length,
     };
+    phrases.push(phrase);
     for (const key of new Set(phrase.tokens)) {
-      const list = index.get(key);
-      if (list === undefined) index.set(key, [phrase]);
+      const list = byWord.get(key);
+      if (list === undefined) byWord.set(key, [phrase]);
       else list.push(phrase);
     }
   }
+  const byRarest = new Map<string, Array<Phrase>>();
+  const count = (word: string) => byWord.get(word)?.length ?? 0;
+  for (const phrase of phrases) {
+    const words = phrase.tokens.filter((word) => word !== "sich");
+    const rarest = (words.length > 0 ? words : phrase.tokens).reduce(
+      (best, word) => (count(word) < count(best) ? word : best),
+    );
+    const list = byRarest.get(rarest);
+    if (list === undefined) byRarest.set(rarest, [phrase]);
+    else list.push(phrase);
+  }
+  const index = { byWord, byRarest };
   indexes.set(db, index);
   return index;
 };
