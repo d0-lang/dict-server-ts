@@ -16,8 +16,10 @@ import { UD_POS, type UdPos } from "@dict/core/schema";
  *     des	DET	of the (masculine or neuter, genitive)
  *
  * Senses are separated by ` | `. `#` starts a comment line. Case matters:
- * `Sie` and `sie` are different lines. A sense may end with `→` and words the
- * file lists, which it points at as `see` (`なかった`, "past of ない" → `ない`).
+ * `Sie` and `sie` are different lines. A sense may end with `→` and words it
+ * points at as `see` (`なかった`, "past of ない" → `ない`; `という` → `言う`),
+ * which the client looks up when the sense is clicked. A word without an
+ * entry, in the file or the dictionary, is dropped (`resolveSee`).
  * A word may have other spellings after a `/`, which find its line
  * (`ようとする/うとする`: `行こうとする` has no `よう`).
  */
@@ -93,7 +95,6 @@ export const parseGrammarFile = (
     const see = parts.map(({ see }) => see);
     return [
       {
-        where,
         lemma,
         pos: pos as UdPos,
         senses,
@@ -102,15 +103,7 @@ export const parseGrammarFile = (
       },
     ];
   });
-  // `see` names words of this file, so each has an entry.
-  const lemmas = new Set(entries.map((entry) => entry.lemma));
-  for (const { where, see } of entries) {
-    const missing = see?.flat().find((target) => !lemmas.has(target));
-    if (missing !== undefined) {
-      throw new Error(`${where}: → ${missing}, which the file does not list`);
-    }
-  }
-  return entries.map(({ where: _, ...entry }) => entry);
+  return entries;
 };
 
 /** The grammar entries of a language; none when it has no file. */
