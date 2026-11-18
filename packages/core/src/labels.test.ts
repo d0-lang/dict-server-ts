@@ -20,10 +20,16 @@ describe("label explanations", () => {
 
   it("read every language's file, which lists only labels that exist", () => {
     for (const code of languageCodes()) {
-      const labels = readLabels(readLanguage(code));
+      const language = readLanguage(code);
+      // Labels the lookup adds to a form (`て form`).
+      const forms = new Set(
+        language.context.analyzer?.formEndings.map((ending) => ending.label),
+      );
+      const labels = readLabels(language);
       for (const label of Object.keys(labels)) {
         assert.isTrue(
-          label.split("/").every((part) => SINGLE.has(part)),
+          forms.has(label) ||
+            label.split("/").every((part) => SINGLE.has(part)),
           `${code}: ${label}`,
         );
       }

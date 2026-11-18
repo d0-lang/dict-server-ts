@@ -28,6 +28,8 @@ export const japanese = dictionary([
   ["似合う", "VERB", ["にあわせて"], ["to suit"]],
   ["合わせる", "VERB", ["あわせて", "あわせ"], ["to match"]],
   ["約", "ADV", [], ["about"]],
+  ["実験", "NOUN", [], ["experiment"]],
+  ["ながら", "PART", [], ["while"]],
   ["三", "NUM", ["3"], ["three"]],
   ["た", "X", [], ["The hiragana syllable た"], "syllable"],
   // the grammar file's endings
