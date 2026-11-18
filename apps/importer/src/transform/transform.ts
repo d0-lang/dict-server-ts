@@ -556,9 +556,12 @@ const lineFeatures = (
   raw: WiktextractEntry,
   pos: UdPos,
 ): string | undefined => {
-  const own = rules.featureTags ?? {};
-  // The shared tags for nouns and verbs; a language's own for any word.
+  // The shared tags for nouns and verbs; a language's own for adjectives
+  // too (a Japanese な-adjective), not for suffixes and other lines, where a
+  // tag can mean something else (`-na` on the imperative `な` is its
+  // romanization).
   const sharedTags = FEATURE_POS.has(pos);
+  const own = sharedTags || pos === "ADJ" ? (rules.featureTags ?? {}) : {};
   if (!sharedTags && Object.keys(own).length === 0) return undefined;
   const senses = (raw.senses ?? []).filter(
     (sense) =>

@@ -50,6 +50,7 @@
 てみる	AUX	try ...ing, ... and see (食べてみる, try eating; 聞いてみた, tried asking)
 てくる	AUX	come to ..., start to ... (寒くなってきた, it has got cold) | go and ... and come back (買ってくる, go buy (it))
 ていく	AUX	go on ...ing, keep ...ing (増えていく, keep increasing; 続けていく, keep it up) | from now on, one after another: an action or change going forward (これから変わっていく, will change from here on; 順番に見ていきましょう, let's look at them in turn) | ... and go, ... away (持っていく, take along; 消えていく, fade away)
+とく/といて/といた	AUX	casual ておく: do in advance, leave as it is (買っとく, buy (it) in advance; 開けといて, leave (it) open) → ておく
 てくれる	AUX	(someone) does ... for me or us (教えてくれた, (he) taught me)
 てもらう	AUX	have (someone) do ... for me (教えてもらった, (I) had (her) teach me)
 てあげる	AUX	do ... for (someone) (教えてあげる, (I'll) teach you)
@@ -65,11 +66,14 @@
 じゃん	PART	isn't it?, you know (casual じゃないか: いいじゃん, isn't it nice; 言ったじゃん, I told you)
 けれど	CCONJ	but, although (casual けれども: 高いけれど買った, it was expensive, but I bought it)
 なんか	PART	things like, such as (例えばなんか, for example) | kind of, like (filler: なんか変, kind of strange) | something (なんか食べる, eat something) | the likes of (dismissive: 私なんか, someone like me)
-なんて	PART	things like, such as (なんていう, (something) called) | how, what (exclamation: なんてきれい, how beautiful) | the likes of (dismissive: 勉強なんて, studying and the like)
+なんて	PART	things like, such as (なんていう, (something) called) | how, what (exclamation: なんてきれい, how beautiful) | what (in a question or quote: なんて言った?, what did (he) say?; なんて読むの?, how do you read it?) | the likes of (dismissive: 勉強なんて, studying and the like)
+かな	PART	I wonder, maybe (tentative, ending a sentence: 行けるかな, I wonder if (I) can go; 大丈夫かな, I hope it's all right) | I wish, I hope (with ない: 早く来ないかな, I wish (he) would come soon) | (literary) a haiku cutting word, expressing wonder or admiration
 ぐらい	PART	about, around (三時間ぐらい, about three hours) | to the extent that, so ... that (泣くぐらい痛い, so painful you could cry) | at least, just (これぐらい, at least this much)
 くらい	PART	about, around (三時間くらい, about three hours) | to the extent that, so ... that (泣くくらい痛い, so painful you could cry) | at least, just (これくらい, at least this much)
 
 ## Set phrases
+からの	ADP	from, before a noun (東京からの手紙, a letter from Tokyo; 昨日からの雨, the rain since yesterday)
+にわたって/にわたる/にわたり	ADP	over, throughout (a time or an area: 3年にわたって, over three years; 全国にわたる, nationwide)
 によると	ADP	according to (ニュースによると, according to the news)
 によれば	ADP	according to (調査によれば, according to the survey)
 によって	ADP	by (someone: 彼によって書かれた, written by him) | depending on (人によって違う, differs from person to person) | because of, due to (台風によって, due to the typhoon)
@@ -148,6 +152,10 @@
 とする	AUX	suppose, assume (行くとすると, supposing (we) go; 来るとしたら, if (he) comes) | treat as, regard as; とされる: is said to be, is regarded as (AをBとする, take A as B; 名作とされる, is regarded as a masterpiece) | state, hold that (…としている, (they) say that ...) | after a word for how something looks or feels: be ... (しっかりとした, solid; ゆったりとした, roomy)
 
 ## Adverbs and fillers
+意外と	ADV	surprisingly, unexpectedly (意外と簡単, surprisingly easy)
+というより	CCONJ	rather than; or rather (話すというより叫ぶ, more shouting than talking)
+ある意味	ADV	in a sense, in a way (ある意味正しい, (it's) right in a sense)
+はっきり言って/はっきりいって	ADV	frankly speaking, to be honest (はっきり言って無理だ, frankly, it's impossible)
 ほぼ	ADV	almost, nearly (ほぼ毎日, almost every day; ほぼゼロ, nearly zero) | about, approximately
 やはり	ADV	as expected, after all (やはり雨だった, it rained after all) | still, also, likewise (彼もやはり, he too)
 やっぱり	ADV	as expected, after all (casual やはり) | still, also | (filler) well, I think

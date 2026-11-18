@@ -3,7 +3,7 @@ import { GRAMMAR_SOURCE_POS } from "@dict/core/schema";
 import { loadEntries } from "../../common/entries.ts";
 import type { FormRow } from "../../common/forms.ts";
 import { type Answer, type Click, PLAIN } from "./click.ts";
-import { wholeIds } from "./parts.ts";
+import { morphemeParts, splitResult, wholeIds } from "./parts.ts";
 import { endOf, hasPos, headOf, startOf, type Word } from "./words.ts";
 
 /** Most words a phrase may span. */
@@ -149,18 +149,36 @@ const phraseAt = (
     // (`入る`) underline nothing.
     const phraseMatch = c.matchOf(start, start + written.length);
     const ownMatch = c.matchOf(startOf(found), endOf(found));
-    return {
-      entries: [
-        ...loadEntries(c.db, phraseIds).map((entry) => ({
-          ...entry,
-          ...phraseMatch,
-        })),
-        ...loadEntries(
-          c.db,
-          own.filter((id) => !phraseIds.includes(id)),
-        ).map((entry) => ({ ...entry, ...ownMatch })),
-      ],
-    };
+    const entries = [
+      ...loadEntries(c.db, phraseIds).map((entry) => ({
+        ...entry,
+        ...phraseMatch,
+      })),
+      ...loadEntries(
+        c.db,
+        own.filter((id) => !phraseIds.includes(id)),
+      ).map((entry) => ({ ...entry, ...ownMatch })),
+    ];
+    // A grammar construction keeps the clicked word's own pieces, as the
+    // word alone would (`に|し|たい|です` for `にする`: たい "want to" is
+    // there too), when the construction ends where that word ends.
+    const construction = phrase.every(grammar);
+    const parts =
+      construction &&
+      start + written.length === endOf(found) &&
+      phraseMatch.match !== undefined
+        ? morphemeParts(c, found, new Set([...phraseIds, ...own]))
+        : [];
+    if (parts.length > 1) {
+      const before = context.slice(start, startOf(found));
+      return splitResult(
+        c.db,
+        entries,
+        [...(before === "" ? [] : [{ text: before, ids: [] }]), ...parts],
+        {},
+      );
+    }
+    return { entries };
   }
   return undefined;
 };

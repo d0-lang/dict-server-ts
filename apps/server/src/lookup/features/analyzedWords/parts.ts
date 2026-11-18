@@ -1,6 +1,7 @@
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import { hiragana, isKana } from "@dict/core/kana";
 import { lookupKey } from "@dict/core/lookupKey";
+import { FormSource } from "@dict/core/schema";
 import {
   loadEntries,
   type LookupEntry,
@@ -120,9 +121,30 @@ export const wholeIds = (
     ),
   ];
   const inflected = w.length > 1 && w.at(-1) !== head;
+  // The head as written also reaches verbs whose forms it is, when the
+  // analyzer's lemma misses one (`従え` is `従える` too, which UniDic reads
+  // as `従う`). Not an entry of the stem itself (`食べ` "stem of 食べる").
+  const stemForms =
+    w.length > 1 && !head.bases.includes(head.surface)
+      ? c
+          .rows(prefix + head.surface)
+          .filter(
+            (row) =>
+              row.source === FormSource.Inflection &&
+              INFLECTING.has(row.pos) &&
+              lookupKey(row.lemma) !== lookupKey(prefix + head.surface),
+          )
+      : [];
   for (const form of candidates) {
-    const found = c.rows(form);
-    if (found.length === 0) continue;
+    const rows = c.rows(form);
+    if (rows.length === 0) continue;
+    const found =
+      form === written
+        ? rows
+        : [
+            ...rows,
+            ...stemForms.filter((row) => !rows.some((r) => r.id === row.id)),
+          ];
     const inflecting = found.filter((row) => INFLECTING.has(row.pos));
     const kept = inflected && inflecting.length > 0 ? inflecting : found;
     // The base forms' own entries first, the last named first: it is the

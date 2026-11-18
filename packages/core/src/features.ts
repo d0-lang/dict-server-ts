@@ -44,7 +44,7 @@ export const FEATURE_LABELS: Readonly<Record<string, string>> = {
 /**
  * Parts of speech that get features from the shared tags: names don't need
  * grammar on the headword. A language's own tags (`featureTags`) give
- * features to any part of speech (a Japanese な-adjective).
+ * features to adjectives too (a Japanese な-adjective).
  */
 export const FEATURE_POS: ReadonlySet<UdPos> = new Set(["NOUN", "VERB"]);
 
