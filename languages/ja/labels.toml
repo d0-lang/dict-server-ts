@@ -1,0 +1,6 @@
+# What Japanese's labels mean, in English (the pair's target language), for
+# `/v1/get-labels`. `text` at most 1000 characters, plain text.
+
+["て form"]
+name = "て form"
+text = "The verb or adjective in its て form, which links it to what follows: and, and then (食べて寝る, eat and sleep), or a verb after it that adds a meaning (食べている, is eating; 食べてみる, try eating; 食べてしまう, end up eating). Verbs make it like the past た: 読んで, 書いて, 行って. Adjectives end in くて (高くて, expensive and)."

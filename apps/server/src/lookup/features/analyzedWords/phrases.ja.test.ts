@@ -83,17 +83,12 @@ describe("grammar phrases and endings", () => {
   });
 
   it("shows an ending by its own line, not by a line it is a form of", () => {
-    const { entries, segments } = lookupWord(
-      words,
-      language,
-      "て",
-      "言えて、出る。",
-      1,
-    );
-    const part = segments!.find((segment) => segment.text === "て")!;
+    // 言え|て is one segment, 言えて: the て form ends 言え, and shows
+    // the て line, not ている's.
+    const { entries } = lookupWord(words, language, "て", "言えて、出る。", 1);
     assert.deepStrictEqual(
-      part.entries!.map((i) => entries[i]!.lemma),
-      ["て"],
+      entries.map((entry) => entry.lemma),
+      ["言える", "て"],
     );
   });
 
@@ -102,10 +97,11 @@ describe("grammar phrases and endings", () => {
       "言え",
       "なかった",
     ]);
-    // by the base form of the last ending: みよう is みる
+    // by the base form of the last ending: みよう is みる; the て form
+    // ends 出, and みよう shows てみる
     assert.deepStrictEqual(shown("出", "出てみよう。").segments, [
-      "出",
-      "てみよう",
+      "出て",
+      "みよう",
     ]);
     // たら is its base た and "if": it stays out of the group
     assert.deepStrictEqual(shown("言", "言えなかったら困る。").segments, [

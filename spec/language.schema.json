@@ -378,6 +378,38 @@
               },
               "description": "Rules that join a morpheme to the word before it: a word is a morpheme and what the rules join to it (`食べ` + `まし` + `た`)."
             },
+            "formEndings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Parts of speech of the ending, as in `join`."
+                  },
+                  "surface": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Only these spellings of it (`て`, `で`)."
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "The label on the entries of the piece it ends (`て form`), explained in the language's `labels.toml`."
+                  }
+                },
+                "required": [
+                  "pos",
+                  "label"
+                ],
+                "additionalProperties": false
+              },
+              "description": "Endings that make a form of the piece before them, as a reader takes it: the ending closes that piece's segment, whose entries get `label`, with the ending's own line after them (`並んで`: `並ぶ` [て form] and `て`). What follows starts a segment that runs to the word's end or the next such ending (`並んで|います`, `作って|みました`)."
+            },
             "prefixes": {
               "type": "array",
               "items": {

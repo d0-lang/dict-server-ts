@@ -7,6 +7,7 @@ import {
   type Segment,
 } from "../../common/entries.ts";
 import { type FormRow, grammarIds } from "../../common/forms.ts";
+import type { Morpheme } from "../../common/analyzer.ts";
 import type { Click } from "./click.ts";
 import { hasPos, headOf, startOf, type Word } from "./words.ts";
 
@@ -26,7 +27,18 @@ export type Part = {
   readonly text: string;
   readonly ids: ReadonlyArray<number>;
   readonly main?: boolean;
+  /** A label for these of `ids`: the piece a form ending closes (`並ぶ` in `並んで`, `て form`). */
+  readonly form?: {
+    readonly label: string;
+    readonly ids: ReadonlyArray<number>;
+  };
 };
+
+/** `entry` with `part`'s form label, when it is one of the ids the label is for. */
+const withForm = (part: Part, id: number, entry: LookupEntry): LookupEntry =>
+  part.form?.ids.includes(id) === true
+    ? { ...entry, labels: [...(entry.labels ?? []), part.form.label] }
+    : entry;
 
 /**
  * A result of entries for the whole run, then each part's: the main parts'
@@ -34,7 +46,8 @@ export type Part = {
  * when it is more than the clicked word: on the whole run's entries, as the
  * protocol asks of the first entry. With none of those, on the entries of the
  * part shown first, all of them: entries with one headword are merged only
- * when their `match` is the same (`presentResult`).
+ * when their `match` is the same (`presentResult`). One part is the whole
+ * run, and no segments (`食べて`, its form ending joined).
  */
 export const splitResult = (
   db: DictionaryDb,
@@ -58,19 +71,24 @@ export const splitResult = (
     entries: [
       ...whole.map((entry) => ({ ...entry, ...match })),
       ...ranked.flatMap((part) =>
-        loadEntries(db, part.ids).map((entry) =>
-          part === first ? { ...entry, ...match } : entry,
-        ),
+        loadEntries(db, part.ids).map((loaded, k) => {
+          const entry = withForm(part, part.ids[k]!, loaded);
+          return part === first ? { ...entry, ...match } : entry;
+        }),
       ),
     ],
-    segments: parts.map((part): Segment =>
-      part.ids.length > 0
-        ? {
-            text: part.text,
-            entries: part.ids.map((_, k) => from.get(part)! + k),
-          }
-        : { text: part.text },
-    ),
+    ...(parts.length > 1
+      ? {
+          segments: parts.map((part): Segment =>
+            part.ids.length > 0
+              ? {
+                  text: part.text,
+                  entries: part.ids.map((_, k) => from.get(part)! + k),
+                }
+              : { text: part.text },
+          ),
+        }
+      : {}),
   };
 };
 
@@ -134,17 +152,23 @@ const endingGroup = (
   { readonly end: number; readonly ids: ReadonlyArray<number> } | undefined => {
   for (let end = w.length; end >= from + 2; end--) {
     const run = w.slice(from, end);
-    const before = run
-      .slice(0, -1)
+    const rest = run
+      .slice(1, -1)
       .map((m) => m.surface)
       .join("");
+    // The first ending also by its base form: `で|い` is `ている`.
+    const befores = [
+      ...new Set([run[0]!.surface, ...run[0]!.bases].map((f) => f + rest)),
+    ];
     const last = run.at(-1)!;
     const bases = last.bases.filter(
       (base) => last.surface === base || !last.surface.startsWith(base),
     );
-    for (const form of [last.surface, ...bases].map((f) => before + f)) {
-      const ids = grammarIds(c.db, lookupKey(form));
-      if (ids.length > 0) return { end, ids };
+    for (const before of befores) {
+      for (const form of [last.surface, ...bases].map((f) => before + f)) {
+        const ids = grammarIds(c.db, lookupKey(form));
+        if (ids.length > 0) return { end, ids };
+      }
     }
   }
   return undefined;
@@ -154,7 +178,8 @@ const endingGroup = (
  * Each morpheme a part: an ending by its grammar-file line, else by its base
  * forms (`し` -> `する`); the head also by its spelling (`勉強` the noun).
  * Endings the grammar file lists together are one part (`言え|なかった`,
- * `食べ|てい|ます`: `endingGroup`). Entries already `shown` for the whole
+ * `食べ|てい|ます`: `endingGroup`). A form ending closes the part before it
+ * (`formEndings`: `食べて|います`). Entries already `shown` for the whole
  * word are left out.
  */
 export const morphemeParts = (
@@ -163,23 +188,29 @@ export const morphemeParts = (
   shown: ReadonlySet<number>,
 ): ReadonlyArray<Part> => {
   const head = w.findIndex((m) => !hasPos(m.pos, c.settings.prefixes));
-  const parts: Array<Part> = [];
-  const add = (text: string, ids: ReadonlyArray<number>, main = false) =>
+  /** Each part, with the morphemes it spells (`from` up to `to`). */
+  const parts: Array<Part & { readonly from: number; readonly to: number }> =
+    [];
+  const add = (
+    from: number,
+    to: number,
+    ids: ReadonlyArray<number>,
+    main = false,
+  ) =>
     parts.push({
-      text,
+      text: w
+        .slice(from, to)
+        .map((m) => m.surface)
+        .join(""),
       ids: [...new Set(ids)].filter((id) => !shown.has(id)),
       ...(main ? { main } : {}),
+      from,
+      to,
     });
   for (let i = 0; i < w.length;) {
     const group = head >= 0 && i > head ? endingGroup(c, w, i) : undefined;
     if (group !== undefined) {
-      add(
-        w
-          .slice(i, group.end)
-          .map((m) => m.surface)
-          .join(""),
-        group.ids,
-      );
+      add(i, group.end, group.ids);
       i = group.end;
       continue;
     }
@@ -215,11 +246,87 @@ export const morphemeParts = (
     // with a prefix written before it (`お|送り`, `お|名前`): the client
     // opens on the segment of the first entry in one.
     add(
-      morpheme.surface,
+      i,
+      i + 1,
       !isHead && grammar.length > 0 ? grammar : ranked.map((row) => row.id),
       isHead,
     );
     i++;
   }
-  return parts;
+  return withFormEndings(c, w, head, parts, shown);
+};
+
+/**
+ * The parts with each form ending moved onto the part before it, which it
+ * closes (`並ん|で` is `並んで`): that part's entries get the ending's label,
+ * and the ending's own line follows them. The parts after it, up to the next
+ * form ending, are one part (`い|ます` is `います`), holding each one's
+ * entries (`ている`, `ます`).
+ */
+const withFormEndings = (
+  c: Click,
+  w: Word,
+  head: number,
+  parts: ReadonlyArray<Part & { readonly from: number; readonly to: number }>,
+  shown: ReadonlySet<number>,
+): ReadonlyArray<Part> => {
+  const endingOf = (m: Morpheme) =>
+    c.settings.formEndings.find(
+      (ending) =>
+        hasPos(m.pos, ending.pos) &&
+        (ending.surface === undefined || ending.surface.includes(m.surface)),
+    );
+  const out: Array<Part> = [];
+  /** Whether the last part takes in the parts after it: what follows a form ending. */
+  let open = false;
+  let opensNext = false;
+  for (const part of parts) {
+    const first = w[part.from]!;
+    const ending = part.from > head ? endingOf(first) : undefined;
+    const before = out.at(-1);
+    if (ending !== undefined && before !== undefined) {
+      const own = first.bases
+        .flatMap((base) => grammarIds(c.db, base))
+        .filter((id) => !shown.has(id) && !before.ids.includes(id));
+      out[out.length - 1] = {
+        ...before,
+        text: before.text + first.surface,
+        ids: [...new Set([...before.ids, ...own])],
+        // Only what inflects has the form (not `見` the noun in `見て`).
+        form: {
+          label: ending.label,
+          ids: before.ids.filter((id) => INFLECTING.has(c.infoOf(id).pos)),
+        },
+      };
+      open = false;
+      opensNext = part.to - part.from === 1;
+      if (!opensNext) {
+        out.push({
+          text: part.text.slice(first.surface.length),
+          ids: part.ids,
+        });
+        open = true;
+      }
+      continue;
+    }
+    if (open) {
+      const last = out.at(-1)!;
+      out[out.length - 1] = {
+        ...last,
+        text: last.text + part.text,
+        ids: [...new Set([...last.ids, ...part.ids])],
+      };
+      continue;
+    }
+    out.push(
+      part.main === true
+        ? { text: part.text, ids: part.ids, main: true }
+        : { text: part.text, ids: part.ids },
+    );
+    if (opensNext) {
+      open = true;
+      opensNext = false;
+    }
+  }
+  return out;
 };

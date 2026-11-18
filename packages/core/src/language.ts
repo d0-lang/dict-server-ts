@@ -337,6 +337,27 @@ const Context = doc(
             ),
             [],
           ),
+          formEndings: orDefault(
+            doc(
+              Schema.Array(
+                Schema.Struct({
+                  pos: doc(
+                    strings,
+                    "Parts of speech of the ending, as in `join`.",
+                  ),
+                  surface: Schema.optionalKey(
+                    doc(strings, "Only these spellings of it (`て`, `で`)."),
+                  ),
+                  label: doc(
+                    Schema.String,
+                    "The label on the entries of the piece it ends (`て form`), explained in the language's `labels.toml`.",
+                  ),
+                }),
+              ),
+              "Endings that make a form of the piece before them, as a reader takes it: the ending closes that piece's segment, whose entries get `label`, with the ending's own line after them (`並んで`: `並ぶ` [て form] and `て`). What follows starts a segment that runs to the word's end or the next such ending (`並んで|います`, `作って|みました`).",
+            ),
+            [],
+          ),
           prefixes: orDefault(
             doc(
               strings,

@@ -51,6 +51,10 @@ export const pairLabels = (
         ).labels,
     ),
   );
+  // Labels the lookup adds to a form (`て form`).
+  for (const ending of language.context.analyzer?.formEndings ?? []) {
+    shown.add(ending.label);
+  }
   return Object.fromEntries(
     [...shown].sort().flatMap((label) => {
       const explanation = explainLabel(explanations, label);

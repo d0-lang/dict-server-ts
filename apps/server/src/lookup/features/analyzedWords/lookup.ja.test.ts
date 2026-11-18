@@ -45,12 +45,22 @@ describe("words found by the analyzer, in a script without spaces", () => {
     assert.strictEqual(entries[0]!.lemma, "勉強");
     assert.strictEqual(entries[0]!.pos, "VERB");
     assert.deepStrictEqual(entries[0]!.match, ["勉強しています"]);
+    // The て form ends the piece before it, labelled, with the て line.
     assert.deepStrictEqual(parts("し", context), [
       "勉強: 勉強",
+      "して: する, て",
+      "います: いる, ます",
+    ]);
+    const suru = entries.find((entry) => entry.lemma === "する")!;
+    assert.deepStrictEqual(suru.labels, ["て form"]);
+  });
+
+  it("joins ながら after the verb, as the て form", () => {
+    assert.deepStrictEqual(parts("実", "実験しながら話す。"), [
+      // 実験 is the whole word's entry, shown first
+      "実験: ",
       "し: する",
-      "て: て",
-      "い: いる",
-      "ます: ます",
+      "ながら: ながら",
     ]);
   });
 

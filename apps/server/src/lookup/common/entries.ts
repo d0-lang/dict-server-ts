@@ -14,9 +14,10 @@ import { commonsFilePage } from "./sources.ts";
 
 /**
  * Entry in the shape of the protocol's `/v1/lookup` response. Until
- * `presentResult` turns it into a headword, `lemma` is the stored lemma and
- * `features` its grammar (`Gender=Masc`); after, `lemma` is the headword and
- * `labels` its grammar, and `features` is gone.
+ * `presentResult` turns it into a headword, `lemma` is the stored lemma,
+ * `features` its grammar (`Gender=Masc`) and `labels` what the lookup adds
+ * (`て form`); after, `lemma` is the headword and `labels` its grammar and
+ * those, and `features` is gone.
  */
 export type LookupEntry = {
   readonly lemma: string;

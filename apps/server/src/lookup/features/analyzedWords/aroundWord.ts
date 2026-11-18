@@ -1,6 +1,12 @@
 import { loadEntries } from "../../common/entries.ts";
 import { type Answer, type Click, PLAIN } from "./click.ts";
-import { derivedWord, morphemeParts, splitResult, wholeIds } from "./parts.ts";
+import {
+  derivedWord,
+  INFLECTING,
+  morphemeParts,
+  splitResult,
+  wholeIds,
+} from "./parts.ts";
 import { endOf, startOf } from "./words.ts";
 
 /**
@@ -24,6 +30,27 @@ export const aroundWord = (c: Click): Answer => {
   const parts = morphemeParts(c, found, new Set(whole));
   if (derived && parts.every((part) => part.ids.length === 0)) {
     return PLAIN;
+  }
+  // A form ending closes the head (`並んで`): the word's entries are that
+  // part's, with the form's label (`並ぶ` [て form]), not the whole word's.
+  const formed = parts.find((part) => part.main === true && part.form);
+  if (formed !== undefined && whole.length > 0) {
+    const moved = parts.map((part) =>
+      part === formed
+        ? {
+            ...part,
+            ids: [...whole, ...part.ids],
+            form: {
+              ...part.form!,
+              ids: [
+                ...whole.filter((id) => INFLECTING.has(c.infoOf(id).pos)),
+                ...part.form!.ids,
+              ],
+            },
+          }
+        : part,
+    );
+    return splitResult(c.db, [], moved, match);
   }
   return splitResult(c.db, wholeEntries, parts, match);
 };

@@ -139,7 +139,17 @@ export const presentResult = (
   const withKey = new Map<string, Array<number>>();
   const newIndex = new Map<number, number>();
   result.entries.forEach((entry, i) => {
-    const head = headwordOf(language, entry.lemma, entry.pos, entry.features);
+    const grammar = headwordOf(
+      language,
+      entry.lemma,
+      entry.pos,
+      entry.features,
+    );
+    // Labels the lookup added stay after the grammar's (`て form`).
+    const head = {
+      ...grammar,
+      labels: unique([...grammar.labels, ...(entry.labels ?? [])]),
+    };
     // A context entry stays apart from an own entry with the same headword.
     const key = JSON.stringify([
       head.lemma,

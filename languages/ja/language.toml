@@ -53,6 +53,9 @@ prefixes = ["接頭辞"]
 # Suffixes make a new word (機械|屋 "mechanic", 国際|的 "international"): one
 # without an entry is shown by its parts, not as the word before the suffix.
 suffixes = ["接尾辞"]
+# The て form ends the piece before it, as a reader takes it: 並んで|います,
+# 使わ|れて|います, not 並ん|で|い|ます. That piece's entries are labelled.
+formEndings = [{ pos = ["助詞-接続助詞"], surface = ["て", "で"], label = "て form" }]
 
 # Auxiliaries after a verb, adjective or auxiliary: 食べ|まし|た, 行か|ない.
 [[context.analyzer.join]]
@@ -64,10 +67,11 @@ after = ["動詞", "形容詞", "助動詞"]
 pos = ["形容詞-非自立可能"]
 after = ["動詞", "形容詞", "助動詞"]
 
-# The て form and the conditional ば: 食べ|て, 食べれ|ば.
+# The て form, the conditional ば, and ながら/つつ "while": 食べ|て,
+# 食べれ|ば, 実験し|ながら.
 [[context.analyzer.join]]
 pos = ["助詞-接続助詞"]
-surface = ["て", "で", "ば"]
+surface = ["て", "で", "ば", "ながら", "つつ"]
 after = ["動詞", "形容詞", "助動詞"]
 
 # たり/だり listing actions: 入院し|たり, 読ん|だり.
