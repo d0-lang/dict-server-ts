@@ -11,8 +11,12 @@
  * The texts come from the corpus repo next to this one (`../corpus/<lang>`,
  * or `--texts`). Results go to `apps/server/eval/out/<lang>/dump/<run>.jsonl`.
  * Every run reports where a response breaks the protocol's rules for `match`
- * and `segments`. With `--base`, it also counts how many responses changed
- * and lists the words whose first entry changed, most frequent first.
+ * and `segments`, and what a lookup costs: its time and the SQL statements it
+ * runs, saved next to the run as `<run>.cost.json`. With `--base`, it also
+ * counts how many responses changed, lists the words whose first entry
+ * changed, most frequent first, and compares the cost with the base run's.
+ * Times depend on the machine and what else runs on it: compare runs made
+ * alike.
  */
 import { Database } from "bun:sqlite";
 import { drizzle } from "drizzle-orm/bun-sqlite";
@@ -28,7 +32,11 @@ import { parseArgs } from "node:util";
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import { readPairLanguage } from "@dict/core/language";
 import { schema } from "@dict/core/schema";
+import { loadAnalyzer } from "../src/lookup/common/analyzer.ts";
 import type { LookupResult } from "../src/lookup/common/entries.ts";
+import { compoundRules } from "../src/lookup/features/compounds/split.ts";
+import { warmCompounds } from "../src/lookup/features/compounds/stems.ts";
+import { phraseIndex } from "../src/lookup/features/phrases/phraseIndex.ts";
 import { lookupWord } from "../src/lookup/lookup.ts";
 
 const { values } = parseArgs({
@@ -50,6 +58,74 @@ const pair = `${lang}_${values.target}`;
 const texts = values.texts ?? `../corpus/${lang}`;
 const out = join("apps/server/eval/out", lang, "dump");
 const fileOf = (run: string) => join(out, `${run}.jsonl`);
+const costFileOf = (run: string) => join(out, `${run}.cost.json`);
+
+/** What the lookups cost: milliseconds and SQL statements per lookup. */
+type Cost = {
+  readonly lookups: number;
+  readonly ms: {
+    readonly mean: number;
+    readonly p50: number;
+    readonly p99: number;
+  };
+  readonly sql: { readonly mean: number; readonly p99: number };
+};
+
+/**
+ * Counts the SQL statements `client` runs. Every statement it prepares, with
+ * `query` (cached) or `prepare` (drizzle's), counts each call that runs it.
+ */
+const countStatements = (client: Database): (() => number) => {
+  let count = 0;
+  const counting = new WeakSet<object>();
+  const counted = <S extends object>(statement: S): S => {
+    if (counting.has(statement)) return statement;
+    counting.add(statement);
+    const methods = statement as unknown as Record<string, unknown>;
+    for (const name of ["all", "get", "run", "values", "iterate"]) {
+      const run = methods[name];
+      if (typeof run !== "function") continue;
+      methods[name] = (...args: Array<unknown>) => {
+        count++;
+        return run.apply(statement, args);
+      };
+    }
+    return statement;
+  };
+  const { query, prepare } = client;
+  client.query = ((sql: string) =>
+    counted(query.call(client, sql))) as unknown as typeof client.query;
+  client.prepare = ((...args: Parameters<typeof prepare>) =>
+    counted(prepare.apply(client, args))) as unknown as typeof client.prepare;
+  return () => count;
+};
+
+/** The value below which a share `p` of the sorted `values` fall. */
+const percentile = (sorted: ReadonlyArray<number>, p: number): number =>
+  sorted[Math.min(sorted.length - 1, Math.floor(p * sorted.length))] ?? 0;
+
+const costOf = (
+  ms: ReadonlyArray<number>,
+  sql: ReadonlyArray<number>,
+): Cost => {
+  const round = (n: number) => Math.round(n * 100) / 100;
+  const mean = (values: ReadonlyArray<number>) =>
+    values.reduce((sum, n) => sum + n, 0) / Math.max(1, values.length);
+  const sortedMs = [...ms].sort((a, b) => a - b);
+  const sortedSql = [...sql].sort((a, b) => a - b);
+  return {
+    lookups: ms.length,
+    ms: {
+      mean: round(mean(ms)),
+      p50: round(percentile(sortedMs, 0.5)),
+      p99: round(percentile(sortedMs, 0.99)),
+    },
+    sql: { mean: round(mean(sql)), p99: percentile(sortedSql, 0.99) },
+  };
+};
+
+const describeCost = (cost: Cost) =>
+  `${cost.ms.mean} ms mean, ${cost.ms.p50} p50, ${cost.ms.p99} p99; ${cost.sql.mean} SQL statements mean, ${cost.sql.p99} p99`;
 
 /** One lookup: what was sent and what came back. */
 type Line = {
@@ -97,12 +173,27 @@ const copyNumber = (text: string, word: string, start: number) => {
   return undefined;
 };
 
-const dump = (): ReadonlyArray<Line> => {
-  const db = drizzle({
-    client: new Database(`data/${pair}.sqlite`, { readonly: true }),
-    schema,
-  }) as DictionaryDb;
+const dump = (): { lines: ReadonlyArray<Line>; cost: Cost } => {
+  const client = new Database(`data/${pair}.sqlite`, { readonly: true });
+  const statements = countStatements(client);
+  const db = drizzle({ client, schema }) as DictionaryDb;
   const language = readPairLanguage(pair);
+  // Built before the first lookup, as the server builds them at startup,
+  // so no lookup's cost includes them.
+  loadAnalyzer(language);
+  phraseIndex(db, language);
+  const rules = compoundRules(language);
+  if (rules !== undefined) warmCompounds(db, rules);
+  const ms: Array<number> = [];
+  const sql: Array<number> = [];
+  const timed = (word: string, context?: string, at?: number): LookupResult => {
+    const before = statements();
+    const start = performance.now();
+    const result = lookupWord(db, language, word, context, at);
+    ms.push(performance.now() - start);
+    sql.push(statements() - before);
+    return result;
+  };
   const sentences = new Intl.Segmenter(lang, { granularity: "sentence" });
   const segmenter = new Intl.Segmenter(lang, { granularity: "word" });
   const lines: Array<Line> = [];
@@ -128,16 +219,16 @@ const dump = (): ReadonlyArray<Line> => {
           word,
           ...(context !== undefined ? { context } : {}),
           ...(at !== undefined ? { at } : {}),
-          r: lookupWord(db, language, word, context, at),
+          r: timed(word, context, at),
         });
         if (!plain.has(word)) {
           plain.add(word);
-          lines.push({ word, r: lookupWord(db, language, word) });
+          lines.push({ word, r: timed(word) });
         }
       }
     }
   }
-  return lines;
+  return { lines, cost: costOf(ms, sql) };
 };
 
 /** Where a response breaks the protocol's rules for `match` and `segments`. */
@@ -179,14 +270,16 @@ const firstOf = (r: LookupResult) => {
   return `${entry.lemma} ${entry.pos}${reading === undefined ? "" : ` ${reading}`}${entry.match === undefined ? "" : ` match=${entry.match.join("|")}`}`;
 };
 
-const lines = dump();
+const { lines, cost } = dump();
 mkdirSync(out, { recursive: true });
 writeFileSync(
   fileOf(values.run),
   lines.map((line) => JSON.stringify(line)).join("\n") + "\n",
 );
+writeFileSync(costFileOf(values.run), JSON.stringify(cost, null, 2) + "\n");
 console.log(`${lines.length} lookups -> ${fileOf(values.run)}`);
 console.log("protocol problems:", problems(lines));
+console.log(`cost per lookup: ${describeCost(cost)}`);
 
 if (values.base !== undefined) {
   const baseFile = fileOf(values.base);
@@ -199,6 +292,17 @@ if (values.base !== undefined) {
     throw new Error(
       `${dirname(baseFile)}: the runs looked up different words (${base.length} and ${lines.length}); was the corpus changed?`,
     );
+  }
+  const baseCost = costFileOf(values.base);
+  if (existsSync(baseCost)) {
+    const before = JSON.parse(readFileSync(baseCost, "utf8")) as Cost;
+    const change = (from: number, to: number) =>
+      `${from} -> ${to} (${to >= from ? "+" : ""}${Math.round(((to - from) / Math.max(from, 0.001)) * 100)}%)`;
+    console.log(
+      `cost against ${values.base}: ms mean ${change(before.ms.mean, cost.ms.mean)}, p99 ${change(before.ms.p99, cost.ms.p99)}; SQL mean ${change(before.sql.mean, cost.sql.mean)}`,
+    );
+  } else {
+    console.log(`no cost saved for ${values.base}: run it again to compare`);
   }
   let changed = 0;
   const firsts = new Map<string, { count: number; context?: string }>();
