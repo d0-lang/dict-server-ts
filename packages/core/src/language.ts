@@ -123,6 +123,27 @@ const Import = doc(
       ),
       false,
     ),
+    skippedPos: orDefault(
+      doc(
+        strings,
+        'wiktextract parts of speech whose lines are not imported. Japanese `syllable` is a kana\'s own line ("The hiragana syllable は"), which names no word a reader looks up.',
+      ),
+      [],
+    ),
+    formlessPos: orDefault(
+      doc(
+        strings,
+        "wiktextract parts of speech whose inflection tables are not indexed. Japanese `suffix` lines conjugate endings that the analyzer splits off and finds by their base form (`た`, `ます`), and their tables, Classical forms included, spell short words: `な` as a form of `ず`, `は` of the Old Japanese `ふ`.",
+      ),
+      [],
+    ),
+    lemmaSuffixes: orDefault(
+      doc(
+        Schema.Record(Schema.String, Schema.String),
+        "Head templates whose words a reader learns with something added, by template name: the lemma gets it (`ja-verb-suru` = `する`: the verb on the page `勉強` is `勉強する`, its reading `べんきょうする`), the bare word stays a form, and table forms without the word are dropped (Wiktionary's tables of katakana する-verbs give `し` and `しろ` for `カール`).",
+      ),
+      {},
+    ),
   }),
   "How the importer reads this language's wiktextract data.",
 );

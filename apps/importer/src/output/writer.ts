@@ -249,6 +249,9 @@ export const makeWriter = (
         JSON.stringify([entry.page]),
       );
       insertForm.run(lookupKey(entry.lemma), state.id, FormSource.Lemma);
+      if (entry.bareLemma !== undefined) {
+        insertForm.run(lookupKey(entry.bareLemma), state.id, FormSource.Lemma);
+      }
     } else {
       counts.mergedLines++;
       if (!state.pages.has(entry.page)) {

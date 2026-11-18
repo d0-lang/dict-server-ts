@@ -27,8 +27,11 @@ export const addRedirects = ({
 }: WriterContext) => {
   const readAs = sqlite.query<{ id: number }, [string, number, string]>(
     `SELECT DISTINCT f.entry_id AS id FROM forms f
-     JOIN pronunciations p ON p.entry_id = f.entry_id AND p.kind = 'reading' AND p.value = ?3
      JOIN entries e ON e.id = f.entry_id AND e.pos <> 'PROPN'
+     -- read as the spelling, plus what the lemma adds to the word (ねつぞう
+     -- for 捏造する, read ねつぞうする: lemmaSuffixes)
+     JOIN pronunciations p ON p.entry_id = f.entry_id AND p.kind = 'reading'
+       AND p.value = ?3 || substr(e.lemma, length(?1) + 1)
      WHERE f.form = ?1 AND f.source = ?2`,
   );
   const lemmaOf = sqlite.query<{ id: number }, [string, number]>(

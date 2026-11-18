@@ -1,3 +1,4 @@
+import { lookupKey } from "@dict/core/lookupKey";
 import { Effect, Result, Stream } from "effect";
 import { createDictionaryFile } from "@dict/core/DictionaryDb";
 import { SCHEMA_VERSION } from "@dict/core/schema";
@@ -123,6 +124,12 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     try: () => options.grammar ?? loadGrammar(rules.code),
     catch: importFailure("cannot read the grammar file"),
   });
+  // A suffix the grammar file lists keeps its table (`てます` of `ている`):
+  // the grammar line shows it.
+  const withGrammar = {
+    ...rules,
+    grammarWords: new Set(grammar.map((entry) => lookupKey(entry.lemma))),
+  };
   const writer = makeWriter(
     db,
     grammar,
@@ -139,7 +146,7 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     );
 
   const writeBatch = (batch: ReadonlyArray<WiktextractEntry>) => {
-    const results = batch.map((raw) => transformEntry(rules, raw));
+    const results = batch.map((raw) => transformEntry(withGrammar, raw));
     results.forEach((result) => tallyResult(tally, result));
     writer.writeBatch(results);
     const before = tally.languageLines;

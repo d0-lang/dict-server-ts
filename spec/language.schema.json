@@ -133,6 +133,27 @@
         "verbChainsThroughEntries": {
           "type": "boolean",
           "description": "A verb form's chain of links goes on through a word with entries but no verb entry, by that word's own verb links: French `partie` is \"feminine singular of parti\", whose entries are an adjective and a noun and whose verb line is \"past participle of partir\", so `partie` also reaches `partir`. Otherwise a chain stops at any word with an entry. Off where a participle used as an adjective is mostly read as one: the verb it reaches then ranks with the adjective, and often first (German `naheliegende`, Russian `удаленный`)."
+        },
+        "skippedPos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "wiktextract parts of speech whose lines are not imported. Japanese `syllable` is a kana's own line (\"The hiragana syllable は\"), which names no word a reader looks up."
+        },
+        "formlessPos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "wiktextract parts of speech whose inflection tables are not indexed. Japanese `suffix` lines conjugate endings that the analyzer splits off and finds by their base form (`た`, `ます`), and their tables, Classical forms included, spell short words: `な` as a form of `ず`, `は` of the Old Japanese `ふ`."
+        },
+        "lemmaSuffixes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Head templates whose words a reader learns with something added, by template name: the lemma gets it (`ja-verb-suru` = `する`: the verb on the page `勉強` is `勉強する`, its reading `べんきょうする`), the bare word stays a form, and table forms without the word are dropped (Wiktionary's tables of katakana する-verbs give `し` and `しろ` for `カール`)."
         }
       },
       "additionalProperties": false,
