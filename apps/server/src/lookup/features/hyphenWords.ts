@@ -83,7 +83,9 @@ const spellings = (
  * (`-то`, `-ка`, `экс-`, see `hyphenAffixes`), so `сказал-то` still explains
  * `то`, but only beside dictionary words: `-е` in `environment-е` is an ending.
  * After a number, the part is an ending the grammar file explains (`-е` in
- * `1990-е`, `-го` in `3-го`), if it lists one.
+ * `1990-е`, `-го` in `3-го`), if it lists one. The entries cover what they
+ * explain, so `match` holds more than the clicked part: the number with its
+ * ending (`3-го`), the hyphen-joined word with its affix (`сказал-то`).
  */
 const hyphenWordIds = (
   db: DictionaryDb,
@@ -113,7 +115,10 @@ const hyphenWordIds = (
   }
   // An ending written after a number (`3-го`, `1990-х`): the grammar file's ending.
   if (clicked > first && /^\p{N}+$/u.test(tokens[clicked - 1]!.key)) {
-    return at(grammarIds(db, `-${tokens[clicked]!.key}`), [clicked]);
+    return at(grammarIds(db, `-${tokens[clicked]!.key}`), [
+      clicked - 1,
+      clicked,
+    ]);
   }
   const others = tokens
     .slice(first, last + 1)
@@ -134,7 +139,10 @@ const hyphenWordIds = (
         endings.has(row.id) && row.pos === "X" ? [] : [row.id],
       );
     });
-  return at(affixIds, [clicked]);
+  return at(
+    affixIds,
+    Array.from({ length: last - first + 1 }, (_, k) => first + k),
+  );
 };
 
 /**

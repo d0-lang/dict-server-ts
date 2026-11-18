@@ -1,6 +1,13 @@
 import { assert, describe, it } from "@effect/vitest";
-import { lemmas } from "../testing/dictionary.ts";
+import { lookupWord } from "../lookup.ts";
+import { languageOf, lemmas } from "../testing/dictionary.ts";
 import { russian } from "../testing/russian.ts";
+
+/** The `match` of each entry of `word` clicked in `context`. */
+const matches = (word: string, context: string) =>
+  lookupWord(russian, languageOf("ru_en"), word, context, 1).entries.map(
+    (entry) => entry.match,
+  );
 
 describe("lookup with context", () => {
   it("joins the parts of a Russian hyphenated word, inflected or not", () => {
@@ -29,6 +36,11 @@ describe("lookup with context", () => {
       lemmas(russian, "ru_en", "ка", "Поехали-ка домой."),
       ["-ка", "ка"],
     );
+    // The affix explains the hyphen-joined word, which it underlines.
+    assert.deepStrictEqual(matches("ка", "Поехали-ка домой."), [
+      ["Поехали-ка"],
+      undefined,
+    ]);
     assert.deepStrictEqual(
       lemmas(russian, "ru_en", "е", "Это было в 1990-е годы."),
       ["е"],
@@ -40,6 +52,11 @@ describe("lookup with context", () => {
       lemmas(russian, "ru_en", "го", "В матче 3-го тура выиграли гости."),
       ["-го", "го"],
     );
+    // It underlines the number with its ending, never just the ending.
+    assert.deepStrictEqual(matches("го", "В матче 3-го тура выиграли гости."), [
+      ["3-го"],
+      undefined,
+    ]);
     // not without the number
     assert.deepStrictEqual(lemmas(russian, "ru_en", "го", "Они играли в го."), [
       "го",
