@@ -98,7 +98,7 @@ export const judgeSplit = (
   language: Language,
   c: SegmentCase,
 ): { outcome: SegmentOutcome; split: string } => {
-  const rules = compoundRules(language) ?? { linkers: [] };
+  const rules = compoundRules(language) ?? { linkers: [], nounLinkers: [] };
   const result = compoundEntries(db, c.word, rules);
   const segments = result.segments;
   if (segments === undefined || result.entries.length === 0)

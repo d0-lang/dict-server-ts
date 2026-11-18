@@ -15,6 +15,8 @@ export type CompoundRules = {
    * order. `""` is a plain join (`Gemüse|fond`).
    */
   readonly linkers: ReadonlyArray<string>;
+  /** Of `linkers`, those that join a modifier to any noun (German `s`, `es`). */
+  readonly nounLinkers: ReadonlyArray<string>;
   /**
    * Endings a modifier drops before its linker, for languages whose
    * modifiers are stems rather than words: Russian `нефть` → `нефт|е|газовый`,

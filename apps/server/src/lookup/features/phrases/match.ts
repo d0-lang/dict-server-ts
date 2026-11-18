@@ -16,6 +16,7 @@ import { type Phrase, phraseIndex } from "./phraseIndex.ts";
 type Matcher = {
   readonly tokens: ReadonlyArray<Token>;
   readonly info: (key: string, wordClass?: CaseClass) => TokenInfo;
+  readonly reflexive: string | undefined;
   readonly reflexives: ReadonlySet<string> | undefined;
   /** Words allowed between a verb and the rest of its phrase (`context.maxGap`). */
   readonly maxGap: number;
@@ -72,7 +73,7 @@ const keyMatches = (
   ) {
     return true;
   }
-  if (m.reflexives !== undefined && word === "sich" && m.reflexives.has(key)) {
+  if (word === m.reflexive && m.reflexives?.has(key) === true) {
     return true;
   }
   if (!phrase.verb || !m.info(key).lemmas.has(word)) return false;
@@ -226,7 +227,7 @@ const placePhrase = (
     !phrase.tokens.every(
       (word) =>
         m.available.has(word) ||
-        (word === "sich" && m.reflexives !== undefined),
+        (word === m.reflexive && m.reflexives !== undefined),
     )
   ) {
     return undefined;
@@ -391,8 +392,22 @@ export const phraseEntryIds = (
       ...(host === undefined ? [] : [host, ...info(host).lemmas]),
     ];
   };
+  // No phrase has the clicked word: nothing to match, and no need to look
+  // up the sentence's other words.
+  if (
+    !positions.some((clicked) =>
+      words(tokens[clicked]!.key).some((word) => index.byWord.has(word)),
+    )
+  ) {
+    return [];
+  }
   for (const token of tokens) {
     for (const word of words(token.key)) available.add(word);
+  }
+  // The phrases that can match here: those whose rarest word the sentence has.
+  const present = new Set<Phrase>();
+  for (const word of available) {
+    for (const phrase of index.byRarest.get(word) ?? []) present.add(phrase);
   }
   const m: Matcher = {
     tokens,
@@ -403,12 +418,16 @@ export const phraseEntryIds = (
   };
   const matches = new Map<Phrase, PhraseMatch>();
   for (const clicked of positions) {
-    const key = tokens[clicked]!.key;
-    const candidates = new Set<Phrase>();
-    for (const lemma of words(key)) {
-      for (const phrase of index.get(lemma) ?? []) candidates.add(phrase);
-    }
-    for (const phrase of candidates) {
+    // Those with the clicked word, in the order its words list them: by the
+    // first of its words they have, then in index order.
+    const own = words(tokens[clicked]!.key);
+    const candidates = [...present]
+      .flatMap((phrase) => {
+        const first = own.findIndex((word) => phrase.tokens.includes(word));
+        return first < 0 ? [] : [{ phrase, first }];
+      })
+      .sort((a, b) => a.first - b.first || a.phrase.order - b.phrase.order);
+    for (const { phrase } of candidates) {
       const match = matchPhrase(m, phrase, clicked);
       const old = matches.get(phrase);
       if (match !== undefined && (old === undefined || rank(match, old) < 0)) {

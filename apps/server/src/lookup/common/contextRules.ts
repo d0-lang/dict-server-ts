@@ -3,6 +3,8 @@ import { lookupKey } from "@dict/core/lookupKey";
 
 /** A language's `[context]` settings, as the matcher reads them. */
 type ContextRules = {
+  /** The pronoun phrases are written with (`sich`), and what it stands for; both unset without one. */
+  readonly reflexive: string | undefined;
   readonly reflexives: ReadonlySet<string> | undefined;
   readonly maxGap: number;
   readonly negation: string | undefined;
@@ -47,8 +49,11 @@ export const contextRules = (language: Language): ContextRules => {
   if (cached !== undefined) return cached;
   const { context } = language;
   const rules: ContextRules = {
+    reflexive: context.reflexive,
     reflexives:
-      context.reflexives.length > 0 ? new Set(context.reflexives) : undefined,
+      context.reflexive !== undefined && context.reflexives.length > 0
+        ? new Set(context.reflexives)
+        : undefined,
     maxGap: context.maxGap,
     negation: context.negation,
     bracket: context.verbBracket,

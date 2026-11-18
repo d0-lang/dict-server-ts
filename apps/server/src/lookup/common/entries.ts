@@ -2,14 +2,10 @@ import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import { caseClass, cleanWord, lookupKey } from "@dict/core/lookupKey";
 import {
   CaseClass,
-  entries,
   FormSource,
   GRAMMAR_SOURCE_POS,
-  pronunciations,
-  senses,
   type UdPos,
 } from "@dict/core/schema";
-import { asc, inArray } from "drizzle-orm";
 import { notAnAcronym } from "./forms.ts";
 import { commonsFilePage } from "./sources.ts";
 
@@ -193,34 +189,76 @@ const rankedIds = (
     )
     .map((row) => row.id);
 
-/** Entries by id, in the order given, in the shape of the protocol. */
+/** Row shapes of `loadEntries`' queries; the JSON columns still as text. */
+type HeadRow = {
+  readonly id: number;
+  readonly lemma: string;
+  readonly pos: UdPos;
+  readonly features: string | null;
+  readonly pages: string | null;
+};
+type SenseRow = {
+  readonly entryId: number;
+  readonly glosses: string;
+  readonly see: string | null;
+};
+type PronRow = {
+  readonly entryId: number;
+  readonly kind: string;
+  readonly value: string;
+};
+
+/** `rows` by their entry, each entry's in the order given. */
+const byEntry = <R extends { readonly entryId: number }>(
+  rows: ReadonlyArray<R>,
+): ReadonlyMap<number, ReadonlyArray<R>> => {
+  const grouped = new Map<number, Array<R>>();
+  for (const row of rows) {
+    const list = grouped.get(row.entryId);
+    if (list === undefined) grouped.set(row.entryId, [row]);
+    else list.push(row);
+  }
+  return grouped;
+};
+
+/**
+ * Entries by id, in the order given, in the shape of the protocol. The ids go
+ * in as one JSON list (`json_each`), so each query is prepared once and kept
+ * (`query`), whatever the number of ids.
+ */
 export const loadEntries = (
   db: DictionaryDb,
   ids: ReadonlyArray<number>,
 ): ReadonlyArray<LookupEntry> => {
   if (ids.length === 0) return [];
-  const heads = db
-    .select()
-    .from(entries)
-    .where(inArray(entries.id, [...ids]))
-    .all();
-  const senseRows = db
-    .select()
-    .from(senses)
-    .where(inArray(senses.entryId, [...ids]))
-    .orderBy(asc(senses.entryId), asc(senses.idx))
-    .all();
-  const pronRows = db
-    .select()
-    .from(pronunciations)
-    .where(inArray(pronunciations.entryId, [...ids]))
-    .orderBy(asc(pronunciations.entryId), asc(pronunciations.idx))
-    .all();
+  const list = JSON.stringify(ids);
+  const heads = db.$client
+    .query<HeadRow, [string]>(
+      `SELECT id, lemma, pos, features, pages FROM entries
+       WHERE id IN (SELECT value FROM json_each(?1))`,
+    )
+    .all(list);
+  const senseRows = byEntry(
+    db.$client
+      .query<SenseRow, [string]>(
+        `SELECT entry_id AS entryId, glosses, see FROM senses
+         WHERE entry_id IN (SELECT value FROM json_each(?1)) ORDER BY entry_id, idx`,
+      )
+      .all(list),
+  );
+  const pronRows = byEntry(
+    db.$client
+      .query<PronRow, [string]>(
+        `SELECT entry_id AS entryId, kind, value FROM pronunciations
+         WHERE entry_id IN (SELECT value FROM json_each(?1)) ORDER BY entry_id, idx`,
+      )
+      .all(list),
+  );
 
   const byId = new Map(heads.map((head) => [head.id, head]));
   return ids.map((id) => {
     const head = byId.get(id)!;
-    const prons = pronRows.filter((p) => p.entryId === id);
+    const prons = pronRows.get(id) ?? [];
     const ipa = prons.filter((p) => p.kind === "ipa").map((p) => p.value);
     const audio = prons
       .filter((p) => p.kind === "audio")
@@ -236,20 +274,22 @@ export const loadEntries = (
       ...(audio.length > 0 ? { audio } : {}),
       ...(reading !== undefined ? { reading } : {}),
     };
+    const pages =
+      head.pages === null
+        ? []
+        : (JSON.parse(head.pages) as ReadonlyArray<string>);
     return {
       lemma: head.lemma,
       pos: head.pos,
       ...(head.features !== null ? { features: head.features } : {}),
-      ...(head.pages !== null && head.pages.length > 0
-        ? { pages: head.pages }
-        : {}),
+      ...(pages.length > 0 ? { pages } : {}),
       ...(Object.keys(pron).length > 0 ? { pron } : {}),
-      senses: senseRows
-        .filter((s) => s.entryId === id)
-        .map((s) => ({
-          glosses: s.glosses,
-          ...(s.see !== null ? { see: s.see } : {}),
-        })),
+      senses: (senseRows.get(id) ?? []).map((s) => ({
+        glosses: JSON.parse(s.glosses) as ReadonlyArray<string>,
+        ...(s.see !== null
+          ? { see: JSON.parse(s.see) as ReadonlyArray<string> }
+          : {}),
+      })),
     };
   });
 };

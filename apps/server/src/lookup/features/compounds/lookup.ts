@@ -82,7 +82,7 @@ export const compoundEntries = (
 ): LookupResult => {
   const split =
     rules.stemEndings === undefined
-      ? wordCompound(db, word, rules.linkers)
+      ? wordCompound(db, word, rules)
       : stemCompound(db, word, rules);
   return split === undefined
     ? { entries: [] }

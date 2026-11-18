@@ -3,13 +3,18 @@ import { caseClass, cleanWord, lookupKey } from "@dict/core/lookupKey";
 import { CaseClass, FormSource } from "@dict/core/schema";
 import { findEntriesByForm } from "../../common/entries.ts";
 import { type CompoundSplit, distinctEntries } from "./parts.ts";
-import { CONTENT_POS, type PartScore, splitCompound } from "./split.ts";
+import {
+  type CompoundRules,
+  CONTENT_POS,
+  type PartScore,
+  splitCompound,
+} from "./split.ts";
 
 /** German-style compounds: every part is a word form (`Gemüse|fonds`). */
 export const wordCompound = (
   db: DictionaryDb,
   word: string,
-  linkers: ReadonlyArray<string>,
+  { linkers, nounLinkers }: CompoundRules,
 ): CompoundSplit | undefined => {
   const capital = caseClass(cleanWord(word)) !== CaseClass.Lower;
   const key = lookupKey(word);
@@ -30,13 +35,15 @@ export const wordCompound = (
     `SELECT count(*) AS n FROM forms f JOIN entries e ON e.id = f.entry_id
      WHERE f.form = ? AND f.source = ${FormSource.Lemma} AND e.pos IN ('NOUN', 'ADV', 'NUM')`,
   );
-  /** See `PartScore`: `s`/`es` link any noun, other linkers mostly a plural. */
+  /** See `PartScore`: `nounLinkers` link any noun, other linkers mostly a plural. */
   const partScore: PartScore = (stem, linker) => {
     const score = formScore.get(stem)!.score ?? 0;
     if (score === 0) return 0;
     if (linker === "" && plainLemma.get(stem)!.n > 0) return 4;
     if (linker !== "" && nounForm.get(stem + linker, stem)!.n > 0) return 3;
-    return score === 2 && ["", "s", "es"].includes(linker) ? 2 : 1;
+    return score === 2 && (linker === "" || nounLinkers.includes(linker))
+      ? 2
+      : 1;
   };
   const pieces = splitCompound(key, partScore, linkers);
   if (pieces === undefined) return undefined;
