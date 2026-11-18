@@ -50,4 +50,30 @@ export const german = dictionary([
   ["Hand", "NOUN"],
   ["tagen", "VERB", ["tagen", "tagt"]],
   ["Tag", "NOUN", ["Tage", "Tagen"]],
+  // With their gender, so the headword has its article (`der Hund`).
+  ["Hund", "NOUN", ["Hunde", "Hundes"], ["dog"], "noun", "Gender=Masc"],
+  ["Mutter", "NOUN", ["Mütter"], ["mother"], "noun", "Gender=Fem"],
+  ["Mutter", "NOUN", ["Muttern"], ["nut (for a bolt)"], "noun", "Gender=Fem"],
 ]);
+
+// `Mutter` "mother" with its page and a recording, as the import stores
+// them: the lookup links the page and the recording's file page.
+{
+  const { id } = german.$client
+    .query<{ id: number }, []>(
+      "SELECT min(id) AS id FROM entries WHERE lemma = 'Mutter'",
+    )
+    .get()!;
+  german.$client.run("UPDATE entries SET pages = ? WHERE id = ?", [
+    JSON.stringify(["Mutter"]),
+    id,
+  ]);
+  german.$client.run(
+    "INSERT INTO pronunciations VALUES (?, 0, 'ipa', '/ˈmʊtɐ/'), (?, 1, 'audio', ?)",
+    [
+      id,
+      id,
+      "https://upload.wikimedia.org/wikipedia/commons/0/03/De-Mutter.ogg",
+    ],
+  );
+}

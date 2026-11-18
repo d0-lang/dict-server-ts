@@ -3,7 +3,7 @@ import { Effect, Layer } from "effect";
 import { HttpApiTest } from "effect/http-api";
 import { HttpServer } from "effect/http";
 import { Api } from "./Api.ts";
-import { DictHandlersMemory } from "../http/DictHandlers.ts";
+import { DictHandlersMemory } from "../http/testing.ts";
 
 const HandlersLayer = Layer.mergeAll(
   DictHandlersMemory,
@@ -40,9 +40,10 @@ layer(HandlersLayer)("DictApi", (it) => {
       const result = yield* client.dict.lookup({
         payload: { word: "Mutter", lang: "de_en" },
       });
+      // One entry per headword, its meanings as senses.
       assert.deepStrictEqual(
-        result.entries.map((e) => e.senses[0]?.glosses),
-        [["mother"], ["nut (for a bolt)"]],
+        result.entries.map((e) => [e.lemma, e.senses.map((s) => s.glosses)]),
+        [["die Mutter", [["mother"], ["nut (for a bolt)"]]]],
       );
     }),
   );
