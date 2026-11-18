@@ -3,6 +3,25 @@ import { lookupWord } from "../../lookup.ts";
 import { languageOf, lemmas } from "../../testing/dictionary.ts";
 import { french } from "../../testing/french.ts";
 
+describe("verb phrases whose rest is a verb", () => {
+  it("keep their order, so the near future is no idiom", () => {
+    // `aller` + an infinitive is the near future, not `faire aller` "to fool".
+    assert.deepStrictEqual(
+      lemmas(french, "fr_en", "faire", "On va faire une pause."),
+      ["faire"],
+    );
+    assert.deepStrictEqual(
+      lemmas(french, "fr_en", "va", "On va faire une pause."),
+      ["aller"],
+    );
+    // Written in the phrase's order, it is the idiom.
+    assert.deepStrictEqual(
+      lemmas(french, "fr_en", "faire", "Il veut nous faire aller."),
+      ["faire aller", "faire"],
+    );
+  });
+});
+
 describe("phrases ending in a contracted word", () => {
   it("match the preposition merged with the article", () => {
     assert.deepStrictEqual(

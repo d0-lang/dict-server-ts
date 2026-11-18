@@ -74,6 +74,8 @@ export const french = dictionary([
   ["fait", "ADJ", [], ["done"]],
   ["fait", "NOUN", [], ["fact"]],
   ["faire", "VERB", ["fait"], ["to do"]],
+  ["aller", "VERB", ["va", "vais"], ["to go"]],
+  ["faire aller", "VERB", [], ["to fool"]],
   ["envie", "NOUN", [], ["desire"]],
   ["envier", "VERB", ["envie"], ["to envy"]],
   ["désolé", "ADJ", [], ["sorry"]],

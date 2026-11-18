@@ -28,6 +28,8 @@ export type TokenInfo = {
   readonly conjunction: boolean;
   /** The form can be a verb (`будет`, `могу`). */
   readonly verb: boolean;
+  /** The form's best reading, ranked as lookups rank, is a verb (`faire`, not `dość`, whose rarest reading is one). */
+  readonly verbFirst: boolean;
 };
 
 export type FormRow = {
@@ -112,6 +114,7 @@ export const tokenInfos = (db: DictionaryDb) => {
           (row) => row.pos === "SCONJ" || row.pos === "CCONJ",
         ),
         verb: rows.some((row) => row.pos === "VERB" || row.pos === "AUX"),
+        verbFirst: rows[0]?.pos === "VERB" || rows[0]?.pos === "AUX",
       };
       cache.set(cacheKey, info);
     }
