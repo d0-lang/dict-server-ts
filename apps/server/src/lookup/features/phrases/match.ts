@@ -307,6 +307,22 @@ const placePhrase = (
         : m.bracket
           ? verbAt[0]!
           : verbAt.reduce((best, i) => (gapAt(i) < gapAt(best) ? i : best));
+      // A rest of verbs alone keeps the phrase's order, the verb on its own
+      // side: `va faire` is `aller` with an infinitive (the near future),
+      // not `faire aller` "to fool" read backwards. A verb here is a verb's
+      // lemma read first as a verb: not `dość` "enough", which Wiktionary
+      // also has as a verb. German puts the verb first anyway, and the
+      // bracket below keeps it in place.
+      if (
+        !m.bracket &&
+        rest.every((p) => {
+          const info = m.info(phrase.tokens[p]!);
+          return info.verbLemma && info.verbFirst;
+        }) &&
+        (verb === 0 ? verbPlace > at[0]! : verbPlace < at.at(-1)!)
+      ) {
+        continue;
+      }
       // A verb after the rest stands next to it (`ums Leben kam`), which
       // the contiguous match covers. One far after it is another verb's.
       if (
