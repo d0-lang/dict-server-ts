@@ -6,6 +6,20 @@ code = "ja"
 name = "Japanese"
 target = "en"
 
+[import]
+# Classical Japanese senses (し "adnominal form of Classical き", き "past
+# tense"): a reader of modern text takes them for the modern word.
+historicalStages = [["Classical", "Japanese"]]
+# A kana's own line ("The hiragana syllable は") names no word.
+skippedPos = ["syllable"]
+# Suffixes conjugate endings the analyzer splits off and finds by their base
+# form (た, ます); their tables, Classical forms included, spell short words
+# (な as a form of ず, は of the Old Japanese ふ, く of し).
+formlessPos = ["suffix"]
+# する-verbs: Wiktionary writes the verb on the noun's page (提供), and a
+# reader learns 提供する.
+lemmaSuffixes = { "ja-verb-suru" = "する" }
+
 [context.analyzer]
 # Japanese writes no spaces, and Intl.Segmenter (Chromium's and Bun's ICU)
 # cuts inflected words short: 食べました -> 食|べ|ま|した, 行った -> 行|っ|た.

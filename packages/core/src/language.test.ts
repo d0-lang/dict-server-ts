@@ -30,6 +30,9 @@ describe("language records", () => {
       unmarkedStressForms: false,
       headwordInflections: false,
       verbChainsThroughEntries: false,
+      skippedPos: [],
+      formlessPos: [],
+      lemmaSuffixes: {},
     });
     assert.deepStrictEqual(language.context, {
       verbBracket: false,

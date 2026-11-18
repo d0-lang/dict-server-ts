@@ -1,3 +1,4 @@
+import { lookupKey } from "@dict/core/lookupKey";
 import type { WiktextractForm } from "../source/wiktextract.ts";
 import { isHistorical, type LanguageRules } from "./languages.ts";
 
@@ -418,6 +419,13 @@ export const keepForm = (
   if (isVerbalNounForm(form)) return false;
   if (isAuxiliaryRow(form)) return false;
   if (isHistorical(language, tags)) return false;
+  if (
+    form.source !== undefined &&
+    language.formlessPos?.includes(pos) &&
+    !language.grammarWords?.has(lookupKey(lemma))
+  ) {
+    return false;
+  }
   if (form.source === undefined) {
     if (isMarkedAlternative(form)) return false;
     const agrees = language.headwordGenders === true && AGREEING_POS.has(pos);

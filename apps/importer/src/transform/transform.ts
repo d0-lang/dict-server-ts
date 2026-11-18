@@ -74,6 +74,11 @@ export type ImportEntry = {
   readonly features?: string;
   /** For a reflexive entry (`bawić się`), the verb it belongs to (`bawić`). */
   readonly reflexiveOf?: string;
+  /**
+   * The word before `lemmaSuffixes` added to it (`勉強` of `勉強する`): found
+   * as the lemma is, so a kana spelling's redirect reaches the verb too.
+   */
+  readonly bareLemma?: string;
 };
 
 /** A form a table tags comparative or superlative, and which of the two, if only one. */
@@ -595,8 +600,12 @@ export const transformEntry = (
   const lemma = cleanWord(raw.word);
   const lemmaKey = lookupKey(lemma);
   // A page about a space (French has one for the narrow no-break space) has
-  // no word to look up.
-  if (raw.pos === "soft-redirect" || lemma === "") {
+  // no word to look up, nor a line the language skips (a kana's `syllable`).
+  if (
+    raw.pos === "soft-redirect" ||
+    lemma === "" ||
+    rules.skippedPos?.includes(raw.pos)
+  ) {
     return {
       entry: undefined,
       formOf: [],
@@ -608,7 +617,7 @@ export const transformEntry = (
         placeholder: 0,
       },
       droppedForms: 0,
-      ...(lemma !== ""
+      ...(raw.pos === "soft-redirect" && lemma !== ""
         ? {
             redirect: {
               form: lemmaKey,
@@ -618,9 +627,10 @@ export const transformEntry = (
         : {}),
     };
   }
+  const added = addedToLemma(rules, raw);
   const shownLemma = rules.stressedLemmas
     ? stressedLemma(lemma, raw.forms ?? [])
-    : lemma;
+    : lemma + added;
   const skippedSenses: Record<SkippedSenseReason, number> = {
     archaic: 0,
     "historical-stage": 0,
@@ -708,12 +718,32 @@ export const transformEntry = (
     }
   }
 
-  const { forms, participles, dropped } = collectForms(
-    rules,
-    lemma,
-    raw.forms ?? [],
-    raw.pos,
+  // With a suffix added, a table form must spell the word or its reading
+  // (`勉強した`, `べんきょうした`): `カール`'s table also gives `し`, `しろ`.
+  // The bare word stays a lemma (`bareLemma`).
+  const reading = rubyReading(raw.word, raw.forms ?? []);
+  const spellsWord = (form: WiktextractForm) => {
+    // In either kana script: `ハッとした` of `はっと`.
+    const key = hiragana(lookupKey(form.form));
+    return (
+      form.source === undefined ||
+      key.startsWith(hiragana(lemmaKey)) ||
+      (reading !== undefined && key.startsWith(hiragana(lookupKey(reading))))
+    );
+  };
+  const rawForms = (raw.forms ?? []).filter(
+    (form) => added === "" || spellsWord(form),
   );
+  const collected = collectForms(rules, lemma, rawForms, raw.pos);
+  const { participles } = collected;
+  const forms =
+    added === ""
+      ? collected.forms
+      : collected.forms.filter(
+          (form) => form !== lemmaKey && form !== lookupKey(shownLemma),
+        );
+  const dropped =
+    collected.dropped + (raw.forms ?? []).length - rawForms.length;
   // `man` on the headword line of `Mann` ("obsolete"): the variant points here
   // only if it turns out to be no word of its own.
   for (const form of raw.forms ?? []) {
@@ -748,7 +778,7 @@ export const transformEntry = (
     pronunciations: pickPronunciations(
       rules,
       raw.sounds ?? [],
-      rubyReading(raw.word, raw.forms ?? []),
+      withAdded(reading, added),
     ),
     // A reflexive entry is found by the verb's forms, the verb itself included.
     forms: particle === undefined ? forms : [...new Set([lemmaKey, ...forms])],
@@ -760,6 +790,7 @@ export const transformEntry = (
     ...(participles.length > 0 ? { participleForms: participles } : {}),
     ...(features !== undefined ? { features } : {}),
     ...(particle !== undefined ? { reflexiveOf: shownLemma } : {}),
+    ...(added !== "" ? { bareLemma: lemma } : {}),
   });
 
   const reflexiveEntries = [...reflexive].flatMap(([particle, own]) =>
@@ -800,6 +831,28 @@ export const transformEntry = (
     droppedForms: dropped,
   };
 };
+
+/**
+ * What `lemmaSuffixes` adds to this line's lemma (`する` for a `ja-verb-suru`
+ * line), or "" when nothing is, or the word already ends with it (`以てする`).
+ */
+const addedToLemma = (rules: LanguageRules, raw: WiktextractEntry): string => {
+  const suffixes = rules.lemmaSuffixes ?? {};
+  const added =
+    (raw.head_templates ?? [])
+      .map((template) => suffixes[template.name])
+      .find((suffix) => suffix !== undefined) ?? "";
+  return raw.word.endsWith(added) ? "" : added;
+};
+
+/** A reading with the added suffix, when the suffix is kana and so its own reading. */
+const withAdded = (
+  reading: string | undefined,
+  added: string,
+): string | undefined =>
+  reading === undefined || !/^[\p{scx=Hiragana}\p{scx=Katakana}]*$/u.test(added)
+    ? reading
+    : reading + added;
 
 /** Combining acute and grave, the stress marks of Russian and other Cyrillic dictionaries. */
 const STRESS_MARKS = /[\u0300\u0301]/gu;

@@ -61,6 +61,10 @@ export const WiktextractEntry = Schema.Struct({
   /** A soft redirect's targets: the page only points at these words (Japanese kana -> kanji). */
   redirects: Schema.optionalKey(Schema.Array(Schema.String)),
   sounds: Schema.optionalKey(Schema.Array(WiktextractSound)),
+  /** The headword line's templates (`ja-verb-suru` for a Japanese する-verb). */
+  head_templates: Schema.optionalKey(
+    Schema.Array(Schema.Struct({ name: Schema.String })),
+  ),
 });
 export type WiktextractEntry = typeof WiktextractEntry.Type;
 

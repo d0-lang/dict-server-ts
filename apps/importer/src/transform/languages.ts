@@ -63,6 +63,14 @@ export type LanguageRules = {
   readonly headwordInflections?: boolean;
   /** A verb form's chain goes on through a word with no verb entry (`partie` -> `parti` -> `partir`). */
   readonly verbChainsThroughEntries?: boolean;
+  /** wiktextract parts of speech whose lines are not imported (Japanese `syllable`). */
+  readonly skippedPos?: ReadonlyArray<string>;
+  /** wiktextract parts of speech whose inflection tables are not indexed (Japanese `suffix`), unless the word is in `grammarWords`. */
+  readonly formlessPos?: ReadonlyArray<string>;
+  /** `lookupKey`s of the grammar file's words, set by the importer. */
+  readonly grammarWords?: ReadonlySet<string>;
+  /** Head template name -> what the lemma gets added (`ja-verb-suru` -> `する`). */
+  readonly lemmaSuffixes?: Readonly<Record<string, string>>;
 };
 
 /**
