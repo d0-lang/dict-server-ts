@@ -16,6 +16,18 @@ import { hasPos, headOf, startOf, type Word } from "./words.ts";
 /** `entries.source_pos` of entries that name a letter or a syllable, not a word. */
 const LETTERS = new Set(["character", "letter-name", "syllable"]);
 
+/** UD's open classes, and the function words a content word is not (`し` the verb, not the particle). */
+const CONTENT_UPOS = new Set(["NOUN", "PROPN", "VERB", "ADJ", "ADV"]);
+const FUNCTION_UPOS = new Set([
+  "PART",
+  "PRON",
+  "ADP",
+  "CCONJ",
+  "SCONJ",
+  "DET",
+  "INTJ",
+]);
+
 /** Parts of speech that take endings, so a word with endings keeps only these entries. */
 export const INFLECTING = new Set(["VERB", "ADJ", "AUX"]);
 
@@ -229,12 +241,20 @@ export const morphemeParts = (
     // Only when they find one lemma: `とく` (casual `ておく`) would bring
     // `解く`, `説く` and `得`.
     const byBase = morpheme.bases.flatMap((base) => c.rows(base));
-    const own =
+    const found =
       byLemma.length > 0
         ? byLemma
         : new Set(byBase.map((row) => lookupKey(row.lemma))).size === 1
           ? byBase
           : [];
+    // A content word to the analyzer is no function word: `し` the verb is
+    // not the particle or the pronoun. Other readings stay (`送り` the noun
+    // for the verb's stem).
+    const upos = c.uposOf(morpheme);
+    const content = [...upos].some((tag) => CONTENT_UPOS.has(tag));
+    const own = found.filter(
+      (row) => !content || upos.has(row.pos) || !FUNCTION_UPOS.has(row.pos),
+    );
     // A prefix is shown by its entries as a prefix first (`御` "used to
     // respectfully refer to…" for `お`), then as another word, and as a
     // syllable or character last.

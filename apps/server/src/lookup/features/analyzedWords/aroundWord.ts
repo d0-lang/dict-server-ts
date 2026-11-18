@@ -1,4 +1,6 @@
+import { lookupKey } from "@dict/core/lookupKey";
 import { loadEntries } from "../../common/entries.ts";
+import { grammarIds } from "../../common/forms.ts";
 import { type Answer, type Click, PLAIN } from "./click.ts";
 import {
   derivedWord,
@@ -22,6 +24,20 @@ export const aroundWord = (c: Click): Answer => {
   if (whole.length === 0 && !derived) return PLAIN;
   const match = c.matchOf(startOf(found), endOf(found));
   const wholeEntries = loadEntries(c.db, whole);
+  // A word the grammar file lists as a whole (`します`, "polite する"): its
+  // line first, then the word's entries, as one piece.
+  const spelled = found.length > 1 ? grammarIds(c.db, lookupKey(c.text)) : [];
+  if (spelled.length > 0) {
+    return {
+      entries: [
+        ...loadEntries(c.db, spelled),
+        ...loadEntries(
+          c.db,
+          whole.filter((id) => !spelled.includes(id)),
+        ),
+      ].map((entry) => ({ ...entry, ...match })),
+    };
+  }
   if (found.length === 1) {
     return derived
       ? PLAIN

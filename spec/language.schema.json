@@ -378,6 +378,47 @@
               },
               "description": "Rules that join a morpheme to the word before it: a word is a morpheme and what the rules join to it (`食べ` + `まし` + `た`)."
             },
+            "constructions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "line": {
+                    "type": "string",
+                    "description": "The grammar-file line shown for it, by its word (`お…する`)."
+                  },
+                  "before": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Spellings of the morpheme before the slot (`お`, `ご`)."
+                  },
+                  "slot": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Parts of speech of the one morpheme in the slot, as in `join` (`動詞`, `名詞-普通名詞-サ変可能`)."
+                  },
+                  "after": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "What follows the slot, its last morpheme written or in its base form (`する`, `になる`, `ください`)."
+                  }
+                },
+                "required": [
+                  "line",
+                  "before",
+                  "slot",
+                  "after"
+                ],
+                "additionalProperties": false
+              },
+              "description": "Constructions with a word in them, which no fixed spelling finds: `お` + a verb's stem + `する` is humble (`お待ちします`, `ご案内します`). The run shows `line` first, then the clicked word's entries. Phrases the dictionary spells out come first (`お願いします`)."
+            },
             "formEndings": {
               "type": "array",
               "items": {
