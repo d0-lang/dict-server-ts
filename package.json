@@ -18,6 +18,7 @@
     "bench:context": "bun apps/server/eval/context-bench.ts",
     "bench:segments": "bun apps/server/eval/segments-bench.ts",
     "dump:lookups": "bun apps/server/eval/lookup-dump.ts",
+    "dump:all": "bun apps/server/eval/lookup-dump-all.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "spec": "bun packages/core/scripts/spec.ts"
