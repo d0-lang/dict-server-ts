@@ -196,12 +196,16 @@
           "type": "boolean",
           "description": "Some words are hyphen-joined parts (`что-нибудь`), which the segmenter splits; with context the parts are joined back into one word."
         },
+        "reflexive": {
+          "type": "string",
+          "description": "The reflexive pronoun phrases are written with (German `sich` in `sich vorstellen`), which stands for any of `reflexives` in a sentence (`ich stelle mich vor`)."
+        },
         "reflexives": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Reflexive pronouns a phrase's `sich` stands for."
+          "description": "Reflexive pronouns a phrase's `reflexive` stands for."
         },
         "negation": {
           "type": "string",
@@ -522,6 +526,13 @@
             "type": "string"
           },
           "description": "Linking elements between a modifier and the next part, tried in order; \"\" is a plain join."
+        },
+        "nounLinkers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Of `linkers`, those that join a modifier to any noun (German `s`, `es`: `Arbeit|s|zeit`), so a modifier that is a noun's lemma scores with them as with a plain join; other linkers mostly mark a plural (`n`, `en`). For compounds of words, not of stems (no `stemEndings`)."
         },
         "stemEndings": {
           "type": "array",
