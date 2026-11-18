@@ -185,8 +185,14 @@ const Context = doc(
       ),
       false,
     ),
+    reflexive: Schema.optionalKey(
+      doc(
+        Schema.String,
+        "The reflexive pronoun phrases are written with (German `sich` in `sich vorstellen`), which stands for any of `reflexives` in a sentence (`ich stelle mich vor`).",
+      ),
+    ),
     reflexives: orDefault(
-      doc(strings, "Reflexive pronouns a phrase's `sich` stands for."),
+      doc(strings, "Reflexive pronouns a phrase's `reflexive` stands for."),
       [],
     ),
     negation: Schema.optionalKey(
@@ -464,6 +470,13 @@ const Compounds = doc(
     linkers: doc(
       strings,
       'Linking elements between a modifier and the next part, tried in order; "" is a plain join.',
+    ),
+    nounLinkers: orDefault(
+      doc(
+        strings,
+        "Of `linkers`, those that join a modifier to any noun (German `s`, `es`: `Arbeit|s|zeit`), so a modifier that is a noun's lemma scores with them as with a plain join; other linkers mostly mark a plural (`n`, `en`). For compounds of words, not of stems (no `stemEndings`).",
+      ),
+      [],
     ),
     stemEndings: Schema.optionalKey(
       doc(

@@ -120,7 +120,9 @@ export const phraseIndex = (
   const byRarest = new Map<string, Array<Phrase>>();
   const count = (word: string) => byWord.get(word)?.length ?? 0;
   for (const phrase of phrases) {
-    const words = phrase.tokens.filter((word) => word !== "sich");
+    const words = phrase.tokens.filter(
+      (word) => word !== language.context.reflexive,
+    );
     const rarest = (words.length > 0 ? words : phrase.tokens).reduce(
       (best, word) => (count(word) < count(best) ? word : best),
     );

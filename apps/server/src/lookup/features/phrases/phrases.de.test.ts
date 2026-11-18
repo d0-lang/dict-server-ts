@@ -1,5 +1,6 @@
 import { assert, describe, it } from "@effect/vitest";
-import { lemmas } from "../../testing/dictionary.ts";
+import { lookupWord } from "../../lookup.ts";
+import { dictionary, languageOf, lemmas } from "../../testing/dictionary.ts";
 import { german } from "../../testing/german.ts";
 
 describe("lookup with context", () => {
@@ -13,6 +14,39 @@ describe("lookup with context", () => {
       "vor allem",
       "allem",
     ]);
+  });
+
+  it("finds a phrase written with sich by any reflexive pronoun", () => {
+    assert.deepStrictEqual(
+      lemmas(german, "de_en", "mache", "Ich mache mir Sorgen."),
+      ["sich Sorgen machen", "machen"],
+    );
+  });
+
+  it("takes the reflexive phrases are written with from the language record", () => {
+    // A language whose phrases are written with `zich`, as Dutch's are.
+    const german = languageOf("de_en");
+    const language = {
+      ...german,
+      context: {
+        ...german.context,
+        reflexive: "zich",
+        reflexives: ["zich", "me"],
+      },
+    };
+    const db = dictionary([
+      ["maken", "VERB", ["maak"]],
+      ["zorg", "NOUN", ["zorgen"]],
+      ["zich", "PRON"],
+      ["me", "PRON"],
+      ["zich zorgen maken", "VERB"],
+    ]);
+    assert.deepStrictEqual(
+      lookupWord(db, language, "maak", "Ik maak me zorgen.", 1).entries.map(
+        (entry) => entry.lemma,
+      ),
+      ["zich zorgen maken", "maken"],
+    );
   });
 
   it("finds a verb phrase whose verb comes first", () => {

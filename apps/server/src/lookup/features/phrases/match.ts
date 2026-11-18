@@ -16,6 +16,7 @@ import { type Phrase, phraseIndex } from "./phraseIndex.ts";
 type Matcher = {
   readonly tokens: ReadonlyArray<Token>;
   readonly info: (key: string, wordClass?: CaseClass) => TokenInfo;
+  readonly reflexive: string | undefined;
   readonly reflexives: ReadonlySet<string> | undefined;
   /** Words allowed between a verb and the rest of its phrase (`context.maxGap`). */
   readonly maxGap: number;
@@ -72,7 +73,7 @@ const keyMatches = (
   ) {
     return true;
   }
-  if (m.reflexives !== undefined && word === "sich" && m.reflexives.has(key)) {
+  if (word === m.reflexive && m.reflexives?.has(key) === true) {
     return true;
   }
   if (!phrase.verb || !m.info(key).lemmas.has(word)) return false;
@@ -226,7 +227,7 @@ const placePhrase = (
     !phrase.tokens.every(
       (word) =>
         m.available.has(word) ||
-        (word === "sich" && m.reflexives !== undefined),
+        (word === m.reflexive && m.reflexives !== undefined),
     )
   ) {
     return undefined;

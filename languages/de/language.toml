@@ -21,7 +21,9 @@ participleDeclension = { tags = ["participle"], ending = "", endings = ["e", "en
 # The rest of a verb phrase goes to the end of the clause (`Er nimmt an der
 # Sitzung teil`), so a verb phrase's words may stand apart in German order.
 verbBracket = true
-# Reflexive pronouns a phrase's `sich` stands for.
+# Phrases are written with `sich` (`sich vorstellen`), which stands for any
+# reflexive pronoun in a sentence (`ich stelle mich vor`).
+reflexive = "sich"
 reflexives = ["sich", "mich", "dich", "uns", "euch", "mir", "dir"]
 # Separable verbs: the finite verb with its particle at the end of the clause
 # (`Er fand gestern statt` -> `stattfinden`), whichever of the two was clicked.
@@ -58,3 +60,6 @@ articles = { Masc = "der", Fem = "die", Neut = "das", Ptan = "die" }
 # entry is split into known parts. Linking elements, tried in order; "" is a
 # plain join.
 linkers = ["", "s", "es", "n", "en", "er", "e", "ens"]
+# `s` and `es` join a modifier to any noun (`Arbeit|s|zeit`); the others
+# mostly mark a plural (`Blume|n|topf`).
+nounLinkers = ["s", "es"]
