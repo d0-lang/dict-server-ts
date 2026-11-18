@@ -4,3 +4,25 @@
 ["て form"]
 name = "て form"
 text = "The verb or adjective in its て form, which links it to what follows: and, and then (食べて寝る, eat and sleep), or a verb after it that adds a meaning (食べている, is eating; 食べてみる, try eating; 食べてしまう, end up eating). Verbs make it like the past た: 読んで, 書いて, 行って. Adjectives end in くて (高くて, expensive and)."
+
+[godan]
+text = "A godan (five-row) verb changes the last kana of its stem: 書く, 書かない, 書きます, 書いて. Some end in る like ichidan verbs (帰る, 切る, 知る), which is why the class is shown: 帰らない, not 帰ない."
+
+[ichidan]
+text = "An ichidan (one-row) verb drops る and adds the ending: 食べる, 食べない, 食べます, 食べて. Its dictionary form ends in -iru or -eru."
+
+[irregular]
+text = "The verb follows neither the godan nor the ichidan pattern, and its stem changes from form to form: 来る (くる), 来ない (こない), 来ます (きます), 来て (きて)."
+
+[vt]
+text = "The verb takes an object, marked with を: ドアを開ける, (I) open the door. Many verbs come in pairs with an intransitive one: 開ける / 開く."
+
+[vi]
+text = "The verb takes no object; what changes is the subject, marked with が: ドアが開く, the door opens. Many verbs come in pairs with a transitive one: 開く / 開ける."
+
+["vt/vi"]
+name = "transitive and intransitive"
+text = "The verb is used both with an object (を) and without one (が): 本を開く, open a book; 花が開く, a flower opens."
+
+["na-adj"]
+text = "A な-adjective takes な before a noun (静かな部屋, a quiet room) and だ or です at the end (静かだ). It has no く or かった forms: 静かじゃない, 静かだった. Some end in い and look like い-adjectives: 綺麗, 嫌い."

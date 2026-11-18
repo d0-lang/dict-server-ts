@@ -22,6 +22,17 @@ const LetterPair = doc(
   "[letter, plain]: running text may write `letter` as `plain` (`ё` as `е`).",
 );
 
+/** A grammar feature's name, as in `packages/core/src/features.ts`. */
+const FeatureName = Schema.Literals([
+  "Gender",
+  "Animacy",
+  "Aspect",
+  "Number",
+  "VerbClass",
+  "Subcat",
+  "AdjClass",
+]);
+
 const Import = doc(
   Schema.Struct({
     historicalStages: orDefault(
@@ -136,6 +147,16 @@ const Import = doc(
         "wiktextract parts of speech whose inflection tables are not indexed. Japanese `suffix` lines conjugate endings that the analyzer splits off and finds by their base form (`た`, `ます`), and their tables, Classical forms included, spell short words: `な` as a form of `ず`, `は` of the Old Japanese `ふ`.",
       ),
       [],
+    ),
+    featureTags: orDefault(
+      doc(
+        Schema.Record(
+          Schema.String,
+          Schema.Tuple([FeatureName, Schema.String]),
+        ),
+        'This language\'s wiktextract tags that give a headword feature, besides the shared ones (`masculine`, `perfective`), for a line all of whose senses have the tag: `godan = ["VerbClass", "Godan"]`. They apply to any part of speech (`-na` on a Japanese な-adjective). The value must be one of the feature\'s values in `packages/core/src/features.ts`.',
+      ),
+      {},
     ),
     lemmaSuffixes: orDefault(
       doc(
@@ -412,8 +433,6 @@ const Context = doc(
   }),
   "What the sentence around a word (`context`) adds to its lookup.",
 );
-
-const FeatureName = Schema.Literals(["Gender", "Animacy", "Aspect", "Number"]);
 
 const Headword = doc(
   Schema.Struct({

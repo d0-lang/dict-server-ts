@@ -148,6 +148,32 @@
           },
           "description": "wiktextract parts of speech whose inflection tables are not indexed. Japanese `suffix` lines conjugate endings that the analyzer splits off and finds by their base form (`た`, `ます`), and their tables, Classical forms included, spell short words: `な` as a form of `ず`, `は` of the Old Japanese `ふ`."
         },
+        "featureTags": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "string",
+                "enum": [
+                  "Gender",
+                  "Animacy",
+                  "Aspect",
+                  "Number",
+                  "VerbClass",
+                  "Subcat",
+                  "AdjClass"
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "maxItems": 2,
+            "minItems": 2
+          },
+          "description": "This language's wiktextract tags that give a headword feature, besides the shared ones (`masculine`, `perfective`), for a line all of whose senses have the tag: `godan = [\"VerbClass\", \"Godan\"]`. They apply to any part of speech (`-na` on a Japanese な-adjective). The value must be one of the feature's values in `packages/core/src/features.ts`."
+        },
         "lemmaSuffixes": {
           "type": "object",
           "additionalProperties": {
@@ -529,7 +555,10 @@
               "Gender",
               "Animacy",
               "Aspect",
-              "Number"
+              "Number",
+              "VerbClass",
+              "Subcat",
+              "AdjClass"
             ]
           },
           "description": "Grammar features shown as labels next to the headword (`f`, `anim`, `pf`), in this order. Features an article already shows are left out."

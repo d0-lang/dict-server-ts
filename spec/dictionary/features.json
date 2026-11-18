@@ -3,7 +3,10 @@
     "Gender": ["Masc", "Fem", "Neut", "Com"],
     "Animacy": ["Anim", "Inan"],
     "Aspect": ["Imp", "Perf"],
-    "Number": ["Ptan"]
+    "Number": ["Ptan"],
+    "VerbClass": ["Godan", "Ichidan", "Irreg"],
+    "Subcat": ["Tran", "Intr"],
+    "AdjClass": ["Na"]
   },
   "pos": ["NOUN", "VERB"],
   "tags": {
@@ -27,6 +30,12 @@
     "Inan": "inan",
     "Imp": "impf",
     "Perf": "pf",
-    "Ptan": "pl"
+    "Ptan": "pl",
+    "Godan": "godan",
+    "Ichidan": "ichidan",
+    "Irreg": "irregular",
+    "Tran": "vt",
+    "Intr": "vi",
+    "Na": "na-adj"
   }
 }

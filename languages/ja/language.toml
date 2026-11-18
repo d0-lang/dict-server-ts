@@ -19,6 +19,14 @@ formlessPos = ["suffix"]
 # する-verbs: Wiktionary writes the verb on the noun's page (提供), and a
 # reader learns 提供する.
 lemmaSuffixes = { "ja-verb-suru" = "する" }
+# Grammar a learner needs with the headword, from tags every sense has: how
+# a verb conjugates (帰る is godan, though it ends like 食べる, ichidan),
+# whether it takes an object (開く/開ける), and a な-adjective (綺麗, 嫌い
+# end in い but take な). する-verbs need no label: the headword says する.
+featureTags = { godan = ["VerbClass", "Godan"], ichidan = ["VerbClass", "Ichidan"], kuru = ["VerbClass", "Irreg"], transitive = ["Subcat", "Tran"], intransitive = ["Subcat", "Intr"], "-na" = ["AdjClass", "Na"] }
+
+[headword]
+labels = ["VerbClass", "Subcat", "AdjClass"]
 
 [context.analyzer]
 # Japanese writes no spaces, and Intl.Segmenter (Chromium's and Bun's ICU)

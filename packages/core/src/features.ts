@@ -12,6 +12,11 @@ export const FEATURES = {
   Animacy: ["Anim", "Inan"],
   Aspect: ["Imp", "Perf"],
   Number: ["Ptan"],
+  // Not UD's: how a Japanese verb conjugates, and whether it takes an
+  // object (UD's `Subcat`, which some treebanks use), and a な-adjective.
+  VerbClass: ["Godan", "Ichidan", "Irreg"],
+  Subcat: ["Tran", "Intr"],
+  AdjClass: ["Na"],
 } as const;
 
 export type FeatureName = keyof typeof FEATURES;
@@ -28,9 +33,19 @@ export const FEATURE_LABELS: Readonly<Record<string, string>> = {
   Imp: "impf",
   Perf: "pf",
   Ptan: "pl",
+  Godan: "godan",
+  Ichidan: "ichidan",
+  Irreg: "irregular",
+  Tran: "vt",
+  Intr: "vi",
+  Na: "na-adj",
 };
 
-/** Parts of speech that get features: names don't need grammar on the headword. */
+/**
+ * Parts of speech that get features from the shared tags: names don't need
+ * grammar on the headword. A language's own tags (`featureTags`) give
+ * features to any part of speech (a Japanese な-adjective).
+ */
 export const FEATURE_POS: ReadonlySet<UdPos> = new Set(["NOUN", "VERB"]);
 
 /** wiktextract tags that give a feature, the same for every language. */
@@ -52,11 +67,18 @@ export const FEATURE_TAGS: Readonly<
 
 const NAMES = Object.keys(FEATURES) as Array<FeatureName>;
 
-/** The features `tags` give, values in `FEATURES` order. */
-export const featuresOfTags = (tags: Iterable<string>): Features => {
+/**
+ * The features `tags` give, values in `FEATURES` order: by the shared tags,
+ * and by a language's own (`own`, which `shared: false` keeps alone).
+ */
+export const featuresOfTags = (
+  tags: Iterable<string>,
+  own: Readonly<Record<string, readonly [FeatureName, string]>> = {},
+  shared = true,
+): Features => {
   const found = new Map<FeatureName, Set<string>>();
   for (const tag of tags) {
-    const feature = FEATURE_TAGS[tag];
+    const feature = own[tag] ?? (shared ? FEATURE_TAGS[tag] : undefined);
     if (feature === undefined) continue;
     const [name, value] = feature;
     found.set(name, (found.get(name) ?? new Set()).add(value));
