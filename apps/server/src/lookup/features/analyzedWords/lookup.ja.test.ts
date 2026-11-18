@@ -55,6 +55,28 @@ describe("words found by the analyzer, in a script without spaces", () => {
     assert.deepStrictEqual(suru.labels, ["て form"]);
   });
 
+  it("splits a word made with suffixes into the words it holds, opening on the clicked one", () => {
+    const db = dictionary([
+      ["電化", "NOUN", [], ["electrification"]],
+      ["製品", "NOUN", [], ["product"]],
+      ["製", "NOUN", [], ["made in"]],
+      ["品", "NOUN", [], ["article"]],
+    ]);
+    // the analyzer: 電化|製|品, 製 and 品 suffixes
+    const { entries, segments } = lookupWord(
+      db,
+      languageOf("ja_en"),
+      "製品",
+      "電化製品の回路。",
+      1,
+    );
+    assert.deepStrictEqual(
+      segments?.map((segment) => segment.text),
+      ["電化", "製品"],
+    );
+    assert.strictEqual(entries[0]!.lemma, "製品");
+  });
+
   it("joins ながら after the verb, as the て form", () => {
     assert.deepStrictEqual(parts("実", "実験しながら話す。"), [
       // 実験 is the whole word's entry, shown first
