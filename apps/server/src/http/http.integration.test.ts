@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterAll, assert, describe, it } from "@effect/vitest";
 import { Base64 } from "effect/encoding";
-import { DictHandlersMemory, dictHandlersMemory } from "./DictHandlers.ts";
+import { DictHandlersMemory, dictHandlersMemory } from "./testing.ts";
 import { makeWebHandler } from "./app.ts";
 
 const verifyEd25519 = async (
@@ -195,16 +195,11 @@ describe("HTTP API", () => {
   const lookup = (body: unknown) => lookupRaw(JSON.stringify(body));
 
   it("POST /v1/lookup returns entries, also for an inflected word", async () => {
-    const response = await lookup({ word: "PSA", lang: "de_en" });
+    const response = await lookup({ word: "Hunde", lang: "de_en" });
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(await response.json(), {
       entries: [
-        {
-          lemma: "pies",
-          pos: "NOUN",
-          pron: { ipa: ["/pjɛs/"] },
-          senses: [{ glosses: ["dog"] }],
-        },
+        { lemma: "der Hund", pos: "NOUN", senses: [{ glosses: ["dog"] }] },
       ],
     });
   });
@@ -217,11 +212,11 @@ describe("HTTP API", () => {
     };
     assert.deepStrictEqual(
       body.entries.map((entry) => entry.lemma),
-      ["Gemüse", "Fonds", "Fond"],
+      ["Gemüse", "Fonds"],
     );
     assert.deepStrictEqual(body.segments, [
       { text: "Gemüse", entries: [0] },
-      { text: "fonds", entries: [1, 2] },
+      { text: "fonds", entries: [1] },
     ]);
   });
 
@@ -274,8 +269,13 @@ describe("HTTP API", () => {
       at: 1,
     });
     assert.strictEqual(response.status, 200);
-    const body = (await response.json()) as { entries: Array<unknown> };
-    assert.strictEqual(body.entries.length, 2);
+    const body = (await response.json()) as {
+      entries: Array<{ lemma: string }>;
+    };
+    assert.deepStrictEqual(
+      body.entries.map((entry) => entry.lemma),
+      ["die Mutter"],
+    );
   });
 
   it("POST /v1/lookup ignores fields it does not know", async () => {

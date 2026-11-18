@@ -1,7 +1,7 @@
 import { Effect, Layer } from "effect";
 import { HttpApiBuilder, HttpApiMiddleware } from "effect/http-api";
 import { Api, LookupBodyErrors } from "../api/Api.ts";
-import { AppConfig, loadConfig, type AppConfigValues } from "../config.ts";
+import { AppConfig } from "../config.ts";
 import { Dictionaries } from "../lookup/Dictionaries.ts";
 import {
   LabelsResponse,
@@ -14,7 +14,6 @@ import { Identity } from "../identity/Identity.ts";
 import { SOURCES } from "../lookup/common/sources.ts";
 import { legalSection } from "../legal.ts";
 import { reportUrl } from "../report.ts";
-import { lookupStub } from "./lookupStub.ts";
 import { signedMetaResponse } from "./signMeta.ts";
 
 const LookupBodyErrorsLive = HttpApiMiddleware.layerSchemaErrorTransform(
@@ -123,34 +122,6 @@ const MAX_CONTEXT = 500;
 /** `at` names a copy of `word` in `context`, so it is at most the sentence's length. */
 const isClickedCopy = (at: unknown): at is number =>
   typeof at === "number" && Number.isInteger(at) && at > 0 && at <= MAX_CONTEXT;
-
-/**
- * In-memory handlers for tests: a stub dictionary and `de_en`, whatever is in
- * `data/`, the legal section on, no report link, and `config` over the rest.
- */
-export const dictHandlersMemory = (config: Partial<AppConfigValues> = {}) =>
-  DictHandlersNoDeps.pipe(
-    Layer.provide([
-      Identity.layerMemory,
-      Layer.sync(AppConfig, () =>
-        AppConfig.of({
-          ...loadConfig(),
-          languages: ["de_en"],
-          // The defaults: the templates and example.invalid links.
-          includeLegal: true,
-          reportUrl: undefined,
-          ...config,
-        }),
-      ),
-      Layer.succeed(Dictionaries, {
-        lookup: (_pair, word) => lookupStub(word),
-        // German shows gender as the article; `c` is the rare common gender.
-        labels: () => ({ c: { name: "common gender" } }),
-      }),
-    ]),
-  );
-
-export const DictHandlersMemory = dictHandlersMemory();
 
 export const DictHandlers = DictHandlersNoDeps.pipe(
   Layer.provide([
