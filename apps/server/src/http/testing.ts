@@ -6,6 +6,7 @@ import { lookupWord } from "../lookup/lookup.ts";
 import { languageOf } from "../lookup/testing/dictionary.ts";
 import { german } from "../lookup/testing/german.ts";
 import { DictHandlersNoDeps } from "./DictHandlers.ts";
+import { LegalPages } from "./legalPages.ts";
 
 /**
  * In-memory handlers for tests: `de_en` on the German test dictionary
@@ -38,3 +39,13 @@ export const dictHandlersMemory = (config: Partial<AppConfigValues> = {}) =>
   );
 
 export const DictHandlersMemory = dictHandlersMemory();
+
+/** The legal pages on the test configuration: the templates, legal on, `config` over the rest. */
+export const legalPagesMemory = (config: Partial<AppConfigValues> = {}) =>
+  LegalPages.pipe(
+    Layer.provide(
+      Layer.sync(AppConfig, () =>
+        AppConfig.of({ ...loadConfig(), includeLegal: true, ...config }),
+      ),
+    ),
+  );

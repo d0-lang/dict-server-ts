@@ -29,7 +29,7 @@ const readDocument = (file: string, setting: string) =>
     try: () => new Uint8Array(readFileSync(file)),
     catch: (cause) =>
       new Error(
-        `${setting}=${file}: cannot read the document to hash (${cause instanceof Error ? cause.message : String(cause)})`,
+        `${setting}=${file}: cannot read the document (${cause instanceof Error ? cause.message : String(cause)})`,
       ),
   });
 
@@ -43,6 +43,20 @@ const checkChange = (text: string | undefined, setting: string) =>
     : Effect.void;
 
 /**
+ * The privacy policy and terms as published: the exact bytes of `PRIVACY_FILE`
+ * and `TOS_FILE`. Their hashes go in the `legal` section, and `GET /privacy`
+ * and `GET /terms` render the same bytes as web pages.
+ */
+export const readLegalDocuments = Effect.fnUntraced(function* (
+  config: AppConfigValues,
+) {
+  return {
+    privacy: yield* readDocument(config.privacyFile, "PRIVACY_FILE"),
+    terms: yield* readDocument(config.tosFile, "TOS_FILE"),
+  };
+});
+
+/**
  * The `legal` section, or undefined with `INCLUDE_LEGAL=false`. Fails when a
  * document can't be read or a change text is too long; warns when a document
  * still has placeholders to fill in.
@@ -53,13 +67,13 @@ export const legalSection = Effect.fnUntraced(function* (
   if (!config.includeLegal) return undefined;
   yield* checkChange(config.privacyChange, "PRIVACY_CHANGE");
   yield* checkChange(config.tosChange, "TOS_CHANGE");
+  const { privacy, terms } = yield* readLegalDocuments(config);
   const documents = [
-    { setting: "PRIVACY_FILE", file: config.privacyFile },
-    { setting: "TOS_FILE", file: config.tosFile },
+    { setting: "PRIVACY_FILE", file: config.privacyFile, bytes: privacy },
+    { setting: "TOS_FILE", file: config.tosFile, bytes: terms },
   ];
   const hashes: Array<string> = [];
-  for (const { setting, file } of documents) {
-    const bytes = yield* readDocument(file, setting);
+  for (const { setting, file, bytes } of documents) {
     const left = placeholders(new TextDecoder().decode(bytes));
     if (left.length > 0) {
       yield* Effect.logWarning(

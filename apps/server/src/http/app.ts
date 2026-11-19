@@ -9,6 +9,7 @@ import { HttpApiBuilder } from "effect/http-api";
 import { Api } from "../api/Api.ts";
 import { PlatformLive } from "../platform.ts";
 import { DictHandlers } from "./DictHandlers.ts";
+import { LegalPagesLive } from "./legalPages.ts";
 
 /**
  * Answers an unknown route with a plain 404. The router's own error names the
@@ -26,8 +27,11 @@ const QuietNotFound = HttpRouter.middleware(
   { global: true },
 );
 
-export const makeHttpLive = (handlers: typeof DictHandlers = DictHandlers) =>
-  HttpApiBuilder.layer(Api).pipe(
+export const makeHttpLive = (
+  handlers: typeof DictHandlers = DictHandlers,
+  legalPages: typeof LegalPagesLive = LegalPagesLive,
+) =>
+  Layer.merge(HttpApiBuilder.layer(Api), legalPages).pipe(
     Layer.provide(handlers),
     Layer.provide(PlatformLive),
     Layer.provide(QuietNotFound),
@@ -42,5 +46,7 @@ export const makeHttpLive = (handlers: typeof DictHandlers = DictHandlers) =>
 
 export const HttpLive = makeHttpLive();
 
-export const makeWebHandler = (handlers: typeof DictHandlers = DictHandlers) =>
-  HttpRouter.toWebHandler(makeHttpLive(handlers));
+export const makeWebHandler = (
+  handlers: typeof DictHandlers = DictHandlers,
+  legalPages: typeof LegalPagesLive = LegalPagesLive,
+) => HttpRouter.toWebHandler(makeHttpLive(handlers, legalPages));
