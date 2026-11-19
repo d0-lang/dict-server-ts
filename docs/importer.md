@@ -11,7 +11,17 @@ curl -LO https://kaikki.org/dictionary/raw-wiktextract-data.jsonl.gz
 bun run import --lang pl --input raw-wiktextract-data.jsonl.gz --out data/pl_en.sqlite
 ```
 
-Flags: `--lang` (default `pl`; a language needs `languages/<lang>/language.toml`), `--input` (path or URL, default the raw dump URL), `--out` (default `data/<lang>_en.sqlite`), `--force` (overwrite `--out` if it exists; without it the import stops before doing any work), `--no-form-of-fallback`, `--dump <snapshot>` (the dump snapshot the input comes from, such as `dump-2026-10-30`, kept in the file's `meta` as `dump`), `--limit <n>` (stop after n lines of the language, for samples). The file is built as `<out>.tmp` and renamed when the import succeeds, so a running server never sees a half-written file. A JSON summary (counts, size, time) is printed at the end.
+| Flag | Default | What it does |
+| --- | --- | --- |
+| `--lang` | `pl` | The language to import. It needs `languages/<lang>/language.toml`. |
+| `--input`, `-i` | the raw dump on kaikki.org | Where to read from: a path or URL, plain or `.gz`, the whole dump or a file already filtered to the language. |
+| `--out`, `-o` | `data/<lang>_en.sqlite` | The dictionary file to write. |
+| `--force` | off | Overwrite `--out` if it exists. Without it, the import stops before doing any work. |
+| `--no-form-of-fallback` | off | Don't add `form -> lemma` rows from separate form-of entries (see [What gets imported](#what-gets-imported)). |
+| `--dump <snapshot>` | none | The dump snapshot the input comes from, such as `dump-2026-10-30`. It's kept in the file's `meta` as `dump`. |
+| `--limit <n>` | none | Stop after `n` lines of the language, for samples. |
+
+The file is built as `<out>.tmp` and renamed when the import succeeds, so a running server never sees a half-written file. A JSON summary (counts, size, time) is printed at the end.
 
 To avoid scanning the whole dump on every run, copy each language's lines into its own file and import that (`data/` is gitignored). One pass over the dump writes every language asked for, as `<out-dir>/<lang>.jsonl`:
 
@@ -20,7 +30,12 @@ bun run filter --lang pl,de --input raw-wiktextract-data.jsonl.gz --out-dir data
 bun run import --lang pl --input data/raw/pl.jsonl
 ```
 
-`--lang` takes a comma-separated list, or `all` (the default) for every language in `languages/`; `--out-dir` defaults to `data/raw`; `--force` overwrites files that exist.
+| Flag | Default | What it does |
+| --- | --- | --- |
+| `--lang` | `all` | The languages to keep, joined by commas; `all` is every language in `languages/`. |
+| `--input`, `-i` | required | The raw dump: a path or URL, plain or `.gz`. |
+| `--out-dir`, `-o` | `data/raw` | Where to write one `<lang>.jsonl` per language. |
+| `--force` | off | Overwrite files that exist. |
 
 ## Dump snapshots
 
