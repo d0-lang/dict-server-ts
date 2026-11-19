@@ -9,7 +9,7 @@ Click a word while you read, and the server answers with what it means, in Engli
 - **Compounds, split into their parts**: `Rettungsfonds` → `Rettung` + `s` + `Fonds`
 - **Whole words in text without spaces**: `食` in *寿司を食べました* → *食べる*
 
-It speaks the [DaDict protocol](https://github.com/d0-lang/protocol), so any client that speaks it can use any server. **DaDict public** at `https://server.dadict.com` is the one we run. Run your own if you'd rather your lookups stayed with you.
+It speaks the [d0 lookup protocol](https://github.com/d0-lang/protocol), so any client that speaks it can use any server. **DaDict public** at `https://server.dadict.com` is the one we run. Run your own if you'd rather your lookups stayed with you.
 
 ## Languages
 
