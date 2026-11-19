@@ -63,8 +63,7 @@ With Docker, `DICT_PORT` sets the port on your machine (default 3000), and `DICT
 
 ## Going public
 
-- **Legal texts.** Copy `legal/privacy.example.md` and `legal/terms.example.md`, fill them in, and turn `INCLUDE_LEGAL` on. [`legal/README.md`](legal/README.md) says what to fill in, and what your setup has to do for the texts to be true. Settle them before you go public: any change makes every client pause until its user has seen it.
-- **Logs.** Words and sentences travel in the request body, which the server doesn't log. Keep it that way in your proxy, and don't log the `Referer` header.
+- **Legal texts.** Copy `legal/privacy.example.md` and `legal/terms.example.md`, fill them in, and turn `INCLUDE_LEGAL` on. [`legal/README.md`](legal/README.md) says what to fill in, and what your setup has to do for the texts to be true, such as what your proxy may log. Settle them before you go public: any change makes every client pause until its user has seen it.
 - **The key.** Back it up, and keep it for as long as the server runs.
 
 ## Development
