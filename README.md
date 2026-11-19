@@ -2,8 +2,6 @@
 
 <h1 align="center">DaDict server</h1>
 
-<p align="center"><b>The dictionary server behind DaDict.</b></p>
-
 <p align="center">
 Public server: <code>https://server.dadict.com</code> — add it in DaDict<br>
 <a href="https://server.dadict.com/privacy">Privacy policy</a> · <a href="https://server.dadict.com/terms">Terms</a> · <a href="#run-your-own">Run your own</a> · <a href="https://github.com/d0-lang/protocol">Protocol</a>
