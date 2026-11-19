@@ -2,7 +2,7 @@
 
 <h1 align="center">DaDict server</h1>
 
-<p align="center"><b>Look up a word in the sentence where you met it.</b></p>
+<p align="center"><b>The dictionary server behind DaDict.</b></p>
 
 <p align="center">
 Public server: <code>https://server.dadict.com</code> — add it in DaDict<br>
