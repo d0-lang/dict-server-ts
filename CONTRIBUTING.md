@@ -27,7 +27,7 @@ bun run import --lang pl   # builds data/pl_en.sqlite from the kaikki.org dump, 
 bun run dev
 ```
 
-The tests need no dictionary files. `README.md` describes the layout and the importer.
+The tests need no dictionary files. [docs/development.md](docs/development.md) describes the layout, [docs/importer.md](docs/importer.md) the importer and [docs/lookups.md](docs/lookups.md) how lookups work.
 
 ## Before you open a PR
 

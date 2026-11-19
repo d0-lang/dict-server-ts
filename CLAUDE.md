@@ -1,6 +1,6 @@
 Default to Bun for install, run, and TypeScript. Use Effect 4 APIs from the `effect` package — HTTP and Schema live there, not in the old `@effect/platform` HTTP stack.
 
-The protocol the server implements is `../protocol/README.md` ([d0-lang/protocol](https://github.com/d0-lang/protocol)).
+The protocol the server implements is `../protocol/PROTOCOL.md` ([d0-lang/protocol](https://github.com/d0-lang/protocol/blob/main/PROTOCOL.md)).
 
 ## Layout
 
