@@ -1,6 +1,13 @@
-# dict-server-ts
+<p align="center"><img src="docs/logo.svg" width="96" height="96" alt="DaDict logo"></p>
 
-**The dictionary server behind DaDict: look up a word in the sentence where you met it.**
+<h1 align="center">DaDict server</h1>
+
+<p align="center"><b>Look up a word in the sentence where you met it.</b></p>
+
+<p align="center">
+Public server: <code>https://server.dadict.com</code> — add it in DaDict<br>
+<a href="https://server.dadict.com/privacy">Privacy policy</a> · <a href="https://server.dadict.com/terms">Terms</a> · <a href="#run-your-own">Run your own</a> · <a href="https://github.com/d0-lang/protocol">Protocol</a>
+</p>
 
 Click a word while you read, and the server answers with what it means, in English. With the sentence around the word, it finds what a single word can't show:
 
@@ -9,24 +16,11 @@ Click a word while you read, and the server answers with what it means, in Engli
 - **Compounds, split into their parts**: `Rettungsfonds` → `Rettung` + `s` + `Fonds`
 - **Whole words in text without spaces**: `食` in *寿司を食べました* → *食べる*
 
-It speaks the [d0 lookup protocol](https://github.com/d0-lang/protocol), so any client that speaks it can use any server. **DaDict public** at `https://server.dadict.com` is the one we run. Run your own if you'd rather your lookups stayed with you.
+It speaks the [d0 lookup protocol](https://github.com/d0-lang/protocol), so any client that speaks it can use any server. **DaDict public**, at the address above, is the one we run. Run your own if you'd rather your lookups stayed with you.
 
 ## Languages
 
-Every language is explained in English, from the English [Wiktionary](https://en.wiktionary.org/).
-
-| Language | Pair | Also |
-| --- | --- | --- |
-| German | `de_en` | Compounds split into parts, separable verbs, the article in the headword (`der Hund`) |
-| Spanish | `es_en` | |
-| French | `fr_en` | |
-| Italian | `it_en` | |
-| Japanese | `ja_en` | Words found in text without spaces, readings in kana |
-| Polish | `pl_en` | Reflexive verbs with `się` |
-| Russian | `ru_en` | Stress marks in the headword (`соба́ка`) |
-| Ukrainian | `uk_en` | Stress marks in the headword |
-
-All of them find phrases from the sentence, and answer with pronunciation (IPA, and recordings from Wikimedia Commons where there are any) and links to the Wiktionary pages the entries come from.
+**German · Spanish · French · Italian · Japanese · Polish · Russian · Ukrainian**, each explained in English, from the English [Wiktionary](https://en.wiktionary.org/). Answers come with pronunciation (IPA, and recordings from Wikimedia Commons where there are any) and links to the Wiktionary pages the entries come from.
 
 ## Run your own
 
@@ -72,7 +66,6 @@ With Docker, `DICT_PORT` sets the port on your machine (default 3000), and `DICT
 - **Legal texts.** Copy `legal/privacy.example.md` and `legal/terms.example.md`, fill them in, and turn `INCLUDE_LEGAL` on. [`legal/README.md`](legal/README.md) says what to fill in, and what your setup has to do for the texts to be true. Settle them before you go public: any change makes every client pause until its user has seen it.
 - **Logs.** Words and sentences travel in the request body, which the server doesn't log. Keep it that way in your proxy, and don't log the `Referer` header.
 - **The key.** Back it up, and keep it for as long as the server runs.
-- The protocol's [server guide](https://github.com/d0-lang/protocol/blob/main/SERVER.md) ends with a checklist.
 
 ## Development
 
