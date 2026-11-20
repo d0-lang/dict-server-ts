@@ -104,7 +104,12 @@ export const copySameAsSenses = ({ sqlite }: WriterContext) =>
             others.filter(
               (other) =>
                 other.reading !== null &&
-                stem(hiragana(other.reading)) === pointer.reading,
+                // `もうす` names all of `申す`'s reading, `ゆうぎ` only the
+                // part before `遊戯する`'s する
+                [
+                  hiragana(other.reading),
+                  stem(hiragana(other.reading)),
+                ].includes(pointer.reading),
             ),
           )[0];
         }

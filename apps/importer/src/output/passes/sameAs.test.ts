@@ -78,6 +78,15 @@ describe("copySameAsSenses", () => {
     assert.deepStrictEqual(glossesOf(sqlite, 4), ["to play (a game)"]);
   });
 
+  it("finds a verb by the whole reading the gloss names", () => {
+    const sqlite = file([
+      [1, "申す", "VERB", "もうす", ["to say (humble)"]],
+      [2, "申す", "VERB", "ます", ["Same as もうす (mōsu) above"]],
+    ]);
+    run(sqlite);
+    assert.deepStrictEqual(glossesOf(sqlite, 2), ["to say (humble)"]);
+  });
+
   it("takes the nearest entry that way when the gloss names no reading", () => {
     const sqlite = file([
       [1, "灸", "NOUN", "きゅう", ["moxibustion"]],
