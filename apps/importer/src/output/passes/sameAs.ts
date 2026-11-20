@@ -6,6 +6,10 @@ import type { WriterContext } from "./context.ts";
  * entry of its word on the same Wiktionary page, which the reader may not
  * see ("above"). It is replaced by that entry's senses, so the entry
  * explains the word by itself: `遊戯` read ゆうげ gets ゆうぎ's "a game".
+ * A する verb's "Same as above" points at the word without する, a headword
+ * of its own (`見合いする` under `見合い`): it takes that word's senses. The
+ * verb's entry stays, since the analyzer may not keep the word whole without
+ * it (`厄介|払い|し|た`).
  */
 
 /** "Same as しん (shin) above", "same as above.", "all senses same as 上(うえ) (ue) above". */
@@ -71,6 +75,10 @@ export const copySameAsSenses = ({ sqlite }: WriterContext) =>
     const deleteSenses = sqlite.prepare(
       "DELETE FROM senses WHERE entry_id = ?",
     );
+    /** The entries of the word a する verb is made of, verbs aside. */
+    const nounsOf = sqlite.prepare<{ id: number }, [string]>(
+      "SELECT id FROM entries WHERE lemma = ? AND pos <> 'VERB' ORDER BY id",
+    );
     const insert = sqlite.prepare(
       "INSERT INTO senses (entry_id, idx, glosses, see) VALUES (?, ?, ?, ?)",
     );
@@ -130,6 +138,10 @@ export const copySameAsSenses = ({ sqlite }: WriterContext) =>
         seen.add(sense.glosses);
         senses.push(sense);
       };
+      const madeOf =
+        self.lemma.endsWith("する") && self.lemma.length > 2
+          ? nounsOf.all(self.lemma.slice(0, -2))
+          : [];
       let changed = false;
       for (const sense of sensesOf.all(self.id)) {
         if (parseSameAs(lastGloss(sense)) === undefined) {
@@ -137,12 +149,15 @@ export const copySameAsSenses = ({ sqlite }: WriterContext) =>
           continue;
         }
         const target = targetOf(lastGloss(sense));
-        if (target === undefined) {
+        if (target !== undefined) {
+          meaningful(target.id).forEach(add);
+          changed = true;
+        } else if (madeOf.length > 0) {
+          madeOf.forEach((noun) => meaningful(noun.id).forEach(add));
+          changed = true;
+        } else {
           add(sense);
-          continue;
         }
-        meaningful(target.id).forEach(add);
-        changed = true;
       }
       if (!changed) continue;
       deleteSenses.run(self.id);

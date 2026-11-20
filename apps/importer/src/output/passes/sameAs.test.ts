@@ -87,6 +87,21 @@ describe("copySameAsSenses", () => {
     assert.deepStrictEqual(glossesOf(sqlite, 2), ["to say (humble)"]);
   });
 
+  it("gives a する verb that points at the word without する its senses", () => {
+    const sqlite = file([
+      [1, "見合い", "NOUN", "みあい", ["formal marriage interview"]],
+      [2, "見合いする", "VERB", "みあいする", ["Same as above."]],
+      [3, "手当", "NOUN", "てあて", ["allowance"]],
+      [4, "手当する", "VERB", "てあてする", ["to treat", "same as above."]],
+      // no word without する: left as it is
+      [5, "ぺらぺらする", "VERB", null, ["Same as above."]],
+    ]);
+    run(sqlite);
+    assert.deepStrictEqual(glossesOf(sqlite, 2), ["formal marriage interview"]);
+    assert.deepStrictEqual(glossesOf(sqlite, 4), ["to treat", "allowance"]);
+    assert.deepStrictEqual(glossesOf(sqlite, 5), ["Same as above."]);
+  });
+
   it("takes the nearest entry that way when the gloss names no reading", () => {
     const sqlite = file([
       [1, "灸", "NOUN", "きゅう", ["moxibustion"]],
