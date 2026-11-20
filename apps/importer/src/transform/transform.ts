@@ -21,7 +21,7 @@ import {
   isVerbalNounForm,
   keepForm,
   skipSense,
-  synonymTargets,
+  seeTargets,
   type Degree,
   type SkippedSenseReason,
 } from "./rules.ts";
@@ -720,7 +720,7 @@ export const transformEntry = (
         path.slice(0, -1).forEach((parent) => parentGlosses.add(parent));
         own.senses.add(
           path,
-          synonymTargets(rules, outcome.gloss, sense.links ?? []).filter(
+          seeTargets(rules, outcome.gloss, sense.links ?? []).filter(
             (word) => lookupKey(word) !== lemmaKey,
           ),
         );

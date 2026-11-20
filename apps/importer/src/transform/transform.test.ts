@@ -6,6 +6,7 @@ import type { WiktextractEntry } from "../source/wiktextract.ts";
 
 const pl = importRules(readLanguage("pl"));
 const de = importRules(readLanguage("de"));
+const ja = importRules(readLanguage("ja"));
 const fr = importRules(readLanguage("fr"));
 const italian = importRules(readLanguage("it"));
 const ru = importRules(readLanguage("ru"));
@@ -883,6 +884,35 @@ describe("transformEntry", () => {
     assert.deepStrictEqual(result.entry?.senses, [
       { glosses: ["synonym of strunnik"], see: ["strunnik"] },
       { glosses: ["dog"], see: [] },
+    ]);
+  });
+
+  it("links the word an alternative form with more to say points at", () => {
+    // wiktextract reads the target as "計る referring to dimension", no word
+    const result = transformEntry(
+      ja,
+      entry({
+        word: "測る",
+        pos: "verb",
+        lang_code: "ja",
+        senses: [
+          {
+            glosses: ["alternative form of 計る referring to dimension"],
+            tags: ["alt-of", "alternative"],
+            alt_of: [{ word: "計る referring to dimension" }],
+            links: [
+              ["計る", "計る#Japanese"],
+              ["dimension", "dimension"],
+            ],
+          },
+        ],
+      }),
+    );
+    assert.deepStrictEqual(result.entry?.senses, [
+      {
+        glosses: ["alternative form of 計る referring to dimension"],
+        see: ["計る"],
+      },
     ]);
   });
 
