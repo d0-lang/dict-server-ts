@@ -99,7 +99,8 @@ export const copySameAsSenses = ({ sqlite }: WriterContext) =>
       ];
       const targetOf = (gloss: string): EntryRow | undefined => {
         const pointer = parseSameAs(gloss)!;
-        if (pointer.reading !== undefined) {
+        const { reading } = pointer;
+        if (reading !== undefined) {
           return samePosFirst(
             others.filter(
               (other) =>
@@ -109,7 +110,7 @@ export const copySameAsSenses = ({ sqlite }: WriterContext) =>
                 [
                   hiragana(other.reading),
                   stem(hiragana(other.reading)),
-                ].includes(pointer.reading),
+                ].includes(reading),
             ),
           )[0];
         }
