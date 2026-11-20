@@ -102,7 +102,7 @@ const Import = doc(
     pointerWords: orDefault(
       doc(
         strings,
-        'Words that may make up the opening of a gloss that only names another word\'s form, before "of" and the linked word: `Yang-vowel form of -어서 (-eoseo)`, `topic-marked form of 나 (na)`, `Post-vowel and post-liquid allomorphic form of -으면`. Every word of the opening must be one of these, compared in lower case. wiktextract reads no `form-of` link there, so without this the reader gets the form\'s name and not its meaning: the sense becomes a link to the word, as a `form-of` sense is.',
+        "Words that may make up the opening of a gloss that only names another word's form, before \"of\" and the linked word: `Yang-vowel form of -어서 (-eoseo)`, `topic-marked form of 나 (na)`, `Post-vowel and post-liquid allomorphic form of -으면`. Every word of the opening must be one of these, compared in lower case. wiktextract reads no `form-of` link there, so without this the reader gets the form's name and not its meaning: the sense becomes a link to the word, as a `form-of` sense is.",
       ),
       [],
     ),
@@ -402,23 +402,26 @@ const Context = doc(
                     ),
                     [],
                   ),
-                  as: orDefault(doc(
-                    Schema.Array(
-                      Schema.Struct({
-                        before: Schema.optionalKey(
-                          doc(
-                            strings,
-                            "Only before a morpheme of these parts of speech (endings: `이` + `에요` is the copula).",
+                  as: orDefault(
+                    doc(
+                      Schema.Array(
+                        Schema.Struct({
+                          before: Schema.optionalKey(
+                            doc(
+                              strings,
+                              "Only before a morpheme of these parts of speech (endings: `이` + `에요` is the copula).",
+                            ),
                           ),
-                        ),
-                        pos: doc(
-                          Schema.String,
-                          "Its part of speech (`VCP`, `JKS`).",
-                        ),
-                      }),
+                          pos: doc(
+                            Schema.String,
+                            "Its part of speech (`VCP`, `JKS`).",
+                          ),
+                        }),
+                      ),
+                      "Inside a word: how to read it, the first that fits.",
                     ),
-                    "Inside a word: how to read it, the first that fits.",
-                  ), []),
+                    [],
+                  ),
                 }),
               ),
               "Morphemes the analyzer's dictionary lacks: Lindera's ko-dic has no `이` (the subject particle, the copula, the pronoun), and cuts `생각이` as `생|각이`. Inside a word, the word is analyzed again, cut there, and that reading is kept when the dictionary knows more of the word by it: `생각` + `이` (the particle), not `생` + `각이`, but `호랑이` \"tiger\" as it is. The morpheme's base form is spelled as `baseSpellings` says. At a word's start, see `start`.",
@@ -633,14 +636,14 @@ const Context = doc(
           spacedWords: orDefault(
             doc(
               Schema.Boolean,
-              "The language writes a space after each word with its particles and endings (Korean eojeols), so the piece the segmenter gives is a whole word. A headword spelled as it is written, other than a noun, verb or adjective, is that word, even where the analyzer cuts it into a stem and endings: it comes first (`하지만` \"but\", cut `하` + `-지만`). A word the analyzer reads as a verb with endings is no noun spelled alike (`하지` \"summer solstice\", for `하` + `-지`). Off for Japanese, written without spaces, where `だったら` after a noun is the copula, not the conjunction.",
+              'The language writes a space after each word with its particles and endings (Korean eojeols), so the piece the segmenter gives is a whole word. A headword spelled as it is written, other than a noun, verb or adjective, is that word, even where the analyzer cuts it into a stem and endings: it comes first (`하지만` "but", cut `하` + `-지만`). A word the analyzer reads as a verb with endings is no noun spelled alike (`하지` "summer solstice", for `하` + `-지`). Off for Japanese, written without spaces, where `だったら` after a noun is the copula, not the conjunction.',
             ),
             false,
           ),
           ranksByPos: orDefault(
             doc(
               Schema.Boolean,
-              "A word's or part's entries of the parts of speech `upos` gives the analyzer's reading come before its others, which keep their order (Korean `우리` the pronoun \"we\" before `우리` \"cage\"; the particle `-는` before the ending). Off for Japanese, whose kana words are ranked by reading instead.",
+              'A word\'s or part\'s entries of the parts of speech `upos` gives the analyzer\'s reading come before its others, which keep their order (Korean `우리` the pronoun "we" before `우리` "cage"; the particle `-는` before the ending). Off for Japanese, whose kana words are ranked by reading instead.',
             ),
             false,
           ),
