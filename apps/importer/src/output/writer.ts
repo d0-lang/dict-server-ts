@@ -1,7 +1,12 @@
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import { caseClass, lookupKey } from "@dict/core/lookupKey";
-import { FormSource, GRAMMAR_SOURCE_POS } from "@dict/core/schema";
+import {
+  FormSource,
+  GRAMMAR_SOURCE_POS,
+  NUMERAL_SOURCE_POS,
+} from "@dict/core/schema";
 import type { GrammarEntry } from "../grammar.ts";
+import type { NumeralEntry } from "../numerals.ts";
 import type { Degree } from "../transform/rules.ts";
 import type {
   DerivedSense,
@@ -19,6 +24,8 @@ import {
   resolveFormOf,
 } from "./passes/links.ts";
 import { addParticipleForms } from "./passes/participles.ts";
+import { replaceNumerals } from "./passes/numerals.ts";
+import { copySameAsSenses } from "./passes/sameAs.ts";
 import { resolveSee } from "./passes/see.ts";
 import {
   addAbbreviations,
@@ -99,6 +106,8 @@ export const makeWriter = (
   participlesSharedWithOwn = false,
   /** `verbChainsThroughEntries`. */
   verbChainsThroughEntries = false,
+  /** The language's numerals file (`replaceNumerals`). */
+  numerals: ReadonlyArray<NumeralEntry> = [],
 ) => {
   const sqlite = db.$client;
   sqlite.run(`CREATE TEMP TABLE form_of_pending (
@@ -346,6 +355,31 @@ export const makeWriter = (
     }
   })();
 
+  /** Numerals-file entries, each with its reading, are not merged either. */
+  sqlite.transaction(() => {
+    for (const entry of numerals) {
+      const id = ++lastId;
+      insertEntry.run(
+        id,
+        entry.lemma,
+        "NUM",
+        NUMERAL_SOURCE_POS,
+        0,
+        caseClass(entry.lemma),
+        null,
+        null,
+      );
+      insertForm.run(lookupKey(entry.lemma), id, FormSource.Lemma);
+      insertPron.run(id, 0, "reading", entry.reading);
+      counts.pronunciations++;
+      entry.senses.forEach((sense, idx) => {
+        insertSense.run(id, idx, JSON.stringify([sense]), null);
+        counts.senses++;
+      });
+      counts.entries++;
+    }
+  })();
+
   /** Soft redirects, resolved once every entry is written (`addRedirects`). */
   const redirects: Array<Redirect> = [];
 
@@ -430,6 +464,7 @@ export const makeWriter = (
     followLinkChains(ctx);
     copyDerivedMeanings(ctx);
     settleDegreeEntries(ctx);
+    copySameAsSenses(ctx);
     resolveSee(ctx);
     const unresolved = countUnresolvedLinks(ctx);
     const added = formOfFallback ? resolveFormOf(ctx) : 0;
@@ -442,6 +477,7 @@ export const makeWriter = (
     // the links, to tell which rows only the fallback added).
     sqlite.transaction(() => {
       replaceGrammarWords(ctx);
+      replaceNumerals(ctx);
       dropUnreachedEntries(ctx);
       addUnspacedAbbreviations(ctx);
       addAbbreviations(ctx);

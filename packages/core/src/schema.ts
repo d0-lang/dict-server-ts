@@ -125,6 +125,9 @@ export const pronunciations = sqliteTable(
 /** `entries.source_pos` of entries from a language's grammar file. */
 export const GRAMMAR_SOURCE_POS = "grammar";
 
+/** `entries.source_pos` of entries from a language's numerals file. */
+export const NUMERAL_SOURCE_POS = "numeral";
+
 /** Where a `forms` row came from. The first writer wins (INSERT OR IGNORE). */
 export const FormSource = {
   /** the entry's own headword */

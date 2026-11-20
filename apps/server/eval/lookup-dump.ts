@@ -16,7 +16,8 @@
  * counts how many responses changed, lists the words whose first entry
  * changed, most frequent first, and compares the cost with the base run's.
  * Times depend on the machine and what else runs on it: compare runs made
- * alike.
+ * alike. The dictionaries are read from `DATA_DIR` (default `data`), as the
+ * server reads them, so two builds can be compared without replacing them.
  */
 import { Database } from "bun:sqlite";
 import { drizzle } from "drizzle-orm/bun-sqlite";
@@ -33,6 +34,7 @@ import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import { readPairLanguage } from "@dict/core/language";
 import { schema } from "@dict/core/schema";
 import { loadAnalyzer } from "../src/lookup/common/analyzer.ts";
+import { DATA_DIR } from "../src/config.ts";
 import type { LookupResult } from "../src/lookup/common/entries.ts";
 import { compoundRules } from "../src/lookup/features/compounds/split.ts";
 import { warmCompounds } from "../src/lookup/features/compounds/stems.ts";
@@ -174,7 +176,7 @@ const copyNumber = (text: string, word: string, start: number) => {
 };
 
 const dump = (): { lines: ReadonlyArray<Line>; cost: Cost } => {
-  const client = new Database(`data/${pair}.sqlite`, { readonly: true });
+  const client = new Database(`${DATA_DIR}/${pair}.sqlite`, { readonly: true });
   const statements = countStatements(client);
   const db = drizzle({ client, schema }) as DictionaryDb;
   const language = readPairLanguage(pair);

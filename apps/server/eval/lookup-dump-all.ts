@@ -1,5 +1,6 @@
 /**
- * Runs `dump:lookups` for every language with a dictionary file in `data/`,
+ * Runs `dump:lookups` for every language with a dictionary file in `DATA_DIR`
+ * (default `data/`),
  * and with `--base` checks which languages' answers changed. Most lookup
  * rules are shared, so a change made for one language can change another's
  * popovers; this finds it without the judge.
@@ -17,6 +18,7 @@
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
+import { DATA_DIR } from "../src/config.ts";
 
 const { values } = parseArgs({
   options: {
@@ -47,11 +49,12 @@ const languages = readdirSync("languages", { withFileTypes: true })
     (entry) =>
       entry.isDirectory() &&
       existsSync(join("languages", entry.name, "language.toml")) &&
-      existsSync(`data/${entry.name}_${values.target}.sqlite`),
+      existsSync(`${DATA_DIR}/${entry.name}_${values.target}.sqlite`),
   )
   .map((entry) => entry.name)
   .sort();
-if (languages.length === 0) throw new Error("no dictionary files in data/");
+if (languages.length === 0)
+  throw new Error(`no dictionary files in ${DATA_DIR}/`);
 
 type Outcome = {
   readonly lang: string;

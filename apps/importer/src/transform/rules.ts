@@ -260,24 +260,38 @@ export const grammarPointerTarget = (
   return languageLinks(language, links).find((l) => l.text === match[2])?.word;
 };
 
+/** Openings of a gloss that sends the reader to another word. */
+const SEE_OPENING =
+  /^(?:synonym of|alternative (?:form|spelling) of|same as)\s+/i;
+
 /**
- * The words a "synonym of x" gloss points at. `links` covers the whole path and
- * topic labels, so only links whose text follows "synonym of" count.
+ * The words a gloss like "synonym of x" points at, to link as `see`: also
+ * "alternative form of x" with more after it ("alternative form of 計る
+ * referring to dimension"; without, the word is a form of x), and "same as
+ * x". `links` covers the whole path and topic labels, so only links whose
+ * text follows the opening count.
  */
-export const synonymTargets = (
+export const seeTargets = (
   language: LanguageRules,
   gloss: string,
   links: ReadonlyArray<ReadonlyArray<string>>,
 ): ReadonlyArray<string> => {
-  if (!isPointerGloss(gloss)) return [];
-  const rest = gloss.replace(/^synonym of\s+/i, "");
-  return [
-    ...new Set(
-      languageLinks(language, links)
-        .filter((l) => rest.includes(l.text))
-        .map((l) => l.word),
-    ),
-  ];
+  const opening = SEE_OPENING.exec(gloss);
+  if (opening === null) return [];
+  const rest = gloss.slice(opening[0].length);
+  const linked = languageLinks(language, links).filter((l) =>
+    rest.includes(l.text),
+  );
+  // Two links written next to each other may be one word (`iskrzyć` `się`
+  // is `iskrzyć się`): offered first, it replaces them when it has an entry
+  // (`resolveSee`).
+  const pairs = linked.flatMap((l, i) => {
+    const next = linked[i + 1];
+    return next !== undefined && rest.includes(`${l.text} ${next.text}`)
+      ? [`${l.word} ${next.word}`]
+      : [];
+  });
+  return [...new Set([...pairs, ...linked.map((l) => l.word)])];
 };
 
 /**
