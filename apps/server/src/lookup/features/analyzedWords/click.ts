@@ -264,6 +264,11 @@ export const clickOf = (
         ? morphemes.map((m) => m.reading).join("")
         : undefined;
     },
-    severalWords: (row) => wordsOf(analyze(row.lemma), settings).length > 1,
+    // With spaces, a phrase is written with one (`예를 들다`): the analyzer
+    // cuts a lone verb's lemma too (`우리다` as `우리` + `-다`).
+    severalWords: (row) =>
+      settings.spacedWords
+        ? /\s/u.test(row.lemma.trim())
+        : wordsOf(analyze(row.lemma), settings).length > 1,
   };
 };

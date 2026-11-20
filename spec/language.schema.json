@@ -460,6 +460,34 @@
               },
               "description": "Morphemes the analyzer's dictionary lacks: Lindera's ko-dic has no `이` (the subject particle, the copula, the pronoun), and cuts `생각이` as `생|각이`. Inside a word, the word is analyzed again, cut there, and that reading is kept when the dictionary knows more of the word by it: `생각` + `이` (the particle), not `생` + `각이`, but `호랑이` \"tiger\" as it is. The morpheme's base form is spelled as `baseSpellings` says. At a word's start, see `start`."
             },
+            "recheck": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Parts of speech of the word's last morpheme, as in `join` (ko-dic `ETM`, an adnominal ending)."
+                  },
+                  "before": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Parts of speech the next word must start with, as in `join` (nouns)."
+                  }
+                },
+                "required": [
+                  "pos",
+                  "before"
+                ],
+                "additionalProperties": false
+              },
+              "description": "Words the analyzer may have misread, which a language with spaces can check against the next word: an adnominal ending must come before a noun, so `우리는 어떤가요` is not `우리다` + `-는` but `우리` + `-는`. A word (a run without spaces) that ends in a morpheme of `pos` and is not followed by a word that starts with one of `before` is analyzed alone, and that reading is kept when it no longer ends so."
+            },
             "stemSuffixes": {
               "type": "array",
               "items": {

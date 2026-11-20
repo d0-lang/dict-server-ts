@@ -30,8 +30,20 @@ const FUNCTION_UPOS = new Set([
   "INTJ",
 ]);
 
-/** Parts of speech that name or describe something. */
-const NAMING_UPOS = new Set(["NOUN", "PROPN", "VERB", "ADJ"]);
+/**
+ * Parts of speech a verb's form becomes a word of its own as (`하지만`
+ * "but", `다른` "other", `어떻게` "how"): no noun spelled alike (`하지`
+ * "summer solstice"), nor a letter or a suffix (`가` "first syllable").
+ */
+export const LEXICALIZED = new Set([
+  "ADV",
+  "CCONJ",
+  "SCONJ",
+  "DET",
+  "NUM",
+  "PRON",
+  "INTJ",
+]);
 
 /** Parts of speech that take endings, so a word with endings keeps only these entries. */
 export const INFLECTING = new Set(["VERB", "ADJ", "AUX"]);
@@ -139,9 +151,11 @@ export const wholeIds = (
   // UniDic reads as `従う`; `들어` is `듣다` too, which ko-dic reads as
   // `들다`). Not an entry of the stem itself (`食べ` "stem of 食べる").
   const headPos = c.uposOf(head);
+  // A verb or adjective with its endings, which may have become a word of
+  // its own (`하지만`).
+  const verbal = headPos.has("VERB") || headPos.has("ADJ");
   // Only of a stem that inflects (not the copula `이`, whose `이어` is `잇다`'s).
-  const stem =
-    headPos.size === 0 || headPos.has("VERB") || headPos.has("ADJ");
+  const stem = headPos.size === 0 || headPos.has("VERB") || headPos.has("ADJ");
   const stemForms =
     w.length > 1 && stem && !head.bases.includes(head.surface)
       ? c.settings.stemForms
@@ -169,9 +183,10 @@ export const wholeIds = (
     // alike is another word (`하지` "summer solstice", for `하` + `-지`).
     const own = (row: FormRow) =>
       c.settings.spacedWords &&
+      verbal &&
       form === written &&
       row.source === FormSource.Lemma &&
-      !NAMING_UPOS.has(row.pos) &&
+      LEXICALIZED.has(row.pos) &&
       lookupKey(row.lemma) === lookupKey(written);
     const inflecting = found.filter(
       (row) => INFLECTING.has(row.pos) || own(row),

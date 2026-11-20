@@ -425,6 +425,24 @@ const Context = doc(
             ),
             [],
           ),
+          recheck: orDefault(
+            doc(
+              Schema.Array(
+                Schema.Struct({
+                  pos: doc(
+                    strings,
+                    "Parts of speech of the word's last morpheme, as in `join` (ko-dic `ETM`, an adnominal ending).",
+                  ),
+                  before: doc(
+                    strings,
+                    "Parts of speech the next word must start with, as in `join` (nouns).",
+                  ),
+                }),
+              ),
+              "Words the analyzer may have misread, which a language with spaces can check against the next word: an adnominal ending must come before a noun, so `우리는 어떤가요` is not `우리다` + `-는` but `우리` + `-는`. A word (a run without spaces) that ends in a morpheme of `pos` and is not followed by a word that starts with one of `before` is analyzed alone, and that reading is kept when it no longer ends so.",
+            ),
+            [],
+          ),
           stemSuffixes: orDefault(
             doc(
               strings,

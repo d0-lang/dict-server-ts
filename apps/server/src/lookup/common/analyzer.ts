@@ -106,10 +106,7 @@ const rawBases = (
       settings.baseSpellings.find((rule) => hasPos(part.pos, rule.pos))
         ?.affix === true;
     if (parts.length > 0) {
-      return [
-        ...parts.filter((part) => !affix(part)),
-        ...parts.filter(affix),
-      ];
+      return [...parts.filter((part) => !affix(part)), ...parts.filter(affix)];
     }
   }
   const head = pos.split("+")[0]!;
@@ -118,7 +115,7 @@ const rawBases = (
     .filter((base) => base !== "" && base !== "*");
   // Without base fields, the morpheme as written (ko-dic's reading field is
   // sometimes another word's: `아` read `아이`).
-  return (bases.length > 0 ? bases : [surface]).map((base) => ({
+  return (settings.baseFields.length > 0 ? bases : [surface]).map((base) => ({
     base,
     pos: head,
   }));
@@ -289,13 +286,15 @@ export const analyzerFor = (
   if (cached !== undefined) return cached;
   const tokenize: Analyzer = (text) =>
     reread(
-      restore(text, morphemesOf(text, 0), settings, morphemesOf, known),
+      recheck(
+        text,
+        restore(text, morphemesOf(text, 0), settings, morphemesOf, known),
+        settings,
+        morphemesOf,
+      ),
       settings.reread,
     );
-  const morphemesOf = (
-    text: string,
-    from: number,
-  ): ReadonlyArray<Morpheme> => {
+  const morphemesOf = (text: string, from: number): ReadonlyArray<Morpheme> => {
     const tokenizer = tokenizerFor(settings.dictionary);
     const offsets = utf16At(text);
     return tokenizer.tokenize(text).map((token) => {
@@ -364,6 +363,51 @@ export const analyzerFor = (
   };
   byKnown.set(known, analyze);
   return analyze;
+};
+
+/**
+ * The morphemes with each word that a `recheck` rule finds misread analyzed
+ * alone, when that reading no longer ends in the rule's `pos`: `우리는` ends
+ * in an adnominal ending (`우리다` + `-는`) with no noun after it, and alone
+ * it is `우리` + `-는`.
+ */
+const recheck = (
+  text: string,
+  morphemes: ReadonlyArray<Morpheme>,
+  settings: AnalyzerSettings,
+  morphemesOf: (text: string, from: number) => ReadonlyArray<Morpheme>,
+): ReadonlyArray<Morpheme> => {
+  if (settings.recheck.length === 0) return morphemes;
+  let out = morphemes;
+  const words = [...text.matchAll(/\S+/g)].map((w) => ({
+    start: w.index,
+    end: w.index + w[0].length,
+  }));
+  words.forEach(({ start, end }, i) => {
+    const inside = out.filter((m) => m.start >= start && m.end <= end);
+    const last = inside.filter((m) => /\p{L}/u.test(m.surface)).at(-1);
+    if (last === undefined || last.end !== end) return;
+    const next = words[i + 1];
+    const first =
+      next === undefined
+        ? undefined
+        : out.find((m) => m.start >= next.start && m.end <= next.end);
+    const rule = settings.recheck.find(
+      (r) =>
+        hasPos(last.pos, r.pos) &&
+        (first === undefined || !hasPos(first.pos, r.before)),
+    );
+    if (rule === undefined) return;
+    const alone = morphemesOf(text.slice(start, end), start);
+    const aloneLast = alone.at(-1);
+    if (aloneLast === undefined || hasPos(aloneLast.pos, rule.pos)) return;
+    out = [
+      ...out.filter((m) => m.end <= start),
+      ...alone,
+      ...out.filter((m) => m.start >= end),
+    ];
+  });
+  return out;
 };
 
 /**
@@ -481,7 +525,10 @@ const restore = (
         fits = false;
         break;
       }
-      const bases = spelledBases([{ base: rule.surface, pos: as.pos }], settings);
+      const bases = spelledBases(
+        [{ base: rule.surface, pos: as.pos }],
+        settings,
+      );
       restored.push({
         ...(bases.some((base) => base !== rule.surface)
           ? { respelled: true }

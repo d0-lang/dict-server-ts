@@ -3,7 +3,7 @@ import { lookupKey } from "@dict/core/lookupKey";
 import { FormSource } from "@dict/core/schema";
 import { loadEntries } from "../../common/entries.ts";
 import { type Answer, type Click, PLAIN } from "./click.ts";
-import { wholeIds } from "./parts.ts";
+import { LEXICALIZED, wholeIds } from "./parts.ts";
 
 /**
  * The clicked piece is the word: the plain lookup answers, unless its top
@@ -22,17 +22,19 @@ export const singleWord = (c: Click): Answer => {
   if (found[0]!.respelled === true) {
     const ids = wholeIds(c, found, text);
     const written = c.rows(word).map((row) => row.id);
-    const own = c.settings.spacedWords
-      ? c
-          .rows(word)
-          .filter(
-            (row) =>
-              row.source === FormSource.Lemma &&
-              !NAMING.has(row.pos) &&
-              lookupKey(row.lemma) === lookupKey(word),
-          )
-          .map((row) => row.id)
-      : [];
+    const verbal = ["VERB", "ADJ"].some((tag) => c.uposOf(found[0]!).has(tag));
+    const own =
+      c.settings.spacedWords && verbal
+        ? c
+            .rows(word)
+            .filter(
+              (row) =>
+                row.source === FormSource.Lemma &&
+                LEXICALIZED.has(row.pos) &&
+                lookupKey(row.lemma) === lookupKey(word),
+            )
+            .map((row) => row.id)
+        : [];
     const first = [...own, ...ids];
     if (first.length === 0 || first[0] === written[0]) return PLAIN;
     const upos = c.uposOf(found[0]!);
@@ -106,9 +108,6 @@ export const singleWord = (c: Click): Answer => {
     .filter((id) => !ranked.includes(id));
   return { entries: loadEntries(c.db, [...ranked, ...new Set(rest)]) };
 };
-
-/** Parts of speech that name or describe something: no lexicalized form of a verb. */
-const NAMING = new Set(["NOUN", "PROPN", "VERB", "ADJ"]);
 
 /**
  * The plain lookup's entries, those of the analyzer's parts of speech first

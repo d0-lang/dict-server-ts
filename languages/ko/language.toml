@@ -139,6 +139,13 @@ after = ["NNG", "NNP", "NNB", "XR", "MAG"]
 pos = ["XSN"]
 after = ["NNG", "NNP", "NNB", "NNBC", "NP", "NR", "XR", "XSN"]
 
+# An adnominal ending comes before a noun. ko-dic reads some nouns with a
+# particle as a verb with one (우리는 as 우리다 + -는, in 우리는 어떤가요):
+# such a word not followed by a noun is read again alone.
+[[context.analyzer.recheck]]
+pos = ["ETM"]
+before = ["NNG", "NNP", "NNB", "NNBC", "NR", "NP", "XPN", "SN", "SL", "SH", "UNK"]
+
 # Lindera's ko-dic has no 이 at all (the source mecab-ko-dic has 30 entries
 # for it): it cuts 생각이 as 생|각이 and 학생이에요 as 학생|이에|요. After a
 # noun ending in a consonant, 이 is read as cut off: the copula before an
