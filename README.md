@@ -7,14 +7,14 @@ Public server: <code>https://server.dadict.com</code> — add it in DaDict<br>
 <a href="https://server.dadict.com/privacy">Privacy policy</a> · <a href="https://server.dadict.com/terms">Terms</a> · <a href="#run-your-own">Run your own</a> · <a href="https://github.com/d0-lang/protocol">Protocol</a>
 </p>
 
-Click a word while you read, and the server answers with what it means, in English. With the sentence around the word, it finds what a single word can't show:
+Click a word, get explanation in English, context aware:
 
-- **Phrases and idioms**: `Kraft` in *Das Gesetz tritt morgen in Kraft* → *in Kraft treten*, "to come into force"
-- **Separable verbs**: `fand` in *Die Sitzung fand gestern statt* → *stattfinden*
-- **Compounds, split into their parts**: `Rettungsfonds` → `Rettung` + `s` + `Fonds`
+- **Phrases**: `Kraft` in *Das Gesetz **tritt** morgen **in Kraft*** → *in Kraft treten*, "to come into force"
+- **Separable verbs**: `fand` in *Die Sitzung **fand** gestern **statt*** → *stattfinden*
+- **Compounds, split into their parts**: `Rettungsfonds` → `Rettung` + `s` + `Fonds`, with entries for `Rettung` and `Fonds`
 - **Whole words in text without spaces**: `食` in *寿司を食べました* → *食べる*
 
-It speaks the [d0 lookup protocol](https://github.com/d0-lang/protocol), so any client that speaks it can use any server. **DaDict public**, at the address above, is the one we run. Run your own if you'd rather your lookups stayed with you.
+Server uses the [d0 lookup protocol](https://github.com/d0-lang/protocol), so any client that support it can use this server.
 
 ## Languages
 
@@ -30,11 +30,13 @@ curl -LO https://github.com/d0-lang/dict-server-ts/releases/latest/download/comp
 docker compose up -d
 ```
 
-The first start downloads the release's dictionaries (about 400 MB) and checks them against its checksums. Then the server answers at `http://127.0.0.1:3000`, on this machine only. Point your client at it; to serve other people, put a reverse proxy such as Caddy or nginx in front, and read [Going public](#going-public).
+The first start downloads the release's dictionaries (about 400 MB) and checks them against its checksums. Then the server answers at `http://127.0.0.1:3000`, on this machine only. Point your client at it. 
+
+> If you want other people using your deployment, check out [Going public](#going-public).
 
 - **Settings** go in a `.env` file next to `compose.yaml` (see [Settings](#settings)), then `docker compose up -d` again.
 - **Updating**: download a newer release's `compose.yaml` and `docker compose up -d`. The new image fetches its own dictionaries.
-- **Your server's key** is created on the first start and kept in the `identity` volume. Clients remember it: if it's lost, they warn their users that your server's identity changed. Back it up:
+- **Your server's key** is created on the first start and kept in the `identity` volume.
 
   ```bash
   docker compose cp server:/app/identity/identity.json ./identity-backup.json
@@ -52,7 +54,7 @@ The first start downloads the release's dictionaries (about 400 MB) and checks t
 | `PRIVACY_LINK`, `TOS_LINK` | `example.invalid` | Where they're published. The server shows them itself at `/privacy` and `/terms`, so these can be `https://<your server>/privacy` and `/terms`. |
 | `PRIVACY_CHANGE`, `TOS_CHANGE` | none | A short summary of the last change, shown with the notice. At most 500 characters. |
 | `VERIFICATION_URLS` | `example.invalid` | Where you post news about your server, joined by commas. Clients show it if your key ever changes, so it shouldn't be on the server itself. |
-| `REPORT_URL` | none | A page where users report a wrong or missing answer; `https` only. |
+| `REPORT_URL` | none | A page where users report a wrong or missing answer |
 | `LOG_REQUESTS` | `true` | Write a line for every request: time, method, path, status. Off, the server logs only a request it failed (a 5xx), for a proxy in front that keeps its own log. |
 | `PORT` | `3000` | The port inside the container, or of `bun run dev`. With Docker, change `DICT_PORT` instead. |
 | `IDENTITY_FILE` | `data/identity.json` | Where the key is kept. Docker keeps it in the `identity` volume. |
