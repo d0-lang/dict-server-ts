@@ -5,9 +5,11 @@ import { makeWebHandler } from "./http/app.ts";
 import { legalSection } from "./legal.ts";
 import { reportUrl } from "./report.ts";
 
-const { handler } = makeWebHandler();
 const config = loadConfig();
 const { port, languages } = config;
+const { handler } = makeWebHandler(undefined, undefined, {
+  logRequests: config.logRequests,
+});
 
 // Fail here, not with a 500 on every request.
 if (languages.length === 0) {

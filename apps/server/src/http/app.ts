@@ -1,8 +1,10 @@
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Option } from "effect";
 import {
+  HttpMiddleware,
   HttpRouter,
   HttpServer,
   HttpServerError,
+  HttpServerRequest,
   HttpServerResponse,
 } from "effect/http";
 import { HttpApiBuilder } from "effect/http-api";
@@ -46,7 +48,44 @@ export const makeHttpLive = (
 
 export const HttpLive = makeHttpLive();
 
+/**
+ * In place of the request logger with `LOG_REQUESTS=false`: its line only for
+ * a request the server failed (a 5xx), with the cause. Nothing for one that
+ * worked, a client's mistake (4xx) or a client that gave up.
+ */
+const logFailures = HttpMiddleware.make((httpApp) =>
+  Effect.onExit(httpApp, (exit) => {
+    if (exit._tag === "Success") return Effect.void;
+    const [response, cause] = HttpServerError.causeResponseStripped(exit.cause);
+    if (
+      response.status < 500 ||
+      Option.isNone(cause) ||
+      cause.value.reasons.every(
+        (reason) =>
+          reason._tag === "Interrupt" &&
+          reason.annotations.has(HttpServerError.ClientAbort.key),
+      )
+    ) {
+      return Effect.void;
+    }
+    return Effect.flatMap(HttpServerRequest.HttpServerRequest, (request) =>
+      Effect.logError(cause.value).pipe(
+        Effect.annotateLogs({
+          "http.method": request.method,
+          "http.url": request.url.replace(/[?#].*$/s, ""),
+          "http.status": response.status,
+        }),
+      ),
+    );
+  }),
+);
+
 export const makeWebHandler = (
   handlers: typeof DictHandlers = DictHandlers,
   legalPages: typeof LegalPagesLive = LegalPagesLive,
-) => HttpRouter.toWebHandler(makeHttpLive(handlers, legalPages));
+  { logRequests = true }: { readonly logRequests?: boolean } = {},
+) =>
+  HttpRouter.toWebHandler(
+    makeHttpLive(handlers, legalPages),
+    logRequests ? {} : { disableLogger: true, middleware: logFailures },
+  );

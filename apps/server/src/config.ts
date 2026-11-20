@@ -47,6 +47,11 @@ export type AppConfigValues = {
   /** The page where users report a wrong or missing answer: `report_url`, left out when unset. */
   readonly reportUrl: string | undefined;
   readonly identityFile: string;
+  /**
+   * Write a line for every request (time, method, path, status). Off, only a
+   * request that fails is logged, for a proxy in front that keeps its own log.
+   */
+  readonly logRequests: boolean;
 };
 
 const env = (name: string): string | undefined => {
@@ -113,6 +118,7 @@ export const loadConfig = (): AppConfigValues => ({
   tosChange: env("TOS_CHANGE"),
   reportUrl: env("REPORT_URL"),
   identityFile: envString("IDENTITY_FILE", "data/identity.json"),
+  logRequests: envBool("LOG_REQUESTS", true),
 });
 
 export class AppConfig extends Context.Service<AppConfig, AppConfigValues>()(

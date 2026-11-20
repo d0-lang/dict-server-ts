@@ -40,7 +40,7 @@ Ed25519 identity is stored at `IDENTITY_FILE` (default `data/identity.json`, git
 
 ## Logs
 
-The server writes one log line per request: the time, the method, the path without its query string, and the status (Effect's request logger, which `HttpRouter.toWebHandler` adds; no IP address). A lookup's `word` and `context` travel in the request body, which neither this log nor a web server or proxy in front writes by default. No tracer is set up; if you add one, keep request bodies out of it. An unknown route gets a plain 404, so its query string stays out of the log too: that covers a client that still sends lookups as GET. A web server or proxy in front does log the full address of such a request by default, and Docker keeps the server's lines without limit unless log rotation is set.
+The server writes one log line per request: the time, the method, the path without its query string, and the status (Effect's request logger, which `HttpRouter.toWebHandler` adds; no IP address). `LOG_REQUESTS=false` turns that logger off: the server then logs only a request it failed (a 5xx), with the cause, alongside its start-up lines. A lookup's `word` and `context` travel in the request body, which neither this log nor a web server or proxy in front writes by default. No tracer is set up; if you add one, keep request bodies out of it. An unknown route gets a plain 404, so its query string stays out of the log too: that covers a client that still sends lookups as GET. A web server or proxy in front does log the full address of such a request by default, and Docker keeps the server's lines without limit unless log rotation is set.
 
 ## Tests
 
