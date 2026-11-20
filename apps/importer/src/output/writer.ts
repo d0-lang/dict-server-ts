@@ -19,6 +19,7 @@ import {
   resolveFormOf,
 } from "./passes/links.ts";
 import { addParticipleForms } from "./passes/participles.ts";
+import { copySameAsSenses } from "./passes/sameAs.ts";
 import { resolveSee } from "./passes/see.ts";
 import {
   addAbbreviations,
@@ -430,6 +431,7 @@ export const makeWriter = (
     followLinkChains(ctx);
     copyDerivedMeanings(ctx);
     settleDegreeEntries(ctx);
+    copySameAsSenses(ctx);
     resolveSee(ctx);
     const unresolved = countUnresolvedLinks(ctx);
     const added = formOfFallback ? resolveFormOf(ctx) : 0;
