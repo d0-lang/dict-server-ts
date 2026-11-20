@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Korean (ko_en): language report</title>
+<style>
+:root{--bg:#fff;--fg:#1d1d1f;--muted:#6b6b70;--line:#e3e3e6;--card:#f6f6f8;--up:#1a7f37;--down:#b3261e;--accent:#2f5fd0}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--fg:#ececef;--muted:#9a9aa2;--line:#2c2c31;--card:#1c1c20;--up:#4ac26b;--down:#ff7b72;--accent:#7aa2ff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1060px;margin:0 auto;padding:32px 24px 64px}h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:40px 0 10px;padding-top:8px;border-top:1px solid var(--line)}h3{font-size:15px;margin:22px 0 8px}
+.sub{color:var(--muted);margin:0 0 20px}code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card);padding:1px 4px;border-radius:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}.kpi{background:var(--card);border-radius:10px;padding:12px 14px}.kpi .v{font-size:24px;font-weight:650}.kpi .l{color:var(--muted);font-size:13px}.kpi .d{font-size:13px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;margin:8px 0 4px}th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--muted)}
+.small{font-size:13px}.tests div{margin-bottom:3px}.tests div::before{content:"✓ ";color:var(--up)}ul{padding-left:20px}li{margin:3px 0}.note{color:var(--muted);font-size:13px}
+@media (max-width:600px){main{padding:24px 16px 48px}}
+</style></head><body><main>
+<h1>Korean (ko_en): language report</h1>
+<p class="sub">Branch <code>korean</code>, 2026-11-20. Tier 1, built with the add-language skill, with no reader of Korean. Profile and round log: <code>languages/ko/profile.md</code>. Tier 1 does not pass: the gates fail on English Wiktionary's coverage, not on lookups.</p>
+<div class="kpis">
+<div class="kpi"><div class="l">Tier</div><div class="v">Model only</div><div class="d">unreviewed: no reader checked the profile, the grammar file or a sample</div></div>
+<div class="kpi"><div class="l">Common grammar words</div><div class="v">90.3%</div><div class="d"><span class="up">+10.3</span> from 80.0%; <span class="down">needs 97.5%</span></div></div>
+<div class="kpi"><div class="l">Common content words</div><div class="v">87.7%</div><div class="d">r0 88.8% of 385 items, now of 806; <span class="down">needs 92.5%</span></div></div>
+<div class="kpi"><div class="l">Random words</div><div class="v">69.6%</div><div class="d"><span class="up">+32.1</span> from 37.5%; <span class="down">needs 87.5%</span>; 89.8% without missing words</div></div>
+<div class="kpi"><div class="l">Judge: understood (2,200 items)</div><div class="v">78.0%</div><div class="d"><span class="up">+35.1</span> from 42.9%</div></div>
+</div>
+
+<h2>Profile summary</h2>
+<ul>
+<li><b>Data.</b> English Wiktionary dump of 2026-11-01, 64,457 Korean lines: 39,314 Hangul headwords, 22,386 hanja, 16,882 form-of lines. <code>ko_en.sqlite</code> has 40,499 entries. Particles and endings are there, written with hyphens (<code>-에서</code>, <code>-었-</code>), and verbs have conjugation tables. Many common Sino-Korean and loan words have no Hangul page (<code>농도</code>, <code>회로</code>, <code>엔지니어</code>, <code>픽셀</code>).</li>
+<li><b>Corpus.</b> 28 texts, 71k words (eojeols). Spoken: 15 YouTube videos in 9 genres, auto-captions repaired by Haiku, 31.8k words. Written: 13 ko.wikipedia articles in 10 topics, 39.2k words. No news, blogs or guides.</li>
+<li><b>Words.</b> An eojeol is a word with its particles and endings (<code>학교에서</code>, <code>먹었습니다</code>), and stems fuse with endings (<code>했</code>, <code>갈</code>). The plain lookup found an entry for 49.9% of corpus words; the analyzer path (Lindera's ko-dic) finds one for 95.3%.</li>
+<li><b>Lindera's ko-dic has no <code>이</code></b>: the subject particle, the copula and the pronoun are missing from its build (mecab-ko-dic has 30 entries for it), so <code>생각이</code> was <code>생|각이</code>. The <code>restore</code> setting puts it back.</li>
+<li><b>Grammar file.</b> 57 lines: particles and endings Wiktionary lacks or only names (<code>-이나</code> "or", quoting <code>-이라고</code>, polite <code>-요</code> endings, <code>-적</code>), bound nouns (<code>데</code> "in doing"), spoken words (<code>뭐</code>, <code>막</code>, <code>좀</code>), and 10 hand patches for common nouns.</li>
+<li><b>Headword.</b> As Wiktionary writes it (<code>먹다</code>); no labels. Revised Romanization is in 92% of lines and is not shown: Hangul is phonetic, and the popover shows IPA.</li>
+</ul>
+
+<h2>Gates</h2>
+<p class="small">Same 2,200 items in every run (sampled from <code>r0</code>), judged by Haiku. Words are Kiwi's units: the eojeol a reader clicks, ranked by its head's lemma. In brackets: the figure without the judge's <code>missing_word</code> misses.</p>
+<div class="scroll"><table>
+<tr><th>Gate</th><th class="n">Needs</th><th class="n">r0 (plain)</th><th class="n">r1 (analyzer)</th><th class="n">r2</th><th class="n">r3</th><th class="n">r4 (final)</th></tr>
+<tr><td>Common grammar words</td><td class="n">97.5%</td><td class="n">80.0% (83.5%)</td><td class="n">85.3% (89.7%)</td><td class="n">85.5% (88.8%)</td><td class="n">90.6% (93.6%)</td><td class="n down">90.3% (93.3%)</td></tr>
+<tr><td>Common content words</td><td class="n">92.5%</td><td class="n">88.8% (90.2%)</td><td class="n">84.6% (87.6%)</td><td class="n">87.5% (89.9%)</td><td class="n">87.8% (90.3%)</td><td class="n down">87.7% (90.1%)</td></tr>
+<tr><td>Random words</td><td class="n">87.5%</td><td class="n">37.5% (91.7%)</td><td class="n">67.7% (87.6%)</td><td class="n">69.3% (89.7%)</td><td class="n">69.6% (90.1%)</td><td class="n down">69.6% (89.8%)</td></tr>
+<tr><td>Common words without an entry (no gate)</td><td class="n"></td><td class="n">527</td><td class="n">26</td><td class="n">19</td><td class="n">19</td><td class="n">18</td></tr>
+</table></div>
+<p class="small">r0's common gates count far fewer items, since 527 common items had no entry and count toward neither. All judging and classifying cost about $1.50 on Haiku.</p>
+<ul class="small">
+<li><b>Random:</b> 216 of 962 items are words English Wiktionary has no Korean entry for; without them the gate passes (89.8%). Only hand patches fix it, on the scale of the dictionary.</li>
+<li><b>Content:</b> 64 of 99 misses are missing words or senses; 15 more are constructions over eojeols (tier 2). Fixing everything else would leave about 92%.</li>
+<li><b>Grammar:</b> 12 of 36 misses are missing words, and some are rare words Kiwi lemmatized under a common lemma (<code>거병하여</code> under <code>거</code>).</li>
+</ul>
+
+<h2>Accepted rules and their unit tests</h2>
+<p class="small">All in the <code>context.analyzer</code> settings of <code>language.toml</code>; the TypeScript names no language. Tests: <code>apps/server/src/lookup/features/analyzedWords/lookup.ko.test.ts</code>, each checked to fail without its setting.</p>
+<h3>Parts of speech and base forms (<code>posFields</code>, <code>fused</code>, <code>baseSpellings</code>, <code>baseLetters</code>)</h3>
+<p>ko-dic's tag is its first field; <code>VV+EP</code> is a fused morpheme with both tags. A stem is spelled with <code>다</code>, a particle or ending with hyphens; a fused morpheme takes its parts' base forms, stems first (<code>걸</code> is <code>거</code>, then <code>-ㄹ</code>).</p>
+<div class="tests small"><div>finds a verb by its stem with 다, and its endings with hyphens (<code>먹었습니다</code>)</div><div>finds a particle by its hyphenated spelling, not a word spelled alike (<code>에서</code> "Esau")</div></div>
+<h3>Noun + 하다 (<code>stemSuffixes</code>), changed stems (<code>stemForms</code>)</h3>
+<div class="tests small"><div>reads a noun with 하다 as the verb (<code>공부했어요</code> → <code>공부하다</code>)</div><div>finds a verb whose stem changes by its table forms (<code>들었는데</code> → <code>듣다</code>)</div></div>
+<h3>The missing <code>이</code> (<code>restore</code>)</h3>
+<div class="tests small"><div>reads 이 after a noun as a particle, though ko-dic lacks it (<code>생각이</code>; <code>호랑이</code> stays whole)</div><div>reads 이 at a word's start before a particle as the pronoun (<code>이를</code>, not <code>이르다</code>)</div></div>
+<h3>Spaces (<code>spacedWords</code>), ranking (<code>ranksByPos</code>), adnominal endings (<code>recheck</code>)</h3>
+<div class="tests small"><div>takes no single verb for a phrase, with spaces (<code>우리는</code>, not <code>우리다</code>)</div><div>puts a headword spelled as written first, not a noun spelled alike (<code>하지만</code>, <code>다른</code>; <code>하지</code> is <code>하다</code>)</div><div>ranks entries by ko-dic's part of speech (<code>우리</code> "we"; <code>년</code> "year")</div><div>reads a particle after Latin letters as the particle (<code>TV가</code>)</div></div>
+<h3>Pointer glosses (<code>import.pointerWords</code>)</h3>
+<p>"Yang-vowel form of -어서", "Post-vowel and post-liquid allomorphic form of -으면", "topic-marked form of 나" become links to the word, so the reader gets its meaning. About 120 senses.</p>
+<div class="tests small"><div>links a gloss that only names a form in the language's terms (<code>-아서</code>, <code>-면</code>; not <code>제</code>, whose gloss says when; not in Polish)</div></div>
+<h3>Other languages</h3>
+<p>Every Japanese corpus lookup on the v0.1.3-rc.1 dictionaries, main against this branch: 31 of 72,686 responses change, no first entry. Words headed by the copula lose junk verbs (煮る, 似る, 出る). No other language has an analyzer.</p>
+
+<h2>What got worse, and why it stays</h2>
+<p class="small">Classified diff r1 → r3 on the gate sample: 255 better, 98 worse, 345 same. Every "worse" was read, and the systematic ones were fixed in r4 (the determiner reading of a particle <code>이</code>, the ending <code>-어</code> as the interjection, <code>년</code>, <code>감사합니다</code>, <code>좋아하는</code>, <code>이고</code>, <code>그것이</code>).</p>
+<ul>
+<li><b>ko-dic misreadings with no general fix:</b> <code>전</code> "whole" as <code>저</code> + <code>-ㄴ</code>, <code>나서</code> (<code>-고 나서</code>) as <code>나</code> "I", <code>박은</code> as <code>박</code> "gourd", <code>가지</code> "kind" as <code>가지다</code>, <code>번</code> "time" as <code>벌다</code>.</li>
+<li><b>A determiner spelled like a verb form</b> leads where the verb is meant (<code>오른</code> "right" for "rose"): the price of <code>다른</code> "other" and <code>그런</code> "such" leading.</li>
+<li><b>Both readings of a changed stem</b> show, in ko-dic's order (<code>들었는데</code>: <code>들다</code>, then <code>듣다</code>).</li>
+</ul>
+
+<h2>Memory</h2>
+<div class="scroll"><table>
+<tr><th>Server (v0.1.3-rc.1 dictionaries)</th><th class="n">RSS</th><th class="n">Peak (VmHWM)</th></tr>
+<tr><td>8 pairs, idle after start</td><td class="n">0.97 GB</td><td class="n">1.19 GB</td></tr>
+<tr><td>8 pairs + ko, idle after start</td><td class="n">1.27 GB</td><td class="n">1.49 GB</td></tr>
+<tr><td>8 pairs + ko, after all 72k Korean corpus lookups (16 at a time)</td><td class="n">1.73 GB</td><td class="n">1.98 GB</td></tr>
+<tr><td>… two more Korean replays</td><td class="n">1.75–1.81 GB</td><td class="n">1.98 GB</td></tr>
+<tr><td>… then the Japanese corpus as well</td><td class="n">2.04 GB</td><td class="n">2.21 GB</td></tr>
+<tr><td>8 pairs (main), after the Japanese corpus alone</td><td class="n">1.64 GB</td><td class="n">1.98 GB</td></tr>
+</table></div>
+<p class="small">ko-dic adds about 0.30 GB at rest. Under load RSS levels off and doesn't grow with more lookups. The prod box (7.9 GB, no swap) has room.</p>
+
+<h2>False positives and hand patches</h2>
+<p>No false positives were added. Hand-patched in <code>grammar.tsv</code>: <code>이산화</code>, <code>인슐린</code>, <code>이온</code>, <code>회로</code>, <code>농도</code>, <code>효율</code>, <code>생성</code>, <code>억제</code>, <code>불순물</code>, <code>줄기세포</code>. Missing elsewhere in the sample, and not patched: <code>엔지니어</code>, <code>픽셀</code>, <code>결제하다</code>, <code>역대</code>, <code>일부분</code>, <code>실온</code>, <code>냉동실</code>, <code>수용체</code>, <code>함선</code>, <code>폐결핵</code>, <code>중복</code>, <code>진짜로</code>, <code>쓰임</code>, <code>유소년</code>, <code>편찬</code>, <code>공복</code>, <code>과도하다</code>, <code>연평균</code>, <code>후면</code>, <code>하여금</code>, and about 200 more.</p>
+
+<h2>Open questions</h2>
+<ul>
+<li><b>Hand patches or not.</b> English Wiktionary lacks about one word in five that a reader meets. Passing tier 1 needs a hand-written word list on that scale, or another source.</li>
+<li><b>The analyzer.</b> ko-dic misreads common words, and Lindera's build lacks <code>이</code>. Kiwi read both right in the eval units. Report the <code>이</code> bug to Lindera? Add Kiwi as an analyzer?</li>
+<li><b>For a native speaker:</b> the grammar file's lines and examples; whether <code>오른</code>-style determiners should lead; whether romanization is worth showing.</li>
+<li><b>Tier 2:</b> constructions over eojeols (<code>-ㄹ 수 있다</code>, <code>-고 있다</code>, <code>예를 들어</code>) need the phrase matcher to allow spaces; numbers with counters and units.</li>
+</ul>
+</main></body></html>
