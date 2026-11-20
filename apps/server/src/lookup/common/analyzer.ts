@@ -555,7 +555,22 @@ const restore = (
             : 0),
         0,
       );
-    if (score(after) <= score(before)) continue;
+    // Where the analyzer cut there already, but couldn't read the morpheme
+    // (`세균` + `이`, unknown), the rule's reading is better at once.
+    // So too where it read the morpheme and what follows as another word
+    // (`이고` as `이다` "to carry on the head" + `-고`).
+    const cutAlready = cuts.every(({ at, rule }) =>
+      before.some((m) => m.start === at && m.surface.startsWith(rule.surface)),
+    );
+    // On a tie, the rule's reading when the analyzer's cuts into the word
+    // before the morpheme (`그|것이` against `그것` + `이`), not when it
+    // reads the whole as one word (`호랑이` "tiger", not `호랑` + `이`).
+    const splitBefore = cuts.some(({ at }) => {
+      const word = read.find((m) => m.end === at)!;
+      return before.some((m) => m.start > word.start && m.start < word.end);
+    });
+    const gain = score(after) - score(before);
+    if (!cutAlready && (gain < 0 || (gain === 0 && !splitBefore))) continue;
     out = [
       ...out.filter((m) => m.end <= start),
       ...after,

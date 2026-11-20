@@ -92,7 +92,8 @@ affix = true
 NNG = ["NOUN"]
 NNP = ["PROPN", "NOUN"]
 NNB = ["NOUN"]
-NNBC = ["NOUN"]
+# A counter (년 "year" after a number) is Wiktionary's counter line first.
+NNBC = ["X", "NOUN"]
 NR = ["NUM"]
 NP = ["PRON"]
 VV = ["VERB"]
@@ -127,6 +128,14 @@ after = ["VV", "VA", "VX", "VCP", "VCN", "XSV", "XSA", "EP"]
 # An auxiliary verb written onto the verb before it: 먹어|보다, 해|주세요.
 pos = ["VX"]
 after = ["EC"]
+
+[[context.analyzer.join]]
+# 하다 after -아/-어 makes a verb of an adjective: 좋아|하다 "to like",
+# 슬퍼|하다 "to grieve". ko-dic tags this 하 as a verb of its own.
+pos = ["VV"]
+base = ["하다"]
+after = ["EC"]
+afterSurface = ["아", "어", "여"]
 
 [[context.analyzer.join]]
 # 하다 and 되다 after a noun or root make a verb or adjective of it:

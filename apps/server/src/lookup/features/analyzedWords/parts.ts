@@ -45,6 +45,22 @@ export const LEXICALIZED = new Set([
   "INTJ",
 ]);
 
+/**
+ * Where an entry of `pos` ranks among a word's entries by the analyzer's
+ * reading (`ranksByPos`): by its place among the UD tags the language maps
+ * the reading to (a counter's `X` before `NOUN`: `년` "year" before `년`
+ * "bitch"), after them when it is none; 0 for all without `ranksByPos`.
+ */
+export const posRank = (
+  c: Click,
+  upos: ReadonlySet<string>,
+  pos: string,
+): number => {
+  if (!c.settings.ranksByPos) return 0;
+  const at = [...upos].indexOf(pos);
+  return at < 0 ? upos.size : at;
+};
+
 /** Parts of speech that take endings, so a word with endings keeps only these entries. */
 export const INFLECTING = new Set(["VERB", "ADJ", "AUX"]);
 
@@ -153,7 +169,8 @@ export const wholeIds = (
   const headPos = c.uposOf(head);
   // A verb or adjective with its endings, which may have become a word of
   // its own (`하지만`).
-  const verbal = headPos.has("VERB") || headPos.has("ADJ");
+  const verbal =
+    headPos.has("VERB") || headPos.has("ADJ") || derived.length > 0;
   // Only of a stem that inflects (not the copula `이`, whose `이어` is `잇다`'s).
   const stem = headPos.size === 0 || headPos.has("VERB") || headPos.has("ADJ");
   const stemForms =
@@ -231,8 +248,7 @@ export const wholeIds = (
     };
     // Entries of the analyzer's part of speech first (`ranksByPos`: the
     // particle `-는`, before the ending `-는`).
-    const fits = (row: FormRow) =>
-      c.settings.ranksByPos && headPos.has(row.pos) ? 0 : 1;
+    const fits = (row: FormRow) => posRank(c, headPos, row.pos);
     const ranked = [...kept].sort(
       (a, b) =>
         misread(a) - misread(b) ||
@@ -345,7 +361,12 @@ export const morphemeParts = (
     const morpheme = w[i]!;
     // By its spelling first, when the grammar file has a line for it (`な`
     // after a な-adjective, whose base is `だ`), else by its base forms.
-    const bySpelling = grammarIds(c.db, lookupKey(morpheme.surface));
+    // Not a morpheme the dictionary spells otherwise: the ending `어` is
+    // `-어`, not the interjection `어`.
+    const bySpelling =
+      morpheme.respelled === true
+        ? []
+        : grammarIds(c.db, lookupKey(morpheme.surface));
     const grammar =
       bySpelling.length > 0
         ? bySpelling
@@ -387,8 +408,7 @@ export const morphemeParts = (
       row.sourcePos === "prefix" ? 0 : LETTERS.has(row.sourcePos) ? 2 : 1;
     // Entries of the analyzer's part of speech first (`ranksByPos`: the
     // particle `-는`, before the ending).
-    const fits = (row: FormRow) =>
-      c.settings.ranksByPos && upos.has(row.pos) ? 0 : 1;
+    const fits = (row: FormRow) => posRank(c, upos, row.pos);
     const ranked = [...own].sort(
       (a, b) =>
         (head >= 0 && i < head ? rank(a) - rank(b) : 0) || fits(a) - fits(b),

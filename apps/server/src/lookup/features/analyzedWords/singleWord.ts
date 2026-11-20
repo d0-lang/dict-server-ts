@@ -3,7 +3,7 @@ import { lookupKey } from "@dict/core/lookupKey";
 import { FormSource } from "@dict/core/schema";
 import { loadEntries } from "../../common/entries.ts";
 import { type Answer, type Click, PLAIN } from "./click.ts";
-import { LEXICALIZED, wholeIds } from "./parts.ts";
+import { LEXICALIZED, posRank, wholeIds } from "./parts.ts";
 
 /**
  * The clicked piece is the word: the plain lookup answers, unless its top
@@ -117,9 +117,11 @@ export const singleWord = (c: Click): Answer => {
 const byPos = (c: Click, upos: ReadonlySet<string>): Answer => {
   if (!c.settings.ranksByPos || upos.size === 0) return PLAIN;
   const ids = [...new Set(c.rows(c.word).map((row) => row.id))];
-  const fits = (id: number) => upos.has(c.infoOf(id).pos);
-  if (fits(ids[0]!) || !ids.some(fits)) return PLAIN;
-  return {
-    entries: loadEntries(c.db, [...new Set([...ids.filter(fits), ...ids])]),
-  };
+  const rank = (id: number) => posRank(c, upos, c.infoOf(id).pos);
+  const ranked = ids
+    .map((id, i) => ({ id, i, rank: rank(id) }))
+    .sort((a, b) => a.rank - b.rank || a.i - b.i)
+    .map(({ id }) => id);
+  if (ranked[0] === ids[0]) return PLAIN;
+  return { entries: loadEntries(c.db, ranked) };
 };

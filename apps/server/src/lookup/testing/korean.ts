@@ -1,0 +1,57 @@
+import { dictionary } from "./dictionary.ts";
+
+/**
+ * Korean: lemmas as Wiktionary writes them (verbs with `다`, particles and
+ * endings with hyphens), forms as its conjugation tables list them. Lookups
+ * with context go through the real analyzer (Lindera's ko-dic), so its
+ * morphemes decide what is looked up.
+ */
+export const korean = dictionary([
+  ["먹다", "VERB", ["먹어", "먹었다", "먹었습니다"], ["to eat"]],
+  ["먹", "NOUN", [], ["inkstick"]],
+  ["학교", "NOUN", [], ["school"]],
+  ["에서", "PROPN", [], ["Esau"]],
+  ["공부", "NOUN", [], ["study"]],
+  ["공부하다", "VERB", [], ["to study"]],
+  ["하다", "VERB", ["해", "했다", "했어요"], ["to do"]],
+  ["듣다", "VERB", ["들어", "들었다"], ["to hear"]],
+  ["들다", "VERB", ["들어", "들었다"], ["to enter"]],
+  ["생각", "NOUN", [], ["thought"]],
+  ["생", "NOUN", [], ["life"]],
+  ["호랑이", "NOUN", [], ["tiger"]],
+  ["호랑", "NOUN", [], ["tiger (in compounds)"]],
+  ["이", "DET", [], ["this"]],
+  ["이", "PRON", [], ["this (thing)"]],
+  ["이르다", "VERB", ["이를"], ["to reach"]],
+  ["통하다", "VERB", ["통해"], ["to go through"]],
+  ["우리", "NOUN", [], ["cage"]],
+  ["우리", "PRON", [], ["we"]],
+  ["우리다", "VERB", ["우리는"], ["to infuse"]],
+  ["어떻다", "ADJ", ["어떤가요"], ["to be how"]],
+  ["집", "NOUN", [], ["house"]],
+  ["하지만", "ADV", [], ["but"]],
+  ["하지", "NOUN", [], ["summer solstice"]],
+  ["다르다", "ADJ", ["다른"], ["to be different"]],
+  ["다른", "DET", [], ["other"]],
+  ["사람", "NOUN", [], ["person"]],
+  ["가", "SYM", [], ["the first syllable"], "symbol"],
+  ["년", "NOUN", [], ["(vulgar) woman"]],
+  ["년", "X", [], ["year"], "counter"],
+  ["괜찮다", "ADJ", ["괜찮아요"], ["to be fine"]],
+  // particles and endings
+  ["-에서", "PART", [], ["at, from"], "particle"],
+  ["-이", "PART", [], ["subject"], "particle"],
+  ["-가", "PART", [], ["subject (after a vowel)"], "particle"],
+  ["-를", "PART", [], ["object"], "particle"],
+  ["-은", "PART", [], ["topic"], "particle"],
+  ["-에", "PART", [], ["at, in"], "particle"],
+  ["-이다", "PART", [], ["to be"], "particle"],
+  ["-었-", "X", [], ["past"], "suffix"],
+  ["-았-", "X", [], ["past (after 아, 오)"], "suffix"],
+  ["-습니다", "X", [], ["formal polite"], "suffix"],
+  ["-어요", "X", [], ["polite"], "suffix"],
+  ["-는데", "X", [], ["and, but"], "suffix"],
+  ["-지만", "X", [], ["but"], "suffix"],
+  ["-지", "X", [], ["(negation)"], "suffix"],
+  ["-에요", "X", [], ["polite (copula)"], "suffix"],
+]);
