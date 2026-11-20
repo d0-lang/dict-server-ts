@@ -50,35 +50,35 @@ export const aroundWord = (c: Click): Answer => {
   }
   // A word shown by its parts (`電化|製品`) opens on the clicked one.
   const parts = derived ? clickedFirst(c, split) : split;
-  // A form ending closes the head (`並んで`): the word's entries are that
-  // part's, with the form's label (`並ぶ` [て form]), not the whole word's.
-  const formed = parts.find((part) => part.main === true && part.form);
-  if (formed !== undefined && whole.length > 0) {
+  // The word's entries are its head's, not the whole word's, when a form
+  // ending closes the head (`並んで`: `並ぶ` [て form]) or the head has none
+  // of its own (`飲ま` of `飲ませて`, `電流` of `過電流`): the client opens on
+  // the part of the first entry in one, and can't pick a part without
+  // entries.
+  const head = parts.find((part) => part.main === true);
+  if (
+    head !== undefined &&
+    whole.length > 0 &&
+    (head.form !== undefined || head.ids.length === 0)
+  ) {
     const moved = parts.map((part) =>
-      part === formed
+      part === head
         ? {
             ...part,
             ids: [...whole, ...part.ids],
-            form: {
-              ...part.form!,
-              ids: [
-                ...whole.filter((id) => INFLECTING.has(c.infoOf(id).pos)),
-                ...part.form!.ids,
-              ],
-            },
+            ...(part.form !== undefined
+              ? {
+                  form: {
+                    ...part.form,
+                    ids: [
+                      ...whole.filter((id) => INFLECTING.has(c.infoOf(id).pos)),
+                      ...part.form.ids,
+                    ],
+                  },
+                }
+              : {}),
           }
         : part,
-    );
-    return splitResult(c.db, [], moved, match);
-  }
-  // A head with no entries of its own (`飲ま` of `飲ませて`, `電流` of
-  // `過電流`, whose entries are the word's) holds the word's: the client
-  // opens on the part of the first entry in one, and can't pick a part
-  // without entries.
-  const head = parts.find((part) => part.main === true);
-  if (head !== undefined && head.ids.length === 0 && whole.length > 0) {
-    const moved = parts.map((part) =>
-      part === head ? { ...part, ids: whole } : part,
     );
     return splitResult(c.db, [], moved, match);
   }
