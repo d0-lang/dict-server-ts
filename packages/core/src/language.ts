@@ -296,6 +296,71 @@ const Context = doc(
             Schema.Array(Schema.Int),
             "Which of the dictionary's detail fields hold a morpheme's base forms, looked up in this order (UniDic: 10, the written base form `いる`; 7, the lemma `要る`).",
           ),
+          posFields: orDefault(
+            doc(
+              Schema.Int,
+              "How many of the dictionary's first detail fields are part-of-speech tags, joined with `-` (UniDic: 4, `名詞-普通名詞-一般`; ko-dic: 1, whose later fields are a semantic class and a reading). A tag joined with `+` is a morpheme the dictionary fused of several (ko-dic `VV+EP`, `했`), which has each of those parts of speech.",
+            ),
+            4,
+          ),
+          fused: Schema.optionalKey(
+            doc(
+              Schema.Struct({
+                typeField: doc(
+                  Schema.Int,
+                  "The detail field that names the morpheme's type (ko-dic: 4).",
+                ),
+                types: doc(
+                  strings,
+                  "The types whose base forms come from `field` (ko-dic: `Inflect`; not `Compound`, a noun whose parts are no base form of it: `한국어`).",
+                ),
+                field: doc(
+                  Schema.Int,
+                  "The detail field that lists the parts, each `base/TAG/…`, joined with `+` (ko-dic: 7, `하/XSV/*+았/EP/*`).",
+                ),
+              }),
+              "Morphemes the dictionary fuses of several, whose surface is no base form (ko-dic: `했` is `하` + `았`, `갈` is `가` + `ᆯ`, `예뻐요` is `예쁘` + `어요`): their base forms are their parts', those `baseSpellings` names first, in order (`했`: `하다`, `-았-`), instead of `baseFields`.",
+            ),
+          ),
+          baseSpellings: orDefault(
+            doc(
+              Schema.Array(
+                Schema.Struct({
+                  pos: doc(
+                    strings,
+                    "Parts of speech of the morpheme, as in `join`; of a fused morpheme, of the part.",
+                  ),
+                  spellings: doc(
+                    strings,
+                    "The base forms, `*` standing for the analyzer's (`*다`, `-*`).",
+                  ),
+                }),
+              ),
+              "How the dictionary spells base forms the analyzer gives otherwise, by part of speech, the first rule that matches: ko-dic gives a verb's stem (`먹`) where Wiktionary lists `먹다` (`*다`), and particles and endings bare where Wiktionary writes them with hyphens (`-에서`, `-었-`).",
+            ),
+            [],
+          ),
+          baseLetters: orDefault(
+            doc(
+              Schema.Record(Schema.String, Schema.String),
+              "Letters the analyzer writes in base forms otherwise than the dictionary, replaced in them: ko-dic writes a final consonant ending with the jamo that ends a syllable (`ᆯ` in `가` + `ᆯ`), Wiktionary with the letter (`-ㄹ`).",
+            ),
+            {},
+          ),
+          stemSuffixes: orDefault(
+            doc(
+              strings,
+              "Parts of speech of suffixes that make a verb or adjective of the word before them, as in `join` (ko-dic `XSV`, `XSA`: `공부` + `했어요`): the word is looked up as its head written with the suffix's base forms first (`공부하다`), then by the head's own.",
+            ),
+            [],
+          ),
+          stemForms: orDefault(
+            doc(
+              strings,
+              "Spellings of a stem's forms in the dictionary's inflection tables, `*` standing for the stem as the analyzer cuts it: they reach verbs whose forms the stem is part of, when the analyzer's base form misses one. Japanese, the stem itself: `従え` is a form of `従える`, which UniDic reads as `従う`. Korean, the stem with the infinitive ending: a verb whose stem changes (`듣다`: `들어`) is cut as another verb's (`들` of `들다`), and `들어` is a form of both.",
+            ),
+            ["*"],
+          ),
           readingField: Schema.optionalKey(
             doc(
               Schema.Int,
@@ -468,6 +533,20 @@ const Context = doc(
               'Parts of speech of morphemes that make a new word of the word before them (`接尾辞`: `機械` + `屋` "mechanic"). Such a word without an entry of its own is shown by its parts, each with its own entries, not as its head.',
             ),
             [],
+          ),
+          spacedWords: orDefault(
+            doc(
+              Schema.Boolean,
+              "The language writes a space after each word with its particles and endings (Korean eojeols), so the piece the segmenter gives is a whole word. A headword spelled as it is written, other than a noun, verb or adjective, is that word, even where the analyzer cuts it into a stem and endings: it comes first (`하지만` \"but\", cut `하` + `-지만`). A word the analyzer reads as a verb with endings is no noun spelled alike (`하지` \"summer solstice\", for `하` + `-지`). Off for Japanese, written without spaces, where `だったら` after a noun is the copula, not the conjunction.",
+            ),
+            false,
+          ),
+          ranksByPos: orDefault(
+            doc(
+              Schema.Boolean,
+              "A word's or part's entries of the parts of speech `upos` gives the analyzer's reading come before its others, which keep their order (Korean `우리` the pronoun \"we\" before `우리` \"cage\"; the particle `-는` before the ending). Off for Japanese, whose kana words are ranked by reading instead.",
+            ),
+            false,
           ),
           upos: orDefault(
             doc(

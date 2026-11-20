@@ -14,6 +14,22 @@ import { wholeIds } from "./parts.ts";
 export const singleWord = (c: Click): Answer => {
   const { word, found, text } = c;
   if (found.length !== 1 || text !== word) return undefined;
+  // A morpheme the dictionary spells otherwise (`갈` is `가다` + `-ㄹ`, not
+  // `갈` "reed"): its base forms' entries first, then the word's own as
+  // written, those of the analyzer's part of speech first.
+  if (found[0]!.respelled === true) {
+    const ids = wholeIds(c, found, text);
+    const written = c.rows(word).map((row) => row.id);
+    if (ids.length === 0 || ids[0] === written[0]) return PLAIN;
+    const upos = c.uposOf(found[0]!);
+    const fits = (id: number) => upos.has(c.infoOf(id).pos);
+    const rest = written.filter((id) => !ids.includes(id));
+    return {
+      entries: loadEntries(c.db, [
+        ...new Set([...ids, ...rest.filter(fits), ...rest]),
+      ]),
+    };
+  }
   // A word written in kana whose lemma the analyzer writes in kanji, as a
   // part of speech none of its own entries has (`もの` the noun is `物`,
   // and `もの` has only particle entries): that lemma's entries of that
@@ -52,7 +68,7 @@ export const singleWord = (c: Click): Answer => {
     c.rows(word).length > 0 &&
     c.rows(word)[0]!.source !== FormSource.Redirect
   ) {
-    return PLAIN;
+    return byPos(c, upos);
   }
   const byLemma =
     lemma === undefined
@@ -75,4 +91,19 @@ export const singleWord = (c: Click): Answer => {
     .map((row) => row.id)
     .filter((id) => !ranked.includes(id));
   return { entries: loadEntries(c.db, [...ranked, ...new Set(rest)]) };
+};
+
+/**
+ * The plain lookup's entries, those of the analyzer's parts of speech first
+ * (`ranksByPos`: `우리` the pronoun before `우리` "cage"), when the first
+ * is none of them and some are.
+ */
+const byPos = (c: Click, upos: ReadonlySet<string>): Answer => {
+  if (!c.settings.ranksByPos || upos.size === 0) return PLAIN;
+  const ids = [...new Set(c.rows(c.word).map((row) => row.id))];
+  const fits = (id: number) => upos.has(c.infoOf(id).pos);
+  if (fits(ids[0]!) || !ids.some(fits)) return PLAIN;
+  return {
+    entries: loadEntries(c.db, [...new Set([...ids.filter(fits), ...ids])]),
+  };
 };

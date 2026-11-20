@@ -1,0 +1,130 @@
+#:schema ../../spec/language.schema.json
+# Korean. Every setting is checked against the dump (data/raw/ko.jsonl) and
+# the corpus in profile.md.
+
+code = "ko"
+name = "Korean"
+target = "en"
+
+[import]
+# A Hangul syllable's own line ("More information(eumhun reading: …)") names
+# no word a reader looks up.
+skippedPos = ["syllable"]
+
+[context.analyzer]
+# Korean writes spaces, but between eojeols: a word with its particles and
+# endings (학교에서 = 학교 + 에서, 먹었습니다 = 먹 + 었 + 습니다), which the
+# segmenter gives whole. Verb stems fuse with their endings (했 = 하 + 았,
+# 갈 = 가 + ㄹ), so no table of forms finds them all. ko-dic (mecab-ko-dic)
+# cuts the eojeol into morphemes. It takes about 370 MB of memory.
+dictionary = "ko-dic"
+# Only the first field is a part of speech: the next are a semantic class
+# (장소), whether the syllable ends in a consonant, and a reading.
+posFields = 1
+# The reading, which is the morpheme as written (ㅋㅋㅋ is 크크크).
+baseFields = [3]
+# Inflected forms fused of several morphemes (했 is 하/XSV + 았/EP, 갈 is
+# 가/VV + ᆯ/ETM, 예뻐요 is 예쁘/VA + 어요/EF): their parts' base forms, from
+# the expression field. Not a compound noun (한국어 is 한국 + 어, but its own
+# word) nor a pre-analysed name (텍사스주).
+fused = { typeField = 4, types = ["Inflect"], field = 7 }
+# ko-dic writes a final consonant ending with the jamo that ends a syllable
+# (가 + ᆯ), Wiktionary with the letter (-ㄹ).
+baseLetters = { "ᆫ" = "ㄴ", "ᆯ" = "ㄹ", "ᆷ" = "ㅁ", "ᆸ" = "ㅂ", "ᆻ" = "ㅆ" }
+# Hangul is written as it sounds: no reading field.
+# 하다 and 되다 after a noun make a verb of it: 공부했어요 is 공부하다.
+stemSuffixes = ["XSV", "XSA"]
+# A stem that changes (듣다: 들어, 들었다) is cut as another verb's (들 of
+# 들다), or as none: the stem with the infinitive ending is a form in the
+# tables of every verb it may be (들어: 듣다, 들다).
+stemForms = ["*어", "*아"]
+# A space ends each word with its particles and endings: an eojeol written
+# like an adverb or conjunction is that word (하지만 "but", which ko-dic cuts
+# 하 + 지만), and a verb with endings is no noun spelled alike (하지 "do not",
+# not "summer solstice").
+spacedWords = true
+# A word's entries of the part of speech ko-dic reads it as come first
+# (우리 "we" the pronoun, before 우리 "cage"; the particle -는 before the
+# ending).
+ranksByPos = true
+# A prefix joins the word after it (신|제품).
+prefixes = ["XPN"]
+# A suffix makes a new word (학생|들, 국제|적): one without an entry is shown
+# by its parts.
+suffixes = ["XSN"]
+
+# Wiktionary lists a verb or adjective by its dictionary form, the stem with
+# 다 (먹다; ko-dic gives 먹), and the copula as -이다.
+[[context.analyzer.baseSpellings]]
+pos = ["VV", "VA", "VX", "VCN", "XSV", "XSA"]
+spellings = ["*다"]
+
+[[context.analyzer.baseSpellings]]
+pos = ["VCP"]
+spellings = ["-*다"]
+
+# A pre-final ending sits inside the verb, hyphens on both sides (-었-, -겠-).
+[[context.analyzer.baseSpellings]]
+pos = ["EP"]
+spellings = ["-*-"]
+
+# Particles, endings and suffixes with a hyphen before them (-에서, -습니다,
+# -들). 에서 alone is "Esau", 들 alone "field".
+[[context.analyzer.baseSpellings]]
+pos = ["JKS", "JKC", "JKG", "JKO", "JKB", "JKV", "JKQ", "JX", "JC", "EF", "EC", "ETN", "ETM", "XSN"]
+spellings = ["-*"]
+
+[context.analyzer.upos]
+# ko-dic's tags (Sejong's) as UD tags, to tell which entries fit its reading
+# of a word. Wiktionary lists 있다 and 없다 as both verb and adjective, and
+# conjunctive adverbs (그리고) as adverbs. Particles and endings are particle
+# and suffix lines.
+NNG = ["NOUN"]
+NNP = ["PROPN", "NOUN"]
+NNB = ["NOUN"]
+NNBC = ["NOUN"]
+NR = ["NUM"]
+NP = ["PRON"]
+VV = ["VERB"]
+VA = ["ADJ", "VERB"]
+VX = ["VERB", "ADJ"]
+VCN = ["ADJ"]
+MM = ["DET"]
+MAG = ["ADV"]
+MAJ = ["ADV", "CCONJ"]
+IC = ["INTJ"]
+JKS = ["PART"]
+JKC = ["PART"]
+JKG = ["PART"]
+JKO = ["PART"]
+JKB = ["PART"]
+JKV = ["PART"]
+JKQ = ["PART"]
+JX = ["PART"]
+JC = ["PART"]
+VCP = ["PART"]
+
+# The analyzer's words: a stem with its endings is one word; a particle, and
+# the copula, are words of their own, as a grammar teaches them.
+
+[[context.analyzer.join]]
+# Endings after a verb, adjective, copula or another ending: 먹|었|습니다,
+# 예쁘|어요, 이|에요.
+pos = ["EP", "EF", "EC", "ETN", "ETM"]
+after = ["VV", "VA", "VX", "VCP", "VCN", "XSV", "XSA", "EP"]
+
+[[context.analyzer.join]]
+# An auxiliary verb written onto the verb before it: 먹어|보다, 해|주세요.
+pos = ["VX"]
+after = ["EC"]
+
+[[context.analyzer.join]]
+# 하다 and 되다 after a noun or root make a verb or adjective of it:
+# 공부|했어요, 깨끗|한.
+pos = ["XSV", "XSA"]
+after = ["NNG", "NNP", "NNB", "XR", "MAG"]
+
+[[context.analyzer.join]]
+# A suffix after a noun: 학생|들, 국제|적.
+pos = ["XSN"]
+after = ["NNG", "NNP", "NNB", "NNBC", "NP", "NR", "XR", "XSN"]

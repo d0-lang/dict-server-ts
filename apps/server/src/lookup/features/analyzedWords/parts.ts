@@ -30,6 +30,9 @@ const FUNCTION_UPOS = new Set([
   "INTJ",
 ]);
 
+/** Parts of speech that name or describe something. */
+const NAMING_UPOS = new Set(["NOUN", "PROPN", "VERB", "ADJ"]);
+
 /** Parts of speech that take endings, so a word with endings keeps only these entries. */
 export const INFLECTING = new Set(["VERB", "ADJ", "AUX"]);
 
@@ -114,20 +117,36 @@ export const wholeIds = (
 ): ReadonlyArray<number> => {
   const head = headOf(w, c.settings);
   const prefix = c.context.slice(startOf(w), head.start);
-  const candidates = [
-    written,
-    ...head.bases.flatMap((base) =>
-      prefix === "" ? [base] : [prefix + base, base],
-    ),
-  ];
+  // A suffix that makes a verb of the head: the head with it (`공부하다`
+  // for `공부|했어요`), before the head alone (`공부` "study").
+  const next = w[w.indexOf(head) + 1];
+  const derived =
+    next !== undefined && hasPos(next.pos, c.settings.stemSuffixes)
+      ? next.bases.map((base) => prefix + head.surface + base)
+      : [];
+  const bases = head.bases.flatMap((base) =>
+    prefix === "" ? [base] : [prefix + base, base],
+  );
+  // A lone morpheme the dictionary spells otherwise is another word as
+  // written (`에서` "Esau", for the particle `-에서`): its base forms first.
+  const candidates =
+    w.length === 1 && head.respelled === true
+      ? [...bases, written]
+      : [written, ...derived, ...bases];
   const inflected = w.length > 1 && w.at(-1) !== head;
-  // The head as written also reaches verbs whose forms it is, when the
-  // analyzer's lemma misses one (`従え` is `従える` too, which UniDic reads
-  // as `従う`). Not an entry of the stem itself (`食べ` "stem of 食べる").
+  const headPos = c.uposOf(head);
+  const verbHead =
+    [...headPos].some((tag) => INFLECTING.has(tag)) &&
+    !headPos.has("NOUN") &&
+    !headPos.has("PROPN");
+  // The head as written (`stemForms`) also reaches verbs whose forms it is,
+  // when the analyzer's lemma misses one (`従え` is `従える` too, which
+  // UniDic reads as `従う`; `들어` is `듣다` too, which ko-dic reads as
+  // `들다`). Not an entry of the stem itself (`食べ` "stem of 食べる").
   const stemForms =
     w.length > 1 && !head.bases.includes(head.surface)
-      ? c
-          .rows(prefix + head.surface)
+      ? c.settings.stemForms
+          .flatMap((form) => c.rows(prefix + form.replace("*", head.surface)))
           .filter(
             (row) =>
               row.source === FormSource.Inflection &&
@@ -145,7 +164,31 @@ export const wholeIds = (
             ...rows,
             ...stemForms.filter((row) => !rows.some((r) => r.id === row.id)),
           ];
-    const inflecting = found.filter((row) => INFLECTING.has(row.pos));
+    // A headword spelled as the word is written is the word itself, even
+    // when it no longer inflects (`하지만` "but", of `하다` + `-지만`;
+    // `例えば` "for example"), unless it names something: a noun spelled
+    // alike is another word (`하지` "summer solstice", for `하` + `-지`).
+    const own = (row: FormRow) =>
+      c.settings.spacedWords &&
+      form === written &&
+      row.source === FormSource.Lemma &&
+      !NAMING_UPOS.has(row.pos) &&
+      lookupKey(row.lemma) === lookupKey(written);
+    const inflecting = found.filter(
+      (row) => INFLECTING.has(row.pos) || own(row),
+    );
+    // Only nouns spelled like a verb with its endings: other words (`하지`
+    // "summer solstice" for `하` + `-지`); its base forms find it.
+    if (
+      c.settings.spacedWords &&
+      inflected &&
+      form === written &&
+      verbHead &&
+      inflecting.length === 0 &&
+      found.every((row) => row.pos === "NOUN" || row.pos === "PROPN")
+    ) {
+      continue;
+    }
     const kept = inflected && inflecting.length > 0 ? inflecting : found;
     // The base forms' own entries first, the last named first: it is the
     // most specific (UniDic's lemma `要る` against the written `いる`, which
@@ -171,8 +214,17 @@ export const wholeIds = (
         ? 1
         : 0;
     };
+    // Entries of the analyzer's part of speech first (`ranksByPos`: the
+    // particle `-는`, before the ending `-는`).
+    const upos = c.uposOf(head);
+    const fits = (row: FormRow) =>
+      c.settings.ranksByPos && upos.has(row.pos) ? 0 : 1;
     const ranked = [...kept].sort(
-      (a, b) => misread(a) - misread(b) || priority(a) - priority(b),
+      (a, b) =>
+        misread(a) - misread(b) ||
+        Number(own(b)) - Number(own(a)) ||
+        fits(a) - fits(b) ||
+        priority(a) - priority(b),
     );
     return [...new Set(ranked.map((row) => row.id))];
   }
@@ -285,9 +337,12 @@ export const morphemeParts = (
         ? bySpelling
         : morpheme.bases.flatMap((base) => grammarIds(c.db, base));
     const isHead = i === head;
-    const forms = isHead
-      ? [morpheme.surface, ...morpheme.bases]
-      : morpheme.bases;
+    // Not a stem the dictionary spells otherwise (`보` of `보다` is no
+    // word: `보` "step").
+    const forms =
+      isHead && morpheme.respelled !== true
+        ? [morpheme.surface, ...morpheme.bases]
+        : morpheme.bases;
     const bases = new Set([morpheme.surface, ...morpheme.bases].map(lookupKey));
     // Entries of the part's own lemma; else what its base forms find, for a
     // lemma the dictionary writes otherwise (`欲しい` under `ほしい`).
@@ -316,8 +371,14 @@ export const morphemeParts = (
     // syllable or character last.
     const rank = (row: FormRow) =>
       row.sourcePos === "prefix" ? 0 : LETTERS.has(row.sourcePos) ? 2 : 1;
-    const ranked =
-      head >= 0 && i < head ? [...own].sort((a, b) => rank(a) - rank(b)) : own;
+    // Entries of the analyzer's part of speech first (`ranksByPos`: the
+    // particle `-는`, before the ending).
+    const fits = (row: FormRow) =>
+      c.settings.ranksByPos && upos.has(row.pos) ? 0 : 1;
+    const ranked = [...own].sort(
+      (a, b) =>
+        (head >= 0 && i < head ? rank(a) - rank(b) : 0) || fits(a) - fits(b),
+    );
     // The stem carries the word's meaning, so its entries rank first, even
     // with a prefix written before it (`お|送り`, `お|名前`): the client
     // opens on the segment of the first entry in one.

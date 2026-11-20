@@ -16,9 +16,17 @@ export type Morpheme = {
   /** Where it starts and ends in the text, as UTF-16 indexes. */
   readonly start: number;
   readonly end: number;
-  /** Its part-of-speech tags joined with `-`, unset tags left out (`動詞-非自立可能`). */
+  /**
+   * Its part-of-speech tags joined with `-`, unset tags left out
+   * (`動詞-非自立可能`); a fused morpheme's parts' joined with `+` (ko-dic
+   * `VV+EP`).
+   */
   readonly pos: string;
-  /** Its base forms, from the language's `baseFields`, in that order, without repeats. */
+  /**
+   * Its base forms, from the language's `baseFields` (a fused morpheme's from
+   * its parts, `fused`), spelled as `baseSpellings` says, in that order,
+   * without repeats.
+   */
   readonly bases: ReadonlyArray<string>;
   /**
    * The surface, then as spelled by each later base form where it differs
@@ -26,6 +34,11 @@ export type Morpheme = {
    * lemma `知れる`), so phrases written either way are found.
    */
   readonly spellings: ReadonlyArray<string>;
+  /**
+   * A `baseSpellings` rule spelled its base forms: the dictionary writes it
+   * otherwise than the text (`에서` is `-에서`; `에서` alone is "Esau").
+   */
+  readonly respelled?: boolean;
   /** Its lemma's reading, from the language's `readingField` (`ニン` for `人` the counter), when the dictionary gives one. */
   readonly reading?: string;
 };
@@ -55,9 +68,71 @@ export type Analyzer = (text: string) => ReadonlyArray<Morpheme>;
 
 type AnalyzerSettings = NonNullable<Language["context"]["analyzer"]>;
 
-/** `pos` is one of `tags` or starts with one and a `-`. */
-const hasPos = (pos: string, tags: ReadonlyArray<string>): boolean =>
-  tags.some((tag) => pos === tag || pos.startsWith(`${tag}-`));
+/**
+ * `pos` is one of `tags` or starts with one and a `-`. A fused morpheme's
+ * tags (`VV+EP`) are each of its parts', so it is any of them.
+ */
+export const hasPos = (pos: string, tags: ReadonlyArray<string>): boolean =>
+  pos
+    .split("+")
+    .some((part) =>
+      tags.some((tag) => part === tag || part.startsWith(`${tag}-`)),
+    );
+
+/**
+ * The morpheme's base forms, each with the part of speech it is the base of:
+ * a fused morpheme's from its parts (`하/XSV/*+았/EP/*`), the ones a spelling
+ * rule names, or else the first; any other's from `baseFields`. UniDic's lemma
+ * may carry a gloss for loanwords (`ダイヤ-diagram`).
+ */
+const rawBases = (
+  details: ReadonlyArray<string>,
+  pos: string,
+  settings: AnalyzerSettings,
+): ReadonlyArray<{ readonly base: string; readonly pos: string }> => {
+  const fused = settings.fused;
+  if (
+    fused !== undefined &&
+    fused.types.includes(details[fused.typeField] ?? "")
+  ) {
+    const parts = (details[fused.field] ?? "").split("+").flatMap((part) => {
+      const [base = "", tag = ""] = part.split("/");
+      return base === "" || base === "*" ? [] : [{ base, pos: tag }];
+    });
+    const named = parts.filter((part) =>
+      settings.baseSpellings.some((rule) => hasPos(part.pos, rule.pos)),
+    );
+    if (named.length > 0) return named;
+    if (parts.length > 0) return parts.slice(0, 1);
+  }
+  const head = pos.split("+")[0]!;
+  return settings.baseFields
+    .map((field) => details[field]?.split("-")[0] ?? "")
+    .filter((base) => base !== "" && base !== "*")
+    .map((base) => ({ base, pos: head }));
+};
+
+/** Each base form as the dictionary spells it (`baseLetters`, `baseSpellings`): `먹` (`VV`) is `먹다`, `에서` (`JKB`) is `-에서`. */
+const spelledBases = (
+  raw: ReadonlyArray<{ readonly base: string; readonly pos: string }>,
+  settings: AnalyzerSettings,
+): ReadonlyArray<string> => {
+  const letters = Object.entries(settings.baseLetters);
+  return [
+    ...new Set(
+      raw.flatMap(({ base, pos }) => {
+        const written = letters.reduce(
+          (text, [from, to]) => text.replaceAll(from, to),
+          base,
+        );
+        const rule = settings.baseSpellings.find((r) => hasPos(pos, r.pos));
+        return rule === undefined
+          ? [written]
+          : rule.spellings.map((spelling) => spelling.replace("*", written));
+      }),
+    ),
+  ];
+};
 
 /**
  * The morphemes with the `reread` rules applied, from the first on: a rule's
@@ -184,13 +259,15 @@ export const analyzerFor = (language: Language): Analyzer | undefined => {
     const offsets = utf16At(text);
     const morphemes = tokenizer.tokenize(text).map((token) => {
       const { details } = token;
-      const bases = [
-        ...new Set(
-          settings.baseFields
-            .map((field) => details[field]?.split("-")[0] ?? "")
-            .filter((base) => base !== "" && base !== "*"),
-        ),
-      ];
+      const pos = details
+        .slice(0, settings.posFields)
+        .filter((tag) => tag !== "*" && tag !== "")
+        .join("-");
+      const raw = rawBases(details, pos, settings);
+      const bases = spelledBases(raw, settings);
+      const respelled = raw.some(({ pos }) =>
+        settings.baseSpellings.some((rule) => hasPos(pos, rule.pos)),
+      );
       const reading =
         settings.readingField === undefined
           ? undefined
@@ -199,14 +276,11 @@ export const analyzerFor = (language: Language): Analyzer | undefined => {
         ...(reading !== undefined && reading !== "" && reading !== "*"
           ? { reading }
           : {}),
+        ...(respelled ? { respelled } : {}),
         surface: token.surface,
         start: offsets.get(token.byte_start) ?? 0,
         end: offsets.get(token.byte_end) ?? text.length,
-        pos: details
-          .slice(0, 4)
-          .filter((tag) => tag !== "*" && tag !== "")
-          .join("-"),
-        // A UniDic lemma may carry a gloss for loanwords (`ダイヤ-diagram`).
+        pos,
         bases,
         spellings: [
           ...new Set([

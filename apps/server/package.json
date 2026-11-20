@@ -8,6 +8,7 @@
     "@effect/platform-node": "4.0.5",
     "drizzle-orm": "0.45.4",
     "effect": "4.0.5",
+    "lindera-wasm-ko-dic": "2.1.0",
     "lindera-wasm-unidic": "2.1.0"
   },
   "devDependencies": {

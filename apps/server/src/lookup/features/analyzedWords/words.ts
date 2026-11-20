@@ -1,5 +1,5 @@
 import type { Language } from "@dict/core/language";
-import type { Morpheme } from "../../common/analyzer.ts";
+import { hasPos, type Morpheme } from "../../common/analyzer.ts";
 
 /** Morphemes as words: the analyzer's morphemes joined by the language's rules. */
 
@@ -9,9 +9,7 @@ type Rule = Settings["join"][number];
 /** A word: the morphemes the `join` rules make one (`食べ|まし|た`). */
 export type Word = ReadonlyArray<Morpheme>;
 
-/** `pos` is one of `tags` or starts with one and a `-`. */
-export const hasPos = (pos: string, tags: ReadonlyArray<string>): boolean =>
-  tags.some((tag) => pos === tag || pos.startsWith(`${tag}-`));
+export { hasPos };
 
 const joins = (rule: Rule, morpheme: Morpheme, before: Morpheme): boolean =>
   hasPos(morpheme.pos, rule.pos) &&
