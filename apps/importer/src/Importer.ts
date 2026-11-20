@@ -4,6 +4,7 @@ import { createDictionaryFile } from "@dict/core/DictionaryDb";
 import { SCHEMA_VERSION } from "@dict/core/schema";
 import { ImportError, importFailure } from "./errors.ts";
 import { loadGrammar, type GrammarEntry } from "./grammar.ts";
+import { loadNumerals } from "./numerals.ts";
 import {
   countForms,
   finalizeDatabase,
@@ -124,6 +125,10 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     try: () => options.grammar ?? loadGrammar(rules.code),
     catch: importFailure("cannot read the grammar file"),
   });
+  const numerals = yield* Effect.try({
+    try: () => loadNumerals(rules.code),
+    catch: importFailure("cannot read the numerals file"),
+  });
   // A suffix the grammar file lists keeps its table (`てます` of `ている`):
   // the grammar line shows it.
   const withGrammar = {
@@ -137,6 +142,7 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     rules.reflexive !== undefined,
     rules.participleDeclension?.sharedWithParticiple ?? false,
     rules.verbChainsThroughEntries ?? false,
+    numerals,
   );
   const tally = makeTally();
 

@@ -1,0 +1,35 @@
+# Numerals, one line per word and reading: word, reading (hiragana), senses
+# separated by " | ". These replace Wiktionary's numerals, nouns and kanji
+# entries for each word (apps/importer/src/numerals.ts): it gives 九 eight
+# entries that all say "nine", with mahjong readings, and 五 only nouns.
+# The common reading comes first; the native one says where it is read.
+〇	れい	zero (as a digit: 二〇二六, 2026)
+零	れい	zero, nought
+一	いち	one | first, the best (一番, number one)
+一	ひと	one (native: 一つ, one thing; 一人, one person)
+二	に	two | second (二番目, the second)
+二	ふた	two (native: 二つ, two things; 二人, two people)
+三	さん	three
+三	み	three (native: 三つ, three things; 三日, the third day)
+四	よん	four
+四	し	four (in 四月, April; 四季, the four seasons)
+四	よ	four (in 四人, four people; 四時, four o'clock)
+五	ご	five
+五	いつ	five (native: 五つ, five things; 五日, the fifth day)
+六	ろく	six
+六	む	six (native: 六つ, six things; 六日, the sixth day)
+七	なな	seven
+七	しち	seven (in 七月, July; 七時, seven o'clock)
+八	はち	eight
+八	や	eight (native: 八つ, eight things; 八百屋, greengrocer)
+九	きゅう	nine
+九	く	nine (in 九月, September; 九時, nine o'clock)
+九	ここの	nine (native: 九つ, nine things; 九日, the ninth day)
+十	じゅう	ten
+十	とお	ten (native: 十, ten things; 十日, the tenth day)
+百	ひゃく	hundred | a great many
+千	せん	thousand | a great many
+万	まん	ten thousand
+万	よろず	all, everything; a great many (literary)
+億	おく	hundred million (10⁸)
+兆	ちょう	trillion (10¹²) | sign, omen (in 兆候, 前兆)
