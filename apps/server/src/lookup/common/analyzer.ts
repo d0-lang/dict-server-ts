@@ -246,18 +246,47 @@ export const loadAnalyzer = (language: Language): void => {
   if (settings !== undefined) tokenizerFor(settings.dictionary);
 };
 
-const analyzers = new WeakMap<Language, Analyzer>();
+/** Whether the dictionary has a form: what `restore` weighs two readings by. */
+export type Known = (form: string) => boolean;
 
-/** The language's analyzer, or undefined when it names none. */
-export const analyzerFor = (language: Language): Analyzer | undefined => {
+const analyzers = new WeakMap<Language, WeakMap<Known, Analyzer>>();
+const NOTHING_KNOWN: Known = () => false;
+
+/** A Hangul syllable that ends in a consonant (`책`, not `아`). */
+const endsInConsonant = (ch: string | undefined): boolean => {
+  const code = ch?.codePointAt(0) ?? 0;
+  return code >= 0xac00 && code <= 0xd7a3 && (code - 0xac00) % 28 !== 0;
+};
+
+/**
+ * The language's analyzer, or undefined when it names none. `known` tells
+ * the forms the dictionary has, for `restore`.
+ */
+export const analyzerFor = (
+  language: Language,
+  known: Known = NOTHING_KNOWN,
+): Analyzer | undefined => {
   const settings = language.context.analyzer;
   if (settings === undefined) return undefined;
-  const cached = analyzers.get(language);
+  let byKnown = analyzers.get(language);
+  if (byKnown === undefined) {
+    byKnown = new WeakMap();
+    analyzers.set(language, byKnown);
+  }
+  const cached = byKnown.get(known);
   if (cached !== undefined) return cached;
-  const tokenize: Analyzer = (text) => {
+  const tokenize: Analyzer = (text) =>
+    reread(
+      restore(text, morphemesOf(text, 0), settings, morphemesOf, known),
+      settings.reread,
+    );
+  const morphemesOf = (
+    text: string,
+    from: number,
+  ): ReadonlyArray<Morpheme> => {
     const tokenizer = tokenizerFor(settings.dictionary);
     const offsets = utf16At(text);
-    const morphemes = tokenizer.tokenize(text).map((token) => {
+    return tokenizer.tokenize(text).map((token) => {
       const { details } = token;
       const pos = details
         .slice(0, settings.posFields)
@@ -278,8 +307,8 @@ export const analyzerFor = (language: Language): Analyzer | undefined => {
           : {}),
         ...(respelled ? { respelled } : {}),
         surface: token.surface,
-        start: offsets.get(token.byte_start) ?? 0,
-        end: offsets.get(token.byte_end) ?? text.length,
+        start: from + (offsets.get(token.byte_start) ?? 0),
+        end: from + (offsets.get(token.byte_end) ?? text.length),
         pos,
         bases,
         spellings: [
@@ -296,7 +325,6 @@ export const analyzerFor = (language: Language): Analyzer | undefined => {
       token.free();
       return morpheme;
     });
-    return reread(morphemes, settings.reread);
   };
   // The same sentence is analyzed again for each word clicked in it (a
   // reader clicks several; a corpus collection sends every word), and one
@@ -322,8 +350,105 @@ export const analyzerFor = (language: Language): Analyzer | undefined => {
     }
     return morphemes;
   };
-  analyzers.set(language, analyze);
+  byKnown.set(known, analyze);
   return analyze;
+};
+
+/**
+ * The morphemes with each word that holds a `restore` morpheme read again,
+ * cut there, when the dictionary knows at least as much of the word by that
+ * reading (`생각` + `이`, against `생` + `각이`), and the morpheme before
+ * the cut is of the rule's `after` (not `같` + `이`, for `같이` "together").
+ * A word is a run of text without spaces.
+ */
+const restore = (
+  text: string,
+  morphemes: ReadonlyArray<Morpheme>,
+  settings: AnalyzerSettings,
+  morphemesOf: (text: string, from: number) => ReadonlyArray<Morpheme>,
+  known: Known,
+): ReadonlyArray<Morpheme> => {
+  if (settings.restore.length === 0) return morphemes;
+  let out = morphemes;
+  for (const word of text.matchAll(/\S+/g)) {
+    const start = word.index;
+    const end = start + word[0].length;
+    const cuts: Array<{
+      readonly at: number;
+      readonly rule: AnalyzerSettings["restore"][number];
+    }> = [];
+    for (const rule of settings.restore) {
+      for (let at = start + 1; at < end; at++) {
+        if (
+          text.startsWith(rule.surface, at) &&
+          (!rule.afterFinal || endsInConsonant(text[at - 1]))
+        ) {
+          cuts.push({ at, rule });
+        }
+      }
+    }
+    if (cuts.length === 0) continue;
+    let blanked = word[0];
+    for (const { at, rule } of cuts) {
+      blanked =
+        blanked.slice(0, at - start) +
+        " ".repeat(rule.surface.length) +
+        blanked.slice(at - start + rule.surface.length);
+    }
+    const read = [...morphemesOf(blanked, start)];
+    const restored: Array<Morpheme> = [];
+    let fits = true;
+    for (const { at, rule } of cuts) {
+      const before = read.find((m) => m.end === at);
+      if (before === undefined || !hasPos(before.pos, rule.after)) {
+        fits = false;
+        break;
+      }
+      const next = read.find((m) => m.start === at + rule.surface.length);
+      const as = rule.as.find(
+        (a) =>
+          a.before === undefined ||
+          (next !== undefined && hasPos(next.pos, a.before)),
+      );
+      if (as === undefined) {
+        fits = false;
+        break;
+      }
+      const bases = spelledBases([{ base: rule.surface, pos: as.pos }], settings);
+      restored.push({
+        ...(bases.some((base) => base !== rule.surface)
+          ? { respelled: true }
+          : {}),
+        surface: rule.surface,
+        start: at,
+        end: at + rule.surface.length,
+        pos: as.pos,
+        bases,
+        spellings: [rule.surface],
+      });
+    }
+    if (!fits) continue;
+    const inside = (m: Morpheme) => m.start >= start && m.end <= end;
+    const before = out.filter(inside);
+    const after = [...read, ...restored].sort((a, b) => a.start - b.start);
+    // Letters the dictionary knows a morpheme of, by any base form.
+    const score = (list: ReadonlyArray<Morpheme>) =>
+      list.reduce(
+        (sum, m) =>
+          sum +
+          ([m.surface, ...m.bases].some((form) => known(form))
+            ? m.end - m.start
+            : 0),
+        0,
+      );
+    if (score(after) < score(before)) continue;
+    out = [
+      ...out.filter((m) => m.end <= start),
+      ...after,
+      ...out.filter((m) => m.start >= end),
+    ];
+  }
+  return out;
 };
 
 /**

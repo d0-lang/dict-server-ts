@@ -382,6 +382,60 @@
               },
               "description": "Letters the analyzer writes in base forms otherwise than the dictionary, replaced in them: ko-dic writes a final consonant ending with the jamo that ends a syllable (`ᆯ` in `가` + `ᆯ`), Wiktionary with the letter (`-ㄹ`)."
             },
+            "restore": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "surface": {
+                    "type": "string",
+                    "description": "The morpheme as written (`이`)."
+                  },
+                  "afterFinal": {
+                    "type": "boolean",
+                    "description": "Only right after a Hangul syllable that ends in a consonant (`책|이`, not `아이`)."
+                  },
+                  "after": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Parts of speech of the morpheme before it, as in `join` (nouns and pronouns: `생각` + `이`, not `같` + `이`)."
+                  },
+                  "as": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "before": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Only before a morpheme of these parts of speech (endings: `이` + `에요` is the copula)."
+                        },
+                        "pos": {
+                          "type": "string",
+                          "description": "Its part of speech (`VCP`, `JKS`)."
+                        }
+                      },
+                      "required": [
+                        "pos"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "description": "How to read it: the first that fits."
+                  }
+                },
+                "required": [
+                  "surface",
+                  "after",
+                  "as"
+                ],
+                "additionalProperties": false
+              },
+              "description": "Morphemes the analyzer's dictionary lacks: Lindera's ko-dic has no `이` (the subject particle, the copula), and cuts `생각이` as `생|각이`. A word written with one is analyzed again, cut there, and that reading is kept when the dictionary knows at least as much of the word by it: `생각` + `이` (the particle), not `생` + `각이`. The morpheme's base form is spelled as `baseSpellings` says."
+            },
             "stemSuffixes": {
               "type": "array",
               "items": {

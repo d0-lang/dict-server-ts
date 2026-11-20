@@ -5,6 +5,7 @@ import { lookupKey } from "@dict/core/lookupKey";
 import {
   analyzerFor,
   type Analyzer,
+  type Known,
   type Morpheme,
 } from "../../common/analyzer.ts";
 import type { LookupEntry, LookupResult } from "../../common/entries.ts";
@@ -85,6 +86,27 @@ export type Click = {
   readonly severalWords: (row: FormRow) => boolean;
 };
 
+const knowns = new WeakMap<DictionaryDb, Known>();
+
+/** Whether `db` has a form, cached per dictionary: for the analyzer's `restore`. */
+const knownIn = (db: DictionaryDb): Known => {
+  let known = knowns.get(db);
+  if (known === undefined) {
+    const seen = new Map<string, boolean>();
+    known = (form) => {
+      const key = lookupKey(form);
+      let has = seen.get(key);
+      if (has === undefined) {
+        has = formRows(db, key).length > 0;
+        seen.set(key, has);
+      }
+      return has;
+    };
+    knowns.set(db, known);
+  }
+  return known;
+};
+
 /** Where the only copy of `word` in `context` starts, or -1 when there is none or more than one. */
 const onlyCopy = (context: string, word: string): number => {
   const first = context.indexOf(word);
@@ -105,7 +127,7 @@ export const clickOf = (
   at?: number,
 ): Click | undefined => {
   const settings = language.context.analyzer;
-  const analyze = analyzerFor(language);
+  const analyze = analyzerFor(language, knownIn(db));
   if (settings === undefined || analyze === undefined) return undefined;
   // The click by its place in the string, as `at` counts copies of `word`,
   // not by the server's own segmenter: Bun's cuts a sentence otherwise than

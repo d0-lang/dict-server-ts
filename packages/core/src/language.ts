@@ -347,6 +347,48 @@ const Context = doc(
             ),
             {},
           ),
+          restore: orDefault(
+            doc(
+              Schema.Array(
+                Schema.Struct({
+                  surface: doc(
+                    Schema.String,
+                    "The morpheme as written (`이`).",
+                  ),
+                  afterFinal: orDefault(
+                    doc(
+                      Schema.Boolean,
+                      "Only right after a Hangul syllable that ends in a consonant (`책|이`, not `아이`).",
+                    ),
+                    false,
+                  ),
+                  after: doc(
+                    strings,
+                    "Parts of speech of the morpheme before it, as in `join` (nouns and pronouns: `생각` + `이`, not `같` + `이`).",
+                  ),
+                  as: doc(
+                    Schema.Array(
+                      Schema.Struct({
+                        before: Schema.optionalKey(
+                          doc(
+                            strings,
+                            "Only before a morpheme of these parts of speech (endings: `이` + `에요` is the copula).",
+                          ),
+                        ),
+                        pos: doc(
+                          Schema.String,
+                          "Its part of speech (`VCP`, `JKS`).",
+                        ),
+                      }),
+                    ),
+                    "How to read it: the first that fits.",
+                  ),
+                }),
+              ),
+              "Morphemes the analyzer's dictionary lacks: Lindera's ko-dic has no `이` (the subject particle, the copula), and cuts `생각이` as `생|각이`. A word written with one is analyzed again, cut there, and that reading is kept when the dictionary knows at least as much of the word by it: `생각` + `이` (the particle), not `생` + `각이`. The morpheme's base form is spelled as `baseSpellings` says.",
+            ),
+            [],
+          ),
           stemSuffixes: orDefault(
             doc(
               strings,

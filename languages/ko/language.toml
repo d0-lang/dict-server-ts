@@ -128,3 +128,21 @@ after = ["NNG", "NNP", "NNB", "XR", "MAG"]
 # A suffix after a noun: 학생|들, 국제|적.
 pos = ["XSN"]
 after = ["NNG", "NNP", "NNB", "NNBC", "NP", "NR", "XR", "XSN"]
+
+# Lindera's ko-dic has no 이 at all (the source mecab-ko-dic has 30 entries
+# for it): it cuts 생각이 as 생|각이 and 학생이에요 as 학생|이에|요. After a
+# noun ending in a consonant, 이 is read as cut off: the copula before an
+# ending (학생|이|에요), else the subject particle (생각|이), when the
+# dictionary knows as much of the word that way (not 같이 "together").
+[[context.analyzer.restore]]
+surface = "이"
+afterFinal = true
+after = ["NNG", "NNP", "NNB", "NNBC", "NR", "NP", "XSN"]
+as = [{ before = ["EP", "EF", "EC", "ETM", "ETN"], pos = "VCP" }, { pos = "JKS" }]
+
+# 이 by itself, which ko-dic can't read: mostly the determiner "this" (이
+# 사람).
+[[context.analyzer.reread]]
+pos = ["UNK"]
+surface = ["이"]
+as = { pos = "MM", base = "이" }

@@ -134,17 +134,16 @@ export const wholeIds = (
       ? [...bases, written]
       : [written, ...derived, ...bases];
   const inflected = w.length > 1 && w.at(-1) !== head;
-  const headPos = c.uposOf(head);
-  const verbHead =
-    [...headPos].some((tag) => INFLECTING.has(tag)) &&
-    !headPos.has("NOUN") &&
-    !headPos.has("PROPN");
   // The head as written (`stemForms`) also reaches verbs whose forms it is,
   // when the analyzer's lemma misses one (`従え` is `従える` too, which
   // UniDic reads as `従う`; `들어` is `듣다` too, which ko-dic reads as
   // `들다`). Not an entry of the stem itself (`食べ` "stem of 食べる").
+  const headPos = c.uposOf(head);
+  // Only of a stem that inflects (not the copula `이`, whose `이어` is `잇다`'s).
+  const stem =
+    headPos.size === 0 || headPos.has("VERB") || headPos.has("ADJ");
   const stemForms =
-    w.length > 1 && !head.bases.includes(head.surface)
+    w.length > 1 && stem && !head.bases.includes(head.surface)
       ? c.settings.stemForms
           .flatMap((form) => c.rows(prefix + form.replace("*", head.surface)))
           .filter(
@@ -177,15 +176,16 @@ export const wholeIds = (
     const inflecting = found.filter(
       (row) => INFLECTING.has(row.pos) || own(row),
     );
-    // Only nouns spelled like a verb with its endings: other words (`하지`
-    // "summer solstice" for `하` + `-지`); its base forms find it.
+    // In a language with spaces, rows of the word as written that fit
+    // neither the analyzer's reading of it nor the word itself are another
+    // word spelled alike: `하지` "summer solstice" for `하` + `-지`, `잇다`'s
+    // table for the copula `이에요`. Its base forms find it.
     if (
       c.settings.spacedWords &&
       inflected &&
       form === written &&
-      verbHead &&
-      inflecting.length === 0 &&
-      found.every((row) => row.pos === "NOUN" || row.pos === "PROPN")
+      headPos.size > 0 &&
+      !found.some((row) => headPos.has(row.pos) || own(row))
     ) {
       continue;
     }
@@ -216,9 +216,8 @@ export const wholeIds = (
     };
     // Entries of the analyzer's part of speech first (`ranksByPos`: the
     // particle `-는`, before the ending `-는`).
-    const upos = c.uposOf(head);
     const fits = (row: FormRow) =>
-      c.settings.ranksByPos && upos.has(row.pos) ? 0 : 1;
+      c.settings.ranksByPos && headPos.has(row.pos) ? 0 : 1;
     const ranked = [...kept].sort(
       (a, b) =>
         misread(a) - misread(b) ||
