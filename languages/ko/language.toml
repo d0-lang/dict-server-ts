@@ -10,6 +10,11 @@ target = "en"
 # A Hangul syllable's own line ("More information(eumhun reading: …)") names
 # no word a reader looks up.
 skippedPos = ["syllable"]
+# Glosses that only name another word's form, which wiktextract links no
+# word in: "Yang-vowel form of -어서", "Post-vowel and post-liquid
+# allomorphic form of -으면", "topic-marked form of 나". The reader gets the
+# word's meaning instead of the form's name (about 120 senses).
+pointerWords = ["yang-vowel", "post-vowel", "post-vocalic", "post-liquid", "post-ㄹ", "(l)", "and", "or", "liquid", "colloquial", "allomorphic", "allomorph", "form", "topic-marked"]
 
 [context.analyzer]
 # Korean writes spaces, but between eojeols: a word with its particles and
@@ -21,8 +26,9 @@ dictionary = "ko-dic"
 # Only the first field is a part of speech: the next are a semantic class
 # (장소), whether the syllable ends in a consonant, and a reading.
 posFields = 1
-# The reading, which is the morpheme as written (ㅋㅋㅋ is 크크크).
-baseFields = [3]
+# None: the morpheme as written. The reading field is mostly that, but
+# sometimes another word's (아 read 아이, 물론 몰론).
+baseFields = []
 # Inflected forms fused of several morphemes (했 is 하/XSV + 았/EP, 갈 is
 # 가/VV + ᆯ/ETM, 예뻐요 is 예쁘/VA + 어요/EF): their parts' base forms, from
 # the expression field. Not a compound noun (한국어 is 한국 + 어, but its own
@@ -62,17 +68,21 @@ spellings = ["*다"]
 [[context.analyzer.baseSpellings]]
 pos = ["VCP"]
 spellings = ["-*다"]
+affix = true
 
 # A pre-final ending sits inside the verb, hyphens on both sides (-었-, -겠-).
 [[context.analyzer.baseSpellings]]
 pos = ["EP"]
 spellings = ["-*-"]
+affix = true
 
 # Particles, endings and suffixes with a hyphen before them (-에서, -습니다,
 # -들). 에서 alone is "Esau", 들 alone "field".
 [[context.analyzer.baseSpellings]]
 pos = ["JKS", "JKC", "JKG", "JKO", "JKB", "JKV", "JKQ", "JX", "JC", "EF", "EC", "ETN", "ETM", "XSN"]
 spellings = ["-*"]
+# In a fused morpheme the stem comes first: 걸 is 거 (것) + -ㄹ.
+affix = true
 
 [context.analyzer.upos]
 # ko-dic's tags (Sejong's) as UD tags, to tell which entries fit its reading
@@ -139,6 +149,14 @@ surface = "이"
 afterFinal = true
 after = ["NNG", "NNP", "NNB", "NNBC", "NR", "NP", "XSN"]
 as = [{ before = ["EP", "EF", "EC", "ETM", "ETN"], pos = "VCP" }, { pos = "JKS" }]
+
+# At a word's start before particles, 이 is the pronoun "this" (이를, 이는,
+# 이에): read as 그 "that", which behaves alike (그를, 그는, 그에).
+[[context.analyzer.restore]]
+surface = "이"
+start = true
+standIn = "그"
+rest = ["JKS", "JKC", "JKG", "JKO", "JKB", "JKV", "JKQ", "JX", "JC"]
 
 # 이 by itself, which ko-dic can't read: mostly the determiner "this" (이
 # 사람).

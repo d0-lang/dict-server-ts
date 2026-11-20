@@ -114,6 +114,13 @@
           },
           "description": "Form glosses that describe a word a reader meets on its own, so the word keeps an entry with its base's meaning (\"passive of використовувати: to use\") instead of only linking to the base. Each item is a set of words, all of which must open the gloss before its \"of\": `passive` matches \"passive of\" and \"adjectival past passive participle of\", `active participle` matches \"past active participle of\". Ukrainian sets them because its participles are also adjectives (`поширений` \"widespread\"), which a link to the verb would rank behind it."
         },
+        "pointerWords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Words that may make up the opening of a gloss that only names another word's form, before \"of\" and the linked word: `Yang-vowel form of -어서 (-eoseo)`, `topic-marked form of 나 (na)`, `Post-vowel and post-liquid allomorphic form of -으면`. Every word of the opening must be one of these, compared in lower case. wiktextract reads no `form-of` link there, so without this the reader gets the form's name and not its meaning: the sense becomes a link to the word, as a `form-of` sense is."
+        },
         "stressedLemmas": {
           "type": "boolean",
           "description": "Show the lemma with its stress marks: the headword's `canonical` form, when it spells the same word. Lookups still match unstressed text."
@@ -308,7 +315,7 @@
                 "minimum": -9007199254740991,
                 "maximum": 9007199254740991
               },
-              "description": "Which of the dictionary's detail fields hold a morpheme's base forms, looked up in this order (UniDic: 10, the written base form `いる`; 7, the lemma `要る`)."
+              "description": "Which of the dictionary's detail fields hold a morpheme's base forms, looked up in this order (UniDic: 10, the written base form `いる`; 7, the lemma `要る`). None: the morpheme as written (ko-dic, whose reading field is sometimes another word's)."
             },
             "posFields": {
               "type": "integer",
@@ -365,6 +372,10 @@
                       "type": "string"
                     },
                     "description": "The base forms, `*` standing for the analyzer's (`*다`, `-*`)."
+                  },
+                  "affix": {
+                    "type": "boolean",
+                    "description": "A particle or ending: in a fused morpheme, its base forms come after the stem's (`걸` is `거` + `-ㄹ`: `거` first)."
                   }
                 },
                 "required": [
@@ -391,6 +402,21 @@
                     "type": "string",
                     "description": "The morpheme as written (`이`)."
                   },
+                  "start": {
+                    "type": "boolean",
+                    "description": "At a word's start, read with `standIn` in its place, and only when the rest of the word is of `rest` (the pronoun `이` in `이를`, `이는`, read as `그를`, `그는`). Otherwise inside a word, after a letter of it."
+                  },
+                  "standIn": {
+                    "type": "string",
+                    "description": "With `start`: a morpheme the dictionary has that behaves alike and is as long (`그` for `이`): the word is analyzed with it in its place, and its reading is the morpheme's, its base forms respelled."
+                  },
+                  "rest": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "With `start`: parts of speech the rest of the word must be (particles), as in `join`."
+                  },
                   "afterFinal": {
                     "type": "boolean",
                     "description": "Only right after a Hangul syllable that ends in a consonant (`책|이`, not `아이`)."
@@ -400,7 +426,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "Parts of speech of the morpheme before it, as in `join` (nouns and pronouns: `생각` + `이`, not `같` + `이`)."
+                    "description": "Inside a word: parts of speech of the morpheme before it, as in `join` (nouns and pronouns: `생각` + `이`, not `같` + `이`)."
                   },
                   "as": {
                     "type": "array",
@@ -424,17 +450,15 @@
                       ],
                       "additionalProperties": false
                     },
-                    "description": "How to read it: the first that fits."
+                    "description": "Inside a word: how to read it, the first that fits."
                   }
                 },
                 "required": [
-                  "surface",
-                  "after",
-                  "as"
+                  "surface"
                 ],
                 "additionalProperties": false
               },
-              "description": "Morphemes the analyzer's dictionary lacks: Lindera's ko-dic has no `이` (the subject particle, the copula), and cuts `생각이` as `생|각이`. A word written with one is analyzed again, cut there, and that reading is kept when the dictionary knows at least as much of the word by it: `생각` + `이` (the particle), not `생` + `각이`. The morpheme's base form is spelled as `baseSpellings` says."
+              "description": "Morphemes the analyzer's dictionary lacks: Lindera's ko-dic has no `이` (the subject particle, the copula, the pronoun), and cuts `생각이` as `생|각이`. Inside a word, the word is analyzed again, cut there, and that reading is kept when the dictionary knows more of the word by it: `생각` + `이` (the particle), not `생` + `각이`, but `호랑이` \"tiger\" as it is. The morpheme's base form is spelled as `baseSpellings` says. At a word's start, see `start`."
             },
             "stemSuffixes": {
               "type": "array",

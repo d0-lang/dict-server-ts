@@ -17,16 +17,30 @@ export const singleWord = (c: Click): Answer => {
   // A morpheme the dictionary spells otherwise (`갈` is `가다` + `-ㄹ`, not
   // `갈` "reed"): its base forms' entries first, then the word's own as
   // written, those of the analyzer's part of speech first.
+  // With spaces, a headword spelled as written that names nothing comes
+  // first: `다른` "other", `그런` "such", not `다르다`, `그렇다`.
   if (found[0]!.respelled === true) {
     const ids = wholeIds(c, found, text);
     const written = c.rows(word).map((row) => row.id);
-    if (ids.length === 0 || ids[0] === written[0]) return PLAIN;
+    const own = c.settings.spacedWords
+      ? c
+          .rows(word)
+          .filter(
+            (row) =>
+              row.source === FormSource.Lemma &&
+              !NAMING.has(row.pos) &&
+              lookupKey(row.lemma) === lookupKey(word),
+          )
+          .map((row) => row.id)
+      : [];
+    const first = [...own, ...ids];
+    if (first.length === 0 || first[0] === written[0]) return PLAIN;
     const upos = c.uposOf(found[0]!);
     const fits = (id: number) => upos.has(c.infoOf(id).pos);
-    const rest = written.filter((id) => !ids.includes(id));
+    const rest = written.filter((id) => !first.includes(id));
     return {
       entries: loadEntries(c.db, [
-        ...new Set([...ids, ...rest.filter(fits), ...rest]),
+        ...new Set([...first, ...rest.filter(fits), ...rest]),
       ]),
     };
   }
@@ -92,6 +106,9 @@ export const singleWord = (c: Click): Answer => {
     .filter((id) => !ranked.includes(id));
   return { entries: loadEntries(c.db, [...ranked, ...new Set(rest)]) };
 };
+
+/** Parts of speech that name or describe something: no lexicalized form of a verb. */
+const NAMING = new Set(["NOUN", "PROPN", "VERB", "ADJ"]);
 
 /**
  * The plain lookup's entries, those of the analyzer's parts of speech first

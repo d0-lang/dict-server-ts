@@ -20,6 +20,7 @@ import {
   isPlaceholderGloss,
   isVerbalNounForm,
   keepForm,
+  languagePointerTarget,
   skipSense,
   seeTargets,
   type Degree,
@@ -405,7 +406,9 @@ const classifySense = (
     return { kind: "skip", reason: "placeholder" };
   }
   if (sense.glosses?.length === 1) {
-    const target = grammarPointerTarget(rules, gloss, sense.links ?? []);
+    const target =
+      grammarPointerTarget(rules, gloss, sense.links ?? []) ??
+      languagePointerTarget(rules, gloss, sense.links ?? []);
     if (target !== undefined) {
       return { kind: "link", targets: [lookupKey(target)], pointer: true };
     }

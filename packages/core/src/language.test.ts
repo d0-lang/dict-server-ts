@@ -26,6 +26,7 @@ describe("language records", () => {
       standardPronNotes: [],
       untrustedFormTags: [],
       ownEntryForms: [],
+      pointerWords: [],
       stressedLemmas: false,
       headwordGenders: false,
       unmarkedStressForms: false,

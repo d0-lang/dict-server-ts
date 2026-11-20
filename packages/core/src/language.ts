@@ -99,6 +99,13 @@ const Import = doc(
       ),
       [],
     ),
+    pointerWords: orDefault(
+      doc(
+        strings,
+        'Words that may make up the opening of a gloss that only names another word\'s form, before "of" and the linked word: `Yang-vowel form of -어서 (-eoseo)`, `topic-marked form of 나 (na)`, `Post-vowel and post-liquid allomorphic form of -으면`. Every word of the opening must be one of these, compared in lower case. wiktextract reads no `form-of` link there, so without this the reader gets the form\'s name and not its meaning: the sense becomes a link to the word, as a `form-of` sense is.',
+      ),
+      [],
+    ),
     stressedLemmas: orDefault(
       doc(
         Schema.Boolean,
@@ -294,7 +301,7 @@ const Context = doc(
           ),
           baseFields: doc(
             Schema.Array(Schema.Int),
-            "Which of the dictionary's detail fields hold a morpheme's base forms, looked up in this order (UniDic: 10, the written base form `いる`; 7, the lemma `要る`).",
+            "Which of the dictionary's detail fields hold a morpheme's base forms, looked up in this order (UniDic: 10, the written base form `いる`; 7, the lemma `要る`). None: the morpheme as written (ko-dic, whose reading field is sometimes another word's).",
           ),
           posFields: orDefault(
             doc(
@@ -334,6 +341,13 @@ const Context = doc(
                     strings,
                     "The base forms, `*` standing for the analyzer's (`*다`, `-*`).",
                   ),
+                  affix: orDefault(
+                    doc(
+                      Schema.Boolean,
+                      "A particle or ending: in a fused morpheme, its base forms come after the stem's (`걸` is `거` + `-ㄹ`: `거` first).",
+                    ),
+                    false,
+                  ),
                 }),
               ),
               "How the dictionary spells base forms the analyzer gives otherwise, by part of speech, the first rule that matches: ko-dic gives a verb's stem (`먹`) where Wiktionary lists `먹다` (`*다`), and particles and endings bare where Wiktionary writes them with hyphens (`-에서`, `-었-`).",
@@ -355,6 +369,25 @@ const Context = doc(
                     Schema.String,
                     "The morpheme as written (`이`).",
                   ),
+                  start: orDefault(
+                    doc(
+                      Schema.Boolean,
+                      "At a word's start, read with `standIn` in its place, and only when the rest of the word is of `rest` (the pronoun `이` in `이를`, `이는`, read as `그를`, `그는`). Otherwise inside a word, after a letter of it.",
+                    ),
+                    false,
+                  ),
+                  standIn: Schema.optionalKey(
+                    doc(
+                      Schema.String,
+                      "With `start`: a morpheme the dictionary has that behaves alike and is as long (`그` for `이`): the word is analyzed with it in its place, and its reading is the morpheme's, its base forms respelled.",
+                    ),
+                  ),
+                  rest: Schema.optionalKey(
+                    doc(
+                      strings,
+                      "With `start`: parts of speech the rest of the word must be (particles), as in `join`.",
+                    ),
+                  ),
                   afterFinal: orDefault(
                     doc(
                       Schema.Boolean,
@@ -362,11 +395,14 @@ const Context = doc(
                     ),
                     false,
                   ),
-                  after: doc(
-                    strings,
-                    "Parts of speech of the morpheme before it, as in `join` (nouns and pronouns: `생각` + `이`, not `같` + `이`).",
+                  after: orDefault(
+                    doc(
+                      strings,
+                      "Inside a word: parts of speech of the morpheme before it, as in `join` (nouns and pronouns: `생각` + `이`, not `같` + `이`).",
+                    ),
+                    [],
                   ),
-                  as: doc(
+                  as: orDefault(doc(
                     Schema.Array(
                       Schema.Struct({
                         before: Schema.optionalKey(
@@ -381,11 +417,11 @@ const Context = doc(
                         ),
                       }),
                     ),
-                    "How to read it: the first that fits.",
-                  ),
+                    "Inside a word: how to read it, the first that fits.",
+                  ), []),
                 }),
               ),
-              "Morphemes the analyzer's dictionary lacks: Lindera's ko-dic has no `이` (the subject particle, the copula), and cuts `생각이` as `생|각이`. A word written with one is analyzed again, cut there, and that reading is kept when the dictionary knows at least as much of the word by it: `생각` + `이` (the particle), not `생` + `각이`. The morpheme's base form is spelled as `baseSpellings` says.",
+              "Morphemes the analyzer's dictionary lacks: Lindera's ko-dic has no `이` (the subject particle, the copula, the pronoun), and cuts `생각이` as `생|각이`. Inside a word, the word is analyzed again, cut there, and that reading is kept when the dictionary knows more of the word by it: `생각` + `이` (the particle), not `생` + `각이`, but `호랑이` \"tiger\" as it is. The morpheme's base form is spelled as `baseSpellings` says. At a word's start, see `start`.",
             ),
             [],
           ),

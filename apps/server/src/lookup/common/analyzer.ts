@@ -86,6 +86,7 @@ export const hasPos = (pos: string, tags: ReadonlyArray<string>): boolean =>
  * may carry a gloss for loanwords (`ダイヤ-diagram`).
  */
 const rawBases = (
+  surface: string,
   details: ReadonlyArray<string>,
   pos: string,
   settings: AnalyzerSettings,
@@ -99,17 +100,28 @@ const rawBases = (
       const [base = "", tag = ""] = part.split("/");
       return base === "" || base === "*" ? [] : [{ base, pos: tag }];
     });
-    const named = parts.filter((part) =>
-      settings.baseSpellings.some((rule) => hasPos(part.pos, rule.pos)),
-    );
-    if (named.length > 0) return named;
-    if (parts.length > 0) return parts.slice(0, 1);
+    // Stems before the particles and endings fused onto them: `걸` is `거`
+    // (`것`) + `ㄹ`, `했` is `하` + `았`.
+    const affix = (part: { readonly pos: string }) =>
+      settings.baseSpellings.find((rule) => hasPos(part.pos, rule.pos))
+        ?.affix === true;
+    if (parts.length > 0) {
+      return [
+        ...parts.filter((part) => !affix(part)),
+        ...parts.filter(affix),
+      ];
+    }
   }
   const head = pos.split("+")[0]!;
-  return settings.baseFields
+  const bases = settings.baseFields
     .map((field) => details[field]?.split("-")[0] ?? "")
-    .filter((base) => base !== "" && base !== "*")
-    .map((base) => ({ base, pos: head }));
+    .filter((base) => base !== "" && base !== "*");
+  // Without base fields, the morpheme as written (ko-dic's reading field is
+  // sometimes another word's: `아` read `아이`).
+  return (bases.length > 0 ? bases : [surface]).map((base) => ({
+    base,
+    pos: head,
+  }));
 };
 
 /** Each base form as the dictionary spells it (`baseLetters`, `baseSpellings`): `먹` (`VV`) is `먹다`, `에서` (`JKB`) is `-에서`. */
@@ -292,7 +304,7 @@ export const analyzerFor = (
         .slice(0, settings.posFields)
         .filter((tag) => tag !== "*" && tag !== "")
         .join("-");
-      const raw = rawBases(details, pos, settings);
+      const raw = rawBases(token.surface, details, pos, settings);
       const bases = spelledBases(raw, settings);
       const respelled = raw.some(({ pos }) =>
         settings.baseSpellings.some((rule) => hasPos(pos, rule.pos)),
@@ -355,6 +367,57 @@ export const analyzerFor = (
 };
 
 /**
+ * The word from `start` to `end` read with a `start` rule's stand-in for the
+ * morpheme it starts with (`그를` for `이를`), when the stand-in is a morpheme
+ * of its own there and the rest of the word is of the rule's `rest`: the
+ * stand-in's reading, as the morpheme (`이` the pronoun, then `-를`).
+ */
+const restoreStart = (
+  text: string,
+  morphemes: ReadonlyArray<Morpheme>,
+  start: number,
+  end: number,
+  rule: AnalyzerSettings["restore"][number],
+  morphemesOf: (text: string, from: number) => ReadonlyArray<Morpheme>,
+): ReadonlyArray<Morpheme> => {
+  const { surface, standIn } = rule;
+  if (
+    standIn === undefined ||
+    standIn.length !== surface.length ||
+    end - start <= surface.length ||
+    !text.startsWith(surface, start)
+  ) {
+    return morphemes;
+  }
+  const read = morphemesOf(
+    standIn + text.slice(start + surface.length, end),
+    start,
+  );
+  const [first, ...rest] = read;
+  if (
+    first === undefined ||
+    first.surface !== standIn ||
+    rest.length === 0 ||
+    !rest.every((m) => hasPos(m.pos, rule.rest ?? []))
+  ) {
+    return morphemes;
+  }
+  const respell = (form: string) => form.replaceAll(standIn, surface);
+  const restored: Morpheme = {
+    ...first,
+    surface,
+    bases: first.bases.map(respell),
+    spellings: [surface],
+  };
+  return [
+    ...morphemes.filter((m) => m.end <= start),
+    restored,
+    ...rest,
+    ...morphemes.filter((m) => m.start >= end),
+  ];
+};
+
+/**
  * The morphemes with each word that holds a `restore` morpheme read again,
  * cut there, when the dictionary knows at least as much of the word by that
  * reading (`생각` + `이`, against `생` + `각이`), and the morpheme before
@@ -378,6 +441,10 @@ const restore = (
       readonly rule: AnalyzerSettings["restore"][number];
     }> = [];
     for (const rule of settings.restore) {
+      if (rule.start) {
+        out = restoreStart(text, out, start, end, rule, morphemesOf);
+        continue;
+      }
       for (let at = start + 1; at < end; at++) {
         if (
           text.startsWith(rule.surface, at) &&
@@ -441,7 +508,7 @@ const restore = (
             : 0),
         0,
       );
-    if (score(after) < score(before)) continue;
+    if (score(after) <= score(before)) continue;
     out = [
       ...out.filter((m) => m.end <= start),
       ...after,

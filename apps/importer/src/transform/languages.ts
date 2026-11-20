@@ -58,6 +58,8 @@ export type LanguageRules = {
   };
   /** Form-gloss openings that keep an entry of their own (`passive`, `active participle`): see `isOwnEntryGloss`. */
   readonly ownEntryForms?: ReadonlyArray<string>;
+  /** Words that may make up a gloss opening that only names another word's form (`Yang-vowel form of -어서`): see `languagePointerTarget`. */
+  readonly pointerWords?: ReadonlyArray<string>;
   /** Reflexive senses become an entry with the particle before or after the lemma (`bawić się`). */
   readonly reflexive?: "before" | "after";
   /** Without a table, the headword line's cases and numbers are forms (`structures` for `structure`). */
