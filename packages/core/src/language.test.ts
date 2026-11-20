@@ -27,6 +27,7 @@ describe("language records", () => {
       untrustedFormTags: [],
       ownEntryForms: [],
       pointerWords: [],
+      readingTags: [],
       stressedLemmas: false,
       headwordGenders: false,
       unmarkedStressForms: false,

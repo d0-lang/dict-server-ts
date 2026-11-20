@@ -30,7 +30,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 <li><b>Words.</b> An eojeol is a word with its particles and endings (<code>학교에서</code>, <code>먹었습니다</code>), and stems fuse with endings (<code>했</code>, <code>갈</code>). The plain lookup found an entry for 49.9% of corpus words; the analyzer path (Lindera's ko-dic) finds one for 95.3%.</li>
 <li><b>Lindera's ko-dic has no <code>이</code></b>: the subject particle, the copula and the pronoun are missing from its build (mecab-ko-dic has 30 entries for it), so <code>생각이</code> was <code>생|각이</code>. The <code>restore</code> setting puts it back.</li>
 <li><b>Grammar file.</b> 57 lines: particles and endings Wiktionary lacks or only names (<code>-이나</code> "or", quoting <code>-이라고</code>, polite <code>-요</code> endings, <code>-적</code>), bound nouns (<code>데</code> "in doing"), spoken words (<code>뭐</code>, <code>막</code>, <code>좀</code>), and 10 hand patches for common nouns.</li>
-<li><b>Headword.</b> As Wiktionary writes it (<code>먹다</code>); no labels. Revised Romanization is in 92% of lines and is not shown: Hangul is phonetic, and the popover shows IPA.</li>
+<li><b>Headword.</b> As Wiktionary writes it (<code>먹다</code>); no labels. The Revised Romanization is the headword's reading (<code>import.readingTags</code>: <code>먹다</code> meokda), for 39,443 of 40,499 entries.</li>
 </ul>
 
 <h2>Gates</h2>
@@ -60,6 +60,8 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 <div class="tests small"><div>reads 이 after a noun as a particle, though ko-dic lacks it (<code>생각이</code>; <code>호랑이</code> stays whole)</div><div>reads 이 at a word's start before a particle as the pronoun (<code>이를</code>, not <code>이르다</code>)</div></div>
 <h3>Spaces (<code>spacedWords</code>), ranking (<code>ranksByPos</code>), adnominal endings (<code>recheck</code>)</h3>
 <div class="tests small"><div>takes no single verb for a phrase, with spaces (<code>우리는</code>, not <code>우리다</code>)</div><div>puts a headword spelled as written first, not a noun spelled alike (<code>하지만</code>, <code>다른</code>; <code>하지</code> is <code>하다</code>)</div><div>ranks entries by ko-dic's part of speech (<code>우리</code> "we"; <code>년</code> "year")</div><div>reads a particle after Latin letters as the particle (<code>TV가</code>)</div></div>
+<h3>Romanized reading (<code>import.readingTags</code>)</h3>
+<div class="tests small"><div>takes a reading from a form tagged as one (<code>먹다</code>: meokda)</div></div>
 <h3>Pointer glosses (<code>import.pointerWords</code>)</h3>
 <p>"Yang-vowel form of -어서", "Post-vowel and post-liquid allomorphic form of -으면", "topic-marked form of 나" become links to the word, so the reader gets its meaning. About 120 senses.</p>
 <div class="tests small"><div>links a gloss that only names a form in the language's terms (<code>-아서</code>, <code>-면</code>; not <code>제</code>, whose gloss says when; not in Polish)</div></div>
@@ -92,8 +94,8 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 <h2>Open questions</h2>
 <ul>
 <li><b>Hand patches or not.</b> English Wiktionary lacks about one word in five that a reader meets. Passing tier 1 needs a hand-written word list on that scale, or another source.</li>
-<li><b>The analyzer.</b> ko-dic misreads common words, and Lindera's build lacks <code>이</code>. Kiwi read both right in the eval units. Report the <code>이</code> bug to Lindera? Add Kiwi as an analyzer?</li>
-<li><b>For a native speaker:</b> the grammar file's lines and examples; whether <code>오른</code>-style determiners should lead; whether romanization is worth showing.</li>
+<li><b>The analyzer.</b> ko-dic misreads common words, and Lindera's build lacks <code>이</code>. Kiwi read both right in the eval units. Kiwi is a separate analyzer, not a Lindera dictionary, with its own WebAssembly build (<code>kiwi-nlp</code>). Report the <code>이</code> bug to Lindera? Measure Kiwi as a second backend?</li>
+<li><b>For a native speaker:</b> the grammar file's lines and examples; whether <code>오른</code>-style determiners should lead.</li>
 <li><b>Tier 2:</b> constructions over eojeols (<code>-ㄹ 수 있다</code>, <code>-고 있다</code>, <code>예를 들어</code>) need the phrase matcher to allow spaces; numbers with counters and units.</li>
 </ul>
 </main></body></html>

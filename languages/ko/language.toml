@@ -14,6 +14,10 @@ skippedPos = ["syllable"]
 # word in: "Yang-vowel form of -어서", "Post-vowel and post-liquid
 # allomorphic form of -으면", "topic-marked form of 나". The reader gets the
 # word's meaning instead of the form's name (about 120 senses).
+# The Revised Romanization, which 59,008 of 64,457 lines give (`먹다`:
+# meokda), as the headword's reading: a learner who can't yet read Hangul
+# fluently sounds the word out by it.
+readingTags = ["romanization"]
 pointerWords = ["yang-vowel", "post-vowel", "post-vocalic", "post-liquid", "post-ㄹ", "(l)", "and", "or", "liquid", "colloquial", "allomorphic", "allomorph", "form", "topic-marked"]
 
 [context.analyzer]

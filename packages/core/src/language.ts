@@ -106,6 +106,13 @@ const Import = doc(
       ),
       [],
     ),
+    readingTags: orDefault(
+      doc(
+        strings,
+        "Form tags that mark a headword's reading in a script the reader can sound out, shown as `pron.reading` where the headword has no ruby: Korean `romanization`, the Revised Romanization (`먹다`: `meokda`). The first form with one of these tags is the reading. Japanese takes its reading from the headword's ruby instead.",
+      ),
+      [],
+    ),
     stressedLemmas: orDefault(
       doc(
         Schema.Boolean,

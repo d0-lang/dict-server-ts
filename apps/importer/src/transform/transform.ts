@@ -216,6 +216,23 @@ const smallKe = (
   return reading.replace(/[ヶヵ]/gu, () => (voiced-- > 0 ? "が" : "か"));
 };
 
+/**
+ * The headword's reading from a form tagged as one (`readingTags`: Korean
+ * `romanization`, `meokda` for `먹다`), the first such form.
+ */
+const taggedReading = (
+  rules: LanguageRules,
+  forms: ReadonlyArray<WiktextractForm>,
+): string | undefined => {
+  const tags = rules.readingTags ?? [];
+  if (tags.length === 0) return undefined;
+  const form = forms.find(
+    (f) =>
+      f.form.trim() !== "" && (f.tags ?? []).some((tag) => tags.includes(tag)),
+  );
+  return form?.form.trim();
+};
+
 const pickPronunciations = (
   rules: LanguageRules,
   sounds: ReadonlyArray<WiktextractSound>,
@@ -735,7 +752,9 @@ export const transformEntry = (
   // With a suffix added, a table form must spell the word or its reading
   // (`勉強した`, `べんきょうした`): `カール`'s table also gives `し`, `しろ`.
   // The bare word stays a lemma (`bareLemma`).
-  const reading = rubyReading(raw.word, raw.forms ?? []);
+  const reading =
+    rubyReading(raw.word, raw.forms ?? []) ??
+    taggedReading(rules, raw.forms ?? []);
   const spellsWord = (form: WiktextractForm) => {
     // In either kana script: `ハッとした` of `はっと`.
     const key = hiragana(lookupKey(form.form));

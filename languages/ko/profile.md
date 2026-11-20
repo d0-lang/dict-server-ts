@@ -33,13 +33,13 @@ mecab-ko-dic has 30 entries for `이`: the subject particle, the copula, the pro
 - **Alone,** an unknown `이` is the determiner.
 - On the corpus, about 900 of 1,750 eojeols ending in `이` were misread before `restore`.
 
-Open: tell Lindera (only a model found it). Kiwi (`kiwipiepy`, used here for the eval's units) reads `이` and `듣다`'s stem right, but has no WebAssembly build in this stack.
+Open: tell Lindera (only a model found it). Kiwi, used here for the eval's units through its Python package, reads `이` and `듣다`'s stem right. It is a separate analyzer, not a Lindera dictionary: its own engine and language model, with an official WebAssembly build on npm (`kiwi-nlp` 0.25.0) whose model files load separately. Using it would mean a second analyzer backend next to Lindera; it is not measured here.
 
 ## Headword and spelling
 
 - **Spelling:** Hangul is matched as written; `lookupKey` needs no change.
 - **Headword:** the lemma as Wiktionary writes it (`먹다`, `-에서`). Korean nouns have no gender, so `[headword]` shows no labels and there is no `labels.toml`.
-- **Romanization:** 59,008 of the 64,457 lines have a Revised Romanization; 40,635 have IPA, which the popover shows. Not shown: Hangul is phonetic and learned before reading, and a reader of Hangul text has no use for a romanization. Left for the team to decide.
+- **Romanization:** 59,008 of the 64,457 lines have a Revised Romanization, and 40,635 have IPA. The romanization is the headword's `pron.reading` (`import.readingTags = ["romanization"]`: `먹다` meokda), as the protocol defines it, a script the user can sound out: 39,443 of 40,499 entries have one. Grammar-file lines have none.
 - **Pointer glosses** (`import.pointerWords`): "Yang-vowel form of -어서", "Post-vowel and post-liquid allomorphic form of -으면", "topic-marked form of 나" carry no `form-of` link in the dump. They become links to the word, so the reader gets its meaning. About 120 senses.
 
 ## Grammar file
@@ -124,5 +124,5 @@ The prod box has 7.9 GB and no swap: Korean fits.
 
 - **Data:** the hand-patch question above; Wiktionary sense gaps.
 - **Tier 2:** constructions over eojeols (needs the phrase matcher to allow spaces); numbers with counters and units (`3km나`, `160대`, `10여종`; ko-dic gives digits as unknown); `들이` (ko-dic: `네` + `들` + `이`).
-- **Analyzer:** ko-dic's misreadings (`가지` "kind" as `가지다`, `번` "time" as `벌다`, `살` as `사다`); a native speaker should judge whether Kiwi is worth adding as an analyzer.
+- **Analyzer:** ko-dic's misreadings (`가지` "kind" as `가지다`, `번` "time" as `벌다`, `살` as `사다`). Kiwi (`kiwi-nlp`) as a second analyzer backend is to be measured: quality on the corpus, memory, load time.
 - **Corpus:** no news, blogs or guides.

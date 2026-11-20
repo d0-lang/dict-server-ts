@@ -772,6 +772,26 @@ describe("transformEntry", () => {
     );
   });
 
+  it("takes a reading from a form tagged as one (readingTags)", () => {
+    const meokda = (rules: typeof ko) =>
+      transformEntry(
+        rules,
+        entry({
+          word: "먹다",
+          pos: "verb",
+          lang_code: "ko",
+          forms: [
+            { form: "meokda", tags: ["romanization"] },
+            { form: "먹어", tags: ["infinitive"] },
+          ],
+          senses: [{ glosses: ["to eat"] }],
+        }),
+      ).entry?.pronunciations.filter((p) => p.kind === "reading");
+    assert.deepStrictEqual(meokda(ko), [{ kind: "reading", value: "meokda" }]);
+    // A language that names no reading tag shows none.
+    assert.deepStrictEqual(meokda({ ...ko, readingTags: [] }), []);
+  });
+
   it("links a gloss that only names a form in the language's terms (pointerWords)", () => {
     const korean = (word: string, gloss: string, target: string) =>
       transformEntry(
