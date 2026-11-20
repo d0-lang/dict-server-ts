@@ -77,10 +77,77 @@ describe("words found by the analyzer, in a script without spaces", () => {
     assert.strictEqual(entries[0]!.lemma, "製品");
   });
 
+  it("gives the word's entries to a head with none of its own, so it can be picked", () => {
+    const db = dictionary([
+      // The dictionary has 飲む under its kana, as Wiktionary does.
+      ["のむ", "VERB", ["飲む"], ["to drink"]],
+      ["せる", "AUX", [], ["make or let (someone) do"], "grammar"],
+      ["て", "PART", [], ["and (te form)"], "grammar"],
+      ["頂く", "VERB", ["いただく"], ["to receive"]],
+      ["過", "NOUN", [], ["excess"]],
+      ["電流", "NOUN", [], ["electric current"]],
+    ]);
+    const language = languageOf("ja_en");
+    const partsOf = (word: string, context: string) => {
+      const { entries, segments } = lookupWord(db, language, word, context, 1);
+      return {
+        // every entry in a part: none for the whole word above them
+        whole:
+          entries.length -
+          (segments ?? []).flatMap((s) => s.entries ?? []).length,
+        parts: segments?.map(
+          (segment) =>
+            `${segment.text}: ${(segment.entries ?? []).map((i) => entries[i]!.lemma).join(", ")}`,
+        ),
+        first: entries[0]!.lemma,
+      };
+    };
+    // the analyzer: 飲ま|せ|て|いただき; the segmenter sends 飲
+    assert.deepStrictEqual(partsOf("飲", "飲ませていただきます。"), {
+      whole: 0,
+      parts: ["飲ま: のむ", "せて: せる, て", "いただきます: 頂く"],
+      first: "のむ",
+    });
+    // the analyzer: 過 (a prefix)|電流; 過電流 has no entry
+    assert.deepStrictEqual(partsOf("過", "過電流が流れた。"), {
+      whole: 0,
+      parts: ["過: 過", "電流: 電流"],
+      first: "電流",
+    });
+  });
+
+  it("reads よ between two nouns as the particle, not the stem of よい", () => {
+    const db = dictionary([
+      ["よ", "PART", [], ["used to address someone; O"]],
+      ["良い", "ADJ", ["よい"], ["good"]],
+      ["鏡", "NOUN", [], ["mirror"]],
+      ["気持ち", "NOUN", [], ["feeling"]],
+    ]);
+    const language = languageOf("ja_en");
+    // UniDic: 鏡|よ (よい's stem)|鏡 (a suffix)|よ
+    for (const at of [1, 2]) {
+      const { entries, segments } = lookupWord(
+        db,
+        language,
+        "よ",
+        "鏡よ鏡よ。",
+        at,
+      );
+      assert.isUndefined(segments);
+      assert.deepStrictEqual(
+        entries.map((entry) => [entry.lemma, entry.match]),
+        [["よ", undefined]],
+      );
+    }
+    // the stem before さ|そう stays 良い
+    const good = lookupWord(db, language, "よ", "気持ちよさそうだ。", 1);
+    assert.strictEqual(good.entries[0]!.lemma, "良い");
+  });
+
   it("joins ながら after the verb, as the て form", () => {
     assert.deepStrictEqual(parts("実", "実験しながら話す。"), [
-      // 実験 is the whole word's entry, shown first
-      "実験: ",
+      // 実験 is the head's entry, so its part can be picked
+      "実験: 実験",
       "し: する",
       "ながら: ながら",
     ]);

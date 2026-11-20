@@ -55,6 +55,49 @@ export type Analyzer = (text: string) => ReadonlyArray<Morpheme>;
 
 type AnalyzerSettings = NonNullable<Language["context"]["analyzer"]>;
 
+/** `pos` is one of `tags` or starts with one and a `-`. */
+const hasPos = (pos: string, tags: ReadonlyArray<string>): boolean =>
+  tags.some((tag) => pos === tag || pos.startsWith(`${tag}-`));
+
+/**
+ * The morphemes with the `reread` rules applied, from the first on: a rule's
+ * `after` sees the morpheme before as already reread. A reread morpheme
+ * keeps only its surface as spelling, and no reading: the analyzer's was for
+ * the word it took it for.
+ */
+export const reread = (
+  morphemes: ReadonlyArray<Morpheme>,
+  rules: AnalyzerSettings["reread"],
+): ReadonlyArray<Morpheme> => {
+  if (rules.length === 0) return morphemes;
+  const out: Array<Morpheme> = [];
+  morphemes.forEach((morpheme, i) => {
+    const before = out.at(-1);
+    const next = morphemes[i + 1];
+    const rule = rules.find(
+      (r) =>
+        hasPos(morpheme.pos, r.pos) &&
+        (r.surface === undefined || r.surface.includes(morpheme.surface)) &&
+        (r.after === undefined ||
+          (before !== undefined && hasPos(before.pos, r.after))) &&
+        (r.before === undefined ||
+          (next !== undefined && hasPos(next.pos, r.before))),
+    );
+    if (rule === undefined) {
+      out.push(morpheme);
+      return;
+    }
+    const { reading: _, ...rest } = morpheme;
+    out.push({
+      ...rest,
+      pos: rule.as.pos,
+      bases: rule.as.base === undefined ? morpheme.bases : [rule.as.base],
+      spellings: [morpheme.surface],
+    });
+  });
+  return out;
+};
+
 /** The npm package that holds each dictionary. Only installed ones load. */
 const PACKAGES: Record<AnalyzerSettings["dictionary"], string> = {
   unidic: "lindera-wasm-unidic",
@@ -139,7 +182,7 @@ export const analyzerFor = (language: Language): Analyzer | undefined => {
   const tokenize: Analyzer = (text) => {
     const tokenizer = tokenizerFor(settings.dictionary);
     const offsets = utf16At(text);
-    return tokenizer.tokenize(text).map((token) => {
+    const morphemes = tokenizer.tokenize(text).map((token) => {
       const { details } = token;
       const bases = [
         ...new Set(
@@ -179,6 +222,7 @@ export const analyzerFor = (language: Language): Analyzer | undefined => {
       token.free();
       return morpheme;
     });
+    return reread(morphemes, settings.reread);
   };
   // The same sentence is analyzed again for each word clicked in it (a
   // reader clicks several; a corpus collection sends every word), and one

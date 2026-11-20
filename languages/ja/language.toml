@@ -65,6 +65,23 @@ suffixes = ["接尾辞"]
 # 使わ|れて|います, not 並ん|で|い|ます. That piece's entries are labelled.
 formEndings = [{ pos = ["助詞-接続助詞"], surface = ["て", "で"], label = "て form" }]
 
+# UniDic reads よ between two nouns as the stem of よい "good", and the noun
+# after it as a suffix: 鏡|よ|鏡|よ "mirror, mirror". The stem goes on with
+# さ, そう or すぎる (気持ち|よ|さ|そう), never with a noun: there it is the
+# particle that calls someone.
+[[context.analyzer.reread]]
+pos = ["形容詞"]
+surface = ["よ"]
+after = ["名詞"]
+before = ["名詞", "接尾辞"]
+as = { pos = "助詞-終助詞", base = "よ" }
+
+# A suffix never follows a particle: after one, it is a noun (鏡 above).
+[[context.analyzer.reread]]
+pos = ["接尾辞"]
+after = ["助詞"]
+as = { pos = "名詞-普通名詞-一般" }
+
 # Constructions with a word in them, shown by their grammar-file line.
 # お/ご + a verb's stem or a する-noun + する: humble (お待ちします, ご案内します).
 [[context.analyzer.constructions]]
