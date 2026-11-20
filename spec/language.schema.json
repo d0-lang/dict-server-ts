@@ -408,6 +408,66 @@
               },
               "description": "Rules that join a morpheme to the word before it: a word is a morpheme and what the rules join to it (`食べ` + `まし` + `た`)."
             },
+            "reread": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Parts of speech the analyzer gives the morpheme, as in `join`."
+                  },
+                  "surface": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Only these spellings of it (`よ`)."
+                  },
+                  "after": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Only after a morpheme of these parts of speech, as read by the rules before; left out, after anything."
+                  },
+                  "before": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Only before a morpheme of these parts of speech; left out, before anything."
+                  },
+                  "as": {
+                    "type": "object",
+                    "properties": {
+                      "pos": {
+                        "type": "string",
+                        "description": "Its part of speech instead (`助詞-終助詞`)."
+                      },
+                      "base": {
+                        "type": "string",
+                        "description": "Its base form instead (`よ`); left out, it keeps its own."
+                      }
+                    },
+                    "required": [
+                      "pos"
+                    ],
+                    "additionalProperties": false,
+                    "description": "How to read it."
+                  }
+                },
+                "required": [
+                  "pos",
+                  "as"
+                ],
+                "additionalProperties": false
+              },
+              "description": "Rules for morphemes the analyzer misreads in a known place, applied in order from the sentence's start, before `join`: `よ` between two nouns is the particle, not the stem of `よい` (`鏡|よ|鏡|よ`). A reread morpheme has no reading."
+            },
             "constructions": {
               "type": "array",
               "items": {

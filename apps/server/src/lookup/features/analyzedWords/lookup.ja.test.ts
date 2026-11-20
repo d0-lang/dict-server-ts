@@ -116,6 +116,34 @@ describe("words found by the analyzer, in a script without spaces", () => {
     });
   });
 
+  it("reads よ between two nouns as the particle, not the stem of よい", () => {
+    const db = dictionary([
+      ["よ", "PART", [], ["used to address someone; O"]],
+      ["良い", "ADJ", ["よい"], ["good"]],
+      ["鏡", "NOUN", [], ["mirror"]],
+      ["気持ち", "NOUN", [], ["feeling"]],
+    ]);
+    const language = languageOf("ja_en");
+    // UniDic: 鏡|よ (よい's stem)|鏡 (a suffix)|よ
+    for (const at of [1, 2]) {
+      const { entries, segments } = lookupWord(
+        db,
+        language,
+        "よ",
+        "鏡よ鏡よ。",
+        at,
+      );
+      assert.isUndefined(segments);
+      assert.deepStrictEqual(
+        entries.map((entry) => [entry.lemma, entry.match]),
+        [["よ", undefined]],
+      );
+    }
+    // the stem before さ|そう stays 良い
+    const good = lookupWord(db, language, "よ", "気持ちよさそうだ。", 1);
+    assert.strictEqual(good.entries[0]!.lemma, "良い");
+  });
+
   it("joins ながら after the verb, as the て form", () => {
     assert.deepStrictEqual(parts("実", "実験しながら話す。"), [
       // 実験 is the head's entry, so its part can be picked

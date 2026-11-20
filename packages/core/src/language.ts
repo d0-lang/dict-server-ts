@@ -364,6 +364,50 @@ const Context = doc(
             ),
             [],
           ),
+          reread: orDefault(
+            doc(
+              Schema.Array(
+                Schema.Struct({
+                  pos: doc(
+                    strings,
+                    "Parts of speech the analyzer gives the morpheme, as in `join`.",
+                  ),
+                  surface: Schema.optionalKey(
+                    doc(strings, "Only these spellings of it (`よ`)."),
+                  ),
+                  after: Schema.optionalKey(
+                    doc(
+                      strings,
+                      "Only after a morpheme of these parts of speech, as read by the rules before; left out, after anything.",
+                    ),
+                  ),
+                  before: Schema.optionalKey(
+                    doc(
+                      strings,
+                      "Only before a morpheme of these parts of speech; left out, before anything.",
+                    ),
+                  ),
+                  as: doc(
+                    Schema.Struct({
+                      pos: doc(
+                        Schema.String,
+                        "Its part of speech instead (`助詞-終助詞`).",
+                      ),
+                      base: Schema.optionalKey(
+                        doc(
+                          Schema.String,
+                          "Its base form instead (`よ`); left out, it keeps its own.",
+                        ),
+                      ),
+                    }),
+                    "How to read it.",
+                  ),
+                }),
+              ),
+              "Rules for morphemes the analyzer misreads in a known place, applied in order from the sentence's start, before `join`: `よ` between two nouns is the particle, not the stem of `よい` (`鏡|よ|鏡|よ`). A reread morpheme has no reading.",
+            ),
+            [],
+          ),
           constructions: orDefault(
             doc(
               Schema.Array(
