@@ -41,8 +41,10 @@ const respond = (page: string) =>
           "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
         "x-content-type-options": "nosniff",
         "referrer-policy": "no-referrer",
-        // Readers see a changed text as soon as the server serves it.
-        "cache-control": "no-cache",
+        // Readers see a changed text as soon as the server serves it, and a
+        // proxy passes the page on as it is: Cloudflare would otherwise hide
+        // the email addresses behind a script the policy above blocks.
+        "cache-control": "no-cache, no-transform",
       },
     }),
   );
