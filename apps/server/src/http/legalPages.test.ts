@@ -73,6 +73,14 @@ describe("legal pages", () => {
     );
   });
 
+  it("ask proxies not to change them, so Cloudflare leaves the email addresses alone", async () => {
+    const response = await on.handler(new Request("http://localhost/privacy"));
+    assert.strictEqual(
+      response.headers.get("cache-control"),
+      "no-cache, no-transform",
+    );
+  });
+
   it("are not served with INCLUDE_LEGAL off", async () => {
     for (const path of ["/privacy", "/terms"]) {
       const response = await off.handler(
