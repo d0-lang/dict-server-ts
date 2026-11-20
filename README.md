@@ -22,7 +22,7 @@ Server uses the [d0 lookup protocol](https://github.com/d0-lang/protocol), so an
 
 ## Run your own
 
-You need Docker and about 1 GB of memory for all eight languages. Japanese's word analyzer takes about 600 MB of that; the other seven need 384 MB.
+You need Docker and about 1 GB of memory for all eight languages. Japanese's word analyzer takes about 600 MB of that, the other languages in total need only ~384 MB .
 
 ```bash
 mkdir dict-server && cd dict-server
