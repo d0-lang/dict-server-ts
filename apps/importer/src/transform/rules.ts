@@ -279,13 +279,19 @@ export const seeTargets = (
   const opening = SEE_OPENING.exec(gloss);
   if (opening === null) return [];
   const rest = gloss.slice(opening[0].length);
-  return [
-    ...new Set(
-      languageLinks(language, links)
-        .filter((l) => rest.includes(l.text))
-        .map((l) => l.word),
-    ),
-  ];
+  const linked = languageLinks(language, links).filter((l) =>
+    rest.includes(l.text),
+  );
+  // Two links written next to each other may be one word (`iskrzyć` `się`
+  // is `iskrzyć się`): offered first, it replaces them when it has an entry
+  // (`resolveSee`).
+  const pairs = linked.flatMap((l, i) => {
+    const next = linked[i + 1];
+    return next !== undefined && rest.includes(`${l.text} ${next.text}`)
+      ? [`${l.word} ${next.word}`]
+      : [];
+  });
+  return [...new Set([...pairs, ...linked.map((l) => l.word)])];
 };
 
 /**

@@ -916,6 +916,31 @@ describe("transformEntry", () => {
     ]);
   });
 
+  it("offers two links written together as one word first", () => {
+    const result = transformEntry(
+      pl,
+      entry({
+        word: "skrzyć się",
+        pos: "verb",
+        senses: [
+          {
+            glosses: ["alternative form of iskrzyć się"],
+            links: [
+              ["iskrzyć", "iskrzyć#Polish"],
+              ["się", "się#Polish"],
+            ],
+          },
+        ],
+      }),
+    );
+    // resolveSee keeps `iskrzyć się` alone when it has an entry
+    assert.deepStrictEqual(result.entry?.senses[0]?.see, [
+      "iskrzyć się",
+      "iskrzyć",
+      "się",
+    ]);
+  });
+
   it("does not index the perfect auxiliary as a form of the verb", () => {
     const result = transformEntry(
       de,
