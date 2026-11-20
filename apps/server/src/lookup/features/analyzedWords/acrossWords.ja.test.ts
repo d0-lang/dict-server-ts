@@ -95,7 +95,10 @@ describe("a piece across words, and わけ / な", () => {
   });
 
   it("joins な to a な-adjective, by its own line; な alone keeps the particle first", () => {
-    assert.deepStrictEqual(parts("な", "静かな部屋。"), ["静か: ", "な: な"]);
+    assert.deepStrictEqual(parts("な", "静かな部屋。"), [
+      "静か: 静か",
+      "な: な",
+    ]);
     const alone = lookupWord(words, language, "な", "行くな。", 1);
     assert.deepStrictEqual(
       alone.entries.map((entry) => `${entry.lemma} ${entry.pos}`),

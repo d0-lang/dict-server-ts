@@ -71,6 +71,17 @@ export const aroundWord = (c: Click): Answer => {
     );
     return splitResult(c.db, [], moved, match);
   }
+  // A head with no entries of its own (`飲ま` of `飲ませて`, `電流` of
+  // `過電流`, whose entries are the word's) holds the word's: the client
+  // opens on the part of the first entry in one, and can't pick a part
+  // without entries.
+  const head = parts.find((part) => part.main === true);
+  if (head !== undefined && head.ids.length === 0 && whole.length > 0) {
+    const moved = parts.map((part) =>
+      part === head ? { ...part, ids: whole } : part,
+    );
+    return splitResult(c.db, [], moved, match);
+  }
   return splitResult(c.db, wholeEntries, parts, match);
 };
 
