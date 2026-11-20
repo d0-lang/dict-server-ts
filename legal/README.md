@@ -25,7 +25,7 @@ Replace every `[[...]]`:
 The privacy policy makes promises that only your setup can keep.
 
 - **Web server logs.** Words and sentences travel in the request body, which nginx, Caddy and Apache do not log by default; do not turn body logging on. Set the access log to record only the IP address, the time, the path without the query string, and the status. If you log more (the browser's name, for example), add it to "What is kept".
-- **Log retention.** Delete web server logs after `[[LOG DAYS]]` days. The server program also writes one line per request (time, path, status; no IP address and no query string). Docker keeps those without limit unless you set log rotation.
+- **Log retention.** Delete web server logs after `[[LOG DAYS]]` days. The server program also writes one line per request (time, path, status; no IP address and no query string), unless you set `LOG_REQUESTS=false`: then it logs only requests it failed. Docker keeps those lines without limit unless you set log rotation.
 - **CDN.** A CDN that ends TLS sees every word and sentence, may log them, and may set cookies. If you use one, name it under "Hosting" and check that "no cookies" is still true.
 - **Audio from your own host.** The texts assume recordings come from Wikimedia Commons. If you serve audio yourself, playing a recording is a request to your server. Replace the Wikimedia paragraph in both texts, say what that request tells you, and credit the recordings.
 - **Page addresses.** The policy says you do not record the page a user is reading, even if a client sends it. A browser can send it in the `Referer` header, so keep that header out of your logs.

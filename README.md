@@ -53,6 +53,7 @@ The first start downloads the release's dictionaries (about 400 MB) and checks t
 | `PRIVACY_CHANGE`, `TOS_CHANGE` | none | A short summary of the last change, shown with the notice. At most 500 characters. |
 | `VERIFICATION_URLS` | `example.invalid` | Where you post news about your server, joined by commas. Clients show it if your key ever changes, so it shouldn't be on the server itself. |
 | `REPORT_URL` | none | A page where users report a wrong or missing answer; `https` only. |
+| `LOG_REQUESTS` | `true` | Write a line for every request: time, method, path, status. Off, the server logs only a request it failed (a 5xx), for a proxy in front that keeps its own log. |
 | `PORT` | `3000` | The port inside the container, or of `bun run dev`. With Docker, change `DICT_PORT` instead. |
 | `IDENTITY_FILE` | `data/identity.json` | Where the key is kept. Docker keeps it in the `identity` volume. |
 | `DATA_DIR` | `data` | Where the dictionaries are. |
