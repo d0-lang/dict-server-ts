@@ -17,10 +17,10 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 <p class="sub">Branch <code>korean</code>, 2026-11-21. Tier 1, built with the add-language skill, with no reader of Korean. Profile and round log: <code>languages/ko/profile.md</code>. The content gate passes; grammar and random fail on English Wiktionary's coverage. Since r5 the analyzer is Kiwi, not Lindera's ko-dic.</p>
 <div class="kpis">
 <div class="kpi"><div class="l">Tier</div><div class="v">Model only</div><div class="d">unreviewed: no reader checked the profile, the grammar file or a sample</div></div>
-<div class="kpi"><div class="l">Common grammar words</div><div class="v">91.3%</div><div class="d"><span class="up">+11.3</span> from 80.0%; <span class="down">needs 97.5%</span>; 95.1% without missing words</div></div>
+<div class="kpi"><div class="l">Common grammar words</div><div class="v">91.6%</div><div class="d"><span class="up">+11.6</span> from 80.0%; <span class="down">needs 97.5%</span>; 95.1% without missing words</div></div>
 <div class="kpi"><div class="l">Common content words</div><div class="v">93.2%</div><div class="d"><span class="up">passes</span> (needs 92.5%); 88.7% at r9, before endings and constructions</div></div>
-<div class="kpi"><div class="l">Random words</div><div class="v">73.0%</div><div class="d"><span class="up">+35.5</span> from 37.5%; <span class="down">needs 87.5%</span>; 91.5% without missing words</div></div>
-<div class="kpi"><div class="l">Judge: understood (2,200 items)</div><div class="v">82.4%</div><div class="d"><span class="up">+39.5</span> from 42.9%; ko-dic's best 78.0%</div></div>
+<div class="kpi"><div class="l">Random words</div><div class="v">73.2%</div><div class="d"><span class="up">+35.7</span> from 37.5%; <span class="down">needs 87.5%</span>; 91.7% without missing words</div></div>
+<div class="kpi"><div class="l">Judge: understood (2,200 items)</div><div class="v">82.5%</div><div class="d"><span class="up">+39.6</span> from 42.9%; ko-dic's best 78.0%</div></div>
 </div>
 
 <h2>Profile summary</h2>
@@ -29,29 +29,29 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 <li><b>Corpus.</b> 28 texts, 71k words (eojeols). Spoken: 15 YouTube videos in 9 genres, auto-captions repaired by Haiku, 31.8k words. Written: 13 ko.wikipedia articles, 39.2k words. No news, blogs or guides.</li>
 <li><b>Words.</b> An eojeol is a word with its particles and endings (<code>학교에서</code>, <code>먹었습니다</code>), and stems fuse with endings (<code>했</code>, <code>갈</code>). The plain lookup found an entry for 49.9% of corpus words; the analyzer path finds one for about 95%.</li>
 <li><b>Analyzer: Kiwi</b> (<code>kiwi-nlp</code> 0.25.0), a Korean analyzer with a language model. Lindera's ko-dic, used in r1–r4, lacks <code>이</code> in its build and misread changed stems and bound nouns; working around it took four settings, now removed.</li>
-<li><b>Grammar file.</b> 112 lines: particles and endings Wiktionary lacks or only names (<code>-이나</code> "or", quoting <code>-이라고</code>, <code>-이란</code>, <code>-으면서</code> "while", polite <code>-요</code> endings such as <code>-잖아요</code>), constructions over a space (<code>-을 수 있다</code>, <code>-에 따라</code>, <code>예를 들어</code>), noun suffixes (<code>-률</code>, <code>-별</code>), bound nouns (<code>데</code> "in doing"), spoken words (<code>뭐</code>, <code>막</code>, <code>좀</code>), and 10 hand patches for common nouns.</li>
+<li><b>Grammar file.</b> 113 lines: particles and endings Wiktionary lacks or only names (<code>-이나</code> "or", quoting <code>-이라고</code>, <code>-이란</code>, <code>-으면서</code> "while", polite <code>-요</code> endings such as <code>-잖아요</code>), constructions over a space (<code>-을 수 있다</code>, <code>-에 따라</code>, <code>예를 들어</code>), noun suffixes (<code>-률</code>, <code>-별</code>), bound nouns (<code>데</code> "in doing"), spoken words (<code>뭐</code>, <code>막</code>, <code>좀</code>), and 10 hand patches for common nouns.</li>
 <li><b>Headword.</b> As Wiktionary writes it (<code>먹다</code>); no labels. The Revised Romanization is the headword's reading (<code>import.readingTags</code>: <code>먹다</code> meokda), for 39,443 of 40,499 entries.</li>
 </ul>
 
 <h2>Gates</h2>
 <p class="small">Same 2,200 items in every run (sampled from <code>r0</code>), judged by Haiku on the popover the extension shows. Words are Kiwi's units: the eojeol a reader clicks, ranked by its head's lemma. In brackets: the figure without the judge's <code>missing_word</code> misses.</p>
 <div class="scroll"><table>
-<tr><th>Gate</th><th class="n">Needs</th><th class="n">r0 (plain)</th><th class="n">r4 (ko-dic)</th><th class="n">r9 (Kiwi)</th><th class="n">r10</th><th class="n">r12 (final)</th></tr>
-<tr><td>Common grammar words</td><td class="n">97.5%</td><td class="n">80.0% (83.5%)</td><td class="n">90.3% (93.3%)</td><td class="n">89.8% (93.7%)</td><td class="n">91.6% (95.6%)</td><td class="n down">91.3% (95.1%)</td></tr>
+<tr><th>Gate</th><th class="n">Needs</th><th class="n">r0 (plain)</th><th class="n">r4 (ko-dic)</th><th class="n">r9 (Kiwi)</th><th class="n">r10</th><th class="n">r13 (final)</th></tr>
+<tr><td>Common grammar words</td><td class="n">97.5%</td><td class="n">80.0% (83.5%)</td><td class="n">90.3% (93.3%)</td><td class="n">89.8% (93.7%)</td><td class="n">91.6% (95.6%)</td><td class="n down">91.6% (95.1%)</td></tr>
 <tr><td>Common content words</td><td class="n">92.5%</td><td class="n">88.8% (90.2%)</td><td class="n">87.7% (90.1%)</td><td class="n">88.7% (90.2%)</td><td class="n">93.1% (94.5%)</td><td class="n up">93.2% (94.7%)</td></tr>
-<tr><td>Random words</td><td class="n">87.5%</td><td class="n">37.5% (91.7%)</td><td class="n">69.6% (89.8%)</td><td class="n">71.6% (89.7%)</td><td class="n">73.1% (91.7%)</td><td class="n down">73.0% (91.5%)</td></tr>
-<tr><td>Understood, all 2,200</td><td class="n"></td><td class="n">42.9%</td><td class="n">78.0%</td><td class="n">79.9%</td><td class="n">82.5%</td><td class="n">82.4%</td></tr>
+<tr><td>Random words</td><td class="n">87.5%</td><td class="n">37.5% (91.7%)</td><td class="n">69.6% (89.8%)</td><td class="n">71.6% (89.7%)</td><td class="n">73.1% (91.7%)</td><td class="n down">73.2% (91.7%)</td></tr>
+<tr><td>Understood, all 2,200</td><td class="n"></td><td class="n">42.9%</td><td class="n">78.0%</td><td class="n">79.9%</td><td class="n">82.5%</td><td class="n">82.5%</td></tr>
 </table></div>
-<p class="small">r5–r9: Kiwi, compounds, unknown nouns by their parts. r10: endings shown in a longer click, fused endings, auxiliary verbs, constructions over a space, grammar lines. r11–r12: fixes from r10's classified diff (counters and suffixes stay whole, the copula's 이다 "to carry on the head", constructions without segments so the extension and the API agree). Browser and API agree on 2,196 of 2,200 items (4 differ in how number + counter words group, as since r5). All judging and classifying cost about $3.50 on Haiku.</p>
+<p class="small">r5–r9: Kiwi, compounds, unknown nouns by their parts. r10: endings shown in a longer click, fused endings, auxiliary verbs, constructions over a space, grammar lines. r11–r13: fixes from the classified diffs (counters and suffixes stay whole; the copula's 이다 "to carry on the head"; constructions without segments so the extension and the API agree; no <code>-게 하다</code> from the <code>-게</code> of 이렇게 or 어떻게; a copula ending clicked alone, like 라는 after a quote, opens on its grammar line). Browser and API agree on 2,196 of 2,200 items (4 differ in how number + counter words group, as since r5). All judging and classifying cost about $3.50 on Haiku.</p>
 <ul class="small">
 <li><b>Content passes</b> since the endings and constructions. Of r9's 91 misses, 39 were ours: an ending's meaning not shown (<code>처음이니까</code>: <code>-니까</code> "because"), and constructions over a space (<code>-ㄹ 수 있다</code>, <code>예를 들어</code>, <code>-에 따라</code>). The rest are missing words and senses.</li>
-<li><b>Grammar</b> is capped by data: of 33 misses, 15 are missing words and about 10 missing senses, against 9 the gate allows. Several are rare readings of common grammar words (<code>저</code> as 菹, <code>야</code> as 也, <code>지</code> in <code>12지</code>).</li>
-<li><b>Random:</b> 196 of 971 items are words English Wiktionary has no Korean entry for; without them the gate passes (91.5%).</li>
-<li><b>Classified diffs:</b> r4 → r9 (ko-dic against Kiwi) 172 better, 77 worse; r9 → r12 86 better, 15 worse, 96 the same.</li>
+<li><b>Grammar</b> is capped by data: of 32 misses, 14 are missing words and about 10 missing senses, against 9 the gate allows. Several are rare readings of common grammar words (<code>저</code> as 菹, <code>야</code> as 也, <code>지</code> in <code>12지</code>).</li>
+<li><b>Random:</b> 196 of 971 items are words English Wiktionary has no Korean entry for; without them the gate passes (91.7%).</li>
+<li><b>Classified diffs:</b> r4 → r9 (ko-dic against Kiwi) 172 better, 77 worse; r9 → r12 86 better, 15 worse, 96 the same; r12 → r13 4 better, 1 worse.</li>
 </ul>
 
 <h2>Accepted rules and their unit tests</h2>
-<p class="small">All in the <code>context.analyzer</code> settings of <code>language.toml</code>; the TypeScript names no language. Tests: <code>apps/server/src/lookup/features/analyzedWords/lookup.ko.test.ts</code>, 20 of them, on Kiwi, each checked to fail without its change.</p>
+<p class="small">All in the <code>context.analyzer</code> settings of <code>language.toml</code>; the TypeScript names no language. Tests: <code>apps/server/src/lookup/features/analyzedWords/lookup.ko.test.ts</code>, 22 of them, on Kiwi, each checked to fail without its change.</p>
 <h3>Fused morphemes and base forms (<code>baseSpellings</code>, <code>baseLetters</code>)</h3>
 <p>Kiwi gives a fused syllable's morphemes at one place (<code>했</code>: <code>하</code> + <code>었</code>); they are one piece with each one's base form, and <code>VV+EP</code> matches either tag. A stem is spelled with <code>다</code>, a particle or ending with hyphens, stems first (<code>걸</code> is <code>거</code>, then <code>-ㄹ</code>). A morpheme with no letters joins the next (the copula in <code>냄새야</code>).</p>
 <div class="tests small"><div>finds a verb by its stem with 다, and its endings with hyphens (<code>먹었습니다</code>)</div><div>finds a particle by its hyphenated spelling, not a word spelled alike (<code>에서</code> "Esau")</div><div>reads the copula Kiwi gives no letters of with the ending after it (<code>냄새야</code>)</div></div>
@@ -68,13 +68,13 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 <div class="tests small"><div>reads an auxiliary verb with the verb before it</div></div>
 <h3>Constructions over a space</h3>
 <p>The phrase matcher takes words a space apart, and a phrase may start at an ending or particle written with its hyphen: <code>갈 수 있다</code> (<code>가</code> + <code>ㄹ</code>) is <code>-ㄹ 수 있다</code> "can", <code>급수에 따라</code> <code>-에 따라</code> "according to", <code>오기 때문에</code> <code>-기 때문에</code> "because". Such a popover has no segments: the protocol's segments split the match, which here runs over several words. Wiktionary has few of these, so they are grammar lines.</p>
-<div class="tests small"><div>finds a construction over words a space apart, from an ending</div></div>
+<div class="tests small"><div>finds a construction over words a space apart, from an ending</div><div>starts no construction at the ending of an adverb (<code>어떻게 한</code> is no <code>-게 하다</code>)</div><div>shows what a fused ending adds when it is clicked alone (<code>라는</code> after a quote)</div></div>
 <h3>Spaces (<code>spacedWords</code>), ranking (<code>ranksByPos</code>), counters</h3>
 <div class="tests small"><div>takes no single verb for a phrase, with spaces (<code>우리는</code>, not <code>우리다</code>)</div><div>puts a headword spelled as written first, not a noun spelled alike (<code>하지만</code>, <code>다른</code>)</div><div>ranks entries by Kiwi's part of speech (<code>우리</code> "we")</div><div>reads the word after a number as a counter (<code>3번</code>)</div><div>reads a particle after Latin letters as the particle (<code>TV가</code>)</div><div>reads no word across a space (Kiwi's multi-word dictionary is off)</div></div>
 <h3>Romanized reading (<code>import.readingTags</code>), pointer glosses (<code>import.pointerWords</code>)</h3>
 <div class="tests small"><div>takes a reading from a form tagged as one (<code>먹다</code>: meokda)</div><div>links a gloss that only names a form in the language's terms (<code>-아서</code>, <code>-면</code>)</div></div>
 <h3>Other languages</h3>
-<p>Every Japanese corpus lookup on the v0.1.3-rc.1 dictionaries, main against this branch (r12): 31 of 72,686 responses change, no first entry. Words headed by the copula lose junk verbs (煮る, 似る, 出る). No other language has an analyzer.</p>
+<p>Every Japanese corpus lookup on the v0.1.3-rc.1 dictionaries, main against this branch (r13): 31 of 72,686 responses change, no first entry. Words headed by the copula lose junk verbs (煮る, 似る, 出る). No other language has an analyzer: de, es, fr, it, pl, ru and uk give the same response to every corpus lookup (787,221), and every language's dictionary imports identically with this branch's importer.</p>
 
 <h2>What got worse, and why it stays</h2>
 <ul>

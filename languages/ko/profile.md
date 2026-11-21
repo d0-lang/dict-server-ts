@@ -41,7 +41,7 @@ Kiwi is a Korean analyzer with its own engine and a language model; it reads all
 
 ## Grammar file
 
-`grammar.tsv`, 112 lines:
+`grammar.tsv`, 113 lines:
 - **Particles** Wiktionary lacks or explains only by naming a form: `-이나` "or", `-이라고` and `-이라는` (quoting, "called"), `-이란` (a topic to define: `행복이란`), `-이라면`, `-으로써`, `-으로부터`, `-이라든가`.
 - **Endings:** `-는데` (setting the scene, contrast), polite `-요` forms Wiktionary lists only without `요` (`-거든요`, `-는데요`, `-더라고요`, `-잖아요`, `-나요`, `-을까요`), `-아야` "must" with 하다/되다, `-으려면`, `-고자`, `-다면`, `-다는`, `-네요`, `-다시피`.
 - **Suffixes:** `-적` (`화학적`), `-님`.
@@ -80,7 +80,8 @@ Sample from r0 (`../corpus/eval/out/ko/r0/gate`), 2,200 items. API and extension
 | r9 | grammar lines `-잖아요`, `-이란` | 89.8 (93.7) of 381 | 88.7 (90.2) of 808 | 71.6 (89.7) of 971 | 79.9 |
 | r10 | endings in a longer click, fused endings, `auxiliaries`, constructions over a space, grammar lines for endings, suffixes and constructions | 91.6 (95.6) | 93.1 (94.5) | 73.1 (91.7) | 82.5 |
 | r11 | counters and suffixes stay whole; the copula's `이다`; `때문에` kept | 91.3 (95.3) | 92.9 (94.5) | 73.0 (91.5) | 82.3 |
-| r12 | constructions without segments; fused ending alone (`라는`) | **91.3 (95.1) of 381** | **93.2 (94.7) of 808** | **73.0 (91.5) of 971** | 82.4 |
+| r12 | constructions without segments; fused ending in a longer click (`수도라는`) | 91.3 (95.1) of 381 | 93.2 (94.7) of 808 | 73.0 (91.5) of 971 | 82.4 |
+| r13 | no construction from an adverb's `-게` (`이렇게 하다`, `어떻게 되다`); a fused ending clicked alone (`라는` after a quote); `-이라` | **91.6 (95.1) of 381** | **93.2 (94.7) of 808** | **73.2 (91.7) of 971** | 82.5 |
 
 Figures in brackets are without the judge's `missing_word` misses. r0's common gates count fewer items: 527 common items had no entry then and count toward no gate. Judging cost about $0.50 for r0 and less for each later run (only changed popovers).
 
@@ -105,21 +106,21 @@ Left from ko-dic (r4), all misreadings with no general fix, which Kiwi reads rig
 - `로빈이` as `로` + `빈이`;
 - `오른` "rose" ranking the determiner "right" first, by the spelled-as-written rule.
 
-**Other languages:** a dump of every Japanese corpus lookup on the v0.1.3-rc.1 dictionaries, main against this branch (with Kiwi, r9): 31 of 72,686 responses change, no first entry. Words headed by the copula (`に`, `で`, `な`) lose junk verbs (煮る, 似る, 出る), because stem probes now only follow a verb or adjective. No other language has an analyzer.
+**Other languages:** a dump of every Japanese corpus lookup on the v0.1.3-rc.1 dictionaries, main against this branch (r13): 31 of 72,686 responses change, no first entry. Words headed by the copula (`に`, `で`, `な`) lose junk verbs (煮る, 似る, 出る), because stem probes now only follow a verb or adjective. No other language has an analyzer: de, es, fr, it, pl, ru and uk give the same response to every corpus lookup (787,221 in all), and every language's dictionary imports identically with this branch's importer.
 
 ## Gates
 
-| Gate | Needs | r12 | Without missing words |
+| Gate | Needs | r13 | Without missing words |
 |---|---|---|---|
-| Common grammar words | 97.5% | 91.3% of 381 | 95.1% |
+| Common grammar words | 97.5% | 91.6% of 381 | 95.1% |
 | Common content words | 92.5% | **93.2% of 808, passes** | 94.7% |
-| Random words | 87.5% | 73.0% of 971 | 91.5% |
+| Random words | 87.5% | 73.2% of 971 | 91.7% |
 
 **Content** passes since r10. At r9 it failed by 31 items, and 39 of its 91 misses were ours, not data: an ending's meaning not shown when the click spans several words (`처음이니까`: `-니까` "because"; `돌리면`: "if"), and constructions over a space (`-ㄹ 수 있다`, `예를 들어`, `-에 따라`, `-고 나서`), which the phrase matcher couldn't match and Wiktionary mostly lacks. The rest are missing words and senses (`대사` "metabolism", `조류` "tidal current").
 
 **Grammar** and **random** fail on data:
-- **Grammar:** of 33 misses, 15 are missing words and about 10 missing senses, against 9 the gate allows. Several are rare readings of common grammar words that the units rank as such (`저` as 菹, `야` as 也, `지` in `12지`).
-- **Random:** 196 of 971 items are words English Wiktionary has no entry for. Without them the gate passes (91.5%).
+- **Grammar:** of 32 misses, 14 are missing words and about 10 missing senses, against 9 the gate allows. Several are rare readings of common grammar words that the units rank as such (`저` as 菹, `야` as 也, `지` in `12지`).
+- **Random:** 196 of 971 items are words English Wiktionary has no entry for. Without them the gate passes (91.7%).
 
 Kiwi and the endings didn't change this: a word with no entry stays unexplained however it is read. To pass grammar and random, Korean needs hand patches on the scale of the dictionary, not rules: in the random sample alone, about one word in five has no entry (`엔지니어`, `픽셀`, `결제하다`, `역대`, `일부분`, `실온`, `냉동실`, `수용체`, `함선`, `폐결핵`, `중복`, `진짜로`, `쓰임`). The user rejected a general hand-patch list for Japanese, so this is stopped here and reported.
 
