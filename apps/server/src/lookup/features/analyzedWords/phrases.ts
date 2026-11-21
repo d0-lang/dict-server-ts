@@ -1,5 +1,6 @@
 import { hiragana } from "@dict/core/kana";
-import { GRAMMAR_SOURCE_POS } from "@dict/core/schema";
+import { lookupKey } from "@dict/core/lookupKey";
+import { FormSource, GRAMMAR_SOURCE_POS } from "@dict/core/schema";
 import { loadEntries } from "../../common/entries.ts";
 import type { FormRow } from "../../common/forms.ts";
 import { type Answer, type Click, PLAIN } from "./click.ts";
@@ -29,12 +30,22 @@ export const phraseLookup = (c: Click): Answer => {
     for (let first = Math.max(0, index - size + 1); first <= index; first++) {
       const span = words.slice(first, first + size);
       if (span.length < size) continue;
-      const gaps = span.some(
-        (w, i) => i > 0 && startOf(w) !== endOf(span[i - 1]!),
-      );
+      // Words that touch, or in a language with spaces, words a space apart
+      // (`-ㄹ 수 있다`, `예를 들어`).
+      const gaps = span.some((w, i) => {
+        if (i === 0) return false;
+        const between = c.context.slice(endOf(span[i - 1]!), startOf(w));
+        return (
+          between !== "" && !(c.settings.spacedWords && /^ +$/.test(between))
+        );
+      });
       if (gaps) continue;
       for (const start of startsIn(c, span[0]!)) {
         const answer = phraseAt(c, span, start);
+        if (answer !== undefined) return answer;
+      }
+      for (const lead of endingLeads(c, span[0]!)) {
+        const answer = phraseAt(c, span, lead.start, lead);
         if (answer !== undefined) return answer;
       }
     }
@@ -66,15 +77,44 @@ const startsIn = (c: Click, w: Word): ReadonlyArray<number> => {
   return [...new Set(starts)];
 };
 
-/** The phrase over `span` from `start` on, if the dictionary has one; a start past the first word's own grammar-file phrases only. */
+/**
+ * A phrase's start at an ending or particle, written as the grammar file
+ * writes it, with its hyphen (`baseSpellings`): what a construction over
+ * words a space apart starts with in a language with spaces. `갈` (`가` +
+ * `ㄹ`) of `갈 수 있다` starts `-ㄹ 수 있다`; `에` of `급수에 따라`,
+ * `-에 따라`. The run underlined starts where that morpheme does.
+ */
+type Lead = {
+  readonly start: number;
+  readonly end: number;
+  readonly text: string;
+};
+
+const endingLeads = (c: Click, w: Word): ReadonlyArray<Lead> => {
+  if (!c.settings.spacedWords) return [];
+  const head = w.findIndex((m) => !hasPos(m.pos, c.settings.prefixes));
+  return w.flatMap((m, i) => {
+    const text = m.bases.at(-1);
+    return i >= head && text !== undefined && text.startsWith("-")
+      ? [{ start: m.start, end: m.end, text }]
+      : [];
+  });
+};
+
+/**
+ * The phrase over `span` from `start` on, if the dictionary has one; a start
+ * past the first word's own grammar-file phrases only, as is one from a
+ * `lead`, written in its place.
+ */
 const phraseAt = (
   c: Click,
   span: ReadonlyArray<Word>,
   start: number,
+  lead?: Lead,
 ): Answer => {
   const { context, piece, found, word } = c;
   const morphemes = span.flat().filter((m) => m.end > start);
-  const grammarOnly = start !== startOf(span[0]!);
+  const grammarOnly = lead !== undefined || start !== startOf(span[0]!);
   // The phrase holds the clicked piece from its start on (not `より…`
   // for `たより`, which starts in the word before).
   if (start > piece.start) return undefined;
@@ -84,29 +124,49 @@ const phraseAt = (
   // Spelled as written, and with each morpheme spelled its lemma's way
   // (`かもしれない` -> `かも知れない`, `手にいれ` -> `手に入れ`).
   // A morpheme the phrase starts inside is written as it is.
+  // The spaces between the words stay (`예를 들어`).
   const respelled = (upTo: number) =>
     morphemes
       .slice(0, upTo)
-      .map((m) =>
-        m.start < start ? context.slice(start, m.end) : m.spellings.at(-1)!,
+      .map(
+        (m, i) =>
+          (i > 0 ? context.slice(morphemes[i - 1]!.end, m.start) : "") +
+          (m.start < start ? context.slice(start, m.end) : m.spellings.at(-1)!),
       )
       .join("");
+  // From a lead, its spelling, then the text as written.
+  const fromLead = (end: number) =>
+    lead === undefined ? undefined : lead.text + context.slice(lead.end, end);
   for (let k = last.length; k >= 1; k--) {
     const end = last[k - 1]!.end;
     // The phrase holds the whole clicked piece (`による` in `に|よる|と`).
     if (end < piece.end) break;
     const written = context.slice(start, end);
     const upTo = morphemes.indexOf(last[k - 1]!) + 1;
-    forms.push({ form: written, written }, { form: respelled(upTo), written });
+    const led = fromLead(end);
+    if (led !== undefined) forms.push({ form: led, written });
+    else {
+      forms.push(
+        { form: written, written },
+        { form: respelled(upTo), written },
+      );
+    }
     if (k === last.length) {
       const before = morphemes.indexOf(head);
       // The last word's head is before the start: nothing to put in its base form.
-      if (head.start < start) continue;
+      if (head.start < start || (lead !== undefined && head.start < lead.end)) {
+        continue;
+      }
       for (const base of head.bases) {
-        forms.push(
-          { form: context.slice(start, head.start) + base, written },
-          { form: respelled(before) + base, written },
-        );
+        const ledBase = fromLead(head.start);
+        if (ledBase !== undefined)
+          forms.push({ form: ledBase + base, written });
+        else {
+          forms.push(
+            { form: context.slice(start, head.start) + base, written },
+            { form: respelled(before) + base, written },
+          );
+        }
       }
     }
   }
@@ -142,7 +202,20 @@ const phraseAt = (
     // analyzer): the plain lookup answers, if it has the piece.
     if (written === word && c.rows(word).length > 0) return PLAIN;
     const phraseIds = [...new Set(phrase.map((row) => row.id))];
-    const own = wholeIds(c, found, c.text);
+    // In a language with spaces, the clicked word's own headword too, when
+    // it is more than the analyzer's word (`때문에` "because of", `때문` +
+    // `-에`, in `-기 때문에`).
+    const clicked = c.settings.spacedWords
+      ? c
+          .rows(word)
+          .filter(
+            (row) =>
+              row.source === FormSource.Lemma &&
+              lookupKey(row.lemma) === lookupKey(word),
+          )
+          .map((row) => row.id)
+      : [];
+    const own = [...new Set([...clicked, ...wholeIds(c, found, c.text)])];
     // Each underlines what it covers, when that is more than the clicked
     // word: the phrase (`手に入る` for `入る`), and the word around the
     // piece (`しれないです` for `れ`). The clicked word's own entries
@@ -169,7 +242,10 @@ const phraseAt = (
       phraseMatch.match !== undefined
         ? morphemeParts(c, found, new Set([...phraseIds, ...own]))
         : [];
-    if (parts.length > 1) {
+    // Segments split the match (PROTOCOL.md), which in a language with
+    // spaces runs over several words (`알 수 있는`): the construction is
+    // shown without them there.
+    if (parts.length > 1 && !c.settings.spacedWords) {
       const before = context.slice(start, startOf(found));
       return splitResult(
         c.db,

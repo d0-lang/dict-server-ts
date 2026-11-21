@@ -10,6 +10,7 @@ describe("language records", () => {
       "fr",
       "it",
       "ja",
+      "ko",
       "pl",
       "ru",
       "uk",
@@ -25,6 +26,8 @@ describe("language records", () => {
       standardPronNotes: [],
       untrustedFormTags: [],
       ownEntryForms: [],
+      pointerWords: [],
+      readingTags: [],
       stressedLemmas: false,
       headwordGenders: false,
       unmarkedStressForms: false,
@@ -82,7 +85,7 @@ describe("language records", () => {
   it("names the file and the known codes when a record is missing", () => {
     assert.throws(
       () => readLanguage("xx"),
-      /known: de, es, fr, it, ja, pl, ru/,
+      /known: de, es, fr, it, ja, ko, pl, ru/,
     );
   });
 });

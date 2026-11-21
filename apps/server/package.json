@@ -8,6 +8,7 @@
     "@effect/platform-node": "4.0.5",
     "drizzle-orm": "0.45.4",
     "effect": "4.0.5",
+    "kiwi-nlp": "0.25.0",
     "lindera-wasm-unidic": "2.1.0"
   },
   "devDependencies": {

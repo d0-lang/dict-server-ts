@@ -38,3 +38,6 @@ data/
 
 # benchmark runs
 apps/server/eval/out
+
+# Kiwi's model files (bun run kiwi:model)
+models/

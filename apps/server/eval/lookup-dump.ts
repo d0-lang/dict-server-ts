@@ -175,14 +175,17 @@ const copyNumber = (text: string, word: string, start: number) => {
   return undefined;
 };
 
-const dump = (): { lines: ReadonlyArray<Line>; cost: Cost } => {
+const dump = async (): Promise<{
+  lines: ReadonlyArray<Line>;
+  cost: Cost;
+}> => {
   const client = new Database(`${DATA_DIR}/${pair}.sqlite`, { readonly: true });
   const statements = countStatements(client);
   const db = drizzle({ client, schema }) as DictionaryDb;
   const language = readPairLanguage(pair);
   // Built before the first lookup, as the server builds them at startup,
   // so no lookup's cost includes them.
-  loadAnalyzer(language);
+  await loadAnalyzer(language);
   phraseIndex(db, language);
   const rules = compoundRules(language);
   if (rules !== undefined) warmCompounds(db, rules);
@@ -272,7 +275,7 @@ const firstOf = (r: LookupResult) => {
   return `${entry.lemma} ${entry.pos}${reading === undefined ? "" : ` ${reading}`}${entry.match === undefined ? "" : ` match=${entry.match.join("|")}`}`;
 };
 
-const { lines, cost } = dump();
+const { lines, cost } = await dump();
 mkdirSync(out, { recursive: true });
 writeFileSync(
   fileOf(values.run),

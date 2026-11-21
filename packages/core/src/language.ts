@@ -99,6 +99,20 @@ const Import = doc(
       ),
       [],
     ),
+    pointerWords: orDefault(
+      doc(
+        strings,
+        "Words that may make up the opening of a gloss that only names another word's form, before \"of\" and the linked word: `Yang-vowel form of -어서 (-eoseo)`, `topic-marked form of 나 (na)`, `Post-vowel and post-liquid allomorphic form of -으면`. Every word of the opening must be one of these, compared in lower case. wiktextract reads no `form-of` link there, so without this the reader gets the form's name and not its meaning: the sense becomes a link to the word, as a `form-of` sense is.",
+      ),
+      [],
+    ),
+    readingTags: orDefault(
+      doc(
+        strings,
+        "Form tags that mark a headword's reading in a script the reader can sound out, shown as `pron.reading` where the headword has no ruby: Korean `romanization`, the Revised Romanization (`먹다`: `meokda`). The first form with one of these tags is the reading. Japanese takes its reading from the headword's ruby instead.",
+      ),
+      [],
+    ),
     stressedLemmas: orDefault(
       doc(
         Schema.Boolean,
@@ -289,12 +303,60 @@ const Context = doc(
       doc(
         Schema.Struct({
           dictionary: doc(
-            Schema.Literals(["unidic", "ipadic", "ko-dic", "cc-cedict"]),
-            "The morphological analyzer's dictionary (Lindera): `unidic` or `ipadic` for Japanese, `ko-dic` for Korean, `cc-cedict` for Chinese.",
+            Schema.Literals([
+              "unidic",
+              "ipadic",
+              "ko-dic",
+              "cc-cedict",
+              "kiwi",
+            ]),
+            "The morphological analyzer and its dictionary. Lindera's: `unidic` or `ipadic` for Japanese, `ko-dic` for Korean, `cc-cedict` for Chinese. `kiwi`: Kiwi, a Korean analyzer with a language model (npm `kiwi-nlp`), whose model files `bun run kiwi:model` fetches into `KIWI_MODEL_DIR` (default `models/kiwi`); it reads Korean better than ko-dic, which lacks `이`, and takes about 0.75 GB of memory alone, against ko-dic's 0.35 GB.",
           ),
-          baseFields: doc(
-            Schema.Array(Schema.Int),
-            "Which of the dictionary's detail fields hold a morpheme's base forms, looked up in this order (UniDic: 10, the written base form `いる`; 7, the lemma `要る`).",
+          baseFields: orDefault(
+            doc(
+              Schema.Array(Schema.Int),
+              "Which of the dictionary's detail fields hold a morpheme's base forms, looked up in this order (UniDic: 10, the written base form `いる`; 7, the lemma `要る`). Lindera's only; Kiwi gives each morpheme's base form itself.",
+            ),
+            [],
+          ),
+          baseSpellings: orDefault(
+            doc(
+              Schema.Array(
+                Schema.Struct({
+                  pos: doc(
+                    strings,
+                    "Parts of speech of the morpheme, as in `join`; of a fused morpheme, of the part.",
+                  ),
+                  spellings: doc(
+                    strings,
+                    "The base forms, `*` standing for the analyzer's (`*다`, `-*`).",
+                  ),
+                  affix: orDefault(
+                    doc(
+                      Schema.Boolean,
+                      "A particle or ending: in a fused morpheme, its base forms come after the stem's (`걸` is `거` + `-ㄹ`: `거` first).",
+                    ),
+                    false,
+                  ),
+                }),
+              ),
+              "How the dictionary spells base forms the analyzer gives otherwise, by part of speech, the first rule that matches: Kiwi gives a verb's stem (`먹`) where Wiktionary lists `먹다` (`*다`), and particles and endings bare where Wiktionary writes them with hyphens (`-에서`, `-었-`).",
+            ),
+            [],
+          ),
+          baseLetters: orDefault(
+            doc(
+              Schema.Record(Schema.String, Schema.String),
+              "Letters the analyzer writes in base forms otherwise than the dictionary, replaced in them: Kiwi writes a final consonant ending with the jamo that ends a syllable (`ᆯ` in `가` + `ᆯ`), Wiktionary with the letter (`-ㄹ`).",
+            ),
+            {},
+          ),
+          stemSuffixes: orDefault(
+            doc(
+              strings,
+              "Parts of speech of suffixes that make a verb or adjective of the word before them, as in `join` (Kiwi's `XSV`, `XSA`: `공부` + `했어요`): the word is looked up as its head written with the suffix's base forms first (`공부하다`), then by the head's own.",
+            ),
+            [],
           ),
           readingField: Schema.optionalKey(
             doc(
@@ -468,6 +530,34 @@ const Context = doc(
               'Parts of speech of morphemes that make a new word of the word before them (`接尾辞`: `機械` + `屋` "mechanic"). Such a word without an entry of its own is shown by its parts, each with its own entries, not as its head.',
             ),
             [],
+          ),
+          auxiliaries: orDefault(
+            doc(
+              strings,
+              "Parts of speech of auxiliary verbs that a `join` rule writes onto the verb before them (Kiwi's `VX`): the word is looked up as its text up to the auxiliary with the auxiliary's base forms first (`전해` + `지다`: `전해지다` \"to be passed down\"; `도와주다`), then by the head's own.",
+            ),
+            [],
+          ),
+          compoundPos: orDefault(
+            doc(
+              strings,
+              'Parts of speech of morphemes that make a compound when a `join` rule writes them together (Korean `NNG`, `NNP`: `양자` + `역학`, "quantum mechanics"). Such a word without an entry of its own is shown by its parts, as a word made with `suffixes` is, the longest the dictionary has first (`발색|단`).',
+            ),
+            [],
+          ),
+          spacedWords: orDefault(
+            doc(
+              Schema.Boolean,
+              'The language writes a space after each word with its particles and endings (Korean eojeols), so the piece the segmenter gives is a whole word. A headword spelled as it is written, other than a noun, verb or adjective, is that word, even where the analyzer cuts it into a stem and endings: it comes first (`하지만` "but", cut `하` + `-지만`). A word the analyzer reads as a verb with endings is no noun spelled alike (`하지` "summer solstice", for `하` + `-지`). Off for Japanese, written without spaces, where `だったら` after a noun is the copula, not the conjunction.',
+            ),
+            false,
+          ),
+          ranksByPos: orDefault(
+            doc(
+              Schema.Boolean,
+              'A word\'s or part\'s entries of the parts of speech `upos` gives the analyzer\'s reading come before its others, which keep their order (Korean `우리` the pronoun "we" before `우리` "cage"; the particle `-는` before the ending). Off for Japanese, whose kana words are ranked by reading instead.',
+            ),
+            false,
           ),
           upos: orDefault(
             doc(

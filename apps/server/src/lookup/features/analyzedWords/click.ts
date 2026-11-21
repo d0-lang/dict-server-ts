@@ -10,6 +10,7 @@ import {
 import type { LookupEntry, LookupResult } from "../../common/entries.ts";
 import { type FormRow, formRows } from "../../common/forms.ts";
 import { copyStart } from "../../common/tokenize.ts";
+import { withKnownPieces } from "./pieces.ts";
 import {
   endOf,
   hasPos,
@@ -125,7 +126,10 @@ export const clickOf = (
   // language. A unit after a number is (`28g`: the analyzer reads `グラム`).
   if (/^[\p{Script=Latin}\p{P}]+$/u.test(word)) return undefined;
 
-  const words = wordsOf(analyze(context), settings);
+  const words = wordsOf(
+    withKnownPieces(db, settings, analyze(context)),
+    settings,
+  );
   // The word the piece starts with, when it starts one (`に` of `における`,
   // `東` of `東日本`). A piece that starts inside a word is cut off from it
   // (`思っ|たより`): then the word holding most of the piece, the first on a
@@ -242,6 +246,11 @@ export const clickOf = (
         ? morphemes.map((m) => m.reading).join("")
         : undefined;
     },
-    severalWords: (row) => wordsOf(analyze(row.lemma), settings).length > 1,
+    // With spaces, a phrase is written with one (`예를 들다`): the analyzer
+    // cuts a lone verb's lemma too (`우리다` as `우리` + `-다`).
+    severalWords: (row) =>
+      settings.spacedWords
+        ? /\s/u.test(row.lemma.trim())
+        : wordsOf(analyze(row.lemma), settings).length > 1,
   };
 };
