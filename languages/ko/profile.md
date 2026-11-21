@@ -1,6 +1,6 @@
 # Korean (ko_en)
 
-Tier: **Model only, unreviewed. Tier 1 does not pass.** No reader of Korean has checked this profile, the grammar file or any sample: every point rests on counts from the dump and the corpus, read by the developer agent, and the judge is Haiku. Tier 1 ran 2026-11-20 and stopped short of the gates on data, not lookups: English Wiktionary has no usable entry for about a fifth of the words a reader meets (see Gates). No tier-2 work.
+Tier: **Model only, unreviewed. Tier 1: content passes, grammar and random do not.** No reader of Korean has checked this profile, the grammar file or any sample: every point rests on counts from the dump and the corpus, read by the developer agent, and the judge is Haiku. Tier 1 ran 2026-11-20 and stopped short of the gates on data, not lookups: English Wiktionary has no usable entry for about a fifth of the words a reader meets (see Gates). No tier-2 work.
 
 Data: `data/raw/ko.jsonl`, filtered from the 2026-11-01 dump: 64,457 lines.
 - 39,314 headwords in Hangul and 22,386 in hanja.
@@ -41,7 +41,7 @@ Kiwi is a Korean analyzer with its own engine and a language model; it reads all
 
 ## Grammar file
 
-`grammar.tsv`, 59 lines:
+`grammar.tsv`, 112 lines:
 - **Particles** Wiktionary lacks or explains only by naming a form: `-이나` "or", `-이라고` and `-이라는` (quoting, "called"), `-이란` (a topic to define: `행복이란`), `-이라면`, `-으로써`, `-으로부터`, `-이라든가`.
 - **Endings:** `-는데` (setting the scene, contrast), polite `-요` forms Wiktionary lists only without `요` (`-거든요`, `-는데요`, `-더라고요`, `-잖아요`, `-나요`, `-을까요`), `-아야` "must" with 하다/되다, `-으려면`, `-고자`, `-다면`, `-다는`, `-네요`, `-다시피`.
 - **Suffixes:** `-적` (`화학적`), `-님`.
@@ -49,7 +49,9 @@ Kiwi is a Korean analyzer with its own engine and a language model; it reads all
 - **Spoken words:** `뭐` and `어` as fillers, `막`, `좀`, `되게`, `그러니까`, `그러면`, `그래도`, `요거`/`요런`/`요렇게`.
 - **Hand patches**, common words English Wiktionary lacks: `이산화`, `인슐린`, `이온`, `회로`, `농도`, `효율`, `생성`, `억제`, `불순물`, `줄기세포`.
 
-Not in the file, left to tier 2: constructions that span eojeols (`-ㄹ 수 있다/없다`, `-고 있다`, `-아야 하다`, `예를 들어`, `에 따라`, `뿐만 아니라`). The phrase matcher needs words that touch, and Korean phrases are written with spaces.
+- **Endings** whose Wiktionary entry misleads after a vowel or is missing: `-으면서` "while" (Wiktionary's `-면서` is `고 하면서` "while saying"), `-으며`, `-다고`, `-게` (with `되다`, `하다`), `-구먼`, `-자면`, `-냐면`, `-으려는`, `-고서`.
+- **Noun suffixes:** `-형`, `-율`/`-률`, `-계`, `-상`, `-권`, `-제`, `-층`, `-당`, `-력`, `-감`, `-생`, `-별`, `-경`; `-대로`.
+- **Constructions over a space**, matched from an ending written with its hyphen: `-을 수 있다/없다` (also with `수가`, `수도`), `-을 텐데`, `-고 있다`, `-고 나서`, `-고 싶다`, `-지 않다`, `-지 못하다`, `-게 되다`, `-게 하다`, `-기 때문에`, `-은 적이 있다`, `-어 가지고`, `-에 따라`, `-에 따르면`, `-에 대해`, `-에 대한`, `-을 통해`, `-을 중심으로`, `-에 의해`, `-뿐만 아니라`; and `예를 들어`, `이 밖에`, `어떻게 보면`, `알고 보니`, `그런 다음`, `생각이 나다`, `영향을 주다`.
 
 ## Eval: Kiwi's units
 
@@ -75,7 +77,10 @@ Sample from r0 (`../corpus/eval/out/ko/r0/gate`), 2,200 items. API and extension
 | r6 | r5 + Wiktionary's nouns as Kiwi's words (dropped) | 90.1 (93.2) | 87.6 (89.5) | 71.5 (89.3) | 79.4 |
 | r7 | r5 + compounds, unknown nouns by their parts, no multi-word dictionary, copula of no letters | 89.8 (93.7) | 88.2 (89.7) | 72.6 (88.7) | 80.0 |
 | r8 | unknown nouns only cut into a known head | 89.8 (93.7) | 88.4 (89.8) | 71.5 (89.5) | 79.7 |
-| r9 | grammar lines `-잖아요`, `-이란` | **89.8 (93.7) of 381** | **88.7 (90.2) of 808** | **71.6 (89.7) of 971** | 79.9 |
+| r9 | grammar lines `-잖아요`, `-이란` | 89.8 (93.7) of 381 | 88.7 (90.2) of 808 | 71.6 (89.7) of 971 | 79.9 |
+| r10 | endings in a longer click, fused endings, `auxiliaries`, constructions over a space, grammar lines for endings, suffixes and constructions | 91.6 (95.6) | 93.1 (94.5) | 73.1 (91.7) | 82.5 |
+| r11 | counters and suffixes stay whole; the copula's `이다`; `때문에` kept | 91.3 (95.3) | 92.9 (94.5) | 73.0 (91.5) | 82.3 |
+| r12 | constructions without segments; fused ending alone (`라는`) | **91.3 (95.1) of 381** | **93.2 (94.7) of 808** | **73.0 (91.5) of 971** | 82.4 |
 
 Figures in brackets are without the judge's `missing_word` misses. r0's common gates count fewer items: 527 common items had no entry then and count toward no gate. Judging cost about $0.50 for r0 and less for each later run (only changed popovers).
 
@@ -104,18 +109,19 @@ Left from ko-dic (r4), all misreadings with no general fix, which Kiwi reads rig
 
 ## Gates
 
-| Gate | Needs | r9 | Without missing words |
+| Gate | Needs | r12 | Without missing words |
 |---|---|---|---|
-| Common grammar words | 97.5% | 89.8% of 381 | 93.7% |
-| Common content words | 92.5% | 88.7% of 808 | 90.2% |
-| Random words | 87.5% | 71.6% of 971 | 89.7% |
+| Common grammar words | 97.5% | 91.3% of 381 | 95.1% |
+| Common content words | 92.5% | **93.2% of 808, passes** | 94.7% |
+| Random words | 87.5% | 73.0% of 971 | 91.5% |
 
-All three fail. The misses are data:
-- **Random:** 196 of 971 items are words English Wiktionary has no entry for. Without them the gate passes (89.7%).
-- **Content:** most misses are missing words or senses (`대사` "metabolism", `조류` "tidal current", `주요` "main"). Fixing every other miss would leave it about 92%: still short.
-- **Grammar:** of 39 misses, 16 are missing words and about 5 are constructions that span eojeols (tier 2).
+**Content** passes since r10. At r9 it failed by 31 items, and 39 of its 91 misses were ours, not data: an ending's meaning not shown when the click spans several words (`처음이니까`: `-니까` "because"; `돌리면`: "if"), and constructions over a space (`-ㄹ 수 있다`, `예를 들어`, `-에 따라`, `-고 나서`), which the phrase matcher couldn't match and Wiktionary mostly lacks. The rest are missing words and senses (`대사` "metabolism", `조류` "tidal current").
 
-Kiwi didn't change this: it reads more words right (r4 → r9: 172 popovers better, 77 worse; 78.0% → 79.9% understood), but a word with no entry stays unexplained however it is read. To pass, Korean needs hand patches on the scale of the dictionary, not rules: in the random sample alone, about one word in five has no entry (`엔지니어`, `픽셀`, `결제하다`, `역대`, `일부분`, `실온`, `냉동실`, `수용체`, `함선`, `폐결핵`, `중복`, `진짜로`, `쓰임`). The user rejected a general hand-patch list for Japanese, so this is stopped here and reported.
+**Grammar** and **random** fail on data:
+- **Grammar:** of 33 misses, 15 are missing words and about 10 missing senses, against 9 the gate allows. Several are rare readings of common grammar words that the units rank as such (`저` as 菹, `야` as 也, `지` in `12지`).
+- **Random:** 196 of 971 items are words English Wiktionary has no entry for. Without them the gate passes (91.5%).
+
+Kiwi and the endings didn't change this: a word with no entry stays unexplained however it is read. To pass grammar and random, Korean needs hand patches on the scale of the dictionary, not rules: in the random sample alone, about one word in five has no entry (`엔지니어`, `픽셀`, `결제하다`, `역대`, `일부분`, `실온`, `냉동실`, `수용체`, `함선`, `폐결핵`, `중복`, `진짜로`, `쓰임`). The user rejected a general hand-patch list for Japanese, so this is stopped here and reported.
 
 Words with no entry, most frequent in the corpus: names (캘빈, 샤오미, 통계청, 명나라, 고종, 퇴계), science terms (틸라코이드, 축삭, 광계, 양공), and general words Wiktionary lacks (유소년, 편찬, 공복, 과도하다, 연평균, 품새, 후면, 하여금).
 
@@ -134,6 +140,6 @@ Kiwi adds about 0.63 GB at rest (ko-dic 0.30 GB): its WebAssembly build loads th
 ## What's left
 
 - **Data:** the hand-patch question above; Wiktionary sense gaps.
-- **Tier 2:** constructions over eojeols (needs the phrase matcher to allow spaces); numbers with counters and units in one click (`2024년에`, where the click covers `년에`; `160대`, `10여종`).
+- **Tier 2:** constructions beyond the common ones in the grammar file; numbers with counters and units in one click (`2024년에`, where the click covers `년에`; `160대`, `10여종`).
 - **Analyzer:** Kiwi's misreadings (`아니하고`, `식이`, names it cuts: `박종훈`); a compound after a prefix is not looked up whole (`저|출산` in `저출산기본법`). Kiwi's smaller model, once the WebAssembly build can load it quantized, would take less memory.
 - **Corpus:** no news, blogs or guides.
