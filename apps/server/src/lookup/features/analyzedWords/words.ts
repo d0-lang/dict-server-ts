@@ -47,6 +47,11 @@ export const wordsOf = (
       prefixes = [];
       words.push([morpheme]);
     } else {
+      // A prefix joins only the word right after it, not one past a space.
+      if (prefixes.length > 0 && prefixes.at(-1)!.end !== morpheme.start) {
+        for (const prefix of prefixes) words.push([prefix]);
+        prefixes = [];
+      }
       words.push([...prefixes, morpheme]);
       prefixes = [];
     }

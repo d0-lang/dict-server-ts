@@ -19,9 +19,12 @@ The importer and the server only share `@dict/core`; `boundaries.test.ts` fails 
 
 ```bash
 bun install
+bun run kiwi:model     # Kiwi's model, Korean's analyzer (105 MB, into models/kiwi)
 cp .env.example .env   # already gitignored; Bun loads it automatically
 bun run dev
 ```
+
+Korean's analyzer, Kiwi, needs its model files, which aren't on npm: `bun run kiwi:model` downloads the release that matches the `kiwi-nlp` package and checks its checksum. `KIWI_MODEL_DIR` puts them elsewhere. Only `ko_en` needs them, and its tests.
 
 ## Settings
 

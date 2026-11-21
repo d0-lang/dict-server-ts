@@ -8,6 +8,10 @@ COPY apps/importer/package.json apps/importer/
 COPY apps/server/package.json apps/server/
 RUN bun install --frozen-lockfile --production
 
+# Kiwi's model, Korean's analyzer, which isn't on npm (models/kiwi).
+COPY apps/server/scripts/kiwi-model.ts apps/server/scripts/
+RUN bun apps/server/scripts/kiwi-model.ts
+
 COPY packages/core/src packages/core/src
 COPY apps/server/src apps/server/src
 # Each language's settings, read at startup (grammar files are the importer's).

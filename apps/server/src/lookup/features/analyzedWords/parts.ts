@@ -162,10 +162,9 @@ export const wholeIds = (
       ? [...bases, written]
       : [written, ...derived, ...bases];
   const inflected = w.length > 1 && w.at(-1) !== head;
-  // The head as written (`stemForms`) also reaches verbs whose forms it is,
-  // when the analyzer's lemma misses one (`従え` is `従える` too, which
-  // UniDic reads as `従う`; `들어` is `듣다` too, which ko-dic reads as
-  // `들다`). Not an entry of the stem itself (`食べ` "stem of 食べる").
+  // The head as written also reaches verbs whose forms it is, when the
+  // analyzer's lemma misses one (`従え` is `従える` too, which UniDic reads
+  // as `従う`). Not an entry of the stem itself (`食べ` "stem of 食べる").
   const headPos = c.uposOf(head);
   // A verb or adjective with its endings, which may have become a word of
   // its own (`하지만`).
@@ -175,8 +174,8 @@ export const wholeIds = (
   const stem = headPos.size === 0 || headPos.has("VERB") || headPos.has("ADJ");
   const stemForms =
     w.length > 1 && stem && !head.bases.includes(head.surface)
-      ? c.settings.stemForms
-          .flatMap((form) => c.rows(prefix + form.replace("*", head.surface)))
+      ? c
+          .rows(prefix + head.surface)
           .filter(
             (row) =>
               row.source === FormSource.Inflection &&
@@ -263,12 +262,14 @@ export const wholeIds = (
 
 /**
  * A word made with a suffix (`機械|屋` "mechanic") is not the word before
- * the suffix (`機械` "machine"). Without an entry of its own, it has no
- * entries as a whole: each part shows its own.
+ * the suffix (`機械` "machine"), nor a compound its first part (`발색|단`,
+ * `compoundPos`). Without an entry of its own, it has no entries as a
+ * whole: each part shows its own.
  */
 export const derivedWord = (c: Click, w: Word): boolean =>
   c.rows(c.textOf(w)).length === 0 &&
-  w.some((m) => hasPos(m.pos, c.settings.suffixes));
+  (w.some((m) => hasPos(m.pos, c.settings.suffixes)) ||
+    w.filter((m) => hasPos(m.pos, c.settings.compoundPos)).length >= 2);
 
 /**
  * Endings after the head that the grammar file lists together, as one part:

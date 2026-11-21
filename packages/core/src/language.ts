@@ -303,38 +303,21 @@ const Context = doc(
       doc(
         Schema.Struct({
           dictionary: doc(
-            Schema.Literals(["unidic", "ipadic", "ko-dic", "cc-cedict"]),
-            "The morphological analyzer's dictionary (Lindera): `unidic` or `ipadic` for Japanese, `ko-dic` for Korean, `cc-cedict` for Chinese.",
+            Schema.Literals([
+              "unidic",
+              "ipadic",
+              "ko-dic",
+              "cc-cedict",
+              "kiwi",
+            ]),
+            "The morphological analyzer and its dictionary. Lindera's: `unidic` or `ipadic` for Japanese, `ko-dic` for Korean, `cc-cedict` for Chinese. `kiwi`: Kiwi, a Korean analyzer with a language model (npm `kiwi-nlp`), whose model files `bun run kiwi:model` fetches into `KIWI_MODEL_DIR` (default `models/kiwi`); it reads Korean better than ko-dic, which lacks `이`, and takes about 0.75 GB of memory alone, against ko-dic's 0.35 GB.",
           ),
-          baseFields: doc(
-            Schema.Array(Schema.Int),
-            "Which of the dictionary's detail fields hold a morpheme's base forms, looked up in this order (UniDic: 10, the written base form `いる`; 7, the lemma `要る`). None: the morpheme as written (ko-dic, whose reading field is sometimes another word's).",
-          ),
-          posFields: orDefault(
+          baseFields: orDefault(
             doc(
-              Schema.Int,
-              "How many of the dictionary's first detail fields are part-of-speech tags, joined with `-` (UniDic: 4, `名詞-普通名詞-一般`; ko-dic: 1, whose later fields are a semantic class and a reading). A tag joined with `+` is a morpheme the dictionary fused of several (ko-dic `VV+EP`, `했`), which has each of those parts of speech.",
+              Schema.Array(Schema.Int),
+              "Which of the dictionary's detail fields hold a morpheme's base forms, looked up in this order (UniDic: 10, the written base form `いる`; 7, the lemma `要る`). Lindera's only; Kiwi gives each morpheme's base form itself.",
             ),
-            4,
-          ),
-          fused: Schema.optionalKey(
-            doc(
-              Schema.Struct({
-                typeField: doc(
-                  Schema.Int,
-                  "The detail field that names the morpheme's type (ko-dic: 4).",
-                ),
-                types: doc(
-                  strings,
-                  "The types whose base forms come from `field` (ko-dic: `Inflect`; not `Compound`, a noun whose parts are no base form of it: `한국어`).",
-                ),
-                field: doc(
-                  Schema.Int,
-                  "The detail field that lists the parts, each `base/TAG/…`, joined with `+` (ko-dic: 7, `하/XSV/*+았/EP/*`).",
-                ),
-              }),
-              "Morphemes the dictionary fuses of several, whose surface is no base form (ko-dic: `했` is `하` + `았`, `갈` is `가` + `ᆯ`, `예뻐요` is `예쁘` + `어요`): their base forms are their parts', those `baseSpellings` names first, in order (`했`: `하다`, `-았-`), instead of `baseFields`.",
-            ),
+            [],
           ),
           baseSpellings: orDefault(
             doc(
@@ -357,115 +340,23 @@ const Context = doc(
                   ),
                 }),
               ),
-              "How the dictionary spells base forms the analyzer gives otherwise, by part of speech, the first rule that matches: ko-dic gives a verb's stem (`먹`) where Wiktionary lists `먹다` (`*다`), and particles and endings bare where Wiktionary writes them with hyphens (`-에서`, `-었-`).",
+              "How the dictionary spells base forms the analyzer gives otherwise, by part of speech, the first rule that matches: Kiwi gives a verb's stem (`먹`) where Wiktionary lists `먹다` (`*다`), and particles and endings bare where Wiktionary writes them with hyphens (`-에서`, `-었-`).",
             ),
             [],
           ),
           baseLetters: orDefault(
             doc(
               Schema.Record(Schema.String, Schema.String),
-              "Letters the analyzer writes in base forms otherwise than the dictionary, replaced in them: ko-dic writes a final consonant ending with the jamo that ends a syllable (`ᆯ` in `가` + `ᆯ`), Wiktionary with the letter (`-ㄹ`).",
+              "Letters the analyzer writes in base forms otherwise than the dictionary, replaced in them: Kiwi writes a final consonant ending with the jamo that ends a syllable (`ᆯ` in `가` + `ᆯ`), Wiktionary with the letter (`-ㄹ`).",
             ),
             {},
-          ),
-          restore: orDefault(
-            doc(
-              Schema.Array(
-                Schema.Struct({
-                  surface: doc(
-                    Schema.String,
-                    "The morpheme as written (`이`).",
-                  ),
-                  start: orDefault(
-                    doc(
-                      Schema.Boolean,
-                      "At a word's start, read with `standIn` in its place, and only when the rest of the word is of `rest` (the pronoun `이` in `이를`, `이는`, read as `그를`, `그는`). Otherwise inside a word, after a letter of it.",
-                    ),
-                    false,
-                  ),
-                  standIn: Schema.optionalKey(
-                    doc(
-                      Schema.String,
-                      "With `start`: a morpheme the dictionary has that behaves alike and is as long (`그` for `이`): the word is analyzed with it in its place, and its reading is the morpheme's, its base forms respelled.",
-                    ),
-                  ),
-                  rest: Schema.optionalKey(
-                    doc(
-                      strings,
-                      "With `start`: parts of speech the rest of the word must be (particles), as in `join`.",
-                    ),
-                  ),
-                  afterFinal: orDefault(
-                    doc(
-                      Schema.Boolean,
-                      "Only right after a Hangul syllable that ends in a consonant (`책|이`, not `아이`).",
-                    ),
-                    false,
-                  ),
-                  after: orDefault(
-                    doc(
-                      strings,
-                      "Inside a word: parts of speech of the morpheme before it, as in `join` (nouns and pronouns: `생각` + `이`, not `같` + `이`).",
-                    ),
-                    [],
-                  ),
-                  as: orDefault(
-                    doc(
-                      Schema.Array(
-                        Schema.Struct({
-                          before: Schema.optionalKey(
-                            doc(
-                              strings,
-                              "Only before a morpheme of these parts of speech (endings: `이` + `에요` is the copula).",
-                            ),
-                          ),
-                          pos: doc(
-                            Schema.String,
-                            "Its part of speech (`VCP`, `JKS`).",
-                          ),
-                        }),
-                      ),
-                      "Inside a word: how to read it, the first that fits.",
-                    ),
-                    [],
-                  ),
-                }),
-              ),
-              "Morphemes the analyzer's dictionary lacks: Lindera's ko-dic has no `이` (the subject particle, the copula, the pronoun), and cuts `생각이` as `생|각이`. Inside a word, the word is analyzed again, cut there, and that reading is kept when the dictionary knows more of the word by it: `생각` + `이` (the particle), not `생` + `각이`, but `호랑이` \"tiger\" as it is. The morpheme's base form is spelled as `baseSpellings` says. At a word's start, see `start`.",
-            ),
-            [],
-          ),
-          recheck: orDefault(
-            doc(
-              Schema.Array(
-                Schema.Struct({
-                  pos: doc(
-                    strings,
-                    "Parts of speech of the word's last morpheme, as in `join` (ko-dic `ETM`, an adnominal ending).",
-                  ),
-                  before: doc(
-                    strings,
-                    "Parts of speech the next word must start with, as in `join` (nouns).",
-                  ),
-                }),
-              ),
-              "Words the analyzer may have misread, which a language with spaces can check against the next word: an adnominal ending must come before a noun, so `우리는 어떤가요` is not `우리다` + `-는` but `우리` + `-는`. A word (a run without spaces) that ends in a morpheme of `pos` and is not followed by a word that starts with one of `before` is analyzed alone, and that reading is kept when it no longer ends so.",
-            ),
-            [],
           ),
           stemSuffixes: orDefault(
             doc(
               strings,
-              "Parts of speech of suffixes that make a verb or adjective of the word before them, as in `join` (ko-dic `XSV`, `XSA`: `공부` + `했어요`): the word is looked up as its head written with the suffix's base forms first (`공부하다`), then by the head's own.",
+              "Parts of speech of suffixes that make a verb or adjective of the word before them, as in `join` (Kiwi's `XSV`, `XSA`: `공부` + `했어요`): the word is looked up as its head written with the suffix's base forms first (`공부하다`), then by the head's own.",
             ),
             [],
-          ),
-          stemForms: orDefault(
-            doc(
-              strings,
-              "Spellings of a stem's forms in the dictionary's inflection tables, `*` standing for the stem as the analyzer cuts it: they reach verbs whose forms the stem is part of, when the analyzer's base form misses one. Japanese, the stem itself: `従え` is a form of `従える`, which UniDic reads as `従う`. Korean, the stem with the infinitive ending: a verb whose stem changes (`듣다`: `들어`) is cut as another verb's (`들` of `들다`), and `들어` is a form of both.",
-            ),
-            ["*"],
           ),
           readingField: Schema.optionalKey(
             doc(
@@ -637,6 +528,13 @@ const Context = doc(
             doc(
               strings,
               'Parts of speech of morphemes that make a new word of the word before them (`接尾辞`: `機械` + `屋` "mechanic"). Such a word without an entry of its own is shown by its parts, each with its own entries, not as its head.',
+            ),
+            [],
+          ),
+          compoundPos: orDefault(
+            doc(
+              strings,
+              'Parts of speech of morphemes that make a compound when a `join` rule writes them together (Korean `NNG`, `NNP`: `양자` + `역학`, "quantum mechanics"). Such a word without an entry of its own is shown by its parts, as a word made with `suffixes` is, the longest the dictionary has first (`발색|단`).',
             ),
             [],
           ),

@@ -21,7 +21,8 @@
     "dump:all": "bun apps/server/eval/lookup-dump-all.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "spec": "bun packages/core/scripts/spec.ts"
+    "spec": "bun packages/core/scripts/spec.ts",
+    "kiwi:model": "bun apps/server/scripts/kiwi-model.ts"
   },
   "devDependencies": {
     "@effect/vitest": "4.0.5",

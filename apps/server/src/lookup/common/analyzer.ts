@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { dirname, join } from "node:path";
 import type { Language } from "@dict/core/language";
 
 /**
@@ -18,13 +19,13 @@ export type Morpheme = {
   readonly end: number;
   /**
    * Its part-of-speech tags joined with `-`, unset tags left out
-   * (`動詞-非自立可能`); a fused morpheme's parts' joined with `+` (ko-dic
-   * `VV+EP`).
+   * (`動詞-非自立可能`); a fused morpheme's parts' joined with `+` (Kiwi's
+   * `VV+EP`, `했`).
    */
   readonly pos: string;
   /**
-   * Its base forms, from the language's `baseFields` (a fused morpheme's from
-   * its parts, `fused`), spelled as `baseSpellings` says, in that order,
+   * Its base forms, from the language's `baseFields` (Kiwi's: of each of a
+   * fused morpheme's parts), spelled as `baseSpellings` says, in that order,
    * without repeats.
    */
   readonly bases: ReadonlyArray<string>;
@@ -80,45 +81,33 @@ export const hasPos = (pos: string, tags: ReadonlyArray<string>): boolean =>
     );
 
 /**
- * The morpheme's base forms, each with the part of speech it is the base of:
- * a fused morpheme's from its parts (`하/XSV/*+았/EP/*`), the ones a spelling
- * rule names, or else the first; any other's from `baseFields`. UniDic's lemma
- * may carry a gloss for loanwords (`ダイヤ-diagram`).
+ * A Lindera morpheme's base forms, from `baseFields`, each with the part of
+ * speech it is the base of. UniDic's lemma may carry a gloss for loanwords
+ * (`ダイヤ-diagram`).
  */
-const rawBases = (
-  surface: string,
+const linderaBases = (
   details: ReadonlyArray<string>,
   pos: string,
   settings: AnalyzerSettings,
-): ReadonlyArray<{ readonly base: string; readonly pos: string }> => {
-  const fused = settings.fused;
-  if (
-    fused !== undefined &&
-    fused.types.includes(details[fused.typeField] ?? "")
-  ) {
-    const parts = (details[fused.field] ?? "").split("+").flatMap((part) => {
-      const [base = "", tag = ""] = part.split("/");
-      return base === "" || base === "*" ? [] : [{ base, pos: tag }];
-    });
-    // Stems before the particles and endings fused onto them: `걸` is `거`
-    // (`것`) + `ㄹ`, `했` is `하` + `았`.
-    const affix = (part: { readonly pos: string }) =>
-      settings.baseSpellings.find((rule) => hasPos(part.pos, rule.pos))
-        ?.affix === true;
-    if (parts.length > 0) {
-      return [...parts.filter((part) => !affix(part)), ...parts.filter(affix)];
-    }
-  }
-  const head = pos.split("+")[0]!;
-  const bases = settings.baseFields
+): ReadonlyArray<{ readonly base: string; readonly pos: string }> =>
+  settings.baseFields
     .map((field) => details[field]?.split("-")[0] ?? "")
-    .filter((base) => base !== "" && base !== "*");
-  // Without base fields, the morpheme as written (ko-dic's reading field is
-  // sometimes another word's: `아` read `아이`).
-  return (settings.baseFields.length > 0 ? bases : [surface]).map((base) => ({
-    base,
-    pos: head,
-  }));
+    .filter((base) => base !== "" && base !== "*")
+    .map((base) => ({ base, pos }));
+
+/**
+ * A fused morpheme's parts, stems before the particles and endings fused
+ * onto them (`baseSpellings`' `affix`): `걸` is `거` (`것`) + `ㄹ`, `했` is
+ * `하` + `았`.
+ */
+const stemsFirst = (
+  parts: ReadonlyArray<{ readonly base: string; readonly pos: string }>,
+  settings: AnalyzerSettings,
+): ReadonlyArray<{ readonly base: string; readonly pos: string }> => {
+  const affix = (part: { readonly pos: string }) =>
+    settings.baseSpellings.find((rule) => hasPos(part.pos, rule.pos))?.affix ===
+    true;
+  return [...parts.filter((part) => !affix(part)), ...parts.filter(affix)];
 };
 
 /** Each base form as the dictionary spells it (`baseLetters`, `baseSpellings`): `먹` (`VV`) is `먹다`, `에서` (`JKB`) is `-에서`. */
@@ -182,8 +171,11 @@ export const reread = (
   return out;
 };
 
-/** The npm package that holds each dictionary. Only installed ones load. */
-const PACKAGES: Record<AnalyzerSettings["dictionary"], string> = {
+/** The npm package that holds each Lindera dictionary. Only installed ones load. */
+const PACKAGES: Record<
+  Exclude<AnalyzerSettings["dictionary"], "kiwi">,
+  string
+> = {
   unidic: "lindera-wasm-unidic",
   ipadic: "lindera-wasm-ipadic",
   "ko-dic": "lindera-wasm-ko-dic",
@@ -213,7 +205,7 @@ const tokenizers = new Map<
   ReturnType<InstanceType<Lindera["TokenizerBuilder"]>["build"]>
 >();
 
-const tokenizerFor = (dictionary: AnalyzerSettings["dictionary"]) => {
+const tokenizerFor = (dictionary: keyof typeof PACKAGES) => {
   const cached = tokenizers.get(dictionary);
   if (cached !== undefined) return cached;
   const name = PACKAGES[dictionary];
@@ -245,82 +237,191 @@ const utf16At = (text: string): Map<number, number> => {
   return at;
 };
 
+/** A token of Kiwi's analysis: its base form (`듣` for `들`), tag, and UTF-16 span. */
+type KiwiToken = {
+  readonly str: string;
+  readonly tag: string;
+  readonly position: number;
+  readonly length: number;
+};
+
+type Kiwi = { readonly tokenize: (text: string) => ReadonlyArray<KiwiToken> };
+
 /**
- * Loads the language's analyzer dictionary now, so no lookup waits for it
- * (every request would, since lookups are synchronous). Throws when its
- * package can't be loaded.
+ * Where Kiwi's model files are (`bun run kiwi:model` fetches them there):
+ * `KIWI_MODEL_DIR`, else `models/kiwi` under the working directory.
  */
-export const loadAnalyzer = (language: Language): void => {
+const kiwiModelDir = (): string =>
+  process.env["KIWI_MODEL_DIR"]?.trim() || "models/kiwi";
+
+const KIWI_FILES = [
+  "combiningRule.txt",
+  "cong.mdl",
+  "contraction.dict",
+  "default.dict",
+  "dialect.dict",
+  "extract.mdl",
+  "multi.dict",
+  "nounchr.mdl",
+  "sj.morph",
+  "typo.dict",
+];
+
+let kiwi: Kiwi | undefined;
+let kiwiLoading: Promise<Kiwi> | undefined;
+
+/** Kiwi with its model, built once. Its WebAssembly loads asynchronously; lookups then tokenize synchronously. */
+const loadKiwi = (): Promise<Kiwi> => {
+  kiwiLoading ??= (async () => {
+    const { KiwiBuilder } = (await import("kiwi-nlp")) as unknown as {
+      readonly KiwiBuilder: {
+        create(wasmPath: string): Promise<{
+          build(args: Record<string, unknown>): Promise<Kiwi>;
+        }>;
+      };
+    };
+    const wasm = join(dirname(require.resolve("kiwi-nlp")), "kiwi-wasm.wasm");
+    const builder = await KiwiBuilder.create(wasm);
+    const dir = kiwiModelDir();
+    const modelFiles = Object.fromEntries(
+      KIWI_FILES.map((file) => [
+        file,
+        new Uint8Array(readFileSync(join(dir, file))),
+      ]),
+    );
+    // No multi-word dictionary: its entries span spaces (백일의 낭군님, a
+    // drama's title, as one noun), and a word here ends at a space.
+    kiwi = await builder.build({
+      modelFiles,
+      modelType: "cong",
+      loadMultiDict: false,
+    });
+    return kiwi;
+  })();
+  return kiwiLoading;
+};
+
+/**
+ * Loads the language's analyzer now, so no lookup waits for it (every
+ * request would, since lookups are synchronous). Rejects when its package
+ * or model can't be loaded.
+ */
+export const loadAnalyzer = async (language: Language): Promise<void> => {
   const settings = language.context.analyzer;
-  if (settings !== undefined) tokenizerFor(settings.dictionary);
-};
-
-/** Whether the dictionary has a form: what `restore` weighs two readings by. */
-export type Known = (form: string) => boolean;
-
-const analyzers = new WeakMap<Language, WeakMap<Known, Analyzer>>();
-const NOTHING_KNOWN: Known = () => false;
-
-/** A Hangul syllable that ends in a consonant (`책`, not `아`). */
-const endsInConsonant = (ch: string | undefined): boolean => {
-  const code = ch?.codePointAt(0) ?? 0;
-  return code >= 0xac00 && code <= 0xd7a3 && (code - 0xac00) % 28 !== 0;
+  if (settings === undefined) return;
+  if (settings.dictionary === "kiwi") await loadKiwi();
+  else tokenizerFor(settings.dictionary);
 };
 
 /**
- * The language's analyzer, or undefined when it names none. `known` tells
- * the forms the dictionary has, for `restore`.
+ * A run of text the analyzer read as one piece, with what it is made of:
+ * Lindera's token, or Kiwi's tokens that share a span (`했` is `하` + `었`).
  */
-export const analyzerFor = (
-  language: Language,
-  known: Known = NOTHING_KNOWN,
-): Analyzer | undefined => {
+type Piece = {
+  readonly surface: string;
+  readonly start: number;
+  readonly end: number;
+  readonly pos: string;
+  readonly parts: ReadonlyArray<{
+    readonly base: string;
+    readonly pos: string;
+  }>;
+  readonly reading?: string;
+};
+
+/**
+ * Kiwi's tokens as pieces of the text: tokens whose spans overlap are one
+ * piece, written as the text writes it (`했`: `하` and `었` at one place;
+ * `갈`: `가` and `ᆯ`), its tag the parts' joined with `+`.
+ */
+const kiwiPieces = (text: string, from: number): ReadonlyArray<Piece> => {
+  if (kiwi === undefined) {
+    throw new Error("Kiwi is not loaded: call loadAnalyzer first");
+  }
+  const groups: Array<{ start: number; end: number; tokens: KiwiToken[] }> = [];
+  for (const token of kiwi.tokenize(text)) {
+    const start = token.position;
+    const end = token.position + token.length;
+    const last = groups.at(-1);
+    // Overlapping tokens are one piece, and so is a token with no span of
+    // its own and the one after it: Kiwi gives the copula in 냄새야 as `이`
+    // of length 0 before `야`.
+    if (
+      last !== undefined &&
+      (start < last.end || end <= last.start || last.start === last.end)
+    ) {
+      last.end = Math.max(last.end, end);
+      last.tokens.push(token);
+    } else {
+      groups.push({ start, end, tokens: [token] });
+    }
+  }
+  return groups.map(({ start, end, tokens }) => ({
+    surface: text.slice(start, end),
+    start: from + start,
+    end: from + end,
+    pos: tokens.map((token) => token.tag).join("+"),
+    parts: tokens.map((token) => ({ base: token.str, pos: token.tag })),
+  }));
+};
+
+const analyzers = new WeakMap<Language, Analyzer>();
+
+/** The language's analyzer, or undefined when it names none. */
+export const analyzerFor = (language: Language): Analyzer | undefined => {
   const settings = language.context.analyzer;
   if (settings === undefined) return undefined;
-  let byKnown = analyzers.get(language);
-  if (byKnown === undefined) {
-    byKnown = new WeakMap();
-    analyzers.set(language, byKnown);
-  }
-  const cached = byKnown.get(known);
+  const cached = analyzers.get(language);
   if (cached !== undefined) return cached;
   const tokenize: Analyzer = (text) =>
-    reread(
-      recheck(
-        text,
-        restore(text, morphemesOf(text, 0), settings, morphemesOf, known),
-        settings,
-        morphemesOf,
-      ),
-      settings.reread,
+    reread(morphemesOf(text, 0), settings.reread);
+  const linderaPieces = (text: string, from: number): ReadonlyArray<Piece> => {
+    const tokenizer = tokenizerFor(
+      settings.dictionary as keyof typeof PACKAGES,
     );
-  const morphemesOf = (text: string, from: number): ReadonlyArray<Morpheme> => {
-    const tokenizer = tokenizerFor(settings.dictionary);
     const offsets = utf16At(text);
     return tokenizer.tokenize(text).map((token) => {
       const { details } = token;
       const pos = details
-        .slice(0, settings.posFields)
+        .slice(0, 4)
         .filter((tag) => tag !== "*" && tag !== "")
         .join("-");
-      const raw = rawBases(token.surface, details, pos, settings);
-      const bases = spelledBases(raw, settings);
-      const respelled = raw.some(({ pos }) =>
-        settings.baseSpellings.some((rule) => hasPos(pos, rule.pos)),
-      );
       const reading =
         settings.readingField === undefined
           ? undefined
           : details[settings.readingField];
-      const morpheme: Morpheme = {
+      const piece: Piece = {
         ...(reading !== undefined && reading !== "" && reading !== "*"
           ? { reading }
           : {}),
-        ...(respelled ? { respelled } : {}),
         surface: token.surface,
         start: from + (offsets.get(token.byte_start) ?? 0),
         end: from + (offsets.get(token.byte_end) ?? text.length),
         pos,
+        parts: linderaBases(details, pos, settings),
+      };
+      token.free();
+      return piece;
+    });
+  };
+  const morphemesOf = (text: string, from: number): ReadonlyArray<Morpheme> =>
+    (settings.dictionary === "kiwi"
+      ? kiwiPieces(text, from)
+      : linderaPieces(text, from)
+    ).map((token) => {
+      const raw = stemsFirst(token.parts, settings);
+      const bases = spelledBases(raw, settings);
+      const respelled = raw.some(({ pos }) =>
+        settings.baseSpellings.some((rule) => hasPos(pos, rule.pos)),
+      );
+      const { reading } = token;
+      const morpheme: Morpheme = {
+        ...(reading !== undefined ? { reading } : {}),
+        ...(respelled ? { respelled } : {}),
+        surface: token.surface,
+        start: token.start,
+        end: token.end,
+        pos: token.pos,
         bases,
         spellings: [
           ...new Set([
@@ -333,10 +434,8 @@ export const analyzerFor = (
           ]),
         ],
       };
-      token.free();
       return morpheme;
     });
-  };
   // The same sentence is analyzed again for each word clicked in it (a
   // reader clicks several; a corpus collection sends every word), and one
   // lookup analyzes it, and the lemmas it finds, several times: the most
@@ -361,223 +460,8 @@ export const analyzerFor = (
     }
     return morphemes;
   };
-  byKnown.set(known, analyze);
+  analyzers.set(language, analyze);
   return analyze;
-};
-
-/**
- * The morphemes with each word that a `recheck` rule finds misread analyzed
- * alone, when that reading no longer ends in the rule's `pos`: `우리는` ends
- * in an adnominal ending (`우리다` + `-는`) with no noun after it, and alone
- * it is `우리` + `-는`.
- */
-const recheck = (
-  text: string,
-  morphemes: ReadonlyArray<Morpheme>,
-  settings: AnalyzerSettings,
-  morphemesOf: (text: string, from: number) => ReadonlyArray<Morpheme>,
-): ReadonlyArray<Morpheme> => {
-  if (settings.recheck.length === 0) return morphemes;
-  let out = morphemes;
-  const words = [...text.matchAll(/\S+/g)].map((w) => ({
-    start: w.index,
-    end: w.index + w[0].length,
-  }));
-  words.forEach(({ start, end }, i) => {
-    const inside = out.filter((m) => m.start >= start && m.end <= end);
-    const last = inside.filter((m) => /\p{L}/u.test(m.surface)).at(-1);
-    if (last === undefined || last.end !== end) return;
-    const next = words[i + 1];
-    const first =
-      next === undefined
-        ? undefined
-        : out.find((m) => m.start >= next.start && m.end <= next.end);
-    const rule = settings.recheck.find(
-      (r) =>
-        hasPos(last.pos, r.pos) &&
-        (first === undefined || !hasPos(first.pos, r.before)),
-    );
-    if (rule === undefined) return;
-    const alone = morphemesOf(text.slice(start, end), start);
-    const aloneLast = alone.at(-1);
-    if (aloneLast === undefined || hasPos(aloneLast.pos, rule.pos)) return;
-    out = [
-      ...out.filter((m) => m.end <= start),
-      ...alone,
-      ...out.filter((m) => m.start >= end),
-    ];
-  });
-  return out;
-};
-
-/**
- * The word from `start` to `end` read with a `start` rule's stand-in for the
- * morpheme it starts with (`그를` for `이를`), when the stand-in is a morpheme
- * of its own there and the rest of the word is of the rule's `rest`: the
- * stand-in's reading, as the morpheme (`이` the pronoun, then `-를`).
- */
-const restoreStart = (
-  text: string,
-  morphemes: ReadonlyArray<Morpheme>,
-  start: number,
-  end: number,
-  rule: AnalyzerSettings["restore"][number],
-  morphemesOf: (text: string, from: number) => ReadonlyArray<Morpheme>,
-): ReadonlyArray<Morpheme> => {
-  const { surface, standIn } = rule;
-  if (
-    standIn === undefined ||
-    standIn.length !== surface.length ||
-    end - start <= surface.length ||
-    !text.startsWith(surface, start)
-  ) {
-    return morphemes;
-  }
-  const read = morphemesOf(
-    standIn + text.slice(start + surface.length, end),
-    start,
-  );
-  const [first, ...rest] = read;
-  if (
-    first === undefined ||
-    first.surface !== standIn ||
-    rest.length === 0 ||
-    !rest.every((m) => hasPos(m.pos, rule.rest ?? []))
-  ) {
-    return morphemes;
-  }
-  const respell = (form: string) => form.replaceAll(standIn, surface);
-  const restored: Morpheme = {
-    ...first,
-    surface,
-    bases: first.bases.map(respell),
-    spellings: [surface],
-  };
-  return [
-    ...morphemes.filter((m) => m.end <= start),
-    restored,
-    ...rest,
-    ...morphemes.filter((m) => m.start >= end),
-  ];
-};
-
-/**
- * The morphemes with each word that holds a `restore` morpheme read again,
- * cut there, when the dictionary knows at least as much of the word by that
- * reading (`생각` + `이`, against `생` + `각이`), and the morpheme before
- * the cut is of the rule's `after` (not `같` + `이`, for `같이` "together").
- * A word is a run of text without spaces.
- */
-const restore = (
-  text: string,
-  morphemes: ReadonlyArray<Morpheme>,
-  settings: AnalyzerSettings,
-  morphemesOf: (text: string, from: number) => ReadonlyArray<Morpheme>,
-  known: Known,
-): ReadonlyArray<Morpheme> => {
-  if (settings.restore.length === 0) return morphemes;
-  let out = morphemes;
-  for (const word of text.matchAll(/\S+/g)) {
-    const start = word.index;
-    const end = start + word[0].length;
-    const cuts: Array<{
-      readonly at: number;
-      readonly rule: AnalyzerSettings["restore"][number];
-    }> = [];
-    for (const rule of settings.restore) {
-      if (rule.start) {
-        out = restoreStart(text, out, start, end, rule, morphemesOf);
-        continue;
-      }
-      for (let at = start + 1; at < end; at++) {
-        if (
-          text.startsWith(rule.surface, at) &&
-          (!rule.afterFinal || endsInConsonant(text[at - 1]))
-        ) {
-          cuts.push({ at, rule });
-        }
-      }
-    }
-    if (cuts.length === 0) continue;
-    let blanked = word[0];
-    for (const { at, rule } of cuts) {
-      blanked =
-        blanked.slice(0, at - start) +
-        " ".repeat(rule.surface.length) +
-        blanked.slice(at - start + rule.surface.length);
-    }
-    const read = [...morphemesOf(blanked, start)];
-    const restored: Array<Morpheme> = [];
-    let fits = true;
-    for (const { at, rule } of cuts) {
-      const before = read.find((m) => m.end === at);
-      if (before === undefined || !hasPos(before.pos, rule.after)) {
-        fits = false;
-        break;
-      }
-      const next = read.find((m) => m.start === at + rule.surface.length);
-      const as = rule.as.find(
-        (a) =>
-          a.before === undefined ||
-          (next !== undefined && hasPos(next.pos, a.before)),
-      );
-      if (as === undefined) {
-        fits = false;
-        break;
-      }
-      const bases = spelledBases(
-        [{ base: rule.surface, pos: as.pos }],
-        settings,
-      );
-      restored.push({
-        ...(bases.some((base) => base !== rule.surface)
-          ? { respelled: true }
-          : {}),
-        surface: rule.surface,
-        start: at,
-        end: at + rule.surface.length,
-        pos: as.pos,
-        bases,
-        spellings: [rule.surface],
-      });
-    }
-    if (!fits) continue;
-    const inside = (m: Morpheme) => m.start >= start && m.end <= end;
-    const before = out.filter(inside);
-    const after = [...read, ...restored].sort((a, b) => a.start - b.start);
-    // Letters the dictionary knows a morpheme of, by any base form.
-    const score = (list: ReadonlyArray<Morpheme>) =>
-      list.reduce(
-        (sum, m) =>
-          sum +
-          ([m.surface, ...m.bases].some((form) => known(form))
-            ? m.end - m.start
-            : 0),
-        0,
-      );
-    // Where the analyzer cut there already, but couldn't read the morpheme
-    // (`세균` + `이`, unknown), the rule's reading is better at once.
-    // So too where it read the morpheme and what follows as another word
-    // (`이고` as `이다` "to carry on the head" + `-고`).
-    const cutAlready = cuts.every(({ at, rule }) =>
-      before.some((m) => m.start === at && m.surface.startsWith(rule.surface)),
-    );
-    // On a tie, the rule's reading when the analyzer's cuts into the word
-    // before the morpheme (`그|것이` against `그것` + `이`), not when it
-    // reads the whole as one word (`호랑이` "tiger", not `호랑` + `이`).
-    const splitBefore = cuts.some(({ at }) => {
-      const word = read.find((m) => m.end === at)!;
-      return before.some((m) => m.start > word.start && m.start < word.end);
-    });
-    const gain = score(after) - score(before);
-    if (!cutAlready && (gain < 0 || (gain === 0 && !splitBefore))) continue;
-    out = [
-      ...out.filter((m) => m.end <= start),
-      ...after,
-      ...out.filter((m) => m.start >= end),
-    ];
-  }
-  return out;
 };
 
 /**

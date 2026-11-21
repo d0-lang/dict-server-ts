@@ -3,8 +3,8 @@ import { dictionary } from "./dictionary.ts";
 /**
  * Korean: lemmas as Wiktionary writes them (verbs with `다`, particles and
  * endings with hyphens), forms as its conjugation tables list them. Lookups
- * with context go through the real analyzer (Lindera's ko-dic), so its
- * morphemes decide what is looked up.
+ * with context go through the real analyzer (Kiwi), so its morphemes decide
+ * what is looked up.
  */
 export const korean = dictionary([
   ["먹다", "VERB", ["먹어", "먹었다", "먹었습니다"], ["to eat"]],
@@ -37,7 +37,19 @@ export const korean = dictionary([
   ["가", "SYM", [], ["the first syllable"], "symbol"],
   ["년", "NOUN", [], ["(vulgar) woman"]],
   ["년", "X", [], ["year"], "counter"],
+  ["번", "NOUN", [], ["occasion"]],
+  ["번", "X", [], ["times"], "counter"],
+  ["가다", "VERB", ["갔다"], ["to go"]],
   ["괜찮다", "ADJ", ["괜찮아요"], ["to be fine"]],
+  ["냄새", "NOUN", [], ["smell"]],
+  ["야", "INTJ", [], ["hey"]],
+  ["양자", "NOUN", [], ["quantum"]],
+  ["역학", "NOUN", [], ["mechanics"]],
+  ["양자역학", "NOUN", [], ["quantum mechanics"]],
+  ["발색", "NOUN", [], ["color development"]],
+  ["단", "NOUN", [], ["group"]],
+  ["미술관", "NOUN", [], ["art museum"]],
+  ["백", "NUM", [], ["hundred"]],
   // particles and endings
   ["-에서", "PART", [], ["at, from"], "particle"],
   ["-이", "PART", [], ["subject"], "particle"],
@@ -54,4 +66,6 @@ export const korean = dictionary([
   ["-지만", "X", [], ["but"], "suffix"],
   ["-지", "X", [], ["(negation)"], "suffix"],
   ["-에요", "X", [], ["polite (copula)"], "suffix"],
+  ["-야", "X", [], ["intimate (copula)"], "suffix"],
+  ["-의", "PART", [], ["of"], "particle"],
 ]);

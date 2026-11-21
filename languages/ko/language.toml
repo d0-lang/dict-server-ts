@@ -24,47 +24,48 @@ pointerWords = ["yang-vowel", "post-vowel", "post-vocalic", "post-liquid", "post
 # Korean writes spaces, but between eojeols: a word with its particles and
 # endings (학교에서 = 학교 + 에서, 먹었습니다 = 먹 + 었 + 습니다), which the
 # segmenter gives whole. Verb stems fuse with their endings (했 = 하 + 았,
-# 갈 = 가 + ㄹ), so no table of forms finds them all. ko-dic (mecab-ko-dic)
-# cuts the eojeol into morphemes. It takes about 370 MB of memory.
-dictionary = "ko-dic"
-# Only the first field is a part of speech: the next are a semantic class
-# (장소), whether the syllable ends in a consonant, and a reading.
-posFields = 1
-# None: the morpheme as written. The reading field is mostly that, but
-# sometimes another word's (아 read 아이, 물론 몰론).
-baseFields = []
-# Inflected forms fused of several morphemes (했 is 하/XSV + 았/EP, 갈 is
-# 가/VV + ᆯ/ETM, 예뻐요 is 예쁘/VA + 어요/EF): their parts' base forms, from
-# the expression field. Not a compound noun (한국어 is 한국 + 어, but its own
-# word) nor a pre-analysed name (텍사스주).
-fused = { typeField = 4, types = ["Inflect"], field = 7 }
-# ko-dic writes a final consonant ending with the jamo that ends a syllable
+# 갈 = 가 + ㄹ), so no table of forms finds them all: an analyzer cuts the
+# eojeol into morphemes.
+# Kiwi, not Lindera's ko-dic: ko-dic's build has no 이 (the subject particle,
+# the copula, the pronoun), so it cut 생각이 as 생|각이, and it has no
+# language model, so it read 들었는데 as 들다, 한 번 as 하다 + 벌다, 여러
+# 가지 as 가지다. On the corpus, ko-dic's head words agreed with Kiwi's on
+# 89% of words, 91% with workarounds (profile.md). Kiwi takes about 0.75 GB
+# of memory, against ko-dic's 0.35 GB.
+dictionary = "kiwi"
+# Kiwi gives each morpheme's base form (듣 for 들, 하 and 었 for 했), and
+# marks a fused syllable by giving its morphemes one place in the text: they
+# are one piece, as written (했), with each one's base form.
+# Kiwi writes a final consonant ending with the jamo that ends a syllable
 # (가 + ᆯ), Wiktionary with the letter (-ㄹ).
 baseLetters = { "ᆫ" = "ㄴ", "ᆯ" = "ㄹ", "ᆷ" = "ㅁ", "ᆸ" = "ㅂ", "ᆻ" = "ㅆ" }
 # Hangul is written as it sounds: no reading field.
 # 하다 and 되다 after a noun make a verb of it: 공부했어요 is 공부하다.
 stemSuffixes = ["XSV", "XSA"]
-# A stem that changes (듣다: 들어, 들었다) is cut as another verb's (들 of
-# 들다), or as none: the stem with the infinitive ending is a form in the
-# tables of every verb it may be (들어: 듣다, 들다).
-stemForms = ["*어", "*아"]
+# Numbers, which Kiwi tags SN: the word after one is read as a counter, and
+# Wiktionary's counter lines come first (년 "year" in 2024년, not 년 the
+# insult).
+numbers = ["SN"]
+counters = ["counter"]
 # A space ends each word with its particles and endings: an eojeol written
-# like an adverb or conjunction is that word (하지만 "but", which ko-dic cuts
-# 하 + 지만), and a verb with endings is no noun spelled alike (하지 "do not",
-# not "summer solstice").
+# like an adverb or conjunction is that word (하지만 "but", 하 + 지만 to
+# the analyzer), and a verb with endings is no noun spelled alike (하지 "do
+# not", not "summer solstice").
 spacedWords = true
-# A word's entries of the part of speech ko-dic reads it as come first
-# (우리 "we" the pronoun, before 우리 "cage"; the particle -는 before the
-# ending).
+# A word's entries of the part of speech Kiwi reads it as come first (우리
+# "we" the pronoun, before 우리 "cage"; the particle -는 before the ending).
 ranksByPos = true
 # A prefix joins the word after it (신|제품).
 prefixes = ["XPN"]
 # A suffix makes a new word (학생|들, 국제|적): one without an entry is shown
 # by its parts.
 suffixes = ["XSN"]
+# Nouns written together make a compound (양자|역학, a join rule below): one
+# without an entry is shown by the longest parts Wiktionary has (발색|단).
+compoundPos = ["NNG", "NNP"]
 
 # Wiktionary lists a verb or adjective by its dictionary form, the stem with
-# 다 (먹다; ko-dic gives 먹), and the copula as -이다.
+# 다 (먹다; Kiwi gives 먹), and the copula as -이다.
 [[context.analyzer.baseSpellings]]
 pos = ["VV", "VA", "VX", "VCN", "XSV", "XSA"]
 spellings = ["*다"]
@@ -89,15 +90,13 @@ spellings = ["-*"]
 affix = true
 
 [context.analyzer.upos]
-# ko-dic's tags (Sejong's) as UD tags, to tell which entries fit its reading
+# Kiwi's tags (Sejong's) as UD tags, to tell which entries fit its reading
 # of a word. Wiktionary lists 있다 and 없다 as both verb and adjective, and
 # conjunctive adverbs (그리고) as adverbs. Particles and endings are particle
 # and suffix lines.
 NNG = ["NOUN"]
 NNP = ["PROPN", "NOUN"]
 NNB = ["NOUN"]
-# A counter (년 "year" after a number) is Wiktionary's counter line first.
-NNBC = ["X", "NOUN"]
 NR = ["NUM"]
 NP = ["PRON"]
 VV = ["VERB"]
@@ -135,8 +134,8 @@ after = ["EC"]
 
 [[context.analyzer.join]]
 # 하다 after -아/-어 makes a verb of an adjective: 좋아|하다 "to like",
-# 슬퍼|하다 "to grieve". ko-dic tags this 하 as a verb of its own.
-pos = ["VV"]
+# 슬퍼|하다 "to grieve". Kiwi tags this 하 as an auxiliary or a verb.
+pos = ["VV", "VX"]
 base = ["하다"]
 after = ["EC"]
 afterSurface = ["아", "어", "여"]
@@ -148,39 +147,18 @@ pos = ["XSV", "XSA"]
 after = ["NNG", "NNP", "NNB", "XR", "MAG"]
 
 [[context.analyzer.join]]
+# A counter or unit after a number: 2024|년, 3|번. Wiktionary's counter
+# lines come first then (numbers, counters).
+pos = ["NNB", "NNG"]
+after = ["SN"]
+
+[[context.analyzer.join]]
 # A suffix after a noun: 학생|들, 국제|적.
 pos = ["XSN"]
-after = ["NNG", "NNP", "NNB", "NNBC", "NP", "NR", "XR", "XSN"]
+after = ["NNG", "NNP", "NNB", "NP", "NR", "XR", "XSN"]
 
-# An adnominal ending comes before a noun. ko-dic reads some nouns with a
-# particle as a verb with one (우리는 as 우리다 + -는, in 우리는 어떤가요):
-# such a word not followed by a noun is read again alone.
-[[context.analyzer.recheck]]
-pos = ["ETM"]
-before = ["NNG", "NNP", "NNB", "NNBC", "NR", "NP", "XPN", "SN", "SL", "SH", "UNK"]
-
-# Lindera's ko-dic has no 이 at all (the source mecab-ko-dic has 30 entries
-# for it): it cuts 생각이 as 생|각이 and 학생이에요 as 학생|이에|요. After a
-# noun ending in a consonant, 이 is read as cut off: the copula before an
-# ending (학생|이|에요), else the subject particle (생각|이), when the
-# dictionary knows as much of the word that way (not 같이 "together").
-[[context.analyzer.restore]]
-surface = "이"
-afterFinal = true
-after = ["NNG", "NNP", "NNB", "NNBC", "NR", "NP", "XSN"]
-as = [{ before = ["EP", "EF", "EC", "ETM", "ETN"], pos = "VCP" }, { pos = "JKS" }]
-
-# At a word's start before particles, 이 is the pronoun "this" (이를, 이는,
-# 이에): read as 그 "that", which behaves alike (그를, 그는, 그에).
-[[context.analyzer.restore]]
-surface = "이"
-start = true
-standIn = "그"
-rest = ["JKS", "JKC", "JKG", "JKO", "JKB", "JKV", "JKQ", "JX", "JC"]
-
-# 이 by itself, which ko-dic can't read: mostly the determiner "this" (이
-# 사람).
-[[context.analyzer.reread]]
-pos = ["UNK"]
-surface = ["이"]
-as = { pos = "MM", base = "이" }
+[[context.analyzer.join]]
+# A noun written onto a noun: 양자|역학, 민족|말살. Kiwi cuts a compound it
+# doesn't know into nouns it does; Wiktionary often has it whole.
+pos = ["NNG", "NNP"]
+after = ["NNG", "NNP"]

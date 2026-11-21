@@ -5,12 +5,12 @@ import { lookupKey } from "@dict/core/lookupKey";
 import {
   analyzerFor,
   type Analyzer,
-  type Known,
   type Morpheme,
 } from "../../common/analyzer.ts";
 import type { LookupEntry, LookupResult } from "../../common/entries.ts";
 import { type FormRow, formRows } from "../../common/forms.ts";
 import { copyStart } from "../../common/tokenize.ts";
+import { withKnownPieces } from "./pieces.ts";
 import {
   endOf,
   hasPos,
@@ -86,27 +86,6 @@ export type Click = {
   readonly severalWords: (row: FormRow) => boolean;
 };
 
-const knowns = new WeakMap<DictionaryDb, Known>();
-
-/** Whether `db` has a form, cached per dictionary: for the analyzer's `restore`. */
-const knownIn = (db: DictionaryDb): Known => {
-  let known = knowns.get(db);
-  if (known === undefined) {
-    const seen = new Map<string, boolean>();
-    known = (form) => {
-      const key = lookupKey(form);
-      let has = seen.get(key);
-      if (has === undefined) {
-        has = formRows(db, key).length > 0;
-        seen.set(key, has);
-      }
-      return has;
-    };
-    knowns.set(db, known);
-  }
-  return known;
-};
-
 /** Where the only copy of `word` in `context` starts, or -1 when there is none or more than one. */
 const onlyCopy = (context: string, word: string): number => {
   const first = context.indexOf(word);
@@ -127,7 +106,7 @@ export const clickOf = (
   at?: number,
 ): Click | undefined => {
   const settings = language.context.analyzer;
-  const analyze = analyzerFor(language, knownIn(db));
+  const analyze = analyzerFor(language);
   if (settings === undefined || analyze === undefined) return undefined;
   // The click by its place in the string, as `at` counts copies of `word`,
   // not by the server's own segmenter: Bun's cuts a sentence otherwise than
@@ -147,7 +126,10 @@ export const clickOf = (
   // language. A unit after a number is (`28g`: the analyzer reads `グラム`).
   if (/^[\p{Script=Latin}\p{P}]+$/u.test(word)) return undefined;
 
-  const words = wordsOf(analyze(context), settings);
+  const words = wordsOf(
+    withKnownPieces(db, settings, analyze(context)),
+    settings,
+  );
   // The word the piece starts with, when it starts one (`に` of `における`,
   // `東` of `東日本`). A piece that starts inside a word is cut off from it
   // (`思っ|たより`): then the word holding most of the piece, the first on a
