@@ -30,8 +30,8 @@ pointerWords = ["yang-vowel", "post-vowel", "post-vocalic", "post-liquid", "post
 # the copula, the pronoun), so it cut 생각이 as 생|각이, and it has no
 # language model, so it read 들었는데 as 들다, 한 번 as 하다 + 벌다, 여러
 # 가지 as 가지다. On the corpus, ko-dic's head words agreed with Kiwi's on
-# 89% of words, 91% with workarounds (profile.md). Kiwi takes about 0.75 GB
-# of memory, against ko-dic's 0.35 GB.
+# 89% of words, 91% with workarounds (profile.md). Kiwi adds about 0.63 GB
+# to the server at rest, against ko-dic's 0.30 GB.
 dictionary = "kiwi"
 # Kiwi gives each morpheme's base form (듣 for 들, 하 and 었 for 했), and
 # marks a fused syllable by giving its morphemes one place in the text: they
