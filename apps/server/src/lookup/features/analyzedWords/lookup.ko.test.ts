@@ -104,7 +104,7 @@ describe("Korean words, cut by Kiwi", () => {
     // Kiwi: 냄새 + 이 (length 0) + 야, so 야 is the copula, not "hey".
     assert.deepStrictEqual(parts("냄새야", "이게 뭔 냄새야?"), [
       "냄새: 냄새",
-      "야: -이다",
+      "야: -이다, -야",
     ]);
   });
 
@@ -126,6 +126,50 @@ describe("Korean words, cut by Kiwi", () => {
       "미술관: 미술관",
       "에서: -에서",
     ]);
+  });
+
+  it("shows each ending of a word in a longer click (spacedWords)", () => {
+    // 처음 + 이니까 are two words; 이니까 is a form of the copula, but -니까
+    // "because" is what the reader needs.
+    assert.deepStrictEqual(parts("처음이니까", "이 삶이 처음이니까."), [
+      "처음: 처음",
+      "이: -이다",
+      "니까: -으니",
+    ]);
+  });
+
+  it("shows each ending fused into one syllable", () => {
+    // 신 is -시- (a form of -으시-) + -ㄴ.
+    assert.deepStrictEqual(parts("오신", "선생님이 오신 날."), [
+      "오: 오다",
+      "신: -으시-, -ㄴ",
+    ]);
+  });
+
+  it("shows what an ending adds to the copula fused into it", () => {
+    // 라는 is the copula with no letters + -라는 "called" (a form of
+    // -이라는): the grammar line first, then "to be".
+    assert.deepStrictEqual(parts("수도라는", "한국의 수도라는 서울."), [
+      "수도: 수도",
+      "라는: -이라는, -이다",
+    ]);
+  });
+
+  it("reads an auxiliary verb with the verb before it (auxiliaries)", () => {
+    assert.strictEqual(
+      first("전해진다고", "시간을 넘어 전해진다고."),
+      "전해지다",
+    );
+  });
+
+  it("finds a construction over words a space apart, from an ending", () => {
+    // 갈 is 가 + ㄹ: the construction is -ㄹ 수 있다.
+    assert.strictEqual(first("수", "내일 갈 수 있다."), "-을 수 있다");
+    assert.strictEqual(first("있다", "내일 갈 수 있다."), "-을 수 있다");
+    // From a particle, a word of its own.
+    assert.strictEqual(first("따라", "급수에 따라 다르다."), "-에 따라");
+    // From a word's start.
+    assert.strictEqual(first("들어", "예를 들어 사과."), "예를 들어");
   });
 
   it("reads no word across a space (no multi-word dictionary)", () => {

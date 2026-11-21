@@ -616,6 +616,13 @@
               },
               "description": "Parts of speech of morphemes that make a new word of the word before them (`接尾辞`: `機械` + `屋` \"mechanic\"). Such a word without an entry of its own is shown by its parts, each with its own entries, not as its head."
             },
+            "auxiliaries": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Parts of speech of auxiliary verbs that a `join` rule writes onto the verb before them (Kiwi's `VX`): the word is looked up as its text up to the auxiliary with the auxiliary's base forms first (`전해` + `지다`: `전해지다` \"to be passed down\"; `도와주다`), then by the head's own."
+            },
             "compoundPos": {
               "type": "array",
               "items": {

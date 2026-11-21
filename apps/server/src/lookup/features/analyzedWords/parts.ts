@@ -148,10 +148,22 @@ export const wholeIds = (
   // A suffix that makes a verb of the head: the head with it (`공부하다`
   // for `공부|했어요`), before the head alone (`공부` "study").
   const next = w[w.indexOf(head) + 1];
-  const derived =
-    next !== undefined && hasPos(next.pos, c.settings.stemSuffixes)
+  // An auxiliary verb written onto the verb before it (`auxiliaries`): the
+  // text up to it with its base form (`전해지다` for `전해|진다고`, the
+  // passive), before the head alone (`전하다`).
+  const auxiliary = w
+    .slice(w.indexOf(head) + 1)
+    .find((m) => hasPos(m.pos, c.settings.auxiliaries));
+  const derived = [
+    ...(next !== undefined && hasPos(next.pos, c.settings.stemSuffixes)
       ? next.bases.map((base) => prefix + head.surface + base)
-      : [];
+      : []),
+    ...(auxiliary === undefined
+      ? []
+      : auxiliary.bases.map(
+          (base) => c.context.slice(startOf(w), auxiliary.start) + base,
+        )),
+  ];
   const bases = head.bases.flatMap((base) =>
     prefix === "" ? [base] : [prefix + base, base],
   );
@@ -204,28 +216,34 @@ export const wholeIds = (
       row.source === FormSource.Lemma &&
       LEXICALIZED.has(row.pos) &&
       lookupKey(row.lemma) === lookupKey(written);
-    const inflecting = found.filter(
-      (row) => INFLECTING.has(row.pos) || own(row),
-    );
     // In a language with spaces, rows of the word as written that fit
     // neither the analyzer's reading of it nor the word itself are another
     // word spelled alike: `하지` "summer solstice" for `하` + `-지`, `잇다`'s
-    // table for the copula `이에요`. Its base forms find it.
-    if (
+    // table for the copula `이에요`. Its base forms find it. Where some do
+    // fit, the others go (`이다` "to carry on the head" for the copula
+    // `이` + `-다`).
+    const fitting = found.filter((row) => headPos.has(row.pos) || own(row));
+    const spelledAlike =
       c.settings.spacedWords &&
       inflected &&
       form === written &&
-      headPos.size > 0 &&
-      !found.some((row) => headPos.has(row.pos) || own(row))
-    ) {
-      continue;
-    }
-    const kept = inflected && inflecting.length > 0 ? inflecting : found;
+      headPos.size > 0;
+    if (spelledAlike && fitting.length === 0) continue;
+    const read = spelledAlike ? fitting : found;
+    const inflecting = read.filter(
+      (row) => INFLECTING.has(row.pos) || own(row),
+    );
+    const kept = inflected && inflecting.length > 0 ? inflecting : read;
     // The base forms' own entries first, the last named first: it is the
     // most specific (UniDic's lemma `要る` against the written `いる`, which
     // is also `居る`). Entries that only name the form follow (`行った`
     // "past of 行く").
+    // A verb made with a suffix or auxiliary comes before them, being more
+    // specific still (`전해지다` before `전하다`).
     const priority = (row: FormRow) => {
+      if (derived.some((form) => lookupKey(form) === lookupKey(row.lemma))) {
+        return -1;
+      }
       const at = head.bases.map(lookupKey).lastIndexOf(lookupKey(row.lemma));
       return at < 0 ? head.bases.length : head.bases.length - 1 - at;
     };
@@ -417,10 +435,44 @@ export const morphemeParts = (
     // The stem carries the word's meaning, so its entries rank first, even
     // with a prefix written before it (`お|送り`, `お|名前`): the client
     // opens on the segment of the first entry in one.
+    // An ending fused of several (`신`: `-시-` + `-ㄴ`; `였`: `-이다` +
+    // `-었-`; `라는`, the copula with no letters + `-라는`), not with a
+    // stem (`한데`: `하다` + `-ㄴ데`), is each of them: by its grammar-file line, else its own
+    // entries, else those of the one word it is a form of (`-시-` of
+    // `-으시-`), so neither hides the other.
+    const fusedParts =
+      morpheme.pos.includes("+") &&
+      morpheme.bases.every((base) => base.startsWith("-"))
+        ? morpheme.bases.map((base) => {
+            const lines = grammarIds(c.db, base);
+            if (lines.length > 0) return { ids: lines, line: true };
+            const rows = c.rows(base);
+            const own = rows.filter(
+              (row) => lookupKey(row.lemma) === lookupKey(base),
+            );
+            const kept =
+              own.length > 0
+                ? own
+                : new Set(rows.map((row) => lookupKey(row.lemma))).size === 1
+                  ? rows
+                  : [];
+            return { ids: kept.map((row) => row.id), line: false };
+          })
+        : [];
+    // Grammar-file lines first: they say what the ending adds (`라는`:
+    // `-이라는` "called", before the copula's "to be").
+    const fusedIds = [
+      ...fusedParts.filter((b) => b.line),
+      ...fusedParts.filter((b) => !b.line),
+    ].flatMap((b) => b.ids);
     add(
       i,
       i + 1,
-      !isHead && grammar.length > 0 ? grammar : ranked.map((row) => row.id),
+      fusedIds.length > 0
+        ? fusedIds
+        : !isHead && grammar.length > 0
+          ? grammar
+          : ranked.map((row) => row.id),
       isHead,
     );
     i++;
@@ -566,7 +618,34 @@ export const wordParts = (
   const inflected = w.some((m) =>
     [...c.uposOf(m)].some((tag) => INFLECTING.has(tag)),
   );
-  if (w.length === 1 || !inflected || c.rows(c.textOf(w)).length > 0) {
+  // In a language with spaces the endings carry the meaning a word of a
+  // longer click needs (`처음|이니까`: `-니까` "because"; `돌리|면` "if"),
+  // so a word with an ending after its head is split however the
+  // dictionary lists it, as a word clicked alone is. Not one made with a
+  // suffix or counter (`학|계`, `18|개월`).
+  const headAt = w.indexOf(headOf(w, c.settings));
+  const ending = w.some(
+    (m, i) =>
+      i > headAt &&
+      !hasPos(m.pos, c.settings.suffixes) &&
+      m.bases.some((base) => base.startsWith("-")),
+  );
+  // An ending fused of several is each of them, even alone, by its parts
+  // rather than as written (`라는`: the copula with no letters + `-라는`
+  // "called").
+  if (
+    c.settings.spacedWords &&
+    w.length === 1 &&
+    w[0]!.pos.includes("+") &&
+    w[0]!.bases.every((base) => base.startsWith("-"))
+  ) {
+    const [part] = morphemeParts(c, w, shown);
+    return [{ text: part!.text, ids: part!.ids, ...(main ? { main } : {}) }];
+  }
+  const split = c.settings.spacedWords
+    ? ending
+    : inflected && c.rows(c.textOf(w)).length === 0;
+  if (w.length === 1 || !split) {
     return [{ text: c.textOf(w), ids: whole, ...(main ? { main } : {}) }];
   }
   const parts = morphemeParts(c, w, new Set([...shown, ...whole]));

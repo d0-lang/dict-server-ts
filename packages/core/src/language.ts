@@ -531,6 +531,13 @@ const Context = doc(
             ),
             [],
           ),
+          auxiliaries: orDefault(
+            doc(
+              strings,
+              "Parts of speech of auxiliary verbs that a `join` rule writes onto the verb before them (Kiwi's `VX`): the word is looked up as its text up to the auxiliary with the auxiliary's base forms first (`전해` + `지다`: `전해지다` \"to be passed down\"; `도와주다`), then by the head's own.",
+            ),
+            [],
+          ),
           compoundPos: orDefault(
             doc(
               strings,

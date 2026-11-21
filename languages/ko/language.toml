@@ -42,6 +42,9 @@ baseLetters = { "ᆫ" = "ㄴ", "ᆯ" = "ㄹ", "ᆷ" = "ㅁ", "ᆸ" = "ㅂ", "ᆻ
 # Hangul is written as it sounds: no reading field.
 # 하다 and 되다 after a noun make a verb of it: 공부했어요 is 공부하다.
 stemSuffixes = ["XSV", "XSA"]
+# An auxiliary verb written onto the verb makes a verb Wiktionary often has:
+# 전해|진다고 is 전해지다 "to be passed down" (the passive), 도와|줘 도와주다.
+auxiliaries = ["VX"]
 # Numbers, which Kiwi tags SN: the word after one is read as a counter, and
 # Wiktionary's counter lines come first (년 "year" in 2024년, not 년 the
 # insult).
