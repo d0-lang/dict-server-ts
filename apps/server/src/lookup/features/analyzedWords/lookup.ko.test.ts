@@ -155,6 +155,17 @@ describe("Korean words, cut by Kiwi", () => {
     ]);
   });
 
+  it("shows what a fused ending adds when it is clicked alone", () => {
+    // After a quote the segmenter gives 라는 alone.
+    assert.strictEqual(first("라는", "'벵골리' 라는 호랑이."), "-이라는");
+  });
+
+  it("starts no construction at the ending of an adverb", () => {
+    // 어떻게 "how" is a word of its own: 어떻게 한 is no -게 하다.
+    assert.notStrictEqual(first("한", "아빠 어떻게 한 거야?"), "-게 하다");
+    assert.strictEqual(first("하고", "환경을 좋게 하고 있다."), "-게 하다");
+  });
+
   it("reads an auxiliary verb with the verb before it (auxiliaries)", () => {
     assert.strictEqual(
       first("전해진다고", "시간을 넘어 전해진다고."),

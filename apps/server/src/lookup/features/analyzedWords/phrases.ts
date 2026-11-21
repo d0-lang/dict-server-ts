@@ -93,9 +93,24 @@ type Lead = {
 const endingLeads = (c: Click, w: Word): ReadonlyArray<Lead> => {
   if (!c.settings.spacedWords) return [];
   const head = w.findIndex((m) => !hasPos(m.pos, c.settings.prefixes));
+  // Not an ending inside a word that is an adverb of its own as written:
+  // the `-게` of `이렇게` "like this" or `어떻게` "how" starts no `-게 하다`.
+  // A particle that is a word of its own (`에` of `-에 따라`) still does.
+  const word = c.context.slice(startOf(w), endOf(w));
+  const adverb = c
+    .rows(word)
+    .some(
+      (row) =>
+        row.source === FormSource.Lemma &&
+        row.pos === "ADV" &&
+        lookupKey(row.lemma) === lookupKey(word),
+    );
   return w.flatMap((m, i) => {
     const text = m.bases.at(-1);
-    return i >= head && text !== undefined && text.startsWith("-")
+    return i >= head &&
+      !(adverb && i > head) &&
+      text !== undefined &&
+      text.startsWith("-")
       ? [{ start: m.start, end: m.end, text }]
       : [];
   });

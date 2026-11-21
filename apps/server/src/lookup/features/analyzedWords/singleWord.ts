@@ -3,7 +3,7 @@ import { lookupKey } from "@dict/core/lookupKey";
 import { FormSource } from "@dict/core/schema";
 import { loadEntries } from "../../common/entries.ts";
 import { type Answer, type Click, PLAIN } from "./click.ts";
-import { LEXICALIZED, posRank, wholeIds } from "./parts.ts";
+import { LEXICALIZED, morphemeParts, posRank, wholeIds } from "./parts.ts";
 
 /**
  * The clicked piece is the word: the plain lookup answers, unless its top
@@ -20,7 +20,17 @@ export const singleWord = (c: Click): Answer => {
   // With spaces, a headword spelled as written that names nothing comes
   // first: `다른` "other", `그런` "such", not `다르다`, `그렇다`.
   if (found[0]!.respelled === true) {
-    const ids = wholeIds(c, found, text);
+    // An ending fused of several is each of them, grammar lines first, as
+    // in a longer click (`라는` alone, after a quote: `-이라는` "called",
+    // then the copula).
+    const m = found[0]!;
+    const fusedEnding =
+      c.settings.spacedWords &&
+      m.pos.includes("+") &&
+      m.bases.every((base) => base.startsWith("-"));
+    const ids = fusedEnding
+      ? (morphemeParts(c, found, new Set())[0]?.ids ?? [])
+      : wholeIds(c, found, text);
     const written = c.rows(word).map((row) => row.id);
     const verbal = ["VERB", "ADJ"].some((tag) => c.uposOf(found[0]!).has(tag));
     const own =

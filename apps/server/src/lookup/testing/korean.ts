@@ -52,6 +52,10 @@ export const korean = dictionary([
   ["백", "NUM", [], ["hundred"]],
   ["처음", "NOUN", [], ["the first time"]],
   ["수도", "NOUN", [], ["capital"]],
+  ["어떻게", "ADV", [], ["how"]],
+  // 에 is a headword too, so -에 따라 starts at a word of its own.
+  ["에", "INTJ", [], ["eh?"]],
+  ["좋다", "ADJ", ["좋게"], ["to be good"]],
   ["전하다", "VERB", ["전해"], ["to pass on"]],
   ["전해지다", "VERB", [], ["to be passed down"]],
   ["오다", "VERB", [], ["to come"]],
@@ -86,5 +90,6 @@ export const korean = dictionary([
   ["예를 들어", "ADV", [], ["for example"], "grammar"],
   ["-에 따라", "PART", [], ["according to"], "grammar"],
   ["-이라는", "PART", ["-라는"], ["called"], "grammar"],
+  ["-게 하다", "X", [], ["make (someone do)"], "grammar"],
   ["-의", "PART", [], ["of"], "particle"],
 ]);
