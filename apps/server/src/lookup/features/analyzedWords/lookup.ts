@@ -7,6 +7,7 @@ import { type Answer, type Click, clickOf, PLAIN } from "./click.ts";
 import { constructionLookup } from "./constructions.ts";
 import { numberLookup } from "./numbers.ts";
 import { phraseLookup } from "./phrases.ts";
+import { pieceInWord } from "./pieceInWord.ts";
 import { singleWord } from "./singleWord.ts";
 
 /**
@@ -46,6 +47,8 @@ const STEPS: ReadonlyArray<(click: Click) => Answer> = [
   singleWord,
   // a piece over several words (`よ|ね`, `そう|して`)
   acrossWords,
+  // a word inside one of the dictionary's own words (`都` of `都会`)
+  pieceInWord,
   // the word around the piece (`食べました` for `食`)
   aroundWord,
 ];

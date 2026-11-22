@@ -18,6 +18,7 @@
 嗎/吗	PART	makes a yes-or-no question (你好嗎?, how are you?; 你是學生嗎?, are you a student?)
 呢	PART	and…?, what about…? (我很好, 你呢?, I'm fine, and you?) | softens a question (你在做什麼呢?, what are you doing?) | an action going on (他在睡覺呢, he's sleeping)
 吧	PART	let's, suggests or asks softly (我們走吧, let's go; 你來吧, come on) | I suppose, right?: guesses (你是老師吧?, you're a teacher, right?)
+呀	PART	ah, oh: 啊 after a vowel, softens or stresses what is said (好呀, OK!; 快來呀, come on!) | after each item of a list, in speech
 啊	PART	at the end of a sentence: ah, oh, softens or stresses what is said (好啊, OK!; 真漂亮啊, so beautiful!) | after each item of a list, or a pause in speech (這個啊, 我也不知道, as for this, I don't know either)
 嘛	PART	stresses what is obvious: after all, you know (這是應該的嘛, that's how it should be, after all) | marks a pause before what follows
 們/们	PART	plural of people and pronouns (我們, we; 朋友們, friends)
@@ -44,6 +45,14 @@
 一直	ADV	always, all along, continuously (他一直在等, he has been waiting all along) | straight (一直走, go straight ahead)
 只	ADV	only, just (我只有一個, I only have one; 只是, it's only that)
 越	ADV	越…越…: the more… the more… (越來越好, better and better; 越快越好, the faster the better)
+
+## Locatives
+裡/里	ADP	in, inside: after a noun (房間裡, in the room; 城市裡, in the city; 心裡, in one's heart)
+中	ADP	in, among, during: after a noun (生活中, in life; 學生中, among the students; 一年中, during the year)
+上	ADP	on, above: after a noun (桌子上, on the table) | in, in terms of (網上, online; 歷史上, in history; 實際上, in fact)
+下	ADP	under, below: after a noun (桌子下, under the table) | 在…下: under (the conditions of) (在他的幫助下, with his help)
+內/内	ADP	inside, within: after a noun (國內, within the country; 三天內, within three days)
+外	ADP	outside, beyond: after a noun (國外, abroad; 門外, outside the door) | 以外, 之外: besides, other than
 
 ## Prepositions and conjunctions
 在	ADP	at, in, on: where something is or happens (在家, at home; 在中國, in China; 在這方面, in this respect)
@@ -94,7 +103,7 @@
 那	PRON	that (那是什麼?, what is that?; 那個, that one; 那裡, there)
 那	CCONJ	then, in that case (那我們走吧, then let's go)
 哪	PRON	which (哪個?, which one?; 哪裡, where)
-什麼/什么	PRON	what (你說什麼?, what did you say?) | any, anything (沒什麼, it's nothing)
+什麼/什么	PRON	what (你說什麼?, what did you say?) | any, anything (沒什麼, it's nothing) | before a list: things like, such as (in speech) (什麼咖啡、茶都有, there's coffee, tea, all sorts)
 怎麼/怎么	PRON	how (怎麼走?, how do I get there?) | why, how come (你怎麼不來?, why aren't you coming?)
 怎麼樣/怎么样	PRON	how, how about it (你覺得怎麼樣?, what do you think?; 最近怎麼樣?, how have you been?)
 為什麼/为什么	PRON	why (你為什麼哭?, why are you crying?)
@@ -108,10 +117,27 @@
 家	X	classifier for shops, companies and families (一家餐廳, a restaurant)
 第	X	-th: makes an ordinal number (第一, first; 第三天, the third day)
 
+## Adverbs and conjunctions Wiktionary lacks
+非常	ADV	very, extremely (非常好, very good; 非常感謝, thank you very much)
+特別/特别	ADV	especially, particularly (特別是, especially; 特別喜歡, especially like)
+當然/当然	ADV	of course, naturally (當然可以, of course you can)
+不過/不过	CCONJ	but, however (不過我沒時間, but I have no time) | only, merely (不過是, only, just)
+反正	ADV	anyway, in any case (反正我不去, I'm not going anyway)
+左右	X	after a number: about, approximately, or so (三分鐘左右, about three minutes)
+接著/接着	ADV	then, next, after that (接著放鹽, then add salt)
+以外	X	besides, apart from, other than (除了…以外, except for…; 中國以外, outside China)
+分別/分别	ADV	respectively, separately, each (分別是, are respectively; 分別討論, discuss separately)
+大概	ADV	probably (他大概不來了, he probably isn't coming) | about, roughly (大概十個人, about ten people)
+真的	ADV	really, truly (真的很好, really good; 真的嗎?, really?)
+有人	PRON	someone, some people (有人說, some people say)
+等	X	after a list: and so on, etc. (書、筆等, books, pens, etc.) | after names: and others, et al.
+臺/台	PROPN	Taiwan: short for 臺灣 (來臺, come to Taiwan; 臺北, Taipei)
+嗯	INTJ	mm, uh-huh: agrees, or shows one is listening or thinking | mm: shows enjoyment
+欸	INTJ	uh, er: a pause while thinking | hey: calls for attention
+
 ## Phrases
 就是說/就是说	X	that is to say, in other words
 也就是說/也就是说	X	that is to say, in other words
-是因為/是因为	X	it's because, that's because
 不好	X	不好 + verb: hard to, not easy to (不好說, hard to say) | not good
 實際上/实际上	ADV	in fact, actually
 一下	X	after a verb: a moment, a little, to soften a request (看一下, have a look; 等一下, wait a moment)

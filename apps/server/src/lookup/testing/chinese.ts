@@ -11,10 +11,19 @@ const words: ReadonlyArray<
   readonly [
     traditional: string,
     simplified: string,
-    pos: "NOUN" | "VERB" | "ADV" | "X",
+    pos: "NOUN" | "VERB" | "ADV" | "AUX" | "X",
     gloss: string,
+    /** A grammar-file line's. */
+    sourcePos?: string,
   ]
 > = [
+  ["會", "会", "AUX", "can, will", "grammar"],
+  ["裡", "里", "X", "in", "grammar"],
+  ["里", "里", "X", "li (a unit)"],
+  ["城市", "城市", "NOUN", "city"],
+  ["城", "城", "X", "city wall"],
+  ["市", "市", "X", "market"],
+  ["市裡", "市里", "NOUN", "municipal"],
   ["學習", "学习", "VERB", "to study"],
   ["學", "学", "X", "to learn"],
   ["習", "习", "X", "to practise"],
@@ -49,17 +58,25 @@ const words: ReadonlyArray<
   ["與", "与", "X", "and"],
   ["王", "王", "X", "king"],
   ["三", "三", "X", "three"],
+  ["話題", "话题", "NOUN", "topic"],
+  ["話", "话", "X", "words"],
+  ["題", "题", "X", "forehead"],
+  ["的話", "的话", "X", "if"],
+  ["的", "的", "X", "of"],
+  ["技術", "技术", "NOUN", "technique"],
+  ["會", "会", "X", "meeting"],
+  ["都會", "都会", "NOUN", "metropolis"],
   ["年", "年", "X", "year"],
 ];
 
 export const chinese = (() => {
   const db = dictionary(
-    words.map(([traditional, , pos, gloss]) => [
+    words.map(([traditional, , pos, gloss, sourcePos]) => [
       traditional,
       pos,
       [],
       [gloss],
-      pos === "X" ? "character" : "",
+      sourcePos ?? (pos === "X" ? "character" : ""),
     ]),
   );
   words.forEach(([traditional, simplified], i) => {
@@ -73,7 +90,7 @@ export const chinese = (() => {
   });
   db.$client.run("INSERT INTO meta VALUES (?, ?)", [
     PREFERRED_LETTERS_KEY,
-    JSON.stringify({ 后: ["後"], 机: ["機"] }),
+    JSON.stringify({ 后: ["後"], 机: ["機"], 里: ["裡"] }),
   ]);
   return db;
 })();

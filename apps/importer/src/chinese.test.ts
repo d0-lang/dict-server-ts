@@ -38,7 +38,15 @@ const LINES = [
   {
     word: "說",
     pos: "character",
-    sounds: [pinyin("shuō (shuo¹)", "Standard")],
+    sounds: [
+      pinyin("shuō (shuo¹)", "Standard"),
+      {
+        ipa: "/ʂu̯ɔ⁵⁵/",
+        tags: ["Mandarin", "Standard-Chinese", "vernacular", "Sinological-IPA"],
+      },
+      { ipa: "/sɔ²¹/", tags: ["Sinological-IPA"] },
+      { ipa: "/syːt̚³/", tags: ["Cantonese", "Guangzhou", "Sinological-IPA"] },
+    ],
     senses: [{ glosses: ["to say; to speak"] }],
   },
   // A character's simplified page: no meaning, only where it points.
@@ -147,6 +155,57 @@ const lemmasOf = (db: Database, form: string) =>
         `${row.lemma}: ${row.glosses}${row.reading === null ? "" : ` (${row.reading})`}`,
     );
 
+describe("Chinese import with a grammar file", () => {
+  it.effect(
+    "prefers the letter a grammar line spells, though words keep it",
+    () =>
+      Effect.acquireRelease(
+        Effect.promise(() => mkdtemp(join(tmpdir(), "dict-zh-"))),
+        (dir) =>
+          Effect.promise(() => rm(dir, { recursive: true, force: true })),
+      ).pipe(
+        Effect.flatMap((dir) =>
+          Effect.gen(function* () {
+            const input = join(dir, "zh.jsonl");
+            const out = join(dir, "zh.sqlite");
+            const lines = [
+              {
+                word: "裡",
+                pos: "character",
+                senses: [{ glosses: ["inside"] }],
+              },
+              {
+                word: "里",
+                pos: "character",
+                senses: [{ glosses: ["li (a unit)"] }],
+              },
+              word("公里", "公里", "kilometre"),
+            ].map((line) => JSON.stringify({ lang_code: "zh", ...line }));
+            yield* Effect.promise(() =>
+              writeFile(input, lines.join("\n") + "\n"),
+            );
+            yield* importWiktextract({
+              lang: "zh",
+              input,
+              out,
+              grammar: [
+                { lemma: "裡", pos: "ADP", senses: ["in"], forms: ["里"] },
+              ],
+            });
+            const db = new Database(out, { readonly: true });
+            const meta = db
+              .query<{ value: string }, [string]>(
+                "SELECT value FROM meta WHERE key = ?",
+              )
+              .get(PREFERRED_LETTERS_KEY);
+            assert.deepStrictEqual(JSON.parse(meta!.value), { 里: ["裡"] });
+          }),
+        ),
+        Effect.scoped,
+      ),
+  );
+});
+
 describe("Chinese import", () => {
   it.effect(
     "finds a word by its simplified spelling as by its lemma, read in pinyin",
@@ -190,6 +249,19 @@ describe("Chinese import", () => {
           机: ["機"],
         });
       }).pipe(Effect.scoped),
+  );
+
+  it.effect("gives standard Mandarin's IPA, not other varieties'", () =>
+    Effect.gen(function* () {
+      const db = yield* imported;
+      const ipa = db
+        .query<{ value: string }, []>(
+          "SELECT p.value FROM pronunciations p JOIN entries e ON e.id = p.entry_id WHERE e.lemma = '說' AND p.kind = 'ipa'",
+        )
+        .all()
+        .map((row) => row.value);
+      assert.deepStrictEqual(ipa, ["/ʂu̯ɔ⁵⁵/"]);
+    }).pipe(Effect.scoped),
   );
 
   it.effect("reads each etymology by its own sounds", () =>

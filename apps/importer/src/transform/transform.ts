@@ -274,10 +274,13 @@ const pickPronunciations = (
   reading?: string,
 ): ImportEntry["pronunciations"] => {
   const usable = sounds.filter((s) => !isHistorical(rules, s.tags));
-  const standardTags = ["standard", ...(rules.standardPronTags ?? [])];
+  const required = rules.standardPronTags ?? [];
   const isStandard = (s: WiktextractSound) =>
     (s.note === undefined || rules.standardPronNotes.includes(s.note)) &&
-    (s.tags === undefined || s.tags.every((t) => standardTags.includes(t)));
+    (required.length > 0
+      ? required.every((t) => s.tags?.includes(t) === true) &&
+        !(s.tags ?? []).includes("variant")
+      : s.tags === undefined || s.tags.every((t) => t === "standard"));
   const withIpa = usable.filter((s) => s.ipa !== undefined && s.ipa !== "");
   const standardIpa = withIpa.filter(isStandard);
   const ipa = (standardIpa.length > 0 ? standardIpa : withIpa).map(

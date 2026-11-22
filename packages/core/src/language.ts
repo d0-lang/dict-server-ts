@@ -152,7 +152,7 @@ const Import = doc(
     standardPronTags: orDefault(
       doc(
         strings,
-        "Tags a standard pronunciation may carry, beside `standard` (Chinese `Mandarin`, `Standard-Chinese`, `Sinological-IPA`): a sound with any other tag is regional, kept only when there is no standard one.",
+        "Tags the standard pronunciation has, all of them (Chinese `Mandarin`, `Standard-Chinese`), where every sound has tags: a sound without them, or tagged `variant`, is regional, kept only when there is no standard one. Left empty, the standard sound has no tags but `standard`.",
       ),
       [],
     ),

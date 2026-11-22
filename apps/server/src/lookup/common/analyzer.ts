@@ -4,7 +4,7 @@ import { dirname, join } from "node:path";
 import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import type { Language } from "@dict/core/language";
 import { lookupKey } from "@dict/core/lookupKey";
-import { FormSource } from "@dict/core/schema";
+import { FormSource, GRAMMAR_SOURCE_POS } from "@dict/core/schema";
 
 /**
  * A morphological analyzer (Lindera, compiled to WebAssembly, with its
@@ -381,9 +381,12 @@ export const WORD_INSIDE = "I";
  * script without spaces whose words don't inflect (Chinese), where an
  * analyzer's dictionary would only be a second word list beside this one.
  * Each run of Han letters is cut into the fewest words with an entry, a
- * single letter always counting as one; on a tie, the cut whose last word is
- * longer wins (reverse maximum matching: `研究生命` is `研究|生命`, not
- * `研究生|命`). Each letter is a piece, tagged `WORD_START` where a word
+ * single letter always counting as one. On a tie, the cut with the fewest
+ * letters standing alone that have no grammar-file line wins (`城市|里`, not
+ * `城|市里`: `里` "in" is a word by itself, `城` alone is a letter), then the
+ * one whose last word is longer (reverse maximum matching: `研究生命` is
+ * `研究|生命`, not `研究生|命`). Measured on the corpus's reference words:
+ * 82.8% of words, against 82.0% for the last word alone. Each letter is a piece, tagged `WORD_START` where a word
  * starts and `WORD_INSIDE` inside one, so a `join` rule makes the words of
  * them and a word's letters are its parts (`手|机`). A run of other letters or
  * digits is one piece (`iPhone`, `18`), with no tag, and so is each other
@@ -398,6 +401,13 @@ const wordPieces = (
     `SELECT 1 AS found FROM forms WHERE form = ?1 AND source <> ${FormSource.Abbreviation} LIMIT 1`,
   );
   const isWord = (word: string) => known.get(lookupKey(word)) !== null;
+  // A letter with a grammar-file line is a word by itself (`的`, `了`, `里`).
+  const line = db.$client.query<{ found: number }, [string]>(
+    `SELECT 1 AS found FROM forms f JOIN entries e ON e.id = f.entry_id
+     WHERE f.form = ?1 AND e.source_pos = '${GRAMMAR_SOURCE_POS}' LIMIT 1`,
+  );
+  const loose = (letter: string) =>
+    line.get(lookupKey(letter)) === null ? 1 : 0;
   const pieces: Array<Piece> = [];
   const add = (start: number, end: number, pos = "") => {
     const surface = text.slice(start, end);
@@ -409,7 +419,9 @@ const wordPieces = (
       parts: [{ base: surface, pos }],
     });
   };
-  const runs = /([\p{Script=Han}〇]+)|([\p{L}\p{M}\p{N}]+)|(\S)/gu;
+  // Letters or digits of other scripts stop at a Han letter (`10|天`).
+  const runs =
+    /([\p{Script=Han}〇]+)|((?:(?![\p{Script=Han}〇])[\p{L}\p{M}\p{N}])+)|(\S)/gu;
   for (const run of text.matchAll(runs)) {
     const start = run.index;
     if (run[1] === undefined) {
@@ -421,19 +433,24 @@ const wordPieces = (
     const at = [0];
     for (const letter of letters) at.push(at.at(-1)! + letter.length);
     const fewest = [0];
+    const alone = [0];
     const last = [0];
     for (let end = 1; end <= letters.length; end++) {
       fewest.push(Number.POSITIVE_INFINITY);
+      alone.push(Number.POSITIVE_INFINITY);
       last.push(0);
       for (let size = 1; size <= Math.min(MAX_WORD, end); size++) {
         const word = run[1].slice(at[end - size], at[end]);
         if (size > 1 && !isWord(word)) continue;
         const count = fewest[end - size]! + 1;
+        const lone = alone[end - size]! + (size === 1 ? loose(word) : 0);
         if (
           count < fewest[end]! ||
-          (count === fewest[end] && size > last[end]!)
+          (count === fewest[end] &&
+            (lone < alone[end]! || (lone === alone[end] && size > last[end]!)))
         ) {
           fewest[end] = count;
+          alone[end] = lone;
           last[end] = size;
         }
       }

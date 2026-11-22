@@ -1,6 +1,10 @@
 import { hiragana, isKana } from "@dict/core/kana";
 import { lookupKey } from "@dict/core/lookupKey";
-import { FormSource, PREFERRED_LETTERS_KEY } from "@dict/core/schema";
+import {
+  FormSource,
+  GRAMMAR_SOURCE_POS,
+  PREFERRED_LETTERS_KEY,
+} from "@dict/core/schema";
 import type { Database } from "bun:sqlite";
 import type { WriterContext } from "./context.ts";
 
@@ -57,6 +61,21 @@ const otherScriptLetters = (
   for (const [pair, n] of counted) {
     const [letter, other] = [...pair] as [string, string];
     if (n > (kept.get(other) ?? 0)) (preferred[other] ??= []).push(letter);
+  }
+  // A grammar-file line names a letter's common use: `裡/里` "in" is what
+  // `里` mostly stands for, though many words keep `里` "li" as it is.
+  const lines = sqlite
+    .query<{ lemma: string; form: string }, [number]>(
+      `SELECT e.lemma AS lemma, f.form AS form FROM forms f JOIN entries e ON e.id = f.entry_id
+       WHERE f.source = ?1 AND e.source_pos = '${GRAMMAR_SOURCE_POS}' AND f.form <> e.lemma`,
+    )
+    .all(FormSource.Lemma);
+  for (const { lemma, form } of lines) {
+    const letter = lookupKey(lemma);
+    if ([...letter].length !== 1 || [...form].length !== 1) continue;
+    if (!(preferred[form] ?? []).includes(letter)) {
+      (preferred[form] ??= []).push(letter);
+    }
   }
   return { pairs: new Set(counted.map(([pair]) => pair)), preferred };
 };

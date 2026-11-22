@@ -11,7 +11,13 @@ import {
 import { type FormRow, grammarIds } from "../../common/forms.ts";
 import type { Morpheme } from "../../common/analyzer.ts";
 import type { Click } from "./click.ts";
-import { hasPos, headOf, startOf, type Word } from "./words.ts";
+import {
+  dictionaryWords,
+  hasPos,
+  headOf,
+  startOf,
+  type Word,
+} from "./words.ts";
 
 /** A word's entries as a whole, and its pieces as `segments`, each with its own entries. */
 
@@ -173,7 +179,9 @@ export const wholeIds = (
     w.length === 1 && head.respelled === true
       ? [...bases, written]
       : [written, ...derived, ...bases];
-  const inflected = w.length > 1 && w.at(-1) !== head;
+  // The dictionary's own words don't inflect: `好|事` is no verb's form.
+  const inflected =
+    !dictionaryWords(c.settings) && w.length > 1 && w.at(-1) !== head;
   // The head as written also reaches verbs whose forms it is, when the
   // analyzer's lemma misses one (`従え` is `従える` too, which UniDic reads
   // as `従う`). Not an entry of the stem itself (`食べ` "stem of 食べる").
@@ -474,15 +482,34 @@ export const morphemeParts = (
       i + 1,
       fusedIds.length > 0
         ? fusedIds
-        : !isHead && grammar.length > 0
-          ? grammar
-          : ranked.map((row) => row.id),
+        : dictionaryWords(c.settings)
+          ? letterIds(
+              ranked.map((row) => row.id),
+              grammar,
+            )
+          : !isHead && grammar.length > 0
+            ? grammar
+            : ranked.map((row) => row.id),
       isHead,
     );
     i++;
   }
   return withFormEndings(c, w, head, parts, shown);
 };
+
+/**
+ * A letter's entries as a part of one of the dictionary's own words: its
+ * own first, then its grammar-file lines. In a compound the letter is the
+ * word's morpheme, not the grammar word (`过` of `过程` "process", not the
+ * particle "have done"; `家` of `回家` "home", not the classifier).
+ */
+const letterIds = (
+  own: ReadonlyArray<number>,
+  grammar: ReadonlyArray<number>,
+): ReadonlyArray<number> => [
+  ...own.filter((id) => !grammar.includes(id)),
+  ...grammar,
+];
 
 const NONE: ReadonlyMap<
   number,

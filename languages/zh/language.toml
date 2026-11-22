@@ -26,8 +26,10 @@ varieties = { others = ["Cantonese", "Hokkien", "Min", "Hakka", "Wu", "Teochew",
 # learner sounds the word out by it. Only the standard pronunciation's: not
 # Sichuanese (說 so²) or Xi'an (shě).
 readingSounds = [["Mandarin", "Pinyin"], ["Mandarin", "Standard", "Pinyin"], ["Mandarin", "Pinyin", "Standard-Chinese"]]
-# IPA of standard Mandarin, not of the 13 other varieties a line may give.
-standardPronTags = ["Mandarin", "Standard", "Standard-Chinese", "Sinological-IPA"]
+# IPA of standard Mandarin (tagged Mandarin and Standard-Chinese), not of
+# the dozens of other varieties and cities a line may give (我: Chengdu,
+# Xi'an, Cantonese, Hokkien, Wu...).
+standardPronTags = ["Mandarin", "Standard-Chinese"]
 # Where a sense is used, which the gloss doesn't say: Classical and literary
 # senses (之 "(literary) to go") read in formal writing, and words of Taiwan
 # or the mainland (土豆 "potato" on the mainland, "peanut" in Taiwan).

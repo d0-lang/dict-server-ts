@@ -5,7 +5,14 @@ import { loadEntries } from "../../common/entries.ts";
 import type { FormRow } from "../../common/forms.ts";
 import { type Answer, type Click, PLAIN } from "./click.ts";
 import { morphemeParts, splitResult, wholeIds } from "./parts.ts";
-import { endOf, hasPos, headOf, startOf, type Word } from "./words.ts";
+import {
+  dictionaryWords,
+  endOf,
+  hasPos,
+  headOf,
+  startOf,
+  type Word,
+} from "./words.ts";
 
 /** Most words a phrase may span. */
 const MAX_PHRASE_WORDS = 4;
@@ -62,6 +69,7 @@ export const phraseLookup = (c: Click): Answer => {
 const startsIn = (c: Click, w: Word): ReadonlyArray<number> => {
   const head = w.findIndex((m) => !hasPos(m.pos, c.settings.prefixes));
   const starts = [startOf(w)];
+  if (dictionaryWords(c.settings)) return starts;
   w.forEach((m, i) => {
     if (head < 0 || i < head) return;
     if (i > head) starts.push(m.start);
@@ -152,7 +160,10 @@ const phraseAt = (
   // From a lead, its spelling, then the text as written.
   const fromLead = (end: number) =>
     lead === undefined ? undefined : lead.text + context.slice(lead.end, end);
-  for (let k = last.length; k >= 1; k--) {
+  // The dictionary's own words end where a phrase may (`的|话题` holds no
+  // `的话`).
+  const shortest = dictionaryWords(c.settings) ? last.length : 1;
+  for (let k = last.length; k >= shortest; k--) {
     const end = last[k - 1]!.end;
     // The phrase holds the whole clicked piece (`による` in `に|よる|と`).
     if (end < piece.end) break;
@@ -166,7 +177,8 @@ const phraseAt = (
         { form: respelled(upTo), written },
       );
     }
-    if (k === last.length) {
+    // Words that don't inflect have no base form to write it with.
+    if (k === last.length && !dictionaryWords(c.settings)) {
       const before = morphemes.indexOf(head);
       // The last word's head is before the start: nothing to put in its base form.
       if (head.start < start || (lead !== undefined && head.start < lead.end)) {

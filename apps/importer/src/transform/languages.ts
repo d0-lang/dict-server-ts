@@ -91,7 +91,7 @@ export type LanguageRules = {
   };
   /** Whole tag sets of the sounds that give the reading (Chinese `Mandarin` + `Pinyin`). */
   readonly readingSounds?: ReadonlyArray<ReadonlyArray<string>>;
-  /** Tags a standard pronunciation may carry beside `standard` (Chinese `Mandarin`, `Standard-Chinese`). */
+  /** Tags the standard pronunciation has, all of them (Chinese `Mandarin`, `Standard-Chinese`). */
   readonly standardPronTags?: ReadonlyArray<string>;
   /** Sense tags shown in brackets before the gloss (`(literary) to go`). */
   readonly glossLabels?: ReadonlyArray<string>;
