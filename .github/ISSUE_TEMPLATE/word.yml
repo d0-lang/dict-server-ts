@@ -1,6 +1,6 @@
 name: Wrong or missing word
 description: A word was not found, or what it showed was wrong.
-labels: [bug]
+labels: [bug, report]
 body:
   - type: input
     id: lang
