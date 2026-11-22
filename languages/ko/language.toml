@@ -1,0 +1,172 @@
+#:schema ../../spec/language.schema.json
+# Korean. Every setting is checked against the dump (data/raw/ko.jsonl) and
+# the corpus in profile.md.
+
+code = "ko"
+name = "Korean"
+target = "en"
+
+[import]
+# A Hangul syllable's own line ("More information(eumhun reading: …)") names
+# no word a reader looks up.
+skippedPos = ["syllable"]
+# The Revised Romanization, which 59,008 of 64,457 lines give (`먹다`:
+# meokda), as the headword's reading: a learner who can't yet read Hangul
+# fluently sounds the word out by it.
+readingTags = ["romanization"]
+# Glosses that only name another word's form, which wiktextract links no
+# word in: "Yang-vowel form of -어서", "Post-vowel and post-liquid
+# allomorphic form of -으면", "topic-marked form of 나". The reader gets the
+# word's meaning instead of the form's name (about 120 senses).
+pointerWords = ["yang-vowel", "post-vowel", "post-vocalic", "post-liquid", "post-ㄹ", "(l)", "and", "or", "liquid", "colloquial", "allomorphic", "allomorph", "form", "topic-marked"]
+
+[context.analyzer]
+# Korean writes spaces, but between eojeols: a word with its particles and
+# endings (학교에서 = 학교 + 에서, 먹었습니다 = 먹 + 었 + 습니다), which the
+# segmenter gives whole. Verb stems fuse with their endings (했 = 하 + 았,
+# 갈 = 가 + ㄹ), so no table of forms finds them all: an analyzer cuts the
+# eojeol into morphemes.
+# Kiwi, not Lindera's ko-dic: ko-dic's build has no 이 (the subject particle,
+# the copula, the pronoun), so it cut 생각이 as 생|각이, and it has no
+# language model, so it read 들었는데 as 들다, 한 번 as 하다 + 벌다, 여러
+# 가지 as 가지다. On the corpus, ko-dic's head words agreed with Kiwi's on
+# 89% of words, 91% with workarounds (profile.md). Kiwi adds about 0.63 GB
+# to the server at rest, against ko-dic's 0.30 GB.
+dictionary = "kiwi"
+# Kiwi gives each morpheme's base form (듣 for 들, 하 and 었 for 했), and
+# marks a fused syllable by giving its morphemes one place in the text: they
+# are one piece, as written (했), with each one's base form.
+
+# Kiwi writes a final consonant ending with the jamo that ends a syllable
+# (가 + ᆯ), Wiktionary with the letter (-ㄹ).
+baseLetters = { "ᆫ" = "ㄴ", "ᆯ" = "ㄹ", "ᆷ" = "ㅁ", "ᆸ" = "ㅂ", "ᆻ" = "ㅆ" }
+# Hangul is written as it sounds: no reading field.
+
+# 하다 and 되다 after a noun make a verb of it: 공부했어요 is 공부하다.
+stemSuffixes = ["XSV", "XSA"]
+# An auxiliary verb written onto the verb makes a verb Wiktionary often has:
+# 전해|진다고 is 전해지다 "to be passed down" (the passive), 도와|줘 도와주다.
+auxiliaries = ["VX"]
+# Numbers, which Kiwi tags SN: the word after one is read as a counter, and
+# Wiktionary's counter lines come first (년 "year" in 2024년, not 년 the
+# insult).
+numbers = ["SN"]
+counters = ["counter"]
+# A space ends each word with its particles and endings: an eojeol written
+# like an adverb or conjunction is that word (하지만 "but", 하 + 지만 to
+# the analyzer), and a verb with endings is no noun spelled alike (하지 "do
+# not", not "summer solstice").
+spacedWords = true
+# A word's entries of the part of speech Kiwi reads it as come first (우리
+# "we" the pronoun, before 우리 "cage"; the particle -는 before the ending).
+ranksByPos = true
+# A prefix joins the word after it (신|제품).
+prefixes = ["XPN"]
+# A suffix makes a new word (학생|들, 국제|적): one without an entry is shown
+# by its parts.
+suffixes = ["XSN"]
+# Nouns written together make a compound (양자|역학, a join rule below): one
+# without an entry is shown by the longest parts Wiktionary has (발색|단).
+compoundPos = ["NNG", "NNP"]
+# A piece of such a noun is two syllables or more: one alone matches by
+# chance (간 "liver" in the name 간송).
+compoundPiece = 2
+
+# Wiktionary lists a verb or adjective by its dictionary form, the stem with
+# 다 (먹다; Kiwi gives 먹), and the copula as -이다.
+[[context.analyzer.baseSpellings]]
+pos = ["VV", "VA", "VX", "VCN", "XSV", "XSA"]
+spellings = ["*다"]
+
+[[context.analyzer.baseSpellings]]
+pos = ["VCP"]
+spellings = ["-*다"]
+affix = true
+
+# A pre-final ending sits inside the verb, hyphens on both sides (-었-, -겠-).
+[[context.analyzer.baseSpellings]]
+pos = ["EP"]
+spellings = ["-*-"]
+affix = true
+
+# Particles, endings and suffixes with a hyphen before them (-에서, -습니다,
+# -들). 에서 alone is "Esau", 들 alone "field".
+[[context.analyzer.baseSpellings]]
+pos = ["JKS", "JKC", "JKG", "JKO", "JKB", "JKV", "JKQ", "JX", "JC", "EF", "EC", "ETN", "ETM", "XSN"]
+spellings = ["-*"]
+# In a fused morpheme the stem comes first: 걸 is 거 (것) + -ㄹ.
+affix = true
+
+[context.analyzer.upos]
+# Kiwi's tags (Sejong's) as UD tags, to tell which entries fit its reading
+# of a word. Wiktionary lists 있다 and 없다 as both verb and adjective, and
+# conjunctive adverbs (그리고) as adverbs. Particles and endings are particle
+# and suffix lines.
+NNG = ["NOUN"]
+NNP = ["PROPN", "NOUN"]
+NNB = ["NOUN"]
+NR = ["NUM"]
+NP = ["PRON"]
+VV = ["VERB"]
+VA = ["ADJ", "VERB"]
+VX = ["VERB", "ADJ"]
+VCN = ["ADJ"]
+MM = ["DET"]
+MAG = ["ADV"]
+MAJ = ["ADV", "CCONJ"]
+IC = ["INTJ"]
+JKS = ["PART"]
+JKC = ["PART"]
+JKG = ["PART"]
+JKO = ["PART"]
+JKB = ["PART"]
+JKV = ["PART"]
+JKQ = ["PART"]
+JX = ["PART"]
+JC = ["PART"]
+VCP = ["PART"]
+
+# The analyzer's words: a stem with its endings is one word; a particle, and
+# the copula, are words of their own, as a grammar teaches them.
+
+[[context.analyzer.join]]
+# Endings after a verb, adjective, copula or another ending: 먹|었|습니다,
+# 예쁘|어요, 이|에요.
+pos = ["EP", "EF", "EC", "ETN", "ETM"]
+after = ["VV", "VA", "VX", "VCP", "VCN", "XSV", "XSA", "EP"]
+
+[[context.analyzer.join]]
+# An auxiliary verb written onto the verb before it: 먹어|보다, 해|주세요.
+pos = ["VX"]
+after = ["EC"]
+
+[[context.analyzer.join]]
+# 하다 after -아/-어 makes a verb of an adjective: 좋아|하다 "to like",
+# 슬퍼|하다 "to grieve". Kiwi tags this 하 as an auxiliary or a verb.
+pos = ["VV", "VX"]
+base = ["하다"]
+after = ["EC"]
+afterSurface = ["아", "어", "여"]
+
+[[context.analyzer.join]]
+# 하다 and 되다 after a noun or root make a verb or adjective of it:
+# 공부|했어요, 깨끗|한.
+pos = ["XSV", "XSA"]
+after = ["NNG", "NNP", "NNB", "XR", "MAG"]
+
+[[context.analyzer.join]]
+# A counter or unit after a number: 2024|년, 3|번. Wiktionary's counter
+# lines come first then (numbers, counters).
+pos = ["NNB", "NNG"]
+after = ["SN"]
+
+[[context.analyzer.join]]
+# A suffix after a noun: 학생|들, 국제|적.
+pos = ["XSN"]
+after = ["NNG", "NNP", "NNB", "NP", "NR", "XR", "XSN"]
+
+[[context.analyzer.join]]
+# A noun written onto a noun: 양자|역학, 민족|말살. Kiwi cuts a compound it
+# doesn't know into nouns it does; Wiktionary often has it whole.
+pos = ["NNG", "NNP"]
+after = ["NNG", "NNP"]

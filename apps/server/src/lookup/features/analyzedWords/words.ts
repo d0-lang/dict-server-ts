@@ -1,5 +1,5 @@
 import type { Language } from "@dict/core/language";
-import type { Morpheme } from "../../common/analyzer.ts";
+import { hasPos, type Morpheme } from "../../common/analyzer.ts";
 
 /** Morphemes as words: the analyzer's morphemes joined by the language's rules. */
 
@@ -9,9 +9,7 @@ type Rule = Settings["join"][number];
 /** A word: the morphemes the `join` rules make one (`食べ|まし|た`). */
 export type Word = ReadonlyArray<Morpheme>;
 
-/** `pos` is one of `tags` or starts with one and a `-`. */
-export const hasPos = (pos: string, tags: ReadonlyArray<string>): boolean =>
-  tags.some((tag) => pos === tag || pos.startsWith(`${tag}-`));
+export { hasPos };
 
 const joins = (rule: Rule, morpheme: Morpheme, before: Morpheme): boolean =>
   hasPos(morpheme.pos, rule.pos) &&
@@ -42,6 +40,11 @@ export const wordsOf = (
     ) {
       word!.push(morpheme);
     } else if (hasPos(morpheme.pos, settings.prefixes)) {
+      // Prefixes join one another only when written together.
+      if (prefixes.length > 0 && prefixes.at(-1)!.end !== morpheme.start) {
+        for (const prefix of prefixes) words.push([prefix]);
+        prefixes = [];
+      }
       prefixes.push(morpheme);
     } else if (!/\p{L}/u.test(morpheme.surface)) {
       // A prefix joins a word, not a number (`約` + `30`) or a sign.
@@ -49,6 +52,11 @@ export const wordsOf = (
       prefixes = [];
       words.push([morpheme]);
     } else {
+      // A prefix joins only the word right after it, not one past a space.
+      if (prefixes.length > 0 && prefixes.at(-1)!.end !== morpheme.start) {
+        for (const prefix of prefixes) words.push([prefix]);
+        prefixes = [];
+      }
       words.push([...prefixes, morpheme]);
       prefixes = [];
     }

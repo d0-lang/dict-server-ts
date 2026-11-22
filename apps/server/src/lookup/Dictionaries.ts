@@ -55,7 +55,7 @@ export class Dictionaries extends Context.Service<
         for (const pair of languages) {
           const db = yield* openDictionary(`${dir}/${pair}.sqlite`);
           const language = yield* pairLanguage(pair);
-          yield* Effect.try({
+          yield* Effect.tryPromise({
             try: () => loadAnalyzer(language),
             catch: (cause) =>
               new Error(`analyzer of ${pair}: ${String(cause)}`, { cause }),

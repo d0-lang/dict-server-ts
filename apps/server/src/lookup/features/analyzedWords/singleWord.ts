@@ -3,7 +3,7 @@ import { lookupKey } from "@dict/core/lookupKey";
 import { FormSource } from "@dict/core/schema";
 import { loadEntries } from "../../common/entries.ts";
 import { type Answer, type Click, PLAIN } from "./click.ts";
-import { wholeIds } from "./parts.ts";
+import { LEXICALIZED, morphemeParts, posRank, wholeIds } from "./parts.ts";
 
 /**
  * The clicked piece is the word: the plain lookup answers, unless its top
@@ -14,6 +14,48 @@ import { wholeIds } from "./parts.ts";
 export const singleWord = (c: Click): Answer => {
   const { word, found, text } = c;
   if (found.length !== 1 || text !== word) return undefined;
+  // A morpheme the dictionary spells otherwise (`갈` is `가다` + `-ㄹ`, not
+  // `갈` "reed"): its base forms' entries first, then the word's own as
+  // written, those of the analyzer's part of speech first.
+  // With spaces, a headword spelled as written that names nothing comes
+  // first: `다른` "other", `그런` "such", not `다르다`, `그렇다`.
+  if (found[0]!.respelled === true) {
+    // An ending fused of several is each of them, grammar lines first, as
+    // in a longer click (`라는` alone, after a quote: `-이라는` "called",
+    // then the copula).
+    const m = found[0]!;
+    const fusedEnding =
+      c.settings.spacedWords &&
+      m.pos.includes("+") &&
+      m.bases.every((base) => base.startsWith("-"));
+    const ids = fusedEnding
+      ? (morphemeParts(c, found, new Set())[0]?.ids ?? [])
+      : wholeIds(c, found, text);
+    const written = c.rows(word).map((row) => row.id);
+    const verbal = ["VERB", "ADJ"].some((tag) => c.uposOf(found[0]!).has(tag));
+    const own =
+      c.settings.spacedWords && verbal
+        ? c
+            .rows(word)
+            .filter(
+              (row) =>
+                row.source === FormSource.Lemma &&
+                LEXICALIZED.has(row.pos) &&
+                lookupKey(row.lemma) === lookupKey(word),
+            )
+            .map((row) => row.id)
+        : [];
+    const first = [...own, ...ids];
+    if (first.length === 0 || first[0] === written[0]) return PLAIN;
+    const upos = c.uposOf(found[0]!);
+    const fits = (id: number) => upos.has(c.infoOf(id).pos);
+    const rest = written.filter((id) => !first.includes(id));
+    return {
+      entries: loadEntries(c.db, [
+        ...new Set([...first, ...rest.filter(fits), ...rest]),
+      ]),
+    };
+  }
   // A word written in kana whose lemma the analyzer writes in kanji, as a
   // part of speech none of its own entries has (`もの` the noun is `物`,
   // and `もの` has only particle entries): that lemma's entries of that
@@ -52,7 +94,7 @@ export const singleWord = (c: Click): Answer => {
     c.rows(word).length > 0 &&
     c.rows(word)[0]!.source !== FormSource.Redirect
   ) {
-    return PLAIN;
+    return byPos(c, upos);
   }
   const byLemma =
     lemma === undefined
@@ -75,4 +117,21 @@ export const singleWord = (c: Click): Answer => {
     .map((row) => row.id)
     .filter((id) => !ranked.includes(id));
   return { entries: loadEntries(c.db, [...ranked, ...new Set(rest)]) };
+};
+
+/**
+ * The plain lookup's entries, those of the analyzer's parts of speech first
+ * (`ranksByPos`: `우리` the pronoun before `우리` "cage"), when the first
+ * is none of them and some are.
+ */
+const byPos = (c: Click, upos: ReadonlySet<string>): Answer => {
+  if (!c.settings.ranksByPos || upos.size === 0) return PLAIN;
+  const ids = [...new Set(c.rows(c.word).map((row) => row.id))];
+  const rank = (id: number) => posRank(c, upos, c.infoOf(id).pos);
+  const ranked = ids
+    .map((id, i) => ({ id, i, rank: rank(id) }))
+    .sort((a, b) => a.rank - b.rank || a.i - b.i)
+    .map(({ id }) => id);
+  if (ranked[0] === ids[0]) return PLAIN;
+  return { entries: loadEntries(c.db, ranked) };
 };

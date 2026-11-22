@@ -260,6 +260,30 @@ export const grammarPointerTarget = (
   return languageLinks(language, links).find((l) => l.text === match[2])?.word;
 };
 
+/**
+ * The target of a gloss that only names another word's form in this
+ * language's own terms, which wiktextract reads no `form-of` link in
+ * (Korean "Yang-vowel form of -어서 (-eoseo)", "topic-marked form of 나
+ * (na)"): every word before "of" is one of the language's `pointerWords`,
+ * and the rest is a link, with at most its romanization after it. Not
+ * "allomorph of 저 (jeo, …) before -가", which says when.
+ */
+export const languagePointerTarget = (
+  language: LanguageRules,
+  gloss: string,
+  links: ReadonlyArray<ReadonlyArray<string>>,
+): string | undefined => {
+  const words = new Set(
+    (language.pointerWords ?? []).map((word) => word.toLowerCase()),
+  );
+  if (words.size === 0) return undefined;
+  const match = gloss.match(/^(.+?) of (\S+)(?: \([^()]*\))?$/);
+  if (match === null) return undefined;
+  const opening = match[1]!.toLowerCase().split(/\s+/);
+  if (!opening.every((word) => words.has(word))) return undefined;
+  return languageLinks(language, links).find((l) => l.text === match[2])?.word;
+};
+
 /** Openings of a gloss that sends the reader to another word. */
 const SEE_OPENING =
   /^(?:synonym of|alternative (?:form|spelling) of|same as)\s+/i;

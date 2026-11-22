@@ -1,0 +1,138 @@
+# Korean grammar words, endings and particles. One line per word as written + part of speech:
+# word <TAB> UD part of speech <TAB> senses separated by " | ".
+# The file replaces Wiktionary's determiner, pronoun, conjunction, particle and
+# auxiliary entries for every word listed here; content words stay, and a line
+# with a content part of speech comes before Wiktionary's of that part of speech.
+# Particles and endings are written as Wiktionary writes them, with hyphens
+# (-이나, -었-): the analyzer (`context.analyzer` in language.toml) gives each
+# morpheme its base form spelled so (`baseSpellings`), and finds its line by it.
+# A form after a `/` finds the same line (-으려면 for -려면).
+# Lines are for what Wiktionary lacks or explains only by naming a form.
+# See apps/importer/src/grammar.ts.
+
+## Particles
+-이나/-나	PART	or (사진이나 영상, photos or videos) | ... or something (커피나 마실까요?, shall we have coffee or something?) | as many as, a whole (세 시간이나, a whole three hours) | just (instead of something else)
+-이라/-라	PART	called, as: names or quotes what precedes, with 하다 or 부르다 (이것을 김치라 한다, this is called kimchi) | because (it is), being (학생이라 바빠요, (I) am busy because (I) am a student)
+-이라고/-라고	PART	called; (said) that it is: quotes what follows a noun (장점이라고 할 수 있다, (it) can be called an advantage; 친구라고 했다, (he) said (it) was a friend) | introduces a direct quote ("가자"라고 했다, (he) said "let's go")
+-이라는/-라는	PART	called, named (데미안이라는 소설, a novel called Demian) | that is: links a noun to the noun it describes (사실이라는 것, the fact that it is true)
+-이란/-란	PART	as for, what is called: names a topic in order to define or describe it (행복이란 무엇인가, what is happiness?; 친구란 그런 것이다, that is what a friend is)
+-이라면/-라면	PART	if (it is) (사실이라면, if it is true; 나라면, if I were (you))
+-으로써/-로써	PART	by (means of), through (제공함으로써, by providing; 대화로써, through dialogue)
+-으로부터/-로부터	PART	from (a person, place or source) (친구로부터, from a friend; 지구로부터, from the earth)
+-이라든가/-라든가	PART	or, such as: lists examples (사과라든가 배라든가, apples or pears and such)
+-대로	PART	as, according to, like (말대로, as (you) said; 마음대로, as one pleases; 순서대로, in order)
+
+## Endings
+-는데/-ㄴ데/-은데	X	and, so: sets out a situation for what follows (비가 오는데 우산이 없어요, it's raining and I have no umbrella) | but, whereas: a contrast (작은데 무거워요, it's small but heavy)
+-는데요/-ㄴ데요/-은데요	X	..., though; well, ...: a polite ending that sets out a situation and waits for a reply, or softens what is said (좋은데요, it's good, actually; 그런데요, but...)
+-아야/-어야/-여야	X	only if (가야 알 수 있다, (you) only know if (you) go) | must, have to: with 하다 or 되다 (가야 해요, (I) have to go; 하셔야 돼요, you need to do it)
+-야	X	only if; must, have to: -아야 after a stem ending in 아 (가야 해요, (I) have to go; 봐야 알아요, (you) only know by seeing) | hey, oh: calls someone by a name ending in a vowel (민수야, Minsu!)
+-아야겠다/-어야겠다/-야겠다	X	(I) should, (I) will have to (살아야겠다, I must live; 봐야겠어요, I'll have to see)
+-으려면/-려면	X	if (you) want to, to (do): the aim a condition is for (가려면, if you want to go; 막으려면, to prevent it)
+-고자	X	in order to, intending to: formal (말씀드리고자 합니다, I would like to tell you)
+-다면/-ㄴ다면/-는다면	X	if (it is the case that): supposes something (간다면, if (you) go; 좋다면, if it is good)
+-으면은/-면은	X	if, when: spoken -면 (돌리면은, if you turn it)
+-다는/-ㄴ다는/-는다는	X	that: quotes a statement to describe the noun after it (온다는 소식, the news that (he) is coming; 좋다는 말, the saying that (it) is good)
+-네요	X	(oh,) ...!: a polite ending for what the speaker has just noticed or feels (맛있네요, it's tasty!; 덥네요, it's hot!)
+-거든요	X	..., you see: a polite ending that explains or gives the reason (바빴거든요, I was busy, you see)
+-더라고요/-더라구요	X	(I found that) ...: a polite ending that reports what the speaker saw or felt (맛있더라고요, it was tasty, I found)
+-잖아요	X	..., you know: a polite ending that reminds the listener of something they know or should agree with (알잖아요, you know that; 춥잖아요, it's cold, isn't it)
+-나요	X	a gentle polite question ending: ...? (괜찮나요?, is it all right?)
+-을까요/-ㄹ까요/-까요	X	shall I, shall we ...?: a polite question ending (갈까요?, shall we go?) | do you think ...? (있을까요?, would there be?)
+-다시피	X	as (you know, see): 아시다시피, as you know; 보시다시피, as you can see
+-으면서/-면서	X	while, at the same time: two actions together (음악을 들으면서 공부해요, (I) study while listening to music) | even though, while (알면서 모른 척한다, pretends not to know though (he) knows)
+-으며/-며	X	and: links actions or descriptions, mostly written (키가 크며 힘이 세다, is tall and strong) | while, at the same time (웃으며 말했다, said with a smile)
+-다고/-ㄴ다고/-는다고	X	that ...: quotes a statement indirectly (간다고 했다, said (he) would go) | ..., they say: hearsay at the end of a sentence (비가 온다고, it's going to rain, they say) | (saying) that, because: the reason someone gives (바쁘다고 안 왔다, didn't come, saying (he) was busy)
+-게	X	-ly: makes an adverb of a verb or adjective (빠르게, quickly; 크게, loudly) | so that (잘 보이게, so that it can be seen well) | with 되다: come to, end up (doing) (알게 되다, to come to know) | with 하다: make or let (someone do) (웃게 하다, to make (someone) laugh) | at the end, in speech: (I) will ...; will you ...? (내가 하게, I'll do it)
+-구먼/-구먼요/-구만	X	(so) ...!: notes something just realized (벌써 왔구먼, so you're here already)
+-자면	X	if one is to, to (do): a condition for an intended act (말하자면, so to speak; 가자면 멀다, it's far if we are to go)
+-냐면/-느냐면/-으냐면	X	as for (why, what) ...: raises a question one then answers (왜냐면, because; 뭐냐면, the thing is)
+-으려는/-려는	X	(that) intends to, (that) is about to (가려는 사람, a person who means to go)
+-고서	X	and then, after (doing) (밥을 먹고서 나갔다, (he) went out after eating)
+
+## Constructions over several words, a space apart
+-을 수 있다/-ㄹ 수 있다/-을 수가 있다/-ㄹ 수가 있다/-을 수도 있다/-ㄹ 수도 있다	X	can, be able to (갈 수 있다, (I) can go) | may, might (비가 올 수 있다, it may rain)
+-을 수 없다/-ㄹ 수 없다/-을 수가 없다/-ㄹ 수가 없다	X	cannot, be unable to (믿을 수 없다, (I) can't believe it)
+-을 수밖에 없다/-ㄹ 수밖에 없다	X	have no choice but to (기다릴 수밖에 없다, (we) have no choice but to wait)
+-을 텐데/-ㄹ 텐데	X	(it) will probably ..., so / but: an expectation (비가 올 텐데, it'll probably rain, so ...)
+-고 있다	X	be ...ing: an action going on (먹고 있다, is eating) | be in the state of (입고 있다, is wearing)
+-고 나서	X	after (doing), and then (먹고 나서, after eating)
+-고 싶다	X	want to (가고 싶다, (I) want to go)
+-지 않다	X	not (do, be) (가지 않다, doesn't go; 크지 않다, isn't big)
+-지 못하다	X	cannot, fail to (자지 못했다, couldn't sleep)
+-게 되다	X	come to, end up (doing), get to (알게 되다, to come to know; 가게 되면, if (you) end up going)
+-게 하다	X	make or let (someone do) (웃게 하다, to make (someone) laugh)
+-기 때문에	X	because (비가 오기 때문에, because it rains)
+-은 적이 있다/-ㄴ 적이 있다	X	have (done) before (가 본 적이 있다, (I) have been there)
+-어 가지고/-아 가지고/-어 갖고/-아 갖고	X	(spoken) and then, having done (사 가지고 왔다, bought (it) and came) | so, because (늦어 가지고, because (I) was late)
+-에 따라/-에 따라서	PART	according to, depending on (규칙에 따라, according to the rules; 사람에 따라, depending on the person)
+-에 따르면	PART	according to (a source) (뉴스에 따르면, according to the news)
+-에 대해/-에 대해서	PART	about, regarding (그 문제에 대해, about that problem)
+-에 대한	PART	(a noun) about, on (역사에 대한 책, a book about history)
+-을 통해/-를 통해/-을 통해서/-를 통해서	PART	through, by way of (인터넷을 통해, through the internet)
+-을 중심으로/-를 중심으로	PART	centered on, around (서울을 중심으로, centered on Seoul)
+-에 의해/-에 의해서/-에 의한	PART	by: the doer of a passive (사람에 의해 만들어졌다, was made by people) | owing to, due to
+-뿐만 아니라/뿐만 아니라	PART	not only ... (but also) (한국뿐만 아니라 일본도, not only Korea but also Japan)
+예를 들어/예를 들면	ADV	for example
+이 밖에/이 밖에도/그 밖에/그 밖에도	ADV	besides this, in addition, apart from that
+어떻게 보면	ADV	in a way, from one point of view
+알고 보니	ADV	as it turned out, it turned out that
+그런 다음/그 다음/그다음	ADV	after that, then, next
+생각이 나다	VERB	to come to mind, to remember (그 사람이 생각이 났다, (I) remembered that person)
+영향을 주다/영향을 미치다	VERB	to influence, to affect (건강에 영향을 주다, to affect one's health)
+
+## Suffixes
+-적	X	-ic, -al: makes a describing word of a noun, used with 인 or 으로 (화학적, chemical; 자연적인, natural; 효율적으로, efficiently)
+-님	X	a respectful suffix for people: Mr., Ms., dear (선생님, teacher; 고객님, dear customer)
+-형	X	type, model, form (최신형, the latest model; 원형, the original form)
+-율/-률	X	rate, ratio (성장률, growth rate; 비율, ratio)
+-계	X	world, circle, field (학계, academia; 생태계, ecosystem) | system (신경계, nervous system)
+-상	X	in terms of, from the standpoint of (역사상, in history; 법률상, legally)
+-권	X	sphere, zone (수도권, the capital region) | right (투표권, the right to vote) | ticket (입장권, admission ticket)
+-제	X	system (대통령제, presidential system) | agent, medicine (소화제, digestive medicine)
+-층	X	class, group of people (노년층, the elderly) | layer, stratum (지층, stratum)
+-당	X	per (1인당, per person; 시간당, per hour)
+-력	X	power, ability, force (경쟁력, competitiveness; 영향력, influence)
+-감	X	feeling, sense of (책임감, sense of responsibility; 자신감, confidence)
+-생	X	student (대학생, university student) | born in (a year) (90년생, born in 1990)
+-별	X	by, according to, each (연령별, by age; 지역별, by region)
+-경	X	around, about (a time) (3시경, around three o'clock; 1900년경, around 1900)
+
+## Bound nouns and adverbs whose common use Wiktionary lacks
+데	NOUN	place | situation, case | in doing, for (after -는: 만드는 데 쓰인다, (it) is used for making; 가는 데 한 시간 걸려요, it takes an hour to get there) | thing; what: makes a clause a noun
+같이	ADV	together (with) | like, as: after a noun or -와 (이와 같이, like this; 눈같이 희다, white as snow)
+또	ADV	also | again | 또 다른: another (또 다른 문제, another problem)
+한번	ADV	once, one time | just, (give it) a try: with a verb (한번 해 보세요, give it a try) | sometime (when there is a chance)
+별로	ADV	not very, not much, not particularly: with a negative (별로 없었다, there wasn't much; 별로 안 좋아요, it's not that good)
+덜	ADV	less | not fully, not yet (덜 익은, not fully ripe)
+총	DET	total, in all (총 12명, twelve people in all)
+대로	NOUN	as, the way (one does): after -는 or -ㄴ (하는 대로, the way (one) does; 본 대로, as (I) saw)
+
+## Spoken words
+뭐	PRON	what (뭐 해요?, what are you doing?) | something (뭐 먹을래?, do you want something to eat?) | (filler) well, like, you know (뭐 그런 거, stuff like that)
+뭔가	PRON	something (뭔가 이상해요, something is odd) | somehow, kind of
+어	INTJ	uh, um: hesitating | oh!: surprise | yeah (casual yes)
+아	INTJ	ah, oh | uh, um: hesitating
+이제	ADV	now, from now on | (filler) so, well, and then (이제 뭐, so, well)
+막	ADV	just, just now (막 도착했어요, (I) just arrived) | recklessly, wildly, any old way (막 먹다, eat anything) | (filler) like, you know
+좀	ADV	a little, somewhat (contraction of 조금) | please: softens a request (좀 도와주세요, please help me)
+되게	ADV	very, really (되게 좋아요, it's really good)
+그러니까/그니까	ADV	so, that's why | I mean, that is (그러니까 제 말은, what I mean is)
+그러면/그럼	ADV	then, in that case | (그럼) of course, sure
+그래도	ADV	still, even so, nevertheless
+요거	PRON	this (thing): spoken 이거
+요게	PRON	this (thing), as the subject: spoken 이게
+요런	DET	this kind of, such: spoken 이런
+요렇게	ADV	like this, this way: spoken 이렇게
+
+## Words English Wiktionary lacks, common in the corpus
+이산화	NOUN	dioxide (이산화 탄소, carbon dioxide)
+인슐린	NOUN	insulin
+이온	NOUN	ion
+회로	NOUN	circuit
+농도	NOUN	concentration, density (of a substance)
+효율	NOUN	efficiency
+생성	NOUN	creation, generation, formation (생성하다, to create; 생성되다, to be created)
+억제	NOUN	suppression, restraint (억제하다, to suppress)
+불순물	NOUN	impurity
+줄기세포	NOUN	stem cell

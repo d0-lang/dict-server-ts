@@ -11,6 +11,7 @@ const fr = importRules(readLanguage("fr"));
 const italian = importRules(readLanguage("it"));
 const ru = importRules(readLanguage("ru"));
 const uk = importRules(readLanguage("uk"));
+const ko = importRules(readLanguage("ko"));
 
 const entry = (patch: Partial<WiktextractEntry>): WiktextractEntry => ({
   word: "lapis",
@@ -769,6 +770,74 @@ describe("transformEntry", () => {
       verb.formOf.map((l) => l.lemma),
       ["conter"],
     );
+  });
+
+  it("takes a reading from a form tagged as one (readingTags)", () => {
+    const meokda = (rules: typeof ko) =>
+      transformEntry(
+        rules,
+        entry({
+          word: "먹다",
+          pos: "verb",
+          lang_code: "ko",
+          forms: [
+            { form: "meokda", tags: ["romanization"] },
+            { form: "먹어", tags: ["infinitive"] },
+          ],
+          senses: [{ glosses: ["to eat"] }],
+        }),
+      ).entry?.pronunciations.filter((p) => p.kind === "reading");
+    assert.deepStrictEqual(meokda(ko), [{ kind: "reading", value: "meokda" }]);
+    // A language that names no reading tag shows none.
+    assert.deepStrictEqual(meokda({ ...ko, readingTags: [] }), []);
+  });
+
+  it("links a gloss that only names a form in the language's terms (pointerWords)", () => {
+    const korean = (word: string, gloss: string, target: string) =>
+      transformEntry(
+        ko,
+        entry({
+          word,
+          pos: "suffix",
+          lang_code: "ko",
+          senses: [{ glosses: [gloss], links: [[target, `${target}#Korean`]] }],
+        }),
+      );
+    const yang = korean("-아서", "Yang-vowel form of -어서 (-eoseo)", "-어서");
+    assert.strictEqual(yang.entry, undefined);
+    assert.deepStrictEqual(
+      yang.formOf.map((l) => l.lemma),
+      ["-어서"],
+    );
+    const allomorph = korean(
+      "-면",
+      "Post-vowel and post-liquid allomorphic form of -으면 (-eumyeon)",
+      "-으면",
+    );
+    assert.deepStrictEqual(
+      allomorph.formOf.map((l) => l.lemma),
+      ["-으면"],
+    );
+    // A gloss that says more than the form is a gloss.
+    const more = korean(
+      "제",
+      "allomorph of 저 (jeo, first-person singular polite pronoun) before -가",
+      "저",
+    );
+    assert.deepStrictEqual(more.formOf, []);
+    // Polish sets no pointer words: the same gloss stays a gloss there.
+    const polish = transformEntry(
+      pl,
+      entry({
+        senses: [
+          {
+            glosses: ["Yang-vowel form of lapis"],
+            links: [["lapis", "lapis#Polish"]],
+          },
+        ],
+      }),
+    );
+    assert.deepStrictEqual(polish.formOf, []);
   });
 
   it("drops a grammar parent, keeps its children and links to its target", () => {

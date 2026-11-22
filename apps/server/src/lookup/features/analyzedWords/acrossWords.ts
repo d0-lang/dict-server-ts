@@ -153,7 +153,11 @@ const clauseEdgeIds = (c: Click): ReadonlyArray<number> => {
   const after = context.slice(piece.end).trimStart()[0];
   const sentenceEnd =
     after === undefined || /\p{Sentence_Terminal}/u.test(after);
-  if (!whole || !(clauseStart || sentenceEnd)) return [];
+  // With spaces, the piece is a word wherever it stands (`별로`, cut
+  // `별` + `-로`; `앞으로`).
+  if (!whole || !(clauseStart || sentenceEnd || c.settings.spacedWords)) {
+    return [];
+  }
   const key = lookupKey(word);
   return [
     ...new Set(
