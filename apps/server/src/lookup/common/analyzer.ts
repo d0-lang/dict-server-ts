@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
+import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import type { Language } from "@dict/core/language";
+import { lookupKey } from "@dict/core/lookupKey";
+import { FormSource } from "@dict/core/schema";
 
 /**
  * A morphological analyzer (Lindera, compiled to WebAssembly, with its
@@ -9,7 +12,8 @@ import type { Language } from "@dict/core/language";
  * morphemes and gives each its part of speech and base form. A language names
  * its dictionary in `context.analyzer`. Each dictionary is loaded once, when
  * the server opens the language (`loadAnalyzer`), and stays loaded: UniDic
- * takes about a second and 600 MB.
+ * takes about a second and 600 MB. `words` is no analyzer of its own but the
+ * dictionary's words (`wordPieces`), for a script whose words don't inflect.
  */
 
 export type Morpheme = {
@@ -173,7 +177,7 @@ export const reread = (
 
 /** The npm package that holds each Lindera dictionary. Only installed ones load. */
 const PACKAGES: Record<
-  Exclude<AnalyzerSettings["dictionary"], "kiwi">,
+  Exclude<AnalyzerSettings["dictionary"], "kiwi" | "words">,
   string
 > = {
   unidic: "lindera-wasm-unidic",
@@ -310,7 +314,7 @@ export const loadAnalyzer = async (language: Language): Promise<void> => {
   const settings = language.context.analyzer;
   if (settings === undefined) return;
   if (settings.dictionary === "kiwi") await loadKiwi();
-  else tokenizerFor(settings.dictionary);
+  else if (settings.dictionary !== "words") tokenizerFor(settings.dictionary);
 };
 
 /**
@@ -365,10 +369,102 @@ const kiwiPieces = (text: string, from: number): ReadonlyArray<Piece> => {
   }));
 };
 
+/** The longest word `wordPieces` looks for, in letters: chengyu have 4, most set phrases fewer than 8. */
+const MAX_WORD = 8;
+
+/** The tags of `wordPieces`: a letter that starts a dictionary word, and one inside it. */
+export const WORD_START = "B";
+export const WORD_INSIDE = "I";
+
+/**
+ * The text cut into the dictionary's own words (`dictionary = "words"`), for a
+ * script without spaces whose words don't inflect (Chinese), where an
+ * analyzer's dictionary would only be a second word list beside this one.
+ * Each run of Han letters is cut into the fewest words with an entry, a
+ * single letter always counting as one; on a tie, the cut whose last word is
+ * longer wins (reverse maximum matching: `研究生命` is `研究|生命`, not
+ * `研究生|命`). Each letter is a piece, tagged `WORD_START` where a word
+ * starts and `WORD_INSIDE` inside one, so a `join` rule makes the words of
+ * them and a word's letters are its parts (`手|机`). A run of other letters or
+ * digits is one piece (`iPhone`, `18`), with no tag, and so is each other
+ * character.
+ */
+const wordPieces = (
+  db: DictionaryDb,
+  text: string,
+  from: number,
+): ReadonlyArray<Piece> => {
+  const known = db.$client.query<{ found: number }, [string]>(
+    `SELECT 1 AS found FROM forms WHERE form = ?1 AND source <> ${FormSource.Abbreviation} LIMIT 1`,
+  );
+  const isWord = (word: string) => known.get(lookupKey(word)) !== null;
+  const pieces: Array<Piece> = [];
+  const add = (start: number, end: number, pos = "") => {
+    const surface = text.slice(start, end);
+    pieces.push({
+      surface,
+      start: from + start,
+      end: from + end,
+      pos,
+      parts: [{ base: surface, pos }],
+    });
+  };
+  const runs = /([\p{Script=Han}〇]+)|([\p{L}\p{M}\p{N}]+)|(\S)/gu;
+  for (const run of text.matchAll(runs)) {
+    const start = run.index;
+    if (run[1] === undefined) {
+      add(start, start + run[0].length);
+      continue;
+    }
+    // Letters, not UTF-16 units: a rare character outside the BMP is one.
+    const letters = [...run[1]];
+    const at = [0];
+    for (const letter of letters) at.push(at.at(-1)! + letter.length);
+    const fewest = [0];
+    const last = [0];
+    for (let end = 1; end <= letters.length; end++) {
+      fewest.push(Number.POSITIVE_INFINITY);
+      last.push(0);
+      for (let size = 1; size <= Math.min(MAX_WORD, end); size++) {
+        const word = run[1].slice(at[end - size], at[end]);
+        if (size > 1 && !isWord(word)) continue;
+        const count = fewest[end - size]! + 1;
+        if (
+          count < fewest[end]! ||
+          (count === fewest[end] && size > last[end]!)
+        ) {
+          fewest[end] = count;
+          last[end] = size;
+        }
+      }
+    }
+    const cuts: Array<number> = [];
+    for (let end = letters.length; end > 0; end -= last[end]!) cuts.push(end);
+    let begin = 0;
+    for (const end of cuts.reverse()) {
+      for (let letter = begin; letter < end; letter++) {
+        add(
+          start + at[letter]!,
+          start + at[letter + 1]!,
+          letter === begin ? WORD_START : WORD_INSIDE,
+        );
+      }
+      begin = end;
+    }
+  }
+  return pieces;
+};
+
 const analyzers = new WeakMap<Language, Analyzer>();
 
-/** The language's analyzer, or undefined when it names none. */
-export const analyzerFor = (language: Language): Analyzer | undefined => {
+/**
+ * The language's analyzer, or undefined when it names none. `words` reads the
+ * dictionary `db`, the language's own.
+ */
+export const analyzerFor = (
+  language: Language,
+  db: DictionaryDb,
+): Analyzer | undefined => {
   const settings = language.context.analyzer;
   if (settings === undefined) return undefined;
   const cached = analyzers.get(language);
@@ -407,7 +503,9 @@ export const analyzerFor = (language: Language): Analyzer | undefined => {
   const morphemesOf = (text: string, from: number): ReadonlyArray<Morpheme> =>
     (settings.dictionary === "kiwi"
       ? kiwiPieces(text, from)
-      : linderaPieces(text, from)
+      : settings.dictionary === "words"
+        ? wordPieces(db, text, from)
+        : linderaPieces(text, from)
     ).map((token) => {
       const raw = stemsFirst(token.parts, settings);
       const bases = spelledBases(raw, settings);

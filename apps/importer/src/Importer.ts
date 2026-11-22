@@ -143,6 +143,7 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     rules.participleDeclension?.sharedWithParticiple ?? false,
     rules.verbChainsThroughEntries ?? false,
     numerals,
+    (rules.otherScriptTags ?? []).length > 0,
   );
   const tally = makeTally();
 
@@ -151,8 +152,23 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
       `[${elapsedSeconds().toFixed(0)}s] ${tally.linesScanned} lines scanned, ${tally.languageLines} ${rules.code}, ${writer.counts.entries} entries`,
     );
 
+  // A page's later etymologies repeat the sounds of the earlier ones (the
+  // particle `的` lists `dì`, `dí` of "bright" before its own `de`): each line
+  // reads only the sounds its page hasn't given yet.
+  let page = "";
+  let pageSounds = new Set<string>();
   const writeBatch = (batch: ReadonlyArray<WiktextractEntry>) => {
-    const results = batch.map((raw) => transformEntry(withGrammar, raw));
+    const results = batch.map((raw) => {
+      if (raw.word !== page) {
+        page = raw.word;
+        pageSounds = new Set();
+      }
+      const result = transformEntry(withGrammar, raw, pageSounds);
+      for (const sound of raw.sounds ?? []) {
+        if (sound.zh_pron !== undefined) pageSounds.add(sound.zh_pron);
+      }
+      return result;
+    });
     results.forEach((result) => tallyResult(tally, result));
     writer.writeBatch(results);
     const before = tally.languageLines;

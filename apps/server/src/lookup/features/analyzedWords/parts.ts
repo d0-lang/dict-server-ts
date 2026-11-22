@@ -401,7 +401,11 @@ export const morphemeParts = (
     // Entries of the part's own lemma; else what its base forms find, for a
     // lemma the dictionary writes otherwise (`欲しい` under `ほしい`).
     const byLemma = forms.flatMap((form) =>
-      c.rows(form).filter((row) => bases.has(lookupKey(row.lemma))),
+      c
+        .rows(form)
+        .filter(
+          (row) => bases.has(lookupKey(row.lemma)) || c.ownLemma(row, form),
+        ),
     );
     // Only when they find one lemma: `とく` (casual `ておく`) would bring
     // `解く`, `説く` and `得`.

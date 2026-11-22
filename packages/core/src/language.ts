@@ -113,6 +113,56 @@ const Import = doc(
       ),
       [],
     ),
+    otherScriptTags: orDefault(
+      doc(
+        strings,
+        'Form tags that name the word in the language\'s other script, for a language written in two whose dump keeps each word under one: Chinese `Simplified-Chinese`, on the traditional page (`學習` lists `学习`), whose own page is a soft redirect there. Such a form, and a soft redirect of a word written in that script, is the word\'s lemma too, as the lemma is found and ranked, even where the spelling is also a word of its own (`后` "empress", and `后` for `後` "after"). A form also tagged `alternative` is a variant, not the word in the other script.',
+      ),
+      [],
+    ),
+    markedAlternatives: orDefault(
+      doc(
+        Schema.Boolean,
+        'Every alternative form on a headword line is a marked spelling, not a form: it reaches the word only when it reaches nothing else. Chinese lists variant characters there, which are often other words (`悅` "joy" lists `說` "to say" and `兌`).',
+      ),
+      false,
+    ),
+    varieties: Schema.optionalKey(
+      doc(
+        Schema.Struct({
+          others: doc(
+            strings,
+            "Tags of varieties a reader of this language doesn't read (Chinese `Cantonese`, `Hokkien`, `Wu`).",
+          ),
+          keep: doc(
+            strings,
+            'Tags that keep a sense with one of `others`: it is used in this language too (`Mandarin`; `literary`, as in "(literary or Hakka) my" for `吾`).',
+          ),
+        }),
+        "Varieties written under this language's header that its readers don't use: a sense tagged with one of `others` and none of `keep` is dropped, and so is a form tagged with one of `others`. A word left with no sense has no entry (Cantonese `咩`), unlike a historical stage's.",
+      ),
+    ),
+    readingSounds: orDefault(
+      doc(
+        Schema.Array(strings),
+        'Tag sets of the `sounds` that give the headword\'s reading, each a sound\'s whole set of tags (Chinese `["Mandarin", "Pinyin"]`, and the same with `Standard-Chinese`; not `["Mandarin", "Chengdu", "Sichuanese", "Pinyin"]`): their text (`zh_pron`), without a respelling in brackets (`shuō (shuo¹)`), is `pron.reading`, several joined with `, ` (`le, liǎo`).',
+      ),
+      [],
+    ),
+    standardPronTags: orDefault(
+      doc(
+        strings,
+        "Tags a standard pronunciation may carry, beside `standard` (Chinese `Mandarin`, `Standard-Chinese`, `Sinological-IPA`): a sound with any other tag is regional, kept only when there is no standard one.",
+      ),
+      [],
+    ),
+    glossLabels: orDefault(
+      doc(
+        strings,
+        "Sense tags shown in brackets before the gloss, hyphens as spaces (`(literary) to go`, `(Taiwan) potato`): where the sense is used, which the reader needs to know and the gloss doesn't say.",
+      ),
+      [],
+    ),
     stressedLemmas: orDefault(
       doc(
         Schema.Boolean,
@@ -309,8 +359,9 @@ const Context = doc(
               "ko-dic",
               "cc-cedict",
               "kiwi",
+              "words",
             ]),
-            "The morphological analyzer and its dictionary. Lindera's: `unidic` or `ipadic` for Japanese, `ko-dic` for Korean, `cc-cedict` for Chinese. `kiwi`: Kiwi, a Korean analyzer with a language model (npm `kiwi-nlp`), whose model files `bun run kiwi:model` fetches into `KIWI_MODEL_DIR` (default `models/kiwi`); it reads Korean better than ko-dic, which lacks `이`, and takes about 0.75 GB of memory alone, against ko-dic's 0.35 GB.",
+            "The morphological analyzer and its dictionary. Lindera's: `unidic` or `ipadic` for Japanese, `ko-dic` for Korean, `cc-cedict` for Chinese. `words`: no analyzer, the dictionary's own words, for a script whose words don't inflect (Chinese): a run of Han letters is cut into the fewest words with an entry, reverse maximum matching breaking ties; each letter is a morpheme, tagged `B` where a word starts and `I` inside one (a `join` rule with `pos = [\"I\"]` makes the words of them, and a word's letters are its parts), and the settings that name other parts of speech don't apply. `kiwi`: Kiwi, a Korean analyzer with a language model (npm `kiwi-nlp`), whose model files `bun run kiwi:model` fetches into `KIWI_MODEL_DIR` (default `models/kiwi`); it reads Korean better than ko-dic, which lacks `이`, and takes about 0.75 GB of memory alone, against ko-dic's 0.35 GB.",
           ),
           baseFields: orDefault(
             doc(
@@ -589,6 +640,13 @@ const Headword = doc(
         "Grammar features shown as labels next to the headword (`f`, `anim`, `pf`), in this order. Features an article already shows are left out.",
       ),
       ["Gender", "Animacy", "Aspect", "Number"],
+    ),
+    otherSpellings: orDefault(
+      doc(
+        Schema.Boolean,
+        "Show the lemma's other spelling beside it (`import.otherScriptTags`): the spelling the text uses first, the other in brackets (`学习 (學習)` in simplified text, `學習 (学习)` in traditional).",
+      ),
+      false,
     ),
     articles: Schema.optionalKey(
       doc(

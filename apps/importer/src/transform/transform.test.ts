@@ -44,6 +44,7 @@ describe("transformEntry", () => {
     assert.deepStrictEqual(result.skippedSenses, {
       archaic: 1,
       "historical-stage": 1,
+      "other-variety": 0,
       "no-gloss": 0,
       placeholder: 0,
     });
