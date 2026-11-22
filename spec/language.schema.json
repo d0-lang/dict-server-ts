@@ -630,6 +630,12 @@
               },
               "description": "Parts of speech of morphemes that make a compound when a `join` rule writes them together (Korean `NNG`, `NNP`: `양자` + `역학`, \"quantum mechanics\"). Such a word without an entry of its own is shown by its parts, as a word made with `suffixes` is, the longest the dictionary has first (`발색|단`)."
             },
+            "compoundPiece": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991,
+              "description": "Fewest letters a piece of a `compoundPos` morpheme the dictionary lacks may have when it is cut into nouns the dictionary has: shorter pieces match by chance (Korean `2`: not `간` \"liver\" in the name `간송`)."
+            },
             "spacedWords": {
               "type": "boolean",
               "description": "The language writes a space after each word with its particles and endings (Korean eojeols), so the piece the segmenter gives is a whole word. A headword spelled as it is written, other than a noun, verb or adjective, is that word, even where the analyzer cuts it into a stem and endings: it comes first (`하지만` \"but\", cut `하` + `-지만`). A word the analyzer reads as a verb with endings is no noun spelled alike (`하지` \"summer solstice\", for `하` + `-지`). Off for Japanese, written without spaces, where `だったら` after a noun is the copula, not the conjunction."

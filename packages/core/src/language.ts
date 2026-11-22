@@ -545,6 +545,13 @@ const Context = doc(
             ),
             [],
           ),
+          compoundPiece: orDefault(
+            doc(
+              Schema.Int,
+              'Fewest letters a piece of a `compoundPos` morpheme the dictionary lacks may have when it is cut into nouns the dictionary has: shorter pieces match by chance (Korean `2`: not `간` "liver" in the name `간송`).',
+            ),
+            2,
+          ),
           spacedWords: orDefault(
             doc(
               Schema.Boolean,

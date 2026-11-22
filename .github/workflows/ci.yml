@@ -23,7 +23,9 @@ jobs:
           # The version the Dockerfile runs.
           bun-version: 1.4.4
       - run: bun install --frozen-lockfile
-      # Kiwi's model, which the Korean tests load.
+      # Kiwi's model, which the Korean tests load. A kiwi-nlp upgrade adds its
+      # checksum to the script, which changes the key; the script refetches
+      # whenever the stamp differs from the installed package anyway.
       - uses: actions/cache@v4
         with:
           path: models/kiwi

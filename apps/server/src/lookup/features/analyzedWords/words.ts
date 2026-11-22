@@ -40,6 +40,11 @@ export const wordsOf = (
     ) {
       word!.push(morpheme);
     } else if (hasPos(morpheme.pos, settings.prefixes)) {
+      // Prefixes join one another only when written together.
+      if (prefixes.length > 0 && prefixes.at(-1)!.end !== morpheme.start) {
+        for (const prefix of prefixes) words.push([prefix]);
+        prefixes = [];
+      }
       prefixes.push(morpheme);
     } else if (!/\p{L}/u.test(morpheme.surface)) {
       // A prefix joins a word, not a number (`約` + `30`) or a sign.

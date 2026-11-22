@@ -10,14 +10,14 @@ target = "en"
 # A Hangul syllable's own line ("More information(eumhun reading: …)") names
 # no word a reader looks up.
 skippedPos = ["syllable"]
-# Glosses that only name another word's form, which wiktextract links no
-# word in: "Yang-vowel form of -어서", "Post-vowel and post-liquid
-# allomorphic form of -으면", "topic-marked form of 나". The reader gets the
-# word's meaning instead of the form's name (about 120 senses).
 # The Revised Romanization, which 59,008 of 64,457 lines give (`먹다`:
 # meokda), as the headword's reading: a learner who can't yet read Hangul
 # fluently sounds the word out by it.
 readingTags = ["romanization"]
+# Glosses that only name another word's form, which wiktextract links no
+# word in: "Yang-vowel form of -어서", "Post-vowel and post-liquid
+# allomorphic form of -으면", "topic-marked form of 나". The reader gets the
+# word's meaning instead of the form's name (about 120 senses).
 pointerWords = ["yang-vowel", "post-vowel", "post-vocalic", "post-liquid", "post-ㄹ", "(l)", "and", "or", "liquid", "colloquial", "allomorphic", "allomorph", "form", "topic-marked"]
 
 [context.analyzer]
@@ -36,10 +36,12 @@ dictionary = "kiwi"
 # Kiwi gives each morpheme's base form (듣 for 들, 하 and 었 for 했), and
 # marks a fused syllable by giving its morphemes one place in the text: they
 # are one piece, as written (했), with each one's base form.
+
 # Kiwi writes a final consonant ending with the jamo that ends a syllable
 # (가 + ᆯ), Wiktionary with the letter (-ㄹ).
 baseLetters = { "ᆫ" = "ㄴ", "ᆯ" = "ㄹ", "ᆷ" = "ㅁ", "ᆸ" = "ㅂ", "ᆻ" = "ㅆ" }
 # Hangul is written as it sounds: no reading field.
+
 # 하다 and 되다 after a noun make a verb of it: 공부했어요 is 공부하다.
 stemSuffixes = ["XSV", "XSA"]
 # An auxiliary verb written onto the verb makes a verb Wiktionary often has:
@@ -66,6 +68,9 @@ suffixes = ["XSN"]
 # Nouns written together make a compound (양자|역학, a join rule below): one
 # without an entry is shown by the longest parts Wiktionary has (발색|단).
 compoundPos = ["NNG", "NNP"]
+# A piece of such a noun is two syllables or more: one alone matches by
+# chance (간 "liver" in the name 간송).
+compoundPiece = 2
 
 # Wiktionary lists a verb or adjective by its dictionary form, the stem with
 # 다 (먹다; Kiwi gives 먹), and the copula as -이다.
