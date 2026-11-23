@@ -232,7 +232,7 @@ hatte	AUX	had ("ich hatte keine Zeit", I had no time) → haben | had (past perf
 hattest	AUX	had (du) → haben | had (past perfect)
 hatten	AUX	had (wir, sie, Sie) → haben | had (past perfect: "wir hatten gewartet", we had waited)
 hattet	AUX	had (ihr) → haben | had (past perfect)
-hätte	AUX	would have ("ich hätte gern einen Kaffee", I would like a coffee; "das hätte ich nicht gedacht", I wouldn't have thought so) → haben | had (in a condition: "wenn ich Zeit hätte", if I had time) | could have, should have (with a modal: "er hätte kommen können", he could have come)
+hätte	AUX	form of haben for what is wished, imagined or said politely: I'd like a coffee (ich hätte gern einen Kaffee) → haben | in an "if" that isn't true: if I had time (wenn ich Zeit hätte) | with können, sollen, müssen: could have or should have, but didn't (er hätte kommen können)
 hättest	AUX	would have, had (du) → haben | could have, should have (with a modal)
 hätten	AUX	would have, had (wir, sie, Sie) → haben | could have, should have (with a modal)
 hättet	AUX	would have, had (ihr) → haben | could have, should have (with a modal)
@@ -308,7 +308,7 @@ hält	VERB	holds, stops ("der Bus hält hier", the bus stops here) → halten | 
 lässt	VERB	lets, leaves ("er lässt mich gehen", he lets me go) → lassen | has (something) done ("sie lässt das Auto reparieren", she has the car repaired)
 ließ	VERB	let, left ("er ließ mich gehen", he let me go) → lassen | had (something) done
 trat	VERB	stepped, kicked ("er trat ins Zimmer", he stepped into the room) → treten
-spricht	VERB	speaks, talks ("sie spricht Deutsch", she speaks German) → sprechen | spricht für: suggests, speaks for ("das spricht für ihn", that speaks in his favour; "vieles spricht dafür", there's a lot to suggest it)
+spricht	VERB	form of sprechen: speaks, talks → sprechen | spricht für: is a reason to believe or support something: that speaks in his favour (das spricht für ihn)
 sprach	VERB	spoke, talked → sprechen
 gesprochen	VERB	spoken, spoke ("wir haben darüber gesprochen", we talked about it) → sprechen
 bekam	VERB	got, received ("ich bekam einen Brief", I got a letter) → bekommen
@@ -381,8 +381,8 @@ außer Kraft treten	VERB	to cease to be in force, to lapse
 daran liegen	VERB	to be due to, to be because of ("das liegt daran, dass...", that's because...)
 
 ## Words with a sense Wiktionary lacks
-nach	ADP	after, past (time: "nach dem Essen", after the meal) | to, towards (places and directions: "nach Berlin", to Berlin; "nach Hause", home) | after, behind (in sequence: "nach Ihnen!", after you!) | according to, by (also after the noun: "meiner Meinung nach", in my opinion) | like, of (with riechen, schmecken, klingen, aussehen: "es riecht nach Rauch", it smells of smoke) | for, about (with Frage, fragen, suchen, Sehnsucht: "die Frage nach dem Sinn", the question of the meaning; "nach dem Weg fragen", to ask the way)
-davon	ADV	from it, from that, off it (place or source: "weit davon entfernt", far from it) | of it, of them (part of a whole: "jeder davon", each of them; "zwei davon", two of them) | about it, of it (with hören, wissen, sprechen: "ich habe davon gehört", I've heard of it) | from that, as a result ("davon wird man müde", that makes you tired)
+nach	ADP	later in time or order: after the meal (nach dem Essen), after you (nach Ihnen) | going to a town, a country or a direction; for people and buildings German uses zu: to Berlin (nach Berlin); nach Hause: home | as someone sees or says it, often after the noun: in my opinion (meiner Meinung nach) | what something smells, tastes or sounds like: smells of smoke (riecht nach Rauch) | what you ask about or look for: ask the way (nach dem Weg fragen)
+davon	ADV	away from the thing just mentioned: far from it (weit davon entfernt) | some out of a group or amount already named: two of them (zwei davon) | about the thing just mentioned: I've heard of it (ich habe davon gehört) | as a result of it: that makes you tired (davon wird man müde)
 relativ	ADV	relatively, fairly ("relativ deutlich", fairly clearly)
 wesentlich	ADV	considerably, much (with a comparative: "wesentlich weniger", considerably fewer) | essentially, substantially
 super	ADV	great, really well (colloquial: "das schmeckt super", that tastes great; "super als Beilage", great as a side dish) | very, really (before an adjective: "super simpel", really simple)

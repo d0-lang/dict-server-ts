@@ -222,7 +222,7 @@
 # Each sense names the case the noun after it takes.
 в	ADP	in, at (+ prepositional, where: "в доме", in the house; "в мае", in May) | into, to (+ accusative, where to: "в Москву", to Moscow) | at (+ accusative, time: "в пять часов", at five o'clock; "в среду", on Wednesday)
 во	ADP	in, into (form of в before some consonant clusters: "во дворе", in the yard; "во время", during)
-на	ADP	on, at (+ prepositional, where: "на столе", on the table; "на работе", at work) | onto, to (+ accusative, where to: "на юг", to the south) | for (+ accusative, a time or purpose: "на неделю", for a week) | at, for, on (+ accusative, after verbs: "смотреть на", look at; "надеяться на", hope for)
+на	ADP	where something is, on a surface or at a place or event: on the table (на столе), at work (на работе) | where something goes; the noun's ending changes: onto the table (на стол), to the south (на юг) | how long or what for, planned ahead: for a week (на неделю) | what you look at, hope for or get angry at: look at (смотреть на), hope for (надеяться на)
 с	ADP	with (+ instrumental: "с другом", with a friend) | from, off, since (+ genitive: "с работы", from work; "с утра", since the morning) | about (+ accusative, size: "с километр", about a kilometre)
 со	ADP	with, from (form of с before some consonant clusters: "со мной", with me)
 к	ADP	to, towards (+ dative: "к врачу", to the doctor) | by (+ dative, a time: "к пяти", by five)
@@ -234,7 +234,7 @@
 из	ADP	from, out of (+ genitive: "из дома", out of the house; "из России", from Russia) | of (+ genitive, made of or one of: "из дерева", of wood; "один из нас", one of us)
 от	ADP	from (+ genitive: "от друга", from a friend; "далеко от", far from) | of, to (+ genitive, with words of place: "сбоку от", beside; "справа от", to the right of) | against, for (+ genitive, protection or cure: "лекарство от кашля", cough medicine) | because of (+ genitive: "от страха", from fear)
 до	ADP	until, till, before (+ genitive: "до утра", until morning; "до войны", before the war) | to, as far as (+ genitive: "до центра", to the centre)
-по	ADP	along, around, across (+ dative: "по улице", along the street; "по городу", around the city) | by, on (+ dative, means or channel: "по телефону", on the phone) | according to (+ dative: "по плану", according to the plan; "по словам", according to; "по данным", according to the data) | in, on (+ dative, subject: "специалист по истории", a history specialist) | each, apiece (with numbers: "по два", two each)
+по	ADP	moving over a surface or through an area: along the street (по улице), around the city (по городу) | the means or channel: on the phone (по телефону), on TV (по телевизору) | following a plan, a rule or a source: according to the plan (по плану) | the field something belongs to: a history specialist (специалист по истории) | with numbers, what each one gets: two each (по два)
 за	ADP	behind, beyond (+ instrumental, where; + accusative, where to: "за домом", behind the house) | for (+ accusative: "спасибо за помощь", thanks for the help) | in, within (+ accusative, time taken: "за час", in an hour) | to get, for (+ instrumental: "пошёл за хлебом", went for bread)
 под	ADP	under, below (+ instrumental, where; + accusative, where to: "под столом", under the table) | near (+ instrumental: "под Москвой", near Moscow) | towards (+ accusative, time: "под утро", towards morning)
 над	ADP	over, above (+ instrumental: "над городом", over the city) | on (+ instrumental, working on: "работать над проектом", work on a project)
