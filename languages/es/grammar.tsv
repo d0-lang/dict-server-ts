@@ -12,250 +12,257 @@
 # Forms whose noun or adverb is as common are left out (`vino` "wine",
 # `puesto` "post", `fuera` "outside", `cuesta` "slope").
 # See apps/importer/src/grammar.ts.
+#
+# Each sense explains what the word does, for a learner reading it next to
+# the sentence: what it expresses, then the English, then a short phrase in
+# brackets when the English alone doesn't settle it ("is, for where something
+# is or how it is right now: he's at home (está en casa)"). No notes on case
+# or position: the sentence shows those.
+# A form names its base word, which links it: "form of tener: has → tener".
 
 ## Articles, and the contractions of a and de with el
-el	DET	the (masculine singular; also before a feminine noun starting with a stressed a: el agua, the water)
-la	DET	the (feminine singular)
-la	PRON	her, it (object: la veo, I see her/it)
-los	DET	the (masculine plural)
-los	PRON	them (masculine object: los veo, I see them)
-las	DET	the (feminine plural)
-las	PRON	them (feminine object: las veo, I see them)
-lo	DET	the (before an adjective: lo bueno, the good thing; lo que, what, the thing that)
-lo	PRON	him, it (object: lo veo, I see him/it) | it, so (standing for a clause: lo sé, I know (it))
-un	DET	a, an (masculine)
-una	DET	a, an (feminine)
-una	PRON	one (feminine: una de ellas, one of them)
-unos	DET	some (masculine plural) | about, around (before a number: unos diez, about ten)
-unas	DET	some (feminine plural) | about, around (before a number: unas diez, about ten)
-del	ADP	of the, from the (de + el)
-al	ADP	to the, at the (a + el) | on, upon, when (before an infinitive: al llegar, on arriving)
+el	DET	the, for a masculine noun; also before a feminine noun starting with a stressed a: the water (el agua)
+la	DET	the, for a feminine noun
+la	PRON	her, it: I see her (la veo)
+los	DET	the, for masculine or mixed plural nouns
+los	PRON	them: I see them (los veo)
+las	DET	the, for feminine plural nouns
+las	PRON	them, for women or feminine nouns: I see them (las veo)
+lo	DET	the, turning an adjective into a thing: the good thing (lo bueno), what, the thing that (lo que)
+lo	PRON	him, it: I see him (lo veo) | it, so: stands for what was just said: I know (lo sé)
+un	DET	a, an, for a masculine noun
+una	DET	a, an, for a feminine noun
+una	PRON	one: one of them (una de ellas)
+unos	DET	some | about, roughly, before a number: about ten (unos diez)
+unas	DET	some | about, roughly, before a number: about ten (unas diez)
+del	ADP	de and el joined: of the, from the → de
+al	ADP	a and el joined: to the, at the | on, when, before a verb: on arriving (al llegar)
 
 ## Personal pronouns
 yo	PRON	I
-tú	PRON	you (informal singular, subject)
-él	PRON	he, him (also after a preposition: para él, for him) | it (masculine)
-ella	PRON	she, her (also after a preposition: con ella, with her) | it (feminine)
-ello	PRON	it, that (neuter: por ello, for that reason)
-nosotros	PRON	we, us (after a preposition: con nosotros, with us)
-nosotras	PRON	we, us (feminine)
-vosotros	PRON	you (informal plural, used in Spain: vosotros sois, you are)
-vosotras	PRON	you (informal plural, feminine, used in Spain)
-ellos	PRON	they, them (masculine or mixed; also after a preposition: para ellos, for them)
-ellas	PRON	they, them (feminine)
-me	PRON	me, to me (object: me ve, he sees me; me dio, he gave me) | myself (me lavo, I wash (myself))
-te	PRON	you, to you (object of tú: te veo, I see you) | yourself (te lavas, you wash (yourself))
-nos	PRON	us, to us (object: nos ve, he sees us) | ourselves, each other (nos vemos, see you, we'll see each other)
-os	PRON	you, to you (object of vosotros, Spain: os veo, I see you all) | yourselves, each other
-le	PRON	to him, to her, to it, to you (formal) (indirect object: le dije, I told him/her) | him, you (formal) (object, in Spain: le veo, I see him)
-les	PRON	to them, to you (plural) (indirect object: les dije, I told them)
-mí	PRON	me (after a preposition: para mí, for me)
-ti	PRON	you (after a preposition: para ti, for you)
+tú	PRON	you, to one person you know well; strangers get usted → usted
+él	PRON	he, him: for him (para él) | it, for a masculine noun
+ella	PRON	she, her: with her (con ella) | it, for a feminine noun
+ello	PRON	it, that, for an idea rather than a thing: for that reason (por ello)
+nosotros	PRON	we, us: with us (con nosotros)
+nosotras	PRON	we, us, for a group of women
+vosotros	PRON	you, to several people you know well; used in Spain, Latin America says ustedes → ustedes
+vosotras	PRON	you, to several women you know well; used in Spain
+ellos	PRON	they, them, for men or mixed groups: for them (para ellos)
+ellas	PRON	they, them, for women
+me	PRON	me, to me: he sees me (me ve), he gave me (me dio) | myself: I wash (me lavo)
+te	PRON	you, to you, to someone you call tú: I see you (te veo) | yourself
+nos	PRON	us, to us: he sees us (nos ve) | ourselves, each other: see you (nos vemos)
+os	PRON	you, to you, to several people you know well, in Spain | yourselves, each other
+le	PRON	to him, to her, to you politely: I told him (le dije) | him, in Spain: I see him (le veo)
+les	PRON	to them, to you all: I told them (les dije)
+mí	PRON	me, after a preposition: for me (para mí)
+ti	PRON	you, after a preposition: for you (para ti)
 
 ## Possessives
 mi	DET	my
-mis	DET	my (plural possessee: mis amigos, my friends)
-tu	DET	your (informal singular)
-tus	DET	your (informal singular; plural possessee: tus amigos, your friends)
-su	DET	his, her, its, their, your (formal) (the owner is told by the context: su casa, his/her/their house)
-sus	DET	his, her, its, their, your (formal) (plural possessee: sus amigos, his/her/their friends)
+mis	DET	my, for several things: my friends (mis amigos)
+tu	DET	your, to someone you call tú
+tus	DET	your, for several things, to someone you call tú: your friends (tus amigos)
+su	DET	his, her, its, their, or your politely: the context tells whose: his house, her house, their house (su casa)
+sus	DET	his, her, its, their, or your politely, for several things: his friends, their friends (sus amigos)
 
 ## Demonstratives
-este	DET	this (masculine)
-este	PRON	this one (masculine)
-esta	DET	this (feminine)
-esta	PRON	this one (feminine)
-estos	DET	these (masculine)
-estos	PRON	these (ones) (masculine)
-estas	DET	these (feminine)
-estas	PRON	these (ones) (feminine)
-esto	PRON	this (neuter: esto es, this is; todo esto, all this)
-ese	DET	that (masculine)
-ese	PRON	that one (masculine)
-esa	DET	that (feminine)
-esa	PRON	that one (feminine)
-esos	DET	those (masculine)
-esos	PRON	those (ones) (masculine)
-esas	DET	those (feminine)
-esas	PRON	those (ones) (feminine)
-eso	PRON	that (neuter: eso es, that's it; por eso, that's why; a eso de, at about (a time))
-aquel	DET	that (over there, or long ago; masculine)
-aquella	DET	that (over there, or long ago; feminine)
-aquellos	DET	those (over there, or long ago; masculine)
-aquellas	DET	those (over there, or long ago; feminine)
-aquello	PRON	that (neuter, over there or long ago)
+este	DET	this, close to me
+este	PRON	this one
+esta	DET	this, close to me
+esta	PRON	this one
+estos	DET	these, close to me
+estos	PRON	these, these ones
+estas	DET	these, close to me
+estas	PRON	these, these ones
+esto	PRON	this, for an idea or something unnamed: this is (esto es), all this (todo esto)
+ese	DET	that, close to you
+ese	PRON	that one
+esa	DET	that, close to you
+esa	PRON	that one
+esos	DET	those, close to you
+esos	PRON	those, those ones
+esas	DET	those, close to you
+esas	PRON	those, those ones
+eso	PRON	that, for an idea or something unnamed: that's it (eso es), that's why (por eso) | a eso de: at about, with a time
+aquel	DET	that, far from both of us, or long ago
+aquella	DET	that, far from both of us, or long ago
+aquellos	DET	those, far from both of us, or long ago
+aquellas	DET	those, far from both of us, or long ago
+aquello	PRON	that, far away or long ago, for an idea or something unnamed
 
 ## Relatives
-cual	PRON	which, who (after an article: el cual, la cual, lo cual, which) | like, as (literary: cual niño, like a child)
-cuales	PRON	which, who (after an article: los cuales, las cuales, which)
+cual	PRON	which, who, after el, la or lo: which (lo cual) | (literary) like: like a child (cual niño)
+cuales	PRON	which, who, after los or las: which (los cuales)
 
 ## Prepositions
-ante	ADP	before, in front of (ante el juez, before the judge) | in the face of, faced with, given (ante eso, in view of that) | compared to
-de	ADP	of; 's (la casa de Juan, Juan's house) | from (de Madrid, from Madrid) | about (hablar de, to talk about) | made of (de madera, wooden) | than (before a number: más de diez, more than ten) | with, in, by (describing: la chica de azul, the girl in blue)
+ante	ADP	before, in front of: before the judge (ante el juez) | faced with, given: in view of that (ante eso) | compared to
+de	ADP	of, 's: Juan's house (la casa de Juan) | from: from Madrid (de Madrid) | about: to talk about (hablar de) | made of: wooden (de madera) | than, before a number: more than ten (más de diez) | describing someone: the girl in blue (la chica de azul)
 
 ## Conjunctions
-sino	CCONJ	but (rather), after a negative (no es rojo sino azul, it isn't red but blue) | except, only (no hace sino quejarse, he does nothing but complain)
-mientras	SCONJ	while, as long as (mientras comes, while you eat) | mientras que: whereas
-mientras	ADV	meanwhile (mientras tanto, in the meantime)
+sino	CCONJ	but rather, after a no: it isn't red but blue (no es rojo sino azul) | nothing but, only: he does nothing but complain (no hace sino quejarse)
+mientras	SCONJ	while, as long as: while you eat (mientras comes) | mientras que: whereas
+mientras	ADV	meanwhile: in the meantime (mientras tanto)
 
 ## Adverbs
-muy	ADV	very, too (muy grande, very big)
+muy	ADV	very: very big (muy grande)
 
 ## Forms of ser and estar "to be", and haber "to have" (also the auxiliary of the past) and "there is"
-es	AUX	is (ser: es grande, it is big) → ser
-son	AUX	are (ser: son grandes, they are big) → ser
-soy	AUX	am (ser) → ser
-eres	AUX	are (ser: tú eres, you are) → ser
-somos	AUX	are (ser: nosotros somos, we are) → ser
-era	AUX	was, used to be (ser: era grande, it was big) → ser
-eran	AUX	were, used to be (ser) → ser
-fue	AUX	was (ser: fue un éxito, it was a success) → ser | went (ir: fue a Madrid, he went to Madrid) → ir
-fueron	AUX	were (ser) → ser | went (ir) → ir
-sea	AUX	be (subjunctive of ser: que sea, that it be; o sea, I mean, that is) → ser | sea ... sea: whether ... or (sea en casa, sea en la calle, whether at home or in the street)
-será	AUX	will be (ser) → ser
-sería	AUX	would be (ser) → ser
-está	AUX	is (estar: está en casa, he is at home; está cansado, he is tired) → estar | is (with a gerund: está comiendo, he is eating)
-están	AUX	are (estar) → estar | are (with a gerund: están comiendo, they are eating)
-estoy	AUX	am (estar) → estar | am (with a gerund: estoy comiendo, I am eating)
-estamos	AUX	are (estar: nosotros estamos, we are) → estar | are (with a gerund: estamos comiendo, we are eating)
-estaba	AUX	was (estar) → estar | was (with a gerund: estaba comiendo, he was eating)
-hay	AUX	there is, there are (hay que + infinitive: one has to, you have to) → haber
-ha	AUX	has (with a past participle: ha dicho, he/she has said) → haber
-han	AUX	have (with a past participle: han dicho, they have said) → haber
-he	AUX	have (with a past participle: he dicho, I have said) → haber
-has	AUX	have (with a past participle: has dicho, you have said) → haber
-hemos	AUX	have (with a past participle: hemos dicho, we have said) → haber
-había	AUX	had (with a past participle: había dicho, had said) → haber | there was, there were (había mucha gente, there were a lot of people)
-habían	AUX	had (with a past participle: habían dicho, they had said) → haber
-haya	AUX	have, has (subjunctive, with a past participle: que haya dicho, that he has said) → haber | there be (subjunctive: que haya, that there be)
-hubo	AUX	there was, there were → haber | had (with a past participle, literary)
-hubiera/hubiese	AUX	had (past subjunctive, with a past participle: si hubiera sabido, if I had known) → haber | would have (with a past participle: lo hubiera hecho, I would have done it) | there were (subjunctive: si hubiera tiempo, if there were time)
-habría	AUX	would have (with a past participle: habría dicho, would have said) → haber | there would be
-habrá	AUX	there will be → haber | will have (with a past participle: habrá dicho, will have said)
-sido	AUX	been (ser: ha sido, it has been; ha sido construido, it has been built) → ser
-sean	AUX	be (subjunctive of ser: que sean, that they be) → ser
-seas	AUX	be (subjunctive of ser: que seas, that you be) → ser
-estás	AUX	are (estar: tú estás, you are; ¿cómo estás?, how are you?) → estar | are (with a gerund: estás comiendo, you are eating)
-estuvo	AUX	was (estar: estuvo en casa, he was at home) → estar | was (with a gerund: estuvo trabajando, he was working)
-esté	AUX	be, is (subjunctive of estar: que esté bien, that it be all right) → estar
-hayan	AUX	have (subjunctive, with a past participle: que hayan dicho, that they have said) → haber
-habido	AUX	been (haber: ha habido, there has been, there have been) → haber
+es	AUX	form of ser: is, for what something is, its nature or identity: it's big (es grande) → ser
+son	AUX	form of ser: are, for what something is: they're big (son grandes) → ser
+soy	AUX	form of ser: am, for what I am → ser
+eres	AUX	form of ser: are, for what you are: you are (tú eres) → ser
+somos	AUX	form of ser: are, for what we are → ser
+era	AUX	past of ser: was, used to be: it was big (era grande) → ser
+eran	AUX	past of ser: were, used to be → ser
+fue	AUX	past of ser: was: it was a success (fue un éxito) → ser | past of ir: went: he went to Madrid (fue a Madrid) → ir
+fueron	AUX	past of ser: were → ser | past of ir: went → ir
+sea	AUX	form of ser after que, for wishes, doubts or what may be: that it be (que sea) → ser | o sea: I mean, that is | sea ... sea: whether ... or
+será	AUX	future of ser: will be → ser
+sería	AUX	form of ser: would be → ser
+está	AUX	form of estar: is, for where something is or how it is right now: he's at home (está en casa), he's tired (está cansado) → estar | is doing it now: he's eating (está comiendo)
+están	AUX	form of estar: are, for where or how they are now → estar | are doing it now: they're eating (están comiendo)
+estoy	AUX	form of estar: am, for where or how I am now → estar | am doing it now: I'm eating (estoy comiendo)
+estamos	AUX	form of estar: are, for where or how we are now → estar | are doing it now: we're eating (estamos comiendo)
+estaba	AUX	past of estar: was, where or how it was → estar | was doing it: he was eating (estaba comiendo)
+hay	AUX	form of haber: there is, there are → haber | hay que: one has to, you have to
+ha	AUX	form of haber: has, making the past: he has said (ha dicho) → haber
+han	AUX	form of haber: have, making the past: they have said (han dicho) → haber
+he	AUX	form of haber: have, making the past: I have said (he dicho) → haber
+has	AUX	form of haber: have, making the past: you have said (has dicho) → haber
+hemos	AUX	form of haber: have, making the past: we have said (hemos dicho) → haber
+había	AUX	form of haber: had, making the past: had said (había dicho) → haber | there was, there were: there were a lot of people (había mucha gente)
+habían	AUX	form of haber: had, making the past: they had said (habían dicho) → haber
+haya	AUX	form of haber after que: has: that he has said (que haya dicho) → haber | that there be (que haya)
+hubo	AUX	past of haber: there was, there were → haber | (literary) had, making the past
+hubiera/hubiese	AUX	form of haber for what didn't happen: had: if I had known (si hubiera sabido) → haber | would have: I would have done it (lo hubiera hecho) | there were: if there were time (si hubiera tiempo)
+habría	AUX	form of haber: would have: would have said (habría dicho) → haber | there would be
+habrá	AUX	future of haber: there will be → haber | will have done: will have said (habrá dicho)
+sido	AUX	form of ser: been: it has been (ha sido), it has been built (ha sido construido) → ser
+sean	AUX	form of ser after que, for wishes, doubts or what may be: that they be (que sean) → ser
+seas	AUX	form of ser after que, for wishes, doubts or what may be: that you be (que seas) → ser
+estás	AUX	form of estar: are, where or how you are now: how are you? (¿cómo estás?) → estar | are doing it now: you're eating (estás comiendo)
+estuvo	AUX	past of estar: was, where or how it was: he was at home (estuvo en casa) → estar | was doing it: he was working (estuvo trabajando)
+esté	AUX	form of estar after que: that it be all right (que esté bien) → estar
+hayan	AUX	form of haber after que: have: that they have said (que hayan dicho) → haber
+habido	AUX	form of haber: been, in there has been: there has been (ha habido) → haber
 
 ## Forms of ir "to go" (ir a + infinitive is the near future) and poder "can"
-voy	AUX	I go, I'm going (ir) → ir | voy a + infinitive: I'm going to (voy a comer, I'm going to eat)
-va	AUX	goes, is going (ir) → ir | va a + infinitive: is going to (va a llover, it's going to rain)
-vamos	AUX	we go, we're going (ir) → ir | vamos a + infinitive: we're going to; let's (vamos a ver, let's see)
-iba	AUX	was going, used to go (ir) → ir | iba a + infinitive: was going to (iba a llamar, I was going to call)
-iban	AUX	were going, used to go (ir) → ir | iban a + infinitive: were going to
-van	AUX	go, are going (ir) → ir | van a + infinitive: are going to
-podía	AUX	could, was able to (poder: no podía dormir, I couldn't sleep) → poder
-podría	AUX	could, might, would be able to (poder: podría llover, it might rain) → poder
-puede	AUX	can, may (poder: puede venir, he can come; puede ser, it may be) → poder
-pueden	AUX	can, may (poder: pueden venir, they can come) → poder
-vas	AUX	you go, you're going (ir: tú vas) → ir | vas a + infinitive: you're going to (vas a ver, you'll see)
-vaya	AUX	go (subjunctive of ir: que vaya, that he go; que te vaya bien, good luck) → ir | wow, what a (surprise: ¡vaya!, wow; vaya día, what a day)
-puedo	AUX	I can, I may (poder: no puedo, I can't) → poder
-puedes	AUX	you can, you may (poder: ¿puedes ayudarme?, can you help me?) → poder
-podrá	AUX	will be able to (poder: podrá venir, he will be able to come) → poder
-pueda	AUX	can, may (subjunctive of poder: para que pueda, so that he can) → poder
-puedan	AUX	can, may (subjunctive of poder: para que puedan, so that they can) → poder
+voy	AUX	form of ir: I go, I'm going → ir | voy a: I'm going to: I'm going to eat (voy a comer)
+va	AUX	form of ir: goes, is going → ir | va a: is going to: it's going to rain (va a llover)
+vamos	AUX	form of ir: we go, we're going → ir | vamos a: we're going to; let's: let's see (vamos a ver)
+iba	AUX	past of ir: was going, used to go → ir | iba a: was going to: I was going to call (iba a llamar)
+iban	AUX	past of ir: were going, used to go → ir | iban a: were going to
+van	AUX	form of ir: go, are going → ir | van a: are going to
+podía	AUX	past of poder: could, was able to: I couldn't sleep (no podía dormir) → poder
+podría	AUX	form of poder: could, might: it might rain (podría llover) → poder
+puede	AUX	form of poder: can, may: he can come (puede venir), it may be (puede ser) → poder
+pueden	AUX	form of poder: can, may: they can come (pueden venir) → poder
+vas	AUX	form of ir: you go, you're going → ir | vas a: you're going to: you'll see (vas a ver)
+vaya	AUX	form of ir after que: good luck (que te vaya bien) → ir | wow, what a, in surprise: wow! (¡vaya!), what a day (vaya día)
+puedo	AUX	form of poder: I can, I may: I can't (no puedo) → poder
+puedes	AUX	form of poder: you can, you may: can you help me? (¿puedes ayudarme?) → poder
+podrá	AUX	future of poder: will be able to: he'll be able to come (podrá venir) → poder
+pueda	AUX	form of poder after que: so that he can (para que pueda) → poder
+puedan	AUX	form of poder after que: so that they can (para que puedan) → poder
 
 ## Verb forms of two verbs, the commoner first
-creo	VERB	I think, I believe (creer: creo que sí, I think so) → creer | I create (crear) → crear
-gustaría	VERB	would like (gustar: me gustaría, I would like; le gustaría, he/she would like) → gustar
-sé	VERB	I know (saber: no sé, I don't know) → saber | be! (imperative of ser: sé bueno, be good)
+creo	VERB	form of creer: I think, I believe: I think so (creo que sí) → creer | form of crear: I create → crear
+gustaría	VERB	form of gustar: would like; Spanish says it pleases you: I would like (me gustaría) → gustar
+sé	VERB	form of saber: I know: I don't know (no sé) → saber | form of ser: be!: be good (sé bueno) → ser
 
 ## Forms of the commonest irregular verbs
-tiene	VERB	has (tener: tiene dos hijos, he has two children) → tener | tiene que + infinitive: has to (tiene que irse, he has to go)
-tengo	VERB	I have (tener: tengo frío, I'm cold; tengo veinte años, I'm twenty) → tener | tengo que + infinitive: I have to
-tienen	VERB	have (tener: ellos tienen) → tener | tienen que + infinitive: have to
-tienes	VERB	you have (tener: tú tienes) → tener | tienes que + infinitive: you have to (tienes que verlo, you have to see it)
-tuvo	VERB	had (tener: tuvo un hijo, she had a son) → tener | tuvo que + infinitive: had to
-tenga	VERB	have (subjunctive of tener: que tenga, that he have) → tener | here you are (tenga, handing something over)
-tendría	VERB	would have (tener) → tener | tendría que + infinitive: would have to, should
-hace	VERB	does, makes (hacer: hace la cena, he makes dinner) → hacer | is (weather: hace frío, it's cold; hace sol, it's sunny)
-hace	ADP	ago (hace dos años, two years ago) | for (hace mucho que no lo veo, I haven't seen him for a long time)
-hago	VERB	I do, I make (hacer: ¿qué hago?, what do I do?) → hacer
-hacen	VERB	do, make (hacer: ellos hacen) → hacer
-haces	VERB	you do, you make (hacer: ¿qué haces?, what are you doing?) → hacer
-hizo	VERB	did, made (hacer: lo hizo, he did it) → hacer
-haría	VERB	would do, would make (hacer) → hacer
-haga	VERB	do, make (subjunctive of hacer: que lo haga, that he do it) → hacer
-dice	VERB	says, tells (decir: dice que sí, he says yes) → decir
-digo	VERB	I say, I tell (decir: te digo, I'm telling you) → decir | I mean (correcting oneself: el lunes, digo, el martes, Monday, I mean, Tuesday)
-dicen	VERB	say, tell (decir: dicen que, they say that) → decir
-dices	VERB	you say, you tell (decir: ¿qué dices?, what are you saying?) → decir
-dijo	VERB	said, told (decir: dijo que no, he said no) → decir
-dije	VERB	I said, I told (decir: te lo dije, I told you so) → decir
-dicho	VERB	said, told (past participle of decir: he dicho, I have said; dicho esto, that said) → decir
-dicho	DET	the said, that (formal: dicho libro, the said book; dichas medidas, those measures)
-diría	VERB	would say (decir: yo diría que, I would say that) → decir
-quiero	VERB	I want (querer: quiero agua, I want water; quiero ir, I want to go) → querer | I love (querer: te quiero, I love you)
-quiere	VERB	wants (querer) → querer | loves | quiere decir: means (¿qué quiere decir?, what does it mean?)
-quieren	VERB	want (querer: ellos quieren) → querer
-quieres	VERB	you want (querer: ¿quieres café?, do you want coffee?) → querer
-quiera	VERB	want (subjunctive of querer: lo que quiera, whatever he wants) → querer
-viene	VERB	comes (venir: viene mañana, he's coming tomorrow) → venir
-vienen	VERB	come (venir: ellos vienen) → venir
-da	VERB	gives (dar: me da miedo, it scares me) → dar
-dan	VERB	give (dar: ellos dan) → dar
-dio	VERB	gave (dar: me dio un libro, he gave me a book) → dar
-ve	VERB	sees (ver: no ve nada, he sees nothing) → ver | go! (command of ir: ve a casa, go home) → ir
-veo	VERB	I see (ver: no veo, I can't see; ya veo, I see) → ver
-vio	VERB	saw (ver: lo vio, he saw it) → ver
-visto	VERB	seen (past participle of ver: he visto, I have seen; ¿has visto?, have you seen?) → ver
-sabe	VERB	knows (saber: no sabe, he doesn't know) → saber | tastes (saber: sabe a chocolate, it tastes of chocolate)
-sabes	VERB	you know (saber: ¿sabes?, you know?) → saber
-saben	VERB	know (saber: ellos saben) → saber
-sepa	VERB	know (subjunctive of saber: que yo sepa, as far as I know) → saber
-pone	VERB	puts (poner: pone la mesa, he sets the table) → poner | se pone: gets, becomes (se pone rojo, he goes red)
-ponen	VERB	put (poner: ellos ponen) → poner
-pongo	VERB	I put (poner: lo pongo aquí, I put it here) → poner
-puso	VERB	put (poner: lo puso, he put it) → poner
-sale	VERB	goes out, comes out, leaves (salir: sale de casa, he leaves the house) → salir | sale bien: turns out well
-salió	VERB	went out, came out, left (salir) → salir
-sigue	VERB	follows, continues, is still (seguir: sigue lloviendo, it's still raining) → seguir
-siguen	VERB	follow, continue, are still (seguir) → seguir
-siento	VERB	I feel (sentir: me siento bien, I feel good) → sentir | lo siento: I'm sorry
-siente	VERB	feels (sentir) → sentir
-oye	VERB	hears (oír) → oír | hey, listen (oye, ¿tienes hora?, hey, have you got the time?)
-encuentra	VERB	finds (encontrar) → encontrar | se encuentra: is, is found, lies (se encuentra en Madrid, it is in Madrid; se encuentra cerrado, it is closed)
-pienso	VERB	I think (pensar: pienso que sí, I think so) → pensar
-empieza	VERB	begins, starts (empezar) → empezar
-vuelve	VERB	returns, comes back (volver) → volver | vuelve a + infinitive: does again (vuelve a llover, it's raining again)
-murió	VERB	died (morir) → morir
+tiene	VERB	form of tener: has: he has two children (tiene dos hijos) → tener | tiene que: has to: he has to go (tiene que irse)
+tengo	VERB	form of tener: I have; Spanish also has cold, hunger and years: I'm cold (tengo frío), I'm twenty (tengo veinte años) → tener | tengo que: I have to
+tienen	VERB	form of tener: have → tener | tienen que: have to
+tienes	VERB	form of tener: you have → tener | tienes que: you have to: you have to see it (tienes que verlo)
+tuvo	VERB	past of tener: had: she had a son (tuvo un hijo) → tener | tuvo que: had to
+tenga	VERB	form of tener after que: that he have (que tenga) → tener | here you are, handing something over (tenga)
+tendría	VERB	form of tener: would have → tener | tendría que: would have to, should
+hace	VERB	form of hacer: does, makes: he makes dinner (hace la cena) → hacer | is, talking about the weather: it's cold (hace frío)
+hace	ADP	ago: two years ago (hace dos años) | for, until now: I haven't seen him for a long time (hace mucho que no lo veo)
+hago	VERB	form of hacer: I do, I make: what do I do? (¿qué hago?) → hacer
+hacen	VERB	form of hacer: do, make → hacer
+haces	VERB	form of hacer: you do, you make: what are you doing? (¿qué haces?) → hacer
+hizo	VERB	past of hacer: did, made: he did it (lo hizo) → hacer
+haría	VERB	form of hacer: would do, would make → hacer
+haga	VERB	form of hacer after que: that he do it (que lo haga) → hacer
+dice	VERB	form of decir: says, tells: he says yes (dice que sí) → decir
+digo	VERB	form of decir: I say, I tell: I'm telling you (te digo) → decir | I mean, correcting yourself: Monday, I mean, Tuesday (el lunes, digo, el martes)
+dicen	VERB	form of decir: say, tell: they say that (dicen que) → decir
+dices	VERB	form of decir: you say: what are you saying? (¿qué dices?) → decir
+dijo	VERB	past of decir: said, told: he said no (dijo que no) → decir
+dije	VERB	past of decir: I said, I told: I told you so (te lo dije) → decir
+dicho	VERB	form of decir: said, told: I have said (he dicho), that said (dicho esto) → decir
+dicho	DET	(formal) the said, that: the said book (dicho libro)
+diría	VERB	form of decir: would say: I would say that (yo diría que) → decir
+quiero	VERB	form of querer: I want: I want to go (quiero ir) → querer | I love: I love you (te quiero)
+quiere	VERB	form of querer: wants → querer | loves | quiere decir: means: what does it mean? (¿qué quiere decir?)
+quieren	VERB	form of querer: want → querer
+quieres	VERB	form of querer: you want: do you want coffee? (¿quieres café?) → querer
+quiera	VERB	form of querer after que: whatever he wants (lo que quiera) → querer
+viene	VERB	form of venir: comes: he's coming tomorrow (viene mañana) → venir
+vienen	VERB	form of venir: come → venir
+da	VERB	form of dar: gives: it scares me (me da miedo) → dar
+dan	VERB	form of dar: give → dar
+dio	VERB	past of dar: gave: he gave me a book (me dio un libro) → dar
+ve	VERB	form of ver: sees: he sees nothing (no ve nada) → ver | form of ir: go!: go home (ve a casa) → ir
+veo	VERB	form of ver: I see: I see (ya veo) → ver
+vio	VERB	past of ver: saw: he saw it (lo vio) → ver
+visto	VERB	form of ver: seen: I have seen (he visto) → ver
+sabe	VERB	form of saber: knows: he doesn't know (no sabe) → saber | tastes: it tastes of chocolate (sabe a chocolate)
+sabes	VERB	form of saber: you know: you know? (¿sabes?) → saber
+saben	VERB	form of saber: know → saber
+sepa	VERB	form of saber after que: as far as I know (que yo sepa) → saber
+pone	VERB	form of poner: puts: he sets the table (pone la mesa) → poner | se pone: gets, becomes: he goes red (se pone rojo)
+ponen	VERB	form of poner: put → poner
+pongo	VERB	form of poner: I put: I put it here (lo pongo aquí) → poner
+puso	VERB	past of poner: put: he put it (lo puso) → poner
+sale	VERB	form of salir: goes out, leaves: he leaves the house (sale de casa) → salir | sale bien: turns out well
+salió	VERB	past of salir: went out, left → salir
+sigue	VERB	form of seguir: follows, keeps on, is still: it's still raining (sigue lloviendo) → seguir
+siguen	VERB	form of seguir: follow, keep on, are still → seguir
+siento	VERB	form of sentir: I feel: I feel good (me siento bien) → sentir | lo siento: I'm sorry
+siente	VERB	form of sentir: feels → sentir
+oye	VERB	form of oír: hears → oír | hey, listen: hey, have you got the time? (oye, ¿tienes hora?)
+encuentra	VERB	form of encontrar: finds → encontrar | se encuentra: is, is located: it's in Madrid (se encuentra en Madrid)
+pienso	VERB	form of pensar: I think: I think so (pienso que sí) → pensar
+empieza	VERB	form of empezar: begins, starts → empezar
+vuelve	VERB	form of volver: returns, comes back → volver | vuelve a: does it again: it's raining again (vuelve a llover)
+murió	VERB	past of morir: died → morir
 
 ## Words Wiktionary glosses misleadingly for a reader
-vale	INTJ	okay, all right (Spain: ¿vale?, okay?)
-ah	INTJ	ah (relief, realization, awe) | uh, er (hesitation, in speech)
-hecho	NOUN	fact (el hecho de que, the fact that) | act, deed (hechos, not words) | event, incident (los hechos, what happened)
-a golpe de	ADP	by (means of), with (a golpe de dedito, with a tap of the finger) | by dint of, through repeated (a golpe de talonario, by throwing money at it)
+vale	INTJ	okay, all right, in Spain: okay? (¿vale?)
+ah	INTJ	ah: relief, understanding or awe | uh, er: a pause in speech
+hecho	NOUN	fact: the fact that (el hecho de que) | act, deed | event: what happened (los hechos)
+a golpe de	ADP	by means of, with: with a tap of the finger (a golpe de dedito) | by dint of: by throwing money at it (a golpe de talonario)
 
 ## Set phrases English Wiktionary lacks, or glosses misleadingly
 # Wiktionary's `así es` is "so it is: so it goes", `lo mismo` only "perhaps",
 # `verdad es que` "it may be true that".
 así es	INTJ	that's right, exactly, that's how it is
-eso sí	ADV	mind you, that said, granted (eso sí, es caro, mind you, it's expensive) | (that) for sure (eso sí que no, that's definitely not happening)
-lo mismo	PRON	the same (thing) (lo mismo que, the same as) | perhaps, maybe (colloquial: lo mismo llueve, it may rain)
+eso sí	ADV	mind you, that said: mind you, it's expensive (eso sí, es caro) | for sure: that's definitely not happening (eso sí que no)
+lo mismo	PRON	the same thing: the same as (lo mismo que) | (colloquial) maybe, perhaps: it may rain (lo mismo llueve)
 la verdad es que	ADV	the truth is (that), to be honest, actually
-el hecho de/el hecho de que	NOUN	the fact that, the fact of (el hecho de que llueva, the fact that it rains)
+el hecho de/el hecho de que	NOUN	the fact that, the fact of: the fact that it rains (el hecho de que llueva)
 # Wiktionary's `es que` has only the explaining sense, and matches every
 # literal `es que` (lo malo es que, the bad thing is that).
-es que	SCONJ	is that (lo malo es que, the bad thing is that) | it's just that, the thing is (explaining: es que no puedo, it's just that I can't)
-ahora sí	ADV	now (at last), now for real (ahora sí, vamos, now we're off)
+es que	SCONJ	is that: the bad thing is that (lo malo es que) | it's just that, the thing is, explaining: it's just that I can't (es que no puedo)
+ahora sí	ADV	now, at last, for real: now we're off (ahora sí, vamos)
 y demás	PRON	and so on, and the rest, etc.
-de cara a	ADP	facing | with a view to, ahead of (de cara a las elecciones, ahead of the elections) | when it comes to, as for
-inicio de sesión	NOUN	login, sign-in (starting a session on a computer)
-cabeza fría	NOUN	a cool head, composure (mantener la cabeza fría, to keep a cool head)
-fuego alto	NOUN	high heat (cooking)
-fuego medio	NOUN	medium heat (cooking)
-fuego bajo	NOUN	low heat (cooking)
-mil por mil	ADV	absolutely, a hundred percent (colloquial)
-mayoría simple	NOUN	simple majority (more votes for than against)
+de cara a	ADP	facing | with a view to, ahead of: ahead of the elections (de cara a las elecciones) | when it comes to
+inicio de sesión	NOUN	login, sign-in
+cabeza fría	NOUN	a cool head, calm: to keep a cool head (mantener la cabeza fría)
+fuego alto	NOUN	high heat, in cooking
+fuego medio	NOUN	medium heat, in cooking
+fuego bajo	NOUN	low heat, in cooking
+mil por mil	ADV	(colloquial) absolutely, a hundred percent
+mayoría simple	NOUN	simple majority: more votes for than against
 
 ## Hesitation, in speech
-hm/hmm/mm/mmm	INTJ	hmm (hesitation or thinking)
-ehm/em/eeh	INTJ	um, er (hesitation)
+hm/hmm/mm/mmm	INTJ	hmm: thinking or doubting
+ehm/em/eeh	INTJ	um, er: a pause while thinking
 
 ## Units, written after a number
 g	SYM	gram, grams
