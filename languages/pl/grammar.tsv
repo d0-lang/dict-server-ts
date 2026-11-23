@@ -3,25 +3,31 @@
 # The file replaces Wiktionary's determiner, pronoun, preposition, conjunction,
 # particle and auxiliary entries for every word listed here; nouns, verbs and
 # other content words stay (je "eats", mam "I have"). See apps/importer/src/grammar.ts.
+#
+# Each sense explains what the word does, for a learner reading it next to
+# the sentence: what it expresses, then the English, then a short phrase in
+# brackets when the English alone doesn't settle it ("every, for regular repeats: every year (co roku)"). No notes
+# on case or position: the sentence shows those.
+# A form names its base word, which links it: "past of być: was → być".
 
 ## Personal pronouns
 ja	PRON	I
-mnie	PRON	me: I'm not here (nie ma mnie), you see me (widzisz mnie) | to me, the long form, when the word is stressed → mi | me: about me (o mnie), at my place (u mnie)
-mi	PRON	me, to me, the everyday short form: give me (daj mi), I like it (podoba mi się) → mnie
+mnie	PRON	me: I'm not here (nie ma mnie), you see me (widzisz mnie) | to me: the long form of mi, when the word is stressed → mi | me: about me (o mnie), at my place (u mnie)
+mi	PRON	me, to me: the everyday short form of mnie: give me (daj mi), I like it (podoba mi się) → mnie
 mną	PRON	me: with me (ze mną)
 ty	PRON	you, to one person you know well; strangers get pan or pani → pan, pani
-ciebie	PRON	you, the long form, when the word is stressed or follows a preposition: for you (dla ciebie) → cię
-cię	PRON	you, the everyday short form: I love you (kocham cię) → ciebie
+ciebie	PRON	you: the long form of cię, when the word is stressed or follows a preposition: for you (dla ciebie) → cię
+cię	PRON	you: the everyday short form of ciebie: I love you (kocham cię) → ciebie
 tobie	PRON	to you, the long form, when the word is stressed | you: about you (o tobie)
-ci	PRON	to you, the everyday short form: thank you (dziękuję ci) → tobie | these, those, for men or mixed groups: these people (ci ludzie)
+ci	PRON	to you: the everyday short form of tobie: thank you (dziękuję ci) → tobie | these, those, for men or mixed groups: these people (ci ludzie)
 tobą	PRON	you: with you (z tobą)
 on	PRON	he | it, for a masculine noun: Polish nouns keep their gender, so a table is on
-jego	PRON	him, it, the long form, when the word is stressed: he isn't here (nie ma jego) → go
+jego	PRON	him, it: the long form of go, when the word is stressed: he isn't here (nie ma jego) → go
 jego	DET	his, its
-go	PRON	him, it, the everyday short form: I see him (widzę go) → jego
+go	PRON	him, it: the everyday short form of jego: I see him (widzę go) → jego
 niego	PRON	him, it: jego after a preposition: for him (dla niego), to him (do niego) → jego
-jemu	PRON	to him, to it, the long form, when the word is stressed → mu
-mu	PRON	to him, to it, the everyday short form: give him (daj mu) → jemu
+jemu	PRON	to him, to it: the long form of mu, when the word is stressed → mu
+mu	PRON	to him, to it: the everyday short form of jemu: give him (daj mu) → jemu
 niemu	PRON	him, it: jemu after a preposition: towards him (ku niemu) → jemu
 nim	PRON	him, it: with him (z nim), about him (o nim)
 nim	SCONJ	(literary) before; the everyday word is zanim → zanim
