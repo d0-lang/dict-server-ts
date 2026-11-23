@@ -13,338 +13,345 @@
 # Irregular forms a reader can't connect to their base get lines of their own
 # (был "was", будет "will be"): the protocol has no inflection tables.
 # See apps/importer/src/grammar.ts.
+#
+# Each sense explains what the word does, for a learner reading it next to
+# the sentence: what it expresses, then the English, then a short phrase in
+# brackets when the English alone doesn't settle it ("the means or channel:
+# on the phone (по телефону)"). No notes on case: the sentence shows those.
+# A form names its base word, which links it: "past of быть: was → быть".
 
 ## Personal pronouns
-я	PRON	I (first-person singular pronoun)
-меня́	PRON	me (genitive or accusative: "у меня", I have; "видишь меня", you see me)
-мне	PRON	me, to me (dative: "дай мне", give me; "мне холодно", I'm cold) | me (prepositional, after prepositions: "обо мне", about me)
-мной	PRON	me (instrumental: "со мной", with me; "передо мной", in front of me)
-мно́ю	PRON	me (instrumental, bookish for мной)
-ты	PRON	you (singular, informal)
-тебя́	PRON	you (singular, genitive or accusative: "у тебя", you have; "люблю тебя", I love you)
-тебе́	PRON	you, to you (singular, dative: "тебе нравится", you like it) | you (prepositional, after prepositions: "о тебе", about you)
-тобо́й	PRON	you (singular, instrumental: "с тобой", with you)
-тобо́ю	PRON	you (singular, instrumental, bookish for тобой)
-он	PRON	he | it (for a masculine noun)
-оно́	PRON	it (for a neuter noun)
-она́	PRON	she | it (for a feminine noun)
+я	PRON	I
+меня́	PRON	me | у меня: I have, at my place
+мне	PRON	me, to me: give me (дай мне) | how I feel, said with мне: I'm cold (мне холодно) | me: about me (обо мне)
+мной	PRON	me: with me (со мной)
+мно́ю	PRON	me: a bookish мной → мной
+ты	PRON	you, to one person you know well; strangers get вы → вы
+тебя́	PRON	you | у тебя: you have
+тебе́	PRON	you, to you: you like it (тебе нравится) | you: about you (о тебе)
+тобо́й	PRON	you: with you (с тобой)
+тобо́ю	PRON	you: a bookish тобой → тобой
+он	PRON	he | it, for a masculine noun: Russian nouns keep their gender, so a table is он
+оно́	PRON	it, for a neuter noun
+она́	PRON	she | it, for a feminine noun
 они́	PRON	they
-его́	PRON	him, it (genitive or accusative: "нет его", he isn't here; "вижу его", I see him)
-его́	DET	his, its (does not change form)
-него́	PRON	him, it (genitive or accusative, after prepositions: "у него", he has; "для него", for him; "про него", about him)
-ему́	PRON	him, to him, to it (dative: "дай ему", give him)
-нему́	PRON	him, it (dative, after prepositions: "к нему", to him)
-им	PRON	him, it (instrumental: "доволен им", pleased with him) | them, to them (dative: "скажи им", tell them)
-ним	PRON	him, it (instrumental, after prepositions: "с ним", with him) | them (dative, after prepositions: "к ним", to them)
-нём	PRON	him, it (prepositional: "о нём", about him)
-её	PRON	her, it (genitive or accusative: "нет её", she isn't here; "вижу её", I see her)
-её	DET	her, hers, its (does not change form)
-неё	PRON	her, it (genitive or accusative, after prepositions: "у неё", she has; "для неё", for her)
-ей	PRON	her, to her (dative: "дай ей", give her) | her (instrumental: "горжусь ей", I'm proud of her)
-ней	PRON	her, it (dative, instrumental or prepositional, after prepositions: "к ней", to her; "с ней", with her; "о ней", about her)
-е́ю	PRON	her (instrumental, bookish for ей)
-не́ю	PRON	her (instrumental, after prepositions, bookish for ней)
+его́	PRON	him, it: he isn't here (нет его), I see him (вижу его)
+его́	DET	his, its; the same form whatever follows
+него́	PRON	him, it: его after a preposition: he has (у него), for him (для него) → его
+ему́	PRON	him, to him, to it: give him (дай ему)
+нему́	PRON	him, it: ему after a preposition: to him (к нему) → ему
+им	PRON	him, it: pleased with him (доволен им) | them, to them: tell them (скажи им)
+ним	PRON	him, it, them: им after a preposition: with him (с ним) → им
+нём	PRON	him, it: about him (о нём)
+её	PRON	her, it: I see her (вижу её)
+её	DET	her, hers, its; the same form whatever follows
+неё	PRON	her, it: её after a preposition: she has (у неё) → её
+ей	PRON	her, to her: give her (дай ей)
+ней	PRON	her, it: ей after a preposition: to her (к ней), with her (с ней) → ей
+е́ю	PRON	her: a bookish ей → ей
+не́ю	PRON	her: a bookish ней → ней
 мы	PRON	we
-нас	PRON	us (genitive, accusative or prepositional: "у нас", we have, at our place; "о нас", about us)
-нам	PRON	us, to us (dative: "нам пора", it's time for us to go)
-на́ми	PRON	us (instrumental: "с нами", with us)
-вы	PRON	you (plural, or polite singular: "Вы не подскажете?", could you tell me?)
-вас	PRON	you (plural or polite; genitive, accusative or prepositional: "у вас", you have)
-вам	PRON	you, to you (plural or polite; dative)
-ва́ми	PRON	you (plural or polite; instrumental: "с вами", with you)
-их	PRON	them (genitive or accusative: "вижу их", I see them)
-их	DET	their, theirs (does not change form)
-них	PRON	them (genitive, accusative or prepositional, after prepositions: "у них", they have; "о них", about them)
-и́ми	PRON	them (instrumental: "доволен ими", pleased with them)
-ни́ми	PRON	them (instrumental, after prepositions: "с ними", with them)
+нас	PRON	us | у нас: we have, at our place, in our country
+нам	PRON	us, to us: it's time for us to go (нам пора)
+на́ми	PRON	us: with us (с нами)
+вы	PRON	you, to several people, or politely to one; people you know well get ты → ты
+вас	PRON	you | у вас: you have
+вам	PRON	you, to you
+ва́ми	PRON	you: with you (с вами)
+их	PRON	them: I see them (вижу их)
+их	DET	their, theirs; the same form whatever follows
+них	PRON	them: их after a preposition: they have (у них) → их
+и́ми	PRON	them: pleased with them (доволен ими)
+ни́ми	PRON	them: ими after a preposition: with them (с ними) → ими
 
 ## Reflexive
-себя́	PRON	oneself: myself, yourself, himself, herself, itself, ourselves, themselves (genitive or accusative; refers back to the subject) | "у себя", at one's own place (at home, in one's office)
-себе́	PRON	oneself, to oneself (dative or prepositional: "купил себе", bought for himself; "думать о себе", think about oneself)
-собо́й	PRON	oneself (instrumental: "взять с собой", take along; "между собой", among themselves)
-собо́ю	PRON	oneself (instrumental, bookish for собой)
+себя́	PRON	oneself: myself, yourself, himself, herself, ourselves, themselves: the action goes back to whoever does it | у себя: at one's own place, at home
+себе́	PRON	oneself, to oneself: bought it for himself (купил себе) | think about oneself (думать о себе)
+собо́й	PRON	oneself: take along (взять с собой), among themselves (между собой)
+собо́ю	PRON	oneself: a bookish собой → собой
 
 ## Possessives
-мой	DET	my, mine (masculine; nominative, or accusative of a thing)
-моя́	DET	my, mine (feminine nominative)
-моё	DET	my, mine (neuter; nominative or accusative)
-мои́	DET	my, mine (plural; nominative, or accusative of things)
-моего́	DET	my, mine (masculine or neuter genitive; accusative of a person or animal)
-мое́й	DET	my, mine (feminine genitive, dative, instrumental or prepositional)
-моему́	DET	my, to my (masculine or neuter dative)
-мои́м	DET	my (masculine or neuter instrumental; plural dative)
-моём	DET	my (masculine or neuter prepositional: "в моём доме", in my house)
-мою́	DET	my (feminine accusative)
-мои́х	DET	my, mine (plural genitive or prepositional; accusative of people or animals)
-мои́ми	DET	my (plural instrumental)
-твой	DET	your, yours (singular, informal; masculine; nominative, or accusative of a thing)
-твоя́	DET	your, yours (singular owner; feminine nominative)
-твоё	DET	your, yours (singular owner; neuter; nominative or accusative)
-твои́	DET	your, yours (singular owner; plural; nominative, or accusative of things)
-твоего́	DET	your, yours (singular owner; masculine or neuter genitive; accusative of a person or animal)
-твое́й	DET	your, yours (singular owner; feminine genitive, dative, instrumental or prepositional)
-твоему́	DET	your, to your (singular owner; masculine or neuter dative)
-твои́м	DET	your (singular owner; masculine or neuter instrumental; plural dative)
-твоём	DET	your (singular owner; masculine or neuter prepositional)
-твою́	DET	your (singular owner; feminine accusative)
-твои́х	DET	your, yours (singular owner; plural genitive or prepositional; accusative of people or animals)
-твои́ми	DET	your (singular owner; plural instrumental)
-свой	DET	one's own: my, your, his, her, its, our, their own (refers back to the subject; masculine; nominative, or accusative of a thing)
-своя́	DET	one's own (feminine nominative)
-своё	DET	one's own (neuter; nominative or accusative)
-свои́	DET	one's own (plural; nominative, or accusative of things) | one's own people ("свои", our people)
-своего́	DET	one's own (masculine or neuter genitive; accusative of a person or animal)
-свое́й	DET	one's own (feminine genitive, dative, instrumental or prepositional)
-своему́	DET	one's own, to one's own (masculine or neuter dative)
-свои́м	DET	one's own (masculine or neuter instrumental; plural dative)
-своём	DET	one's own (masculine or neuter prepositional)
-свою́	DET	one's own (feminine accusative)
-свои́х	DET	one's own (plural genitive or prepositional; accusative of people or animals)
-свои́ми	DET	one's own (plural instrumental)
-наш	DET	our, ours (masculine; nominative, or accusative of a thing)
-на́ша	DET	our, ours (feminine nominative)
-на́ше	DET	our, ours (neuter; nominative or accusative)
-на́ши	DET	our, ours (plural; nominative, or accusative of things) | our people, our side
-на́шего	DET	our, ours (masculine or neuter genitive; accusative of a person or animal)
-на́шей	DET	our, ours (feminine genitive, dative, instrumental or prepositional)
-на́шему	DET	our, to our (masculine or neuter dative)
-на́шим	DET	our (masculine or neuter instrumental; plural dative)
-на́шем	DET	our (masculine or neuter prepositional)
-на́шу	DET	our (feminine accusative)
-на́ших	DET	our, ours (plural genitive or prepositional; accusative of people or animals)
-на́шими	DET	our (plural instrumental)
-ваш	DET	your, yours (plural or polite; masculine; nominative, or accusative of a thing)
-ва́ша	DET	your, yours (plural or polite; feminine nominative)
-ва́ше	DET	your, yours (plural or polite; neuter; nominative or accusative)
-ва́ши	DET	your, yours (plural or polite; plural; nominative, or accusative of things)
-ва́шего	DET	your, yours (plural or polite owner; masculine or neuter genitive; accusative of a person or animal)
-ва́шей	DET	your, yours (plural or polite owner; feminine genitive, dative, instrumental or prepositional)
-ва́шему	DET	your, to your (plural or polite owner; masculine or neuter dative)
-ва́шим	DET	your (plural or polite owner; masculine or neuter instrumental; plural dative)
-ва́шем	DET	your (plural or polite owner; masculine or neuter prepositional)
-ва́шу	DET	your (plural or polite owner; feminine accusative)
-ва́ших	DET	your, yours (plural or polite owner; plural genitive or prepositional; accusative of people or animals)
-ва́шими	DET	your (plural or polite owner; plural instrumental)
+мой	DET	my, mine
+моя́	DET	my, mine
+моё	DET	my, mine
+мои́	DET	my, mine
+моего́	DET	my, mine
+мое́й	DET	my, mine
+моему́	DET	my, to my
+мои́м	DET	my
+моём	DET	my: in my house (в моём доме)
+мою́	DET	my
+мои́х	DET	my, mine
+мои́ми	DET	my
+твой	DET	your, yours, to one person you know well
+твоя́	DET	your, yours
+твоё	DET	your, yours
+твои́	DET	your, yours
+твоего́	DET	your, yours
+твое́й	DET	your, yours
+твоему́	DET	your, to your
+твои́м	DET	your
+твоём	DET	your
+твою́	DET	your
+твои́х	DET	your, yours
+твои́ми	DET	your
+свой	DET	one's own: my, your, his, her, our, their, whoever the subject is; Russian uses it where English repeats "his" or "my"
+своя́	DET	one's own: whoever the subject is
+своё	DET	one's own: whoever the subject is
+свои́	DET	one's own: whoever the subject is | свои: our people, one's own people
+своего́	DET	one's own
+свое́й	DET	one's own
+своему́	DET	one's own, to one's own
+свои́м	DET	one's own
+своём	DET	one's own
+свою́	DET	one's own
+свои́х	DET	one's own
+свои́ми	DET	one's own
+наш	DET	our, ours
+на́ша	DET	our, ours
+на́ше	DET	our, ours
+на́ши	DET	our, ours | наши: our people, our side
+на́шего	DET	our, ours
+на́шей	DET	our, ours
+на́шему	DET	our, to our
+на́шим	DET	our
+на́шем	DET	our
+на́шу	DET	our
+на́ших	DET	our, ours
+на́шими	DET	our
+ваш	DET	your, yours, to several people, or politely to one
+ва́ша	DET	your, yours
+ва́ше	DET	your, yours
+ва́ши	DET	your, yours
+ва́шего	DET	your, yours
+ва́шей	DET	your, yours
+ва́шему	DET	your, to your
+ва́шим	DET	your
+ва́шем	DET	your
+ва́шу	DET	your
+ва́ших	DET	your, yours
+ва́шими	DET	your
 
 ## Demonstratives
-э́тот	DET	this, that (masculine; nominative, or accusative of a thing)
-э́та	DET	this, that (feminine nominative)
-э́то	DET	this, that (neuter; nominative or accusative)
-э́то	PRON	this, that, it ("это мой дом", this is my house; "что это?", what is it?) | is, are (links two things, since Russian leaves out "is" in the present: "Москва — это столица России", Moscow is the capital of Russia; "это правда", it's true)
-э́то	PART	(emphasis) it is, it was ("это он сказал", it was he who said it) | (in questions) "где это ты был?", where have you been?
-э́ти	DET	these, those (nominative, or accusative of things)
-э́того	DET	this, that (masculine or neuter genitive; accusative of a person or animal) | of this ("для этого", for this)
-э́той	DET	this, that (feminine genitive, dative, instrumental or prepositional)
-э́тому	DET	this, to this (masculine or neuter dative: "к этому", to this)
-э́тим	DET	this (masculine or neuter instrumental; plural dative) | by this, with this ("этим он хотел сказать", by this he meant)
-э́том	DET	this (masculine or neuter prepositional: "в этом году", this year; "об этом", about this)
-э́ту	DET	this, that (feminine accusative)
-э́тих	DET	these, those (genitive or prepositional; accusative of people or animals)
-э́тими	DET	these, those (instrumental)
-тот	DET	that, the one (masculine; nominative, or accusative of a thing: "тот, кто", the one who) | the same, the right one ("не тот", the wrong one)
-та	DET	that, the one (feminine nominative)
-то	DET	that, the one (neuter; nominative or accusative)
-то	PRON	that ("то, что", what, the thing that; "до того", before that)
-то	PART	(emphasis, after a word) as for, at least ("я-то знаю", I at least know)
-то	CCONJ	then ("если ..., то ...", if ..., then ...) | "то ..., то ...", now ..., now ...; sometimes ..., sometimes ...
-те	DET	those, the ones (nominative, or accusative of things: "те, кто", those who)
-того́	DET	that (masculine or neuter genitive; accusative of a person or animal)
-той	DET	that (feminine genitive, dative, instrumental or prepositional)
-тому́	DET	that, to that (masculine or neuter dative)
-тем	DET	that (masculine or neuter instrumental; plural dative) | "чем ..., тем ...", the more ..., the more ...
-том	DET	that (masculine or neuter prepositional: "о том, что", about the fact that)
-ту	DET	that (feminine accusative)
-тех	DET	those (genitive or prepositional; accusative of people or animals)
-те́ми	DET	those (instrumental)
+э́тот	DET	this, that
+э́та	DET	this, that
+э́то	DET	this, that
+э́то	PRON	this, that, it: this is my house (это мой дом), what is it? (что это?) | stands where English says "is", since Russian has no "is" in the present: Moscow is the capital (Москва — это столица)
+э́то	PART	puts weight on who or what: it was he who said it (это он сказал) | adds surprise to a question: where have you been? (где это ты был?)
+э́ти	DET	these, those
+э́того	DET	this, that | of this: for this (для этого)
+э́той	DET	this, that
+э́тому	DET	this, to this: to this (к этому)
+э́тим	DET	this | by this, with this: by this he meant (этим он хотел сказать)
+э́том	DET	this: this year (в этом году), about this (об этом)
+э́ту	DET	this, that
+э́тих	DET	these, those
+э́тими	DET	these, those
+тот	DET	that, the one: the one who (тот, кто) | the same, the right one: the wrong one (не тот)
+та	DET	that, the one
+то	DET	that, the one
+то	PRON	that: what, the thing that (то, что), before that (до того)
+то	PART	-то after a word, picks it out: as for, at least: I at least know (я-то знаю)
+то	CCONJ	then, after если: if ..., then ... | то ..., то ...: now ..., now ...; sometimes ..., sometimes ...
+те	DET	those, the ones: those who (те, кто)
+того́	DET	that
+той	DET	that
+тому́	DET	that, to that
+тем	DET	that | чем ..., тем ...: the more ..., the more ...
+том	DET	that: about the fact that (о том, что)
+ту	DET	that
+тех	DET	those
+те́ми	DET	those
 
 ## Interrogatives and relatives
-кто	PRON	who | whoever, anyone who ("кто хочет", whoever wants) | (colloquial) someone ("если кто придёт", if someone comes)
-кого́	PRON	whom, who (genitive or accusative: "кого ты видел?", who did you see?) | anyone (with ни or не: "ни у кого нет", nobody has)
-кому́	PRON	to whom, who (dative: "кому ты звонил?", who did you call?)
-кем	PRON	(by, with) whom (instrumental: "с кем?", with whom?; "кем ты работаешь?", what do you do for a living?)
-ком	PRON	whom (prepositional: "о ком?", about whom?)
-что	PRON	what | which, that (relative: "дом, что стоит там", the house that stands there)
-что	SCONJ	that ("я знаю, что ...", I know that ...)
-чего́	PRON	what (genitive: "чего ты хочешь?", what do you want?; "для чего?", what for?) | (colloquial) why ("чего ты молчишь?", why are you silent?)
-чему́	PRON	(to) what (dative: "к чему?", what for?; "чему ты рад?", what are you happy about?)
-чем	PRON	what (instrumental: "чем ты занят?", what are you doing?; "с чем?", with what?; "перед чем", before what)
-чем	SCONJ	than ("лучше, чем ...", better than ...) | "чем ..., тем ...", the more ..., the more ... | rather than ("чем ждать", rather than wait)
-чём	PRON	what (prepositional: "о чём?", about what?; "в чём дело?", what's the matter?)
-кото́рый	PRON	which, who, that (relative; masculine; nominative, or accusative of a thing) | which (in questions: "который час?", what time is it?)
-кото́рая	PRON	which, who, that (relative; feminine nominative)
-кото́рое	PRON	which, that (relative; neuter; nominative or accusative)
-кото́рые	PRON	which, who, that (relative; plural; nominative, or accusative of things)
-кото́рого	PRON	which, whom, whose (masculine or neuter genitive; accusative of a person or animal)
-кото́рой	PRON	which, whom, whose (feminine genitive, dative, instrumental or prepositional)
-кото́рому	PRON	to which, to whom (masculine or neuter dative)
-кото́рым	PRON	which, whom (masculine or neuter instrumental; plural dative)
-кото́ром	PRON	which, whom (masculine or neuter prepositional: "в котором", in which)
-кото́рую	PRON	which, whom (feminine accusative)
-кото́рых	PRON	which, whom, whose (plural genitive or prepositional; accusative of people or animals)
-кото́рыми	PRON	which, whom (plural instrumental)
+кто	PRON	who | whoever, anyone who: whoever wants (кто хочет) | someone, in speech: if someone comes (если кто придёт)
+кого́	PRON	whom, who: who did you see? (кого ты видел?) | with ни, nobody: nobody has (ни у кого нет)
+кому́	PRON	to whom, who: who did you call? (кому ты звонил?)
+кем	PRON	whom, with whom: with whom? (с кем?) | кем ты работаешь?: what do you do for a living?
+ком	PRON	whom: about whom? (о ком?)
+что	PRON	what | which, that: the house that stands there (дом, что стоит там)
+что	SCONJ	that: I know that ... (я знаю, что ...)
+чего́	PRON	what: what do you want? (чего ты хочешь?) | why, in speech: why are you silent? (чего ты молчишь?)
+чему́	PRON	what, to what: what for? (к чему?), what are you happy about? (чему ты рад?)
+чем	PRON	what, with what: what are you doing? (чем ты занят?)
+чем	SCONJ	than: better than (лучше, чем) | чем ..., тем ...: the more ..., the more ... | rather than: rather than wait (чем ждать)
+чём	PRON	what: about what? (о чём?), what's the matter? (в чём дело?)
+кото́рый	PRON	which, who, that: joins a description to a noun | which: what time is it? (который час?)
+кото́рая	PRON	which, who, that
+кото́рое	PRON	which, that
+кото́рые	PRON	which, who, that
+кото́рого	PRON	which, whom, whose
+кото́рой	PRON	which, whom, whose
+кото́рому	PRON	to which, to whom
+кото́рым	PRON	which, whom
+кото́ром	PRON	which, whom: in which (в котором)
+кото́рую	PRON	which, whom
+кото́рых	PRON	which, whom, whose
+кото́рыми	PRON	which, whom
 
 ## Quantifiers and indefinites
-весь	DET	all, the whole, the entire (masculine; nominative, or accusative of a thing)
-вся	DET	all, the whole (feminine nominative)
-всё	PRON	everything, all ("всё хорошо", everything is fine)
-всё	DET	all, the whole (neuter; nominative or accusative)
-все	PRON	everyone, everybody, all ("все знают", everyone knows)
-все	DET	all (plural; nominative, or accusative of things: "все люди", all people)
-всего́	DET	all, the whole (masculine or neuter genitive) | of everything
-всей	DET	all, the whole (feminine genitive, dative, instrumental or prepositional)
-всему́	DET	all, to everything (masculine or neuter dative: "по всему миру", all over the world)
-всем	DET	all, everyone, to everyone (plural dative: "всем привет", hi everyone) | all, the whole (masculine or neuter instrumental)
-всём	DET	all, everything (masculine or neuter prepositional: "во всём", in everything)
-всю	DET	all, the whole (feminine accusative: "всю ночь", all night)
-всех	DET	all, everyone (genitive, accusative or prepositional: "для всех", for everyone)
-все́ми	DET	all, everyone (instrumental)
-сам	PRON	himself, oneself (stresses the person: "он сам", he himself; "сделал сам", did it himself, without help)
-сама́	PRON	herself (stresses the person: "она сама решила", she decided it herself)
-само́	PRON	itself (stresses the thing: "дверь открылась сама", the door opened by itself)
-са́ми	PRON	themselves, ourselves, yourselves (stresses the people: "мы сами", we ourselves)
-самого́	PRON	himself, itself (genitive or accusative) | the very ("с самого утра", since early morning)
-са́мой	DET	the most (feminine genitive, dative, instrumental or prepositional of самый: "самой красивой", the most beautiful) | the very ("с самой весны", since the very spring)
-само́й	PRON	herself (genitive, dative, instrumental or prepositional)
-вся́кие	DET	all sorts of, various ("всякие вещи", all sorts of things) | any, every
-самому́	PRON	himself, to himself (dative)
-сами́м	PRON	himself (instrumental); themselves (dative)
-сами́х	PRON	themselves (genitive, accusative or prepositional)
-никто́	PRON	nobody, no one (with не: "никто не знает", nobody knows)
-никого́	PRON	nobody, no one (genitive or accusative: "никого нет", there's nobody)
-никому́	PRON	nobody, to no one (dative)
-нике́м	PRON	nobody (instrumental)
-ничто́	PRON	nothing (with не)
-ничего́	PRON	nothing (genitive or accusative, with не: "ничего не знаю", I know nothing)
-ничему́	PRON	nothing, to nothing (dative)
-ниче́м	PRON	(with) nothing (instrumental: "ничем не хуже", no worse)
+весь	DET	all, the whole, the entire
+вся	DET	all, the whole
+всё	PRON	everything, all: everything is fine (всё хорошо)
+всё	DET	all, the whole
+все	PRON	everyone, all: everyone knows (все знают)
+все	DET	all: all people (все люди)
+всего́	DET	all, the whole | of everything
+всей	DET	all, the whole
+всему́	DET	all, to everything: all over the world (по всему миру)
+всем	DET	to everyone: hi everyone (всем привет) | all, the whole
+всём	DET	all, everything: in everything (во всём)
+всю	DET	all, the whole: all night (всю ночь)
+всех	DET	all, everyone: for everyone (для всех)
+все́ми	DET	all, everyone
+сам	PRON	himself, oneself: stresses that it's that very person, or that no one helped: did it himself (сделал сам)
+сама́	PRON	herself: stresses that it's that very person: she decided it herself (она сама решила)
+само́	PRON	itself, by itself: the window opened by itself (окно открылось само)
+са́ми	PRON	themselves, ourselves, yourselves: stresses the people: we ourselves (мы сами)
+самого́	PRON	himself, itself | the very: since early morning (с самого утра)
+са́мой	DET	the most, a form of самый: the most beautiful (самой красивой) → самый | the very: since the very spring (с самой весны)
+само́й	PRON	herself
+вся́кие	DET	all sorts of: all sorts of things (всякие вещи) | any, every
+самому́	PRON	himself, to himself
+сами́м	PRON	himself; themselves
+сами́х	PRON	themselves
+никто́	PRON	nobody, no one; the verb takes не as well: nobody knows (никто не знает)
+никого́	PRON	nobody, no one: there's nobody (никого нет)
+никому́	PRON	nobody, to no one
+нике́м	PRON	nobody
+ничто́	PRON	nothing; the verb takes не as well
+ничего́	PRON	nothing; the verb takes не as well: I know nothing (ничего не знаю)
+ничему́	PRON	nothing, to nothing
+ниче́м	PRON	nothing, with nothing: no worse (ничем не хуже)
 
 ## Prepositions
-# Each sense names the case the noun after it takes.
-в	ADP	in, at (+ prepositional, where: "в доме", in the house; "в мае", in May) | into, to (+ accusative, where to: "в Москву", to Moscow) | at (+ accusative, time: "в пять часов", at five o'clock; "в среду", on Wednesday)
-во	ADP	in, into (form of в before some consonant clusters: "во дворе", in the yard; "во время", during)
+# Each sense says what relation the preposition sets up; the noun's ending
+# shows the case, so the senses don't name it.
+в	ADP	where something is: in, at: in the house (в доме), in May (в мае) | where something goes; the noun's ending changes: into, to: to Moscow (в Москву) | a point in time: at five (в пять часов), on Wednesday (в среду)
+во	ADP	в, spelled во before some groups of consonants: in the yard (во дворе), during (во время) → в
 на	ADP	where something is, on a surface or at a place or event: on the table (на столе), at work (на работе) | where something goes; the noun's ending changes: onto the table (на стол), to the south (на юг) | how long or what for, planned ahead: for a week (на неделю) | what you look at, hope for or get angry at: look at (смотреть на), hope for (надеяться на)
-с	ADP	with (+ instrumental: "с другом", with a friend) | from, off, since (+ genitive: "с работы", from work; "с утра", since the morning) | about (+ accusative, size: "с километр", about a kilometre)
-со	ADP	with, from (form of с before some consonant clusters: "со мной", with me)
-к	ADP	to, towards (+ dative: "к врачу", to the doctor) | by (+ dative, a time: "к пяти", by five)
-ко	ADP	to, towards (form of к before some consonant clusters: "ко мне", to me)
-о	ADP	about (+ prepositional: "о книге", about the book) | against (+ accusative: "о стену", against the wall)
-об	ADP	about, against (form of о before a vowel: "об этом", about this)
-обо	ADP	about (form of о before мне, всём, всех: "обо мне", about me)
-у	ADP	at, by (+ genitive: "у окна", by the window; "у друга", at a friend's) | has (+ genitive: "у меня есть", I have; "у него нет", he hasn't got)
-из	ADP	from, out of (+ genitive: "из дома", out of the house; "из России", from Russia) | of (+ genitive, made of or one of: "из дерева", of wood; "один из нас", one of us)
-от	ADP	from (+ genitive: "от друга", from a friend; "далеко от", far from) | of, to (+ genitive, with words of place: "сбоку от", beside; "справа от", to the right of) | against, for (+ genitive, protection or cure: "лекарство от кашля", cough medicine) | because of (+ genitive: "от страха", from fear)
-до	ADP	until, till, before (+ genitive: "до утра", until morning; "до войны", before the war) | to, as far as (+ genitive: "до центра", to the centre)
+с	ADP	together with: with a friend (с другом) | down from, out of, starting from: from work (с работы), since the morning (с утра) | about, roughly, with a size: about a kilometre (с километр)
+со	ADP	с, spelled со before some groups of consonants: with me (со мной) → с
+к	ADP	toward, to someone or something: to the doctor (к врачу) | by a time: by five (к пяти)
+ко	ADP	к, spelled ко before some groups of consonants: to me (ко мне) → к
+о	ADP	about: about the book (о книге) | against, hitting: against the wall (о стену)
+об	ADP	о, spelled об before a vowel: about this (об этом) → о
+обо	ADP	о, spelled обо before мне, всём, всех: about me (обо мне) → о
+у	ADP	next to, at someone's: by the window (у окна), at a friend's (у друга) | having: Russian says "by me there is" for "I have": I have (у меня есть), he hasn't got (у него нет)
+из	ADP	out of, from inside: out of the house (из дома), from Russia (из России) | made of, or one of: of wood (из дерева), one of us (один из нас)
+от	ADP	away from: from a friend (от друга), far from (далеко от) | from a point: to the right of (справа от) | against, to protect or cure: cough medicine (лекарство от кашля) | because of a feeling: from fear (от страха)
+до	ADP	until, before: until morning (до утра), before the war (до войны) | as far as: to the centre (до центра)
 по	ADP	moving over a surface or through an area: along the street (по улице), around the city (по городу) | the means or channel: on the phone (по телефону), on TV (по телевизору) | following a plan, a rule or a source: according to the plan (по плану) | the field something belongs to: a history specialist (специалист по истории) | with numbers, what each one gets: two each (по два)
-за	ADP	behind, beyond (+ instrumental, where; + accusative, where to: "за домом", behind the house) | for (+ accusative: "спасибо за помощь", thanks for the help) | in, within (+ accusative, time taken: "за час", in an hour) | to get, for (+ instrumental: "пошёл за хлебом", went for bread)
-под	ADP	under, below (+ instrumental, where; + accusative, where to: "под столом", under the table) | near (+ instrumental: "под Москвой", near Moscow) | towards (+ accusative, time: "под утро", towards morning)
-над	ADP	over, above (+ instrumental: "над городом", over the city) | on (+ instrumental, working on: "работать над проектом", work on a project)
-пе́ред	ADP	in front of (+ instrumental: "перед домом", in front of the house) | before (+ instrumental, time: "перед обедом", before lunch)
-при	ADP	in the presence of, by (+ prepositional: "при всех", in front of everyone) | under, during, in the time of (+ prepositional: "при Петре", under Peter the Great) | with, given (+ prepositional: "при желании", if you want)
-без	ADP	without (+ genitive: "без сахара", without sugar) | less, minus (+ genitive, in amounts: "пять лет без месяца", five years less a month) | to (+ genitive, telling the time: "без пяти три", five to three)
-для	ADP	for (+ genitive: "для тебя", for you; "для работы", for work)
-че́рез	ADP	through, across (+ accusative: "через лес", through the forest) | in, after (+ accusative, time: "через час", in an hour) | via, by way of (+ accusative)
-про	ADP	about (+ accusative, colloquial: "фильм про войну", a film about the war)
-ме́жду	ADP	between, among (+ instrumental: "между нами", between us)
-ра́ди	ADP	for the sake of (+ genitive: "ради детей", for the children's sake)
-кро́ме	ADP	except, apart from (+ genitive: "все, кроме него", everyone except him) | besides, in addition to (+ genitive)
-среди́	ADP	among, in the middle of (+ genitive: "среди друзей", among friends)
+за	ADP	on the other side of something: behind the house (за домом) | what you thank or pay for: thanks for the help (спасибо за помощь) | how long something took: in an hour (за час) | going to fetch something: went for bread (пошёл за хлебом)
+под	ADP	under, below: under the table (под столом) | near a city: near Moscow (под Москвой) | toward a time: toward morning (под утро)
+над	ADP	over, above: over the city (над городом) | working on something: work on a project (работать над проектом)
+пе́ред	ADP	in front of: in front of the house (перед домом) | just before: before lunch (перед обедом)
+при	ADP	with someone there: in front of everyone (при всех) | in someone's time: under Peter the Great (при Петре) | given, if there is: if you want (при желании)
+без	ADP	without: without sugar (без сахара) | less, in amounts: five years less a month (пять лет без месяца) | to, telling the time: five to three (без пяти три)
+для	ADP	for, meant for: for you (для тебя), for work (для работы)
+че́рез	ADP	through, across: through the forest (через лес) | after a time from now: in an hour (через час) | by way of, via
+про	ADP	about, in everyday speech: a film about the war (фильм про войну)
+ме́жду	ADP	between, among: between us (между нами)
+ра́ди	ADP	for the sake of: for the children's sake (ради детей)
+кро́ме	ADP	except, apart from: everyone except him (все, кроме него) | besides, in addition to
+среди́	ADP	among, in the middle of: among friends (среди друзей)
 
 ## Forms of быть and мочь
-был	AUX	was (past of быть, masculine: "он был дома", he was at home; "был построен", was built) → быть
-была́	AUX	was (past of быть, feminine: "она была дома", she was at home; "была создана", was created) → быть
-бы́ло	AUX	was, it was (past of быть, neuter: "там было тихо", it was quiet there; "было построено", was built) → быть | there was, there were ("было много людей", there were many people)
-бы́ло	PART	nearly, was about to (with a past verb: "я было начал", I was about to start) → быть
-бы́ли	AUX	were (past of быть, plural: "мы были дома", we were at home; "были построены", were built) → быть
-бу́ду	AUX	I will be → быть | I will (with an infinitive: "я буду читать", I will read)
-бу́дешь	AUX	you will be → быть | you will (with an infinitive: "будешь читать", you will read)
-бу́дет	AUX	will be ("завтра будет дождь", it will rain tomorrow) → быть | will (with an infinitive: "он будет работать", he will work) | there will be | be (with пусть: "пусть будет так", let it be so; "пусть он будет царём", let him be king)
-бу́дем	AUX	we will be → быть | we will (with an infinitive: "будем работать", we will work) | let's ("будем надеяться", let's hope)
-бу́дете	AUX	you will be → быть | you will (with an infinitive: "будете работать", you will work)
-бу́дут	AUX	they will be → быть | they will (with an infinitive: "будут работать", they will work; "будут построены", will be built)
-мог	AUX	could, was able to (past of мочь, masculine: "он не мог спать", he couldn't sleep) → мочь | could, might (with бы: "мог бы", could, might)
-могла́	AUX	could, was able to (past of мочь, feminine) → мочь
-могло́	AUX	could (past of мочь, neuter: "могло быть хуже", it could have been worse) → быть
-могли́	AUX	could, were able to (past of мочь, plural) → мочь
+был	AUX	past of быть: was: he was at home (он был дома), was built (был построен) → быть
+была́	AUX	past of быть: was: she was at home (она была дома) → быть
+бы́ло	AUX	past of быть: was, it was: it was quiet there (там было тихо) → быть | there was, there were: there were many people (было много людей)
+бы́ло	PART	was about to, but didn't: I was about to start (я было начал)
+бы́ли	AUX	past of быть: were: we were at home (мы были дома) → быть
+бу́ду	AUX	future of быть: I will be → быть | with a verb, I will: I will read (я буду читать)
+бу́дешь	AUX	future of быть: you will be → быть | with a verb, you will: you will read (будешь читать)
+бу́дет	AUX	future of быть: will be: it will rain tomorrow (завтра будет дождь) → быть | with a verb, will: he will work (он будет работать) | there will be | пусть будет: let it be: let it be so (пусть будет так)
+бу́дем	AUX	future of быть: we will be → быть | with a verb, we will | let's: let's hope (будем надеяться)
+бу́дете	AUX	future of быть: you will be → быть | with a verb, you will
+бу́дут	AUX	future of быть: they will be → быть | with a verb, they will: they will work (будут работать)
+мог	AUX	past of мочь: could, was able to: he couldn't sleep (он не мог спать) → мочь | мог бы: could, might
+могла́	AUX	past of мочь: could, was able to → мочь
+могло́	AUX	past of мочь: could: it could have been worse (могло быть хуже) → мочь
+могли́	AUX	past of мочь: could, were able to → мочь
 
 ## Present forms of мочь and хотеть, and forms of идти, есть and дать
-могу́	AUX	I can, I am able to (present of мочь: "я могу помочь", I can help; "не могу", I can't) → мочь
-мо́жешь	AUX	you can (present of мочь: "ты можешь прийти?", can you come?) → мочь
-мо́жет	AUX	can, is able to, may (he, she or it; present of мочь: "он может прийти", he can come) → мочь | maybe, perhaps (on its own: "может, завтра", maybe tomorrow; "может быть", maybe)
-мо́жем	AUX	we can (present of мочь) → мочь
-мо́жете	AUX	you can (plural or polite; present of мочь: "вы можете мне помочь?", can you help me?) → мочь
-мо́гут	AUX	they can, may (present of мочь) → мочь
-хочу́	VERB	I want (хотеть: "я хочу пить", I'm thirsty; "хочу домой", I want to go home) → хотеть
-хо́чешь	VERB	you want (хотеть: "хочешь чаю?", do you want some tea?) → хотеть
-хо́чет	VERB	wants (he, she or it; хотеть) → хотеть
-хоти́м	VERB	we want (хотеть) → хотеть
-хоти́те	VERB	you want (plural or polite; хотеть: "что вы хотите?", what do you want?) → хотеть
-хотя́т	VERB	they want (хотеть) → хотеть
-шёл	VERB	was going, was walking (past of идти, masculine: "он шёл домой", he was walking home) → идти | was on, was falling ("шёл дождь", it was raining)
-шла	VERB	was going, was walking (past of идти, feminine) → идти | was on ("шла война", a war was on)
-шло	VERB	was going (past of идти, neuter: "время шло", time went by) → идти
-шли	VERB	were going, were walking (past of идти, plural) → идти | were on (of films, plays or rain: "шли дожди", it was raining; "в театре шли спектакли", plays were on at the theatre)
-пошёл	VERB	went, set off (past of пойти, masculine: "он пошёл домой", he went home) → пойти | started (to fall: "пошёл дождь", it started raining)
-пошла́	VERB	went, set off (past of пойти, feminine) → пойти
-пошли́	VERB	went, set off (past of пойти, plural) → пойти | let's go ("пошли!", let's go!)
-ем	VERB	I eat (есть: "я ем", I eat, I'm eating) → есть
-ест	VERB	eats (he, she or it; есть) → есть
-едя́т	VERB	they eat (есть) → есть
-дам	VERB	I will give (дать: "я дам тебе книгу", I'll give you the book) → дать
-даст	VERB	will give (he, she or it; дать) → дать
-даду́т	VERB	they will give (дать) → дать
+могу́	AUX	form of мочь: I can: I can help (я могу помочь), I can't (не могу) → мочь
+мо́жешь	AUX	form of мочь: you can: can you come? (ты можешь прийти?) → мочь
+мо́жет	AUX	form of мочь: can, may: he can come (он может прийти) → мочь | on its own, maybe: maybe tomorrow (может, завтра), maybe (может быть)
+мо́жем	AUX	form of мочь: we can → мочь
+мо́жете	AUX	form of мочь: you can: can you help me? (вы можете мне помочь?) → мочь
+мо́гут	AUX	form of мочь: they can, may → мочь
+хочу́	VERB	form of хотеть: I want: I want to go home (хочу домой) → хотеть
+хо́чешь	VERB	form of хотеть: you want: do you want some tea? (хочешь чаю?) → хотеть
+хо́чет	VERB	form of хотеть: wants → хотеть
+хоти́м	VERB	form of хотеть: we want → хотеть
+хоти́те	VERB	form of хотеть: you want: what do you want? (что вы хотите?) → хотеть
+хотя́т	VERB	form of хотеть: they want → хотеть
+шёл	VERB	past of идти: was going, was walking: he was walking home (он шёл домой) → идти | of rain or snow, was falling; Russian rain "goes": it was raining (шёл дождь)
+шла	VERB	past of идти: was going, was walking → идти | was on, going on: a war was on (шла война)
+шло	VERB	past of идти: was going: time went by (время шло) → идти
+шли	VERB	past of идти: were going, were walking → идти | of rain, or of films and plays, were on: it was raining (шли дожди)
+пошёл	VERB	past of пойти: went, set off: he went home (он пошёл домой) → пойти | started, of rain or snow: it started raining (пошёл дождь)
+пошла́	VERB	past of пойти: went, set off → пойти
+пошли́	VERB	past of пойти: went, set off → пойти | let's go! (пошли!)
+ем	VERB	form of есть, to eat, not есть "there is": I eat, I'm eating (я ем) → есть
+ест	VERB	form of есть, to eat: eats → есть
+едя́т	VERB	form of есть, to eat: they eat → есть
+дам	VERB	form of дать: I will give: I'll give you the book (я дам тебе книгу) → дать
+даст	VERB	form of дать: will give → дать
+даду́т	VERB	form of дать: they will give → дать
 
 ## Adverbs with a sense Wiktionary lacks
-здесь	ADV	here | in this case, in this respect ("здесь важно другое", what matters here is something else)
-давно́	ADV	long ago | for a long time (with a present verb: "давно живёт здесь", has lived here for a long time)
-во́все	ADV	at all (with не: "вовсе не", not at all) | even, outright ("и вовсе", and even)
+здесь	ADV	here | in this case, in this respect: what matters here is something else (здесь важно другое)
+давно́	ADV	long ago | for a long time, and still going on: has lived here for a long time (давно живёт здесь)
+во́все	ADV	not at all, with не: not at all (вовсе не) | even, outright (и вовсе)
 
 ## Abbreviations
-млн.	NUM	million (abbreviation of миллион: "5 млн", 5 million)
-тыс.	NUM	thousand (abbreviation of тысяча: "23 тыс. км", 23 thousand km)
-трлн.	NUM	trillion (abbreviation of триллион)
+млн.	NUM	million: short for миллион: 5 million (5 млн)
+тыс.	NUM	thousand: short for тысяча: 23 thousand km (23 тыс. км)
+трлн.	NUM	trillion: short for триллион
 
 ## Endings written after a number (3-й, 1990-х)
--й	X	-th, ordinal ending after a number (masculine: "99-й год", the 99th year)
--я	X	-th, ordinal ending after a number (feminine: "3-я", third)
--е	X	-th, ordinal ending after a number (neuter: "3-е место", third place) | -s, a decade ("1990-е", the 1990s)
--ый	X	-th, ordinal ending after a number (masculine: "3-ый", third)
--ой	X	-th, ordinal ending after a number (feminine genitive, dative, instrumental or prepositional: "3-ой", of the third)
--го	X	-th, ordinal ending after a number (genitive: "3-го тура", of the third round; "5-го мая", on the 5th of May)
--му	X	-th, ordinal ending after a number (dative: "к 3-му", by the third)
--м	X	-th, ordinal ending after a number (instrumental or prepositional: "в 3-м туре", in the third round; "в 1990-м", in 1990)
--ю	X	-th, ordinal ending after a number (feminine accusative: "на 3-ю", onto the third)
--х	X	ending after a number, plural (genitive or prepositional: "1990-х", of the 1990s; "в 1990-х", in the 1990s)
--ми	X	ending after a number, plural (instrumental: "1990-ми", the 1990s)
+-й	X	-th, after a number: the 99th year (99-й год)
+-я	X	-th, after a number: third (3-я)
+-е	X	-th, after a number: third place (3-е место) | -s, a decade: the 1990s (1990-е)
+-ый	X	-th, after a number: third (3-ый)
+-ой	X	-th, after a number: of the third (3-ой)
+-го	X	-th, after a number: of the third round (3-го тура), on the 5th of May (5-го мая)
+-му	X	-th, after a number: by the third (к 3-му)
+-м	X	-th, after a number: in the third round (в 3-м туре), in 1990 (в 1990-м)
+-ю	X	-th, after a number: onto the third (на 3-ю)
+-х	X	-s of a decade, after a number: of the 1990s (1990-х), in the 1990s (в 1990-х)
+-ми	X	-s of a decade, after a number: the 1990s (1990-ми)
 
 ## Set phrases English Wiktionary lacks (hand patches; the context rules match them like any phrase)
-не то́лько	CCONJ	not only ("не только ..., но и ...", not only ..., but also ...)
-в при́нципе	ADV	in principle, basically, generally speaking
-за счёт	ADP	at the expense of, thanks to, by means of (+ genitive: "за счёт экономии", thanks to savings)
-в отли́чие от	ADP	unlike, in contrast to (+ genitive: "в отличие от брата", unlike his brother)
-в зави́симости от	ADP	depending on (+ genitive)
+не то́лько	CCONJ	not only: not only ..., but also ... (не только ..., но и ...)
+в при́нципе	ADV	in principle, basically, on the whole
+за счёт	ADP	at the expense of, thanks to: thanks to savings (за счёт экономии)
+в отли́чие от	ADP	unlike, in contrast to: unlike his brother (в отличие от брата)
+в зави́симости от	ADP	depending on
 как ми́нимум	ADV	at least
 как ма́ксимум	ADV	at most
-по слова́м	ADP	according to (+ genitive: "по словам врача", according to the doctor)
-по мне́нию	ADP	in the opinion of, according to (+ genitive: "по мнению экспертов", in the experts' opinion)
-по фа́кту	ADV	in fact, actually (colloquial) | on, upon (+ genitive: "по факту оплаты", upon payment)
+по слова́м	ADP	according to someone: according to the doctor (по словам врача)
+по мне́нию	ADP	in the opinion of: in the experts' opinion (по мнению экспертов)
+по фа́кту	ADV	(colloquial) in fact, actually | on, upon: upon payment (по факту оплаты)
 с друго́й стороны́	ADV	on the other hand
 для того́ что́бы	SCONJ	in order to, so that
 из-за того́ что	SCONJ	because, due to the fact that
-и без того́	ADV	already, as it is ("и без того сложно", hard enough as it is)
-не ме́нее	ADV	at least, no less than ("не менее десяти", at least ten)
+и без того́	ADV	already, as it is: hard enough as it is (и без того сложно)
+не ме́нее	ADV	at least, no less than: at least ten (не менее десяти)
 не ме́ньше	ADV	at least, no fewer than
 под руко́й	ADV	at hand, within reach
-под ви́дом	ADP	under the guise of, disguised as (+ genitive)
-на ба́зе	ADP	based on, at, on the basis of (+ genitive: "на базе университета", at the university)
+под ви́дом	ADP	under the guise of, pretending to be
+на ба́зе	ADP	based on, at: at the university (на базе университета)
 на сего́дня	ADV	for today | as of today, at present
 кста́ти говоря́	ADV	by the way, incidentally
 куда́ там	INTJ	no way!, far from it!
-по плечу́	ADV	within one's ability, manageable ("мне это по плечу", I can manage it)
-в о́ба	ADV	closely, sharply (with смотреть, глядеть: "смотреть в оба", to keep one's eyes open)
-речь идёт о	X	it's about, the matter concerns ("речь идёт о деньгах", it's about money)
+по плечу́	ADV	within one's ability: I can manage it (мне это по плечу)
+в о́ба	ADV	closely, sharply: keep your eyes open (смотреть в оба)
+речь идёт о	X	it's about, the matter concerns: it's about money (речь идёт о деньгах)
 речь шла о	X	it was about, the matter concerned
-хрен его́ зна́ет	INTJ	who knows, no idea (vulgar)
-представля́ть собо́й	VERB	to be, to constitute ("это представляет собой ...", this is ...)
+хрен его́ зна́ет	INTJ	(vulgar) who knows, no idea
+представля́ть собо́й	VERB	to be, to make up: this is ... (это представляет собой ...)
 включа́ть в себя́	VERB	to include, to comprise
 получи́ть распростране́ние	VERB	to become widespread, to spread
 вы́йти в фина́л	VERB	to reach the final
