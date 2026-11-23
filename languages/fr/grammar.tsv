@@ -10,302 +10,308 @@
 # "→ aller" links the line to its verb, which the popover still shows after it;
 # a VERB line replaces Wiktionary's other verbs for the word (`vader` for `va`).
 # See apps/importer/src/grammar.ts.
+#
+# Each sense explains what the word does, for a learner reading it next to
+# the sentence: what it expresses, then the English, then a short phrase in
+# brackets when the English alone doesn't settle it ("by, how: on foot
+# (à pied)"). No notes on case or position: the sentence shows those.
+# A form names its base word, which links it: "form of aller: goes → aller".
 
 ## Articles, and the contractions of à and de with them
-le	DET	the (masculine singular)
-le	PRON	him, it (object) | it, so (standing for a whole clause: je le sais, I know (it))
-la	DET	the (feminine singular)
-la	PRON	her, it (object)
-les	DET	the (plural)
-les	PRON	them (object)
-l'	DET	the (le or la before a vowel or mute h: l'homme, the man)
-l'	PRON	him, her, it (le or la before a vowel: je l'ai vu, I saw him/it)
-un	DET	a, an (masculine)
-un	PRON	one (l'un, one of them; les uns, some)
-uns	PRON	some, ones (les uns ... les autres, some ... others; les uns aux autres, (to) each other)
-une	DET	a, an (feminine)
-une	PRON	one (feminine: l'une, one of them)
-des	DET	some (plural of un, une; often not translated: des amis, friends)
-des	ADP	of the, from the (de + les)
-du	ADP	of the, from the (de + le)
-du	DET	some (partitive: du pain, (some) bread)
-au	ADP	to the, at the, in the (à + le) | with, made with (un croissant au beurre, a butter croissant)
-aux	ADP	to the, at the, in the (à + les) | with (le riz aux légumes, rice with vegetables; la fille aux yeux bleus, the girl with blue eyes)
+le	DET	the, for a masculine noun
+le	PRON	him, it | it, so: stands for what was just said: I know (je le sais)
+la	DET	the, for a feminine noun
+la	PRON	her, it
+les	DET	the, for plural nouns
+les	PRON	them
+l'	DET	the: le or la, shortened before a vowel: the man (l'homme) → le, la
+l'	PRON	him, her, it: le or la, shortened before a vowel: I saw him (je l'ai vu) → le, la
+un	DET	a, an, for a masculine noun
+un	PRON	one: one of them (l'un) | les uns: some
+uns	PRON	some, ones: some ... others (les uns ... les autres), each other (les uns aux autres)
+une	DET	a, an, for a feminine noun
+une	PRON	one: one of them (l'une)
+des	DET	some, or nothing in English: friends (des amis)
+des	ADP	de and les joined: of the, from the → de
+du	ADP	de and le joined: of the, from the → de
+du	DET	some, an amount of something: bread, some bread (du pain)
+au	ADP	à and le joined: to the, at the, in the → à | with, made with: a butter croissant (un croissant au beurre)
+aux	ADP	à and les joined: to the, at the, in the → à | with: the girl with blue eyes (la fille aux yeux bleus)
 
 ## Elided forms, written onto the next word (l'homme, qu'il)
-d'	ADP	of, from (de before a vowel: d'une, of a)
-d'	DET	any, some (after a negation: pas d'argent, no money)
-qu'	SCONJ	that (que before a vowel: qu'il vienne, that he come) | than (plus qu'avant, more than before) | only (ne ... qu'un, only one)
-qu'	PRON	what, which, that (que before a vowel: ce qu'il dit, what he says)
-j'	PRON	I (je before a vowel)
-n'	PART	not (ne before a vowel; usually with pas, plus, jamais, rien: je n'ai pas, I don't have)
-s'	PRON	himself, herself, itself, themselves, each other (se before a vowel: il s'appelle, he is called)
-s'	SCONJ	if (si before il, ils: s'il vient, if he comes)
-c'	PRON	it, this, that (ce before a vowel: c'est, it is)
-ç'	PRON	it, that (ce before a: ç'a été, it has been)
-m'	PRON	me, myself (me before a vowel)
-t'	PRON	you, yourself (te before a vowel)
-jusqu'	ADP	until, up to, as far as (jusque before a vowel: jusqu'à, until)
-lorsqu'	SCONJ	when (lorsque before a vowel)
-puisqu'	SCONJ	since, because (puisque before a vowel)
-quoiqu'	SCONJ	although (quoique before a vowel)
+d'	ADP	de, shortened before a vowel: of, from: of a (d'une) → de
+d'	DET	any, some, after a negation: no money (pas d'argent)
+qu'	SCONJ	que, shortened before a vowel: that: that he come (qu'il vienne) → que | than: more than before (plus qu'avant) | only, with ne: only one (ne ... qu'un)
+qu'	PRON	what, which, that: que, shortened before a vowel: what he says (ce qu'il dit) → que
+j'	PRON	I: je, shortened before a vowel → je
+n'	PART	not: ne, shortened before a vowel; it comes with pas, plus, jamais, rien: I don't have (je n'ai pas) → ne
+s'	PRON	himself, herself, itself, themselves, each other: se, shortened before a vowel: he is called (il s'appelle) → se
+s'	SCONJ	if: si, shortened before il and ils: if he comes (s'il vient) → si
+c'	PRON	it, this, that: ce, shortened before a vowel: it is (c'est) → ce
+ç'	PRON	it, that: ce, shortened before a: it has been (ç'a été) → ce
+m'	PRON	me, myself: me, shortened before a vowel → me
+t'	PRON	you, yourself: te, shortened before a vowel → te
+jusqu'	ADP	until, up to, as far as: jusque, shortened before a vowel: until (jusqu'à) → jusque
+lorsqu'	SCONJ	when: lorsque, shortened before a vowel → lorsque
+puisqu'	SCONJ	since, because: puisque, shortened before a vowel → puisque
+quoiqu'	SCONJ	although: quoique, shortened before a vowel → quoique
 
 ## Possessives
-son	DET	his, her, its, their (before a masculine noun or a vowel)
-sa	DET	his, her, its, their (before a feminine noun)
-ses	DET	his, her, its, their (plural)
-mon	DET	my (before a masculine noun or a vowel)
-ma	DET	my (before a feminine noun)
-mes	DET	my (plural)
-ton	DET	your (informal; before a masculine noun or a vowel)
-ta	DET	your (informal; before a feminine noun)
-tes	DET	your (informal; plural)
+son	DET	his, her, its: the owner can be anyone; the noun decides the form
+sa	DET	his, her, its: the owner can be anyone; the noun decides the form
+ses	DET	his, her, its: the owner can be anyone
+mon	DET	my
+ma	DET	my
+mes	DET	my
+ton	DET	your, to someone you call tu → tu
+ta	DET	your, to someone you call tu → tu
+tes	DET	your, to someone you call tu → tu
 notre	DET	our
-nos	DET	our (plural)
-votre	DET	your (plural or formal)
-vos	DET	your (plural or formal; plural)
+nos	DET	our
+votre	DET	your, to several people, or politely to one
+vos	DET	your, to several people, or politely to one
 leur	DET	their
-leur	PRON	(to) them
-leurs	DET	their (plural)
+leur	PRON	to them
+leurs	DET	their
 
 ## Demonstratives
--là	PART	that, those (after a noun with ce, cet, cette or ces: ce jour-là, that day; ces articles-là, those articles) | there (celui-là, that one)
--ci	PART	this, these (after a noun with ce, cet, cette or ces: ce livre-ci, this book) | here (celui-ci, this one)
-ce	DET	this, that (masculine)
-ce	PRON	it, this, that (c'est, it is) | what, that which (ce qui, ce que)
-cet	DET	this, that (masculine, before a vowel)
-cette	DET	this, that (feminine)
+-là	PART	that, those: points at it, after ce or ces and a noun: that day (ce jour-là) | there: that one (celui-là)
+-ci	PART	this, these: points at it, after ce or ces and a noun: this book (ce livre-ci) | here: this one (celui-ci)
+ce	DET	this, that, for a masculine noun
+ce	PRON	it, this, that: it is (c'est) | what, the thing that (ce qui, ce que)
+cet	DET	this, that: ce before a vowel → ce
+cette	DET	this, that, for a feminine noun
 ces	DET	these, those
-ça	PRON	that, it, this (informal cela)
+ça	PRON	that, it, this: the everyday cela → cela
 
 ## Personal pronouns
-il	PRON	he, it | it, there (impersonal: il pleut, it rains; il y a, there is; il faut, one must)
-ils	PRON	they (masculine or mixed)
-elle	PRON	she, it | her (after a preposition)
-elles	PRON	they (feminine) | them (after a preposition)
-on	PRON	we (informal) | one, you, people, they (unspecified person: on dit, people say)
+il	PRON	he | it, a subject that means nothing: it's raining (il pleut), there is (il y a), one must (il faut)
+ils	PRON	they, for men or mixed groups
+elle	PRON	she | it, for a feminine noun | her, after a preposition
+elles	PRON	they, for women | them, after a preposition
+on	PRON	we, in everyday speech | one, people, you: anyone at all: people say (on dit)
 nous	PRON	we | us, to us, ourselves
-vous	PRON	you (plural, or formal singular) | to you, yourself, yourselves
+vous	PRON	you, to several people, or politely to one; friends get tu → tu | to you, yourself, yourselves
 je	PRON	I
-tu	PRON	you (informal singular)
+tu	PRON	you, to one person you know well; strangers get vous → vous
 me	PRON	me, to me, myself
-te	PRON	you, to you, yourself (informal)
-se	PRON	himself, herself, itself, themselves, oneself, each other (reflexive: il se lave, he washes (himself)) | often not translated (se souvenir, to remember)
-lui	PRON	(to) him, (to) her, (to) it (indirect object: je lui parle, I speak to him/her) | him, it (after a preposition, or stressed: avec lui, with him)
-eux	PRON	them (masculine or mixed; after a preposition, or stressed)
-moi	PRON	me, I (stressed or after a preposition: avec moi, with me)
-toi	PRON	you (informal; stressed or after a preposition)
-y	PRON	there (j'y vais, I'm going there) | to it, about it, in it (j'y pense, I think about it)
+te	PRON	you, to you, yourself, to someone you call tu → tu
+se	PRON	himself, herself, itself, themselves: the action goes back to the one doing it: he washes (il se lave) | part of many verbs, not translated: to remember (se souvenir)
+lui	PRON	to him, to her: I speak to him (je lui parle) | him, said with weight or after a preposition: with him (avec lui)
+eux	PRON	them, said with weight or after a preposition: with them (avec eux)
+moi	PRON	me, I, said with weight or after a preposition: with me (avec moi), me too (moi aussi)
+toi	PRON	you, said with weight or after a preposition: with you (avec toi)
+y	PRON	there: I'm going there (j'y vais) | to it, about it, in it: I think about it (j'y pense)
 
 ## Relatives and questions
-qui	PRON	who, whom | which, that (relative: le livre qui est là, the book that is there)
-que	SCONJ	that (je sais que, I know that) | than (plus grand que, bigger than) | only (ne ... que: il n'a que dix ans, he is only ten)
-que	PRON	what (que fais-tu ?, what are you doing?) | which, that, whom (relative object: le livre que je lis, the book I am reading)
-que	ADV	how (que c'est beau !, how beautiful it is!)
-dont	PRON	of which, of whom, whose (relative: la femme dont je parle, the woman I'm talking about) | including (dont deux enfants, including two children)
-où	PRON	where, in which | when (le jour où, the day when) | là où: where; whereas (contrasting)
-quoi	PRON	what (de quoi, about what; quoi ?, what?)
+qui	PRON	who, whom | which, that: the book that is there (le livre qui est là)
+que	SCONJ	that: I know that (je sais que) | than: bigger than (plus grand que) | only, with ne: he's only ten (il n'a que dix ans)
+que	PRON	what: what are you doing? (que fais-tu ?) | which, that, whom: the book I'm reading (le livre que je lis)
+que	ADV	how, in surprise: how beautiful it is! (que c'est beau !)
+dont	PRON	of which, of whom, whose: the woman I'm talking about (la femme dont je parle) | including: including two children (dont deux enfants)
+où	PRON	where | when: the day when (le jour où) | là où: where; whereas
+quoi	PRON	what: about what (de quoi), what? (quoi ?)
 
 ## Prepositions
-de	ADP	of, 's (le livre de Paul, Paul's book) | from (de Paris, from Paris) | to (before an infinitive: essayer de, to try to) | by, with, in (cause, means, manner)
-de	DET	any, some (after a negation or before an adjective: pas de pain, no bread)
-à	ADP	to, at, in (à Paris, in Paris) | with (la fille aux yeux bleus, the girl with blue eyes) | for, -ing (une machine à laver, a washing machine) | by, per (à pied, on foot)
-en	ADP	in, into (en France, en 2020) | by (en voiture, by car) | made of (en bois, wooden) | while, by (with -ant: en marchant, while walking)
-en	PRON	of it, of them, some, any (j'en ai deux, I have two of them) | from there (j'en viens, I come from there)
-dès	ADP	from, as early as, starting from (dès 1990, from 1990 on) | as soon as (dès que)
-par	ADP	by (écrit par, written by) | through, via (par la fenêtre, through the window) | per, a (par jour, a day)
+de	ADP	of, 's: Paul's book (le livre de Paul) | from: from Paris (de Paris) | to, before a verb: to try to (essayer de) | by, with: the cause, means or manner
+de	DET	any, some, after a negation: no bread (pas de pain)
+à	ADP	to, at, in: in Paris (à Paris) | with, a feature: the girl with blue eyes (la fille aux yeux bleus) | for, what it's for: a washing machine (une machine à laver) | by, how: on foot (à pied)
+en	ADP	in, into: in France (en France), in 2020 (en 2020) | by, a way of travelling: by car (en voiture) | made of: wooden (en bois) | while, by doing it: while walking (en marchant)
+en	PRON	of it, of them, some: I have two of them (j'en ai deux) | from there: I come from there (j'en viens)
+dès	ADP	from, as early as: from 1990 on (dès 1990) | dès que: as soon as
+par	ADP	by: written by (écrit par) | through, via: through the window (par la fenêtre) | per, a: a day (par jour)
 
 ## Conjunctions
-parce	SCONJ	because (parce que, parce qu'il: because he)
+parce	SCONJ	parce que: because
 et	CCONJ	and
 ou	CCONJ	or
 mais	CCONJ	but
 si	SCONJ	if, whether
-soit	CCONJ	either ... or (soit ... soit) | that is, namely (soit 20 %, i.e. 20%)
-soit	AUX	be (subjunctive of être: qu'il soit, that he be) → être
+soit	CCONJ	soit ... soit: either ... or | that is, namely: i.e. 20% (soit 20 %)
+soit	AUX	form of être after que, for wishes, doubts or what must be: that he be (qu'il soit) → être
 
 ## Negation and comparison
-pas	ADV	not (ne ... pas: je ne sais pas, I don't know; often alone in speech: je sais pas)
-plus	ADV	more, -er (plus grand, bigger) | most, -est (le plus grand, the biggest) | no more, no longer (ne ... plus: il n'est plus là, he is no longer here) | plus, in addition
+pas	ADV	not; it comes with ne, which speech often drops: I don't know (je ne sais pas, je sais pas)
+plus	ADV	more, -er: bigger (plus grand) | with le, la, les, the most: the biggest (le plus grand) | with ne, no longer, not anymore: he's no longer here (il n'est plus là) | in sums, plus
 
 ## Forms of être "to be" and avoir "to have" (also the auxiliaries of the past)
-est	AUX	is (il est, he is; être) → être | has, have (with a past participle: il est venu, he came)
-sont	AUX	are (ils sont, they are; être) → être | have (with a past participle: ils sont partis, they left)
-suis	AUX	am (je suis, I am; être) → être | have (with a past participle: je suis venu, I came)
-es	AUX	are (tu es, you are; être) → être
-sommes	AUX	are (nous sommes, we are; être) → être
-êtes	AUX	are (vous êtes, you are; être) → être
-était	AUX	was, were, used to be (il était; être) → être | had (with a past participle: il était parti, he had left)
-étaient	AUX	were, used to be (ils étaient; être) → être
-étais	AUX	was, used to be (j'étais, tu étais; être) → être
-été	AUX	been (past participle of être: il a été, he has been / he was) → être
-sera	AUX	will be (il sera; être) → être
-seront	AUX	will be (ils seront; être) → être
-serait	AUX	would be (il serait; être) → être
-seraient	AUX	would be (ils seraient; être) → être
-soient	AUX	be (subjunctive of être: qu'ils soient, that they be) → être
-a	AUX	has (il a, he has; avoir) → avoir | has, have (with a past participle: il a mangé, he ate / he has eaten) | there is (il y a)
-ont	AUX	have (ils ont; avoir) → avoir | have (with a past participle: ils ont vu, they saw / they have seen)
-ai	AUX	have (j'ai, I have; avoir) → avoir | have (with a past participle: j'ai vu, I saw / I have seen)
-as	AUX	have (tu as, you have; avoir) → avoir
-avons	AUX	have (nous avons; avoir) → avoir
-avez	AUX	have (vous avez; avoir) → avoir
-avait	AUX	had (il avait; avoir) → avoir | had (with a past participle: il avait vu, he had seen)
-avaient	AUX	had (ils avaient; avoir) → avoir
-avais	AUX	had (j'avais, tu avais; avoir) → avoir
-aura	AUX	will have (il aura; avoir) → avoir
-aurait	AUX	would have (il aurait; avoir) → avoir
-eu	AUX	had (past participle of avoir: j'ai eu, I had) → avoir
-ayant	AUX	having (present participle of avoir: ayant fini, having finished) → avoir
-étant	AUX	being (present participle of être: étant donné, given) → être
-serai	AUX	will be (je serai; être) → être
-seras	AUX	will be (tu seras; être) → être
-serons	AUX	will be (nous serons; être) → être
-serez	AUX	will be (vous serez; être) → être
-serais	AUX	would be (je serais, tu serais; être) → être
-sois	AUX	be (subjunctive of être: que je sois, that I be) → être | be! (command: sois sage, be good)
-soyez	AUX	be (subjunctive of être: que vous soyez) → être | be! (command: soyez prudents, be careful)
-aurai	AUX	will have (j'aurai; avoir) → avoir | will have (with a past participle: j'aurai fini, I will have finished)
-auras	AUX	will have (tu auras; avoir) → avoir
-aurons	AUX	will have (nous aurons; avoir) → avoir
-aurez	AUX	will have (vous aurez; avoir) → avoir
-auront	AUX	will have (ils auront; avoir) → avoir
-aurais	AUX	would have (j'aurais, tu aurais; avoir) → avoir | would have (with a past participle: j'aurais aimé, I would have liked)
-auraient	AUX	would have (ils auraient; avoir) → avoir | would have (with a past participle: ils auraient dû, they should have)
-aie	AUX	have (subjunctive of avoir: que j'aie, that I have) → avoir
-ait	AUX	have, has (subjunctive of avoir: qu'il ait, that he have; bien qu'il ait vu, although he saw) → avoir
-aient	AUX	have (subjunctive of avoir: qu'ils aient) → avoir
-ayez	AUX	have (subjunctive of avoir: que vous ayez) → avoir | have! (command: n'ayez pas peur, don't be afraid)
-fut	AUX	was (il fut; past historic of être, in writing) → être | was (with a past participle: il fut élu, he was elected)
-furent	AUX	were (ils furent; past historic of être, in writing) → être
-eut	AUX	had (il eut; past historic of avoir, in writing) → avoir
+est	AUX	form of être: is → être | with verbs of moving or changing, makes the past: he came (il est venu)
+sont	AUX	form of être: are → être | with verbs of moving or changing, makes the past: they left (ils sont partis)
+suis	AUX	form of être: am → être | with verbs of moving or changing, makes the past: I came (je suis venu)
+es	AUX	form of être: are → être
+sommes	AUX	form of être: are → être
+êtes	AUX	form of être: are → être
+était	AUX	past of être: was, used to be → être | had: he had left (il était parti)
+étaient	AUX	past of être: were, used to be → être
+étais	AUX	past of être: was, used to be → être
+été	AUX	form of être: been, was: he has been, he was (il a été) → être
+sera	AUX	future of être: will be → être
+seront	AUX	future of être: will be → être
+serait	AUX	form of être: would be → être
+seraient	AUX	form of être: would be → être
+soient	AUX	form of être after que, for wishes, doubts or what must be: that they be (qu'ils soient) → être
+a	AUX	form of avoir: has → avoir | makes the past: he ate, he has eaten (il a mangé) | il y a: there is
+ont	AUX	form of avoir: have → avoir | makes the past: they saw (ils ont vu)
+ai	AUX	form of avoir: have → avoir | makes the past: I saw (j'ai vu)
+as	AUX	form of avoir: have → avoir
+avons	AUX	form of avoir: have → avoir
+avez	AUX	form of avoir: have → avoir
+avait	AUX	past of avoir: had → avoir | had done: he had seen (il avait vu)
+avaient	AUX	past of avoir: had → avoir
+avais	AUX	past of avoir: had → avoir
+aura	AUX	future of avoir: will have → avoir
+aurait	AUX	form of avoir: would have → avoir
+eu	AUX	form of avoir: had: I had (j'ai eu) → avoir
+ayant	AUX	form of avoir: having: having finished (ayant fini) → avoir
+étant	AUX	form of être: being → être | étant donné: given
+serai	AUX	future of être: will be → être
+seras	AUX	future of être: will be → être
+serons	AUX	future of être: will be → être
+serez	AUX	future of être: will be → être
+serais	AUX	form of être: would be → être
+sois	AUX	form of être after que, for wishes, doubts or what must be: that I be (que je sois) → être | be!: be good (sois sage)
+soyez	AUX	form of être after que, for wishes, doubts or what must be → être | be!: be careful (soyez prudents)
+aurai	AUX	future of avoir: will have → avoir | will have done: I will have finished (j'aurai fini)
+auras	AUX	future of avoir: will have → avoir
+aurons	AUX	future of avoir: will have → avoir
+aurez	AUX	future of avoir: will have → avoir
+auront	AUX	future of avoir: will have → avoir
+aurais	AUX	form of avoir: would have → avoir | would have done: I would have liked (j'aurais aimé)
+auraient	AUX	form of avoir: would have → avoir | would have done: they should have (ils auraient dû)
+aie	AUX	form of avoir after que, for wishes, doubts or what must be: that I have (que j'aie) → avoir
+ait	AUX	form of avoir after que, for wishes, doubts or what must be: although he saw (bien qu'il ait vu) → avoir
+aient	AUX	form of avoir after que, for wishes, doubts or what must be → avoir
+ayez	AUX	form of avoir after que, for wishes, doubts or what must be → avoir | have!: don't be afraid (n'ayez pas peur)
+fut	AUX	past of être, in written stories: was → être | was done: he was elected (il fut élu)
+furent	AUX	past of être, in written stories: were → être
+eut	AUX	past of avoir, in written stories: had → avoir
 
 ## Forms of the commonest irregular verbs
-vais	VERB	I go, I'm going (je vais; aller) → aller | I'm going to (with an infinitive: je vais partir, I'm going to leave)
-vas	VERB	you go, you're going (tu vas; aller) → aller | you're going to (with an infinitive: tu vas voir, you'll see)
-va	VERB	goes, is going (il va, he goes; aller) → aller | is going to (with an infinitive: il va pleuvoir, it's going to rain) | go! (command: va voir, go and see)
-vont	VERB	go, are going (ils vont; aller) → aller | are going to (with an infinitive: ils vont venir, they're going to come)
-ira	VERB	will go (il ira; aller) → aller
-irai	VERB	I will go (j'irai; aller) → aller
-iront	VERB	will go (ils iront; aller) → aller
-irait	VERB	would go (il irait; aller) → aller
-irais	VERB	would go (j'irais, tu irais; aller) → aller
-aille	VERB	go (subjunctive of aller: qu'il aille, that he go) → aller
-aillent	VERB	go (subjunctive of aller: qu'ils aillent, that they go) → aller
-fais	VERB	do, make (je fais, tu fais; faire) → faire | do! make! (command: fais attention, be careful)
-fait	VERB	done, made, did (past participle of faire: il a fait, he did, he has done) → faire | does, makes (il fait; faire) | is (of the weather: il fait beau, it's nice out; il fait froid, it's cold)
-font	VERB	do, make (ils font; faire) → faire
-fera	VERB	will do, will make (il fera; faire) → faire | will be (of the weather: il fera beau, it will be nice)
-ferait	VERB	would do, would make (il ferait; faire) → faire
-ferais	VERB	would do, would make (je ferais, tu ferais; faire) → faire
-fasse	VERB	do, make (subjunctive of faire: qu'il fasse, that he do) → faire
-fassent	VERB	do, make (subjunctive of faire: qu'ils fassent) → faire
-fit	VERB	did, made (il fit; past historic of faire, in writing) → faire
-peux	VERB	can (je peux, tu peux; pouvoir) → pouvoir
-peut	VERB	can, may (il peut; pouvoir) → pouvoir
-peuvent	VERB	can, may (ils peuvent; pouvoir) → pouvoir
-pourra	VERB	will be able to (il pourra; pouvoir) → pouvoir
-pourrai	VERB	I will be able to (je pourrai; pouvoir) → pouvoir
-pourront	VERB	will be able to (ils pourront; pouvoir) → pouvoir
-pourrait	VERB	could, might (il pourrait; on pourrait dire, one could say; pouvoir) → pouvoir
-pourrais	VERB	could, might (je pourrais, tu pourrais; pouvoir) → pouvoir
-pourraient	VERB	could, might (ils pourraient; pouvoir) → pouvoir
-puisse	VERB	can, may (subjunctive of pouvoir: qu'il puisse, that he can) → pouvoir
-puissent	VERB	can, may (subjunctive of pouvoir: qu'ils puissent) → pouvoir
-pu	VERB	been able to, could (past participle of pouvoir: il a pu, he could, he was able to) → pouvoir
-veux	VERB	want (je veux, tu veux; vouloir) → vouloir
-veut	VERB	wants (il veut; vouloir) → vouloir
-veulent	VERB	want (ils veulent; vouloir) → vouloir
-voudrait	VERB	would like (il voudrait; vouloir) → vouloir
-voudrais	VERB	would like (je voudrais, I would like; vouloir) → vouloir
-veuillez	VERB	please (polite command of vouloir: veuillez patienter, please wait) → vouloir
-dois	VERB	must, have to (je dois, tu dois; devoir) → devoir | owe
-doit	VERB	must, has to (il doit; devoir) → devoir | must be (a guess: il doit être tard, it must be late) | owes
-doivent	VERB	must, have to (ils doivent; devoir) → devoir
-devrait	VERB	should, ought to (il devrait; devoir) → devoir
-devrais	VERB	should, ought to (je devrais, tu devrais; devoir) → devoir
-devraient	VERB	should, ought to (ils devraient; devoir) → devoir
-devra	VERB	will have to (il devra; devoir) → devoir
-devront	VERB	will have to (ils devront; devoir) → devoir
-doive	VERB	must, have to (subjunctive of devoir: qu'il doive) → devoir
-dû	VERB	had to (past participle of devoir: il a dû partir, he had to leave) → devoir | must have (a guess: il a dû oublier, he must have forgotten) | owed, due (dû à, due to)
-sais	VERB	know (je sais, tu sais; savoir) → savoir | tu sais: you know (in speech)
-sait	VERB	knows (il sait; on ne sait jamais, you never know; savoir) → savoir
-savent	VERB	know (ils savent; savoir) → savoir
-saura	VERB	will know (il saura; savoir) → savoir
-saurait	VERB	would know (il saurait; savoir) → savoir | could (with ne: on ne saurait dire, one couldn't say)
-sache	VERB	know (subjunctive of savoir: que je sache, as far as I know) → savoir
-sachant	VERB	knowing (savoir: sachant que, given that, knowing that) → savoir
-faut	VERB	it is necessary, one must (il faut partir, we have to leave; falloir) → falloir | it takes, is needed (il faut du temps, it takes time)
-faudra	VERB	it will be necessary, will have to (il faudra; falloir) → falloir
-faudrait	VERB	it would be necessary, should (il faudrait, we should; falloir) → falloir
-fallait	VERB	it was necessary, had to (il fallait; falloir) → falloir
-fallu	VERB	been necessary (past participle of falloir: il a fallu, it was necessary, we had to) → falloir
-vaut	VERB	is worth (ça vaut, it's worth; valoir) → valoir | il vaut mieux: it's better (to)
-vaudrait	VERB	would be worth (valoir) → valoir | il vaudrait mieux: it would be better (to)
-viens	VERB	come (je viens, tu viens; venir) → venir | have just (venir de: je viens de manger, I have just eaten) | come! (command: viens ici, come here)
-vient	VERB	comes (il vient; venir) → venir | has just (venir de: il vient de partir, he has just left)
-viennent	VERB	come (ils viennent; venir) → venir | have just (venir de)
-viendra	VERB	will come (il viendra; venir) → venir
-viendrait	VERB	would come (il viendrait; venir) → venir
-vint	VERB	came (il vint; past historic of venir, in writing) → venir
-tient	VERB	holds, keeps (il tient; tenir) → tenir | tient à: cares about, insists on
-tiens	VERB	hold, keep (je tiens, tu tiens; tenir) → tenir | here, take this (tiens!) | well, look (surprise: tiens, c'est toi, well, it's you)
-tiennent	VERB	hold, keep (ils tiennent; tenir) → tenir
-vois	VERB	see (je vois, tu vois; voir) → voir | tu vois: you see (in speech)
-voit	VERB	sees (il voit; on voit, you can see; voir) → voir
-voient	VERB	see (ils voient; voir) → voir
-verra	VERB	will see (il verra; on verra, we'll see; voir) → voir
-verrai	VERB	I will see (je verrai; voir) → voir
-verrait	VERB	would see (il verrait; voir) → voir
-vu	VERB	seen, saw (past participle of voir: j'ai vu, I saw, I have seen) → voir
-vu	ADP	given, in view of (vu la situation, given the situation) | vu que: given that, since
-vit	VERB	lives (il vit; vivre) → vivre | saw (il vit; past historic of voir, in writing) → voir
-dit	VERB	said, told (past participle of dire: il a dit, he said) → dire | says, tells (il dit; dire) | called, known as (Charles dit le Chauve, Charles known as the Bald)
-dis	VERB	say, tell (je dis, tu dis; dire) → dire | say! tell! (command: dis-moi, tell me)
-disent	VERB	say, tell (ils disent; dire) → dire
-dirait	VERB	would say (il dirait; dire) → dire | on dirait: it looks like, you'd think
-prend	VERB	takes (il prend; prendre) → prendre
-prends	VERB	take (je prends, tu prends; prendre) → prendre | take! (command: prends ça, take this)
-prennent	VERB	take (ils prennent; prendre) → prendre
-pris	VERB	taken, took (past participle of prendre: j'ai pris, I took, I have taken) → prendre
-prit	VERB	took (il prit; past historic of prendre, in writing) → prendre
-prenne	VERB	take (subjunctive of prendre: qu'il prenne, that he take) → prendre
-met	VERB	puts (il met; mettre) → mettre | se met à: starts to (il se met à pleuvoir, it starts to rain)
-mets	VERB	put (je mets, tu mets; mettre) → mettre | put! (command: mets-le là, put it there)
-mis	VERB	put (past participle of mettre: il a mis, he put, he has put) → mettre
-mit	VERB	put (il mit; past historic of mettre, in writing) → mettre
+vais	VERB	form of aller: I go → aller | going to, about to happen: I'm going to leave (je vais partir)
+vas	VERB	form of aller: you go → aller | going to, about to happen: you'll see (tu vas voir)
+va	VERB	form of aller: goes → aller | going to, about to happen: it's going to rain (il va pleuvoir) | go!: go and see (va voir)
+vont	VERB	form of aller: go → aller | going to, about to happen: they're going to come (ils vont venir)
+ira	VERB	future of aller: will go → aller
+irai	VERB	future of aller: I will go → aller
+iront	VERB	future of aller: will go → aller
+irait	VERB	form of aller: would go → aller
+irais	VERB	form of aller: would go → aller
+aille	VERB	form of aller after que: that he go (qu'il aille) → aller
+aillent	VERB	form of aller after que: that they go (qu'ils aillent) → aller
+fais	VERB	form of faire: do, make → faire | do!, make!: be careful (fais attention)
+fait	VERB	form of faire: does, makes (il fait) → faire | done, made: he did (il a fait) | with il, talks about the weather: it's nice out (il fait beau)
+font	VERB	form of faire: do, make → faire
+fera	VERB	future of faire: will do, will make → faire | of the weather, will be: it will be nice (il fera beau)
+ferait	VERB	form of faire: would do, would make → faire
+ferais	VERB	form of faire: would do, would make → faire
+fasse	VERB	form of faire after que: that he do (qu'il fasse) → faire
+fassent	VERB	form of faire after que: that they do (qu'ils fassent) → faire
+fit	VERB	past of faire, in written stories: did, made → faire
+peux	VERB	form of pouvoir: can → pouvoir
+peut	VERB	form of pouvoir: can, may → pouvoir
+peuvent	VERB	form of pouvoir: can, may → pouvoir
+pourra	VERB	future of pouvoir: will be able to → pouvoir
+pourrai	VERB	future of pouvoir: I will be able to → pouvoir
+pourront	VERB	future of pouvoir: will be able to → pouvoir
+pourrait	VERB	form of pouvoir: could, might: one could say (on pourrait dire) → pouvoir
+pourrais	VERB	form of pouvoir: could, might → pouvoir
+pourraient	VERB	form of pouvoir: could, might → pouvoir
+puisse	VERB	form of pouvoir after que: that he can (qu'il puisse) → pouvoir
+puissent	VERB	form of pouvoir after que: that they can → pouvoir
+pu	VERB	form of pouvoir: could, was able to: he could (il a pu) → pouvoir
+veux	VERB	form of vouloir: want → vouloir
+veut	VERB	form of vouloir: wants → vouloir
+veulent	VERB	form of vouloir: want → vouloir
+voudrait	VERB	form of vouloir: would like → vouloir
+voudrais	VERB	form of vouloir: would like, the polite way to ask: I would like (je voudrais) → vouloir
+veuillez	VERB	form of vouloir: please, in formal requests: please wait (veuillez patienter) → vouloir
+dois	VERB	form of devoir: must, have to → devoir | owe
+doit	VERB	form of devoir: must, has to → devoir | must be, a confident guess: it must be late (il doit être tard) | owes
+doivent	VERB	form of devoir: must, have to → devoir
+devrait	VERB	form of devoir: should, ought to → devoir
+devrais	VERB	form of devoir: should, ought to → devoir
+devraient	VERB	form of devoir: should, ought to → devoir
+devra	VERB	future of devoir: will have to → devoir
+devront	VERB	future of devoir: will have to → devoir
+doive	VERB	form of devoir after que: must, have to → devoir
+dû	VERB	form of devoir: had to: he had to leave (il a dû partir) → devoir | must have, a confident guess: he must have forgotten (il a dû oublier) | owed, due: due to (dû à)
+sais	VERB	form of savoir: know, as a fact → savoir | tu sais: you know, in speech
+sait	VERB	form of savoir: knows: you never know (on ne sait jamais) → savoir
+savent	VERB	form of savoir: know → savoir
+saura	VERB	future of savoir: will know → savoir
+saurait	VERB	form of savoir: would know → savoir | could, with ne: one couldn't say (on ne saurait dire)
+sache	VERB	form of savoir after que: as far as I know (que je sache) → savoir
+sachant	VERB	form of savoir: knowing: given that, knowing that (sachant que) → savoir
+faut	VERB	form of falloir: it's needed, one must: we have to leave (il faut partir) → falloir | it takes: it takes time (il faut du temps)
+faudra	VERB	future of falloir: will have to, will be needed → falloir
+faudrait	VERB	form of falloir: should, would be needed: we should (il faudrait) → falloir
+fallait	VERB	past of falloir: had to, was needed → falloir
+fallu	VERB	form of falloir: had to: we had to (il a fallu) → falloir
+vaut	VERB	form of valoir: is worth: it's worth it (ça vaut) → valoir | il vaut mieux: it's better to
+vaudrait	VERB	form of valoir: would be worth → valoir | il vaudrait mieux: it would be better to
+viens	VERB	form of venir: come → venir | venir de, has just done it: I have just eaten (je viens de manger) | come!: come here (viens ici)
+vient	VERB	form of venir: comes → venir | venir de, has just done it: he has just left (il vient de partir)
+viennent	VERB	form of venir: come → venir | venir de, have just done it
+viendra	VERB	future of venir: will come → venir
+viendrait	VERB	form of venir: would come → venir
+vint	VERB	past of venir, in written stories: came → venir
+tient	VERB	form of tenir: holds, keeps → tenir | tient à: cares about, insists on
+tiens	VERB	form of tenir: hold, keep → tenir | here, take this (tiens !) | well, look, in surprise: well, it's you (tiens, c'est toi)
+tiennent	VERB	form of tenir: hold, keep → tenir
+vois	VERB	form of voir: see → voir | tu vois: you see, in speech
+voit	VERB	form of voir: sees: you can see (on voit) → voir
+voient	VERB	form of voir: see → voir
+verra	VERB	future of voir: will see: we'll see (on verra) → voir
+verrai	VERB	future of voir: I will see → voir
+verrait	VERB	form of voir: would see → voir
+vu	VERB	form of voir: seen, saw: I saw (j'ai vu) → voir
+vu	ADP	given, in view of: given the situation (vu la situation) | vu que: given that, since
+vit	VERB	form of vivre: lives → vivre | past of voir, in written stories: saw → voir
+dit	VERB	form of dire: said, told: he said (il a dit) → dire | says, tells (il dit) | called, known as: Charles known as the Bald (Charles dit le Chauve)
+dis	VERB	form of dire: say, tell → dire | say!, tell!: tell me (dis-moi)
+disent	VERB	form of dire: say, tell → dire
+dirait	VERB	form of dire: would say → dire | on dirait: it looks like, you'd think
+prend	VERB	form of prendre: takes → prendre
+prends	VERB	form of prendre: take → prendre | take!: take this (prends ça)
+prennent	VERB	form of prendre: take → prendre
+pris	VERB	form of prendre: taken, took: I took (j'ai pris) → prendre
+prit	VERB	past of prendre, in written stories: took → prendre
+prenne	VERB	form of prendre after que: that he take (qu'il prenne) → prendre
+met	VERB	form of mettre: puts → mettre | se met à: starts to: it starts to rain (il se met à pleuvoir)
+mets	VERB	form of mettre: put → mettre | put!: put it there (mets-le là)
+mis	VERB	form of mettre: put: he put (il a mis) → mettre
+mit	VERB	past of mettre, in written stories: put → mettre
 
 ## Words Wiktionary glosses misleadingly for a reader
-bah	INTJ	well, meh, oh well (hesitation or indifference)
-voire	ADV	or even, indeed (une heure, voire deux, an hour, or even two)
-donc	ADV	so, therefore, then | so, well (in speech, going on or summing up: donc voilà, so there you go)
-ainsi	ADV	in this way, like this, thus | so, thus (introducing a consequence) | ainsi que, ainsi qu': as well as; just as
-quelques	DET	a few, some (plural)
-encore	ADV	still, yet (pas encore, not yet) | again | more, another (encore un, one more) | even (encore plus, even more) | also, too (in addition)
-cool	ADJ	cool, great, nice (informal) | relaxed, laid-back
-là	ADV	there, here | then, at that point (à ce moment-là, at that moment) | that, those (after a noun with ce or ces, usually written -là: ces jours-là, those days) | (in speech, for emphasis: là, je suis fatigué, right now I'm tired)
-largement	ADV	widely, largely, mostly | by far, easily, comfortably (il a largement gagné, he won easily) | generously, amply
+bah	INTJ	well, meh, oh well: hesitating or not caring
+voire	ADV	or even: an hour, or even two (une heure, voire deux)
+donc	ADV	so, therefore | so, well, in speech, moving on or summing up: so there you go (donc voilà)
+ainsi	ADV	in this way, like this | so, thus: what follows from it | ainsi que: as well as; just as
+quelques	DET	a few, some
+encore	ADV	still, yet: not yet (pas encore) | again | more, another: one more (encore un) | even: even more (encore plus)
+cool	ADJ	(informal) cool, great, nice | relaxed, laid-back
+là	ADV	there; in speech often here: I'm here (je suis là) | then, at that moment (à ce moment-là) | after ce, ces and a noun, points at it: that day (ce jour-là) | in speech, puts weight on now: right now I'm tired (là, je suis fatigué)
+largement	ADV	widely, mostly | by far, easily: he won easily (il a largement gagné) | generously, amply
 
 ## Set phrases English Wiktionary lacks, or glosses misleadingly
 plus tôt	ADV	earlier, sooner
 en un coup	ADV	in one go, all at once
-l'ensemble de	ADP	the whole of, all of (sur l'ensemble du parcours, over the whole route; l'ensemble des députés, all the deputies)
+l'ensemble de	ADP	the whole of, all of: all the deputies (l'ensemble des députés)
 au sens large	ADV	in the broad sense, broadly speaking
 aller à l'encontre de	VERB	to go against, to run counter to
 masse salariale	NOUN	payroll, total wage bill
-faux bourdon/faux bourdons	NOUN	drone (male bee)
+faux bourdon/faux bourdons	NOUN	drone, the male bee
 # Wiktionary's `il y a` is only "ago", and came before `y avoir` "there be".
 # Wiktionary's `le temps de` is only "by the time that"; before an infinitive it is "time to".
-le temps de	CCONJ	time to, long enough to (le temps d'aller me brosser les dents, time to go and brush my teeth) | by the time (that)
-il y a	ADP	there is, there are (il y a un problème, there is a problem) | ago (il y a deux ans, two years ago)
+le temps de	CCONJ	time to, long enough to: time to go and brush my teeth (le temps d'aller me brosser les dents) | by the time
+il y a	ADP	there is, there are: there's a problem (il y a un problème) | ago: two years ago (il y a deux ans)
 
 ## Units, written after a number
-g	SYM	gram(s) (500 g)
-kg	SYM	kilogram(s)
-mg	SYM	milligram(s)
-km	SYM	kilometre(s)
-cm	SYM	centimetre(s)
-mm	SYM	millimetre(s)
-ml	SYM	millilitre(s)
-cl	SYM	centilitre(s)
+g	SYM	gram: 500 grams (500 g)
+kg	SYM	kilogram
+mg	SYM	milligram
+km	SYM	kilometre
+cm	SYM	centimetre
+mm	SYM	millimetre
+ml	SYM	millilitre
+cl	SYM	centilitre

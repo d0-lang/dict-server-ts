@@ -1,4 +1,7 @@
 import { assert, describe, it } from "@effect/vitest";
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import { LANGUAGES_DIR } from "@dict/core/language";
 import { loadGrammar, parseGrammarFile } from "./grammar.ts";
 
 describe("parseGrammarFile", () => {
@@ -66,5 +69,40 @@ describe("loadGrammar", () => {
       assert.isAbove(loadGrammar(lang).length, 50, lang);
     }
     assert.deepStrictEqual(loadGrammar("xx"), []);
+  });
+});
+
+/** Words of `text` as the extension splits them for `see` links (`linkSense`). */
+const linkWords = (text: string): ReadonlyArray<string> =>
+  text
+    .normalize("NFC")
+    .toLowerCase()
+    .split(/[^\p{L}\p{M}\p{N}]+/u)
+    .filter((word) => word !== "");
+
+/** True if `target`'s words appear in `sense` one after another. */
+const names = (sense: string, target: string): boolean => {
+  const words = linkWords(sense);
+  const run = linkWords(target);
+  return words.some((_, i) => run.every((word, k) => words[i + k] === word));
+};
+
+describe("grammar-file links", () => {
+  // The extension links a `see` word where the sense names it; a word the
+  // sense doesn't name turns the whole sense into one link.
+  it("name every word a sense links to", () => {
+    const languages = readdirSync(LANGUAGES_DIR).filter((lang) =>
+      existsSync(join(LANGUAGES_DIR, lang, "grammar.tsv")),
+    );
+    const unnamed = languages.flatMap((lang) =>
+      loadGrammar(lang).flatMap((line) =>
+        line.senses.flatMap((sense, i) =>
+          (line.see?.[i] ?? [])
+            .filter((target) => !names(sense, target))
+            .map((target) => `${lang} ${line.lemma}: ${target} in "${sense}"`),
+        ),
+      ),
+    );
+    assert.deepStrictEqual(unnamed, []);
   });
 });

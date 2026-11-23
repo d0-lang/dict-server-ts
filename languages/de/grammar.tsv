@@ -8,154 +8,161 @@
 # tables. "→ geben" links the line to its verb, which the popover still shows
 # after it; a VERB line replaces Wiktionary's other verbs for the word.
 # See apps/importer/src/grammar.ts.
+#
+# Each sense explains what the word does, for a learner reading it next to
+# the sentence: what it expresses, then the English, then a short phrase in
+# brackets when the English alone doesn't settle it ("zu and dem joined: to
+# the: to the station (zum Bahnhof)"). No notes on case or position: the
+# sentence shows those. A form names its base word, which links it:
+# "past of geben: gave → geben".
 
 ## Definite article and relative/demonstrative der
-der	DET	the (masculine, subject) | of the, to the (feminine: genitive, dative) | of the (plural, genitive)
-der	PRON	who, which, that (relative, masculine) | he, that one (demonstrative, masculine)
-die	DET	the (feminine; plural)
-die	PRON	who, which, that (relative, feminine or plural) | she, they, that one, those (demonstrative)
-das	DET	the (neuter)
-das	PRON	which, that (relative, neuter) | this, that, it
-den	DET	the (masculine, object) | the, to the (plural, dative)
-den	PRON	whom, which, that (relative, masculine object) | him, that one
-dem	DET	the, to the (masculine or neuter, dative)
-dem	PRON	to whom, to which (relative, dative) | to him, to that one
-des	DET	of the (masculine or neuter, genitive)
-dessen	PRON	whose, of which (masculine or neuter) | his, its (of the one just named)
-deren	PRON	whose, of which (feminine or plural) | her, their (of the one just named)
-denen	PRON	to whom, to which (relative, plural dative) | to them, to those
+der	DET	the, for a masculine noun as the subject | of the, to the, for a feminine noun | of the, for plural nouns
+der	PRON	who, which, that, for a masculine noun | he, that one: points back at someone just named, more firmly than er
+die	DET	the, for a feminine noun or plural nouns
+die	PRON	who, which, that, for a feminine or plural noun | she, they, that one, those: points back at someone just named
+das	DET	the, for a neuter noun
+das	PRON	which, that, for a neuter noun | this, that, it: points at a thing or at what was just said: that's true (das stimmt)
+den	DET	the, for a masculine noun as the object | to the, for plural nouns
+den	PRON	whom, which, that, for a masculine noun | him, that one
+dem	DET	to the, for a masculine or neuter noun
+dem	PRON	to whom, to which | to him, to that one
+des	DET	of the, for a masculine or neuter noun
+dessen	PRON	whose, of which, for a masculine or neuter noun | his, its: the one just named, where sein could mean someone else
+deren	PRON	whose, of which, for a feminine or plural noun | her, their: the one just named, where ihr could mean someone else
+denen	PRON	to whom, to which, for plural nouns | to them, to those
 
 ## Indefinite article and kein
-ein	DET	a, an (masculine or neuter)
-eine	DET	a, an (feminine)
-eine	PRON	one (feminine: "eine von uns", one of us)
-einen	DET	a, an (masculine, object)
-einen	PRON	one (masculine, object)
-einem	DET	a, an, to a (masculine or neuter, dative)
-einem	PRON	one, to one (dative) | you, to you (dative of man: "das tut einem gut", that does you good)
-einer	DET	of a, to a (feminine: genitive, dative)
-einer	PRON	one, someone ("einer von uns", one of us)
-eines	DET	of a (masculine or neuter, genitive)
-eines	PRON	one (neuter)
-kein	DET	no, not a (masculine or neuter)
-keine	DET	no, not a, not any (feminine; plural)
-keine	PRON	none, not one (feminine; plural)
-keinen	DET	no, not a (masculine object; plural dative)
-keinem	DET	no, not a (masculine or neuter, dative)
-keiner	DET	no, not a (feminine genitive or dative; plural genitive)
+ein	DET	a, an, for a masculine or neuter noun
+eine	DET	a, an, for a feminine noun
+eine	PRON	one: one of us (eine von uns)
+einen	DET	a, an, for a masculine noun as the object
+einen	PRON	one
+einem	DET	a, to a, for a masculine or neuter noun
+einem	PRON	one, to one | you, to you: what man becomes when it isn't the subject: that does you good (das tut einem gut) → man
+einer	DET	of a, to a, for a feminine noun
+einer	PRON	one, someone: one of us (einer von uns)
+eines	DET	of a, for a masculine or neuter noun
+eines	PRON	one
+kein	DET	no, not a: German says "no house" (kein Haus) where English says "not a house"
+keine	DET	no, not a, not any: German says "no time" (keine Zeit) where English says "not any time"
+keine	PRON	none, not one
+keinen	DET	no, not a, not any
+keinem	DET	no, not a, to no
+keiner	DET	no, not a, of no
 keiner	PRON	nobody, no one, none
-keines	DET	of no (masculine or neuter, genitive)
-keines	PRON	none (neuter)
+keines	DET	of no
+keines	PRON	none, not one
 
 ## Personal pronouns
 ich	PRON	I
 mich	PRON	me | myself
 mir	PRON	me, to me | myself, to myself
-meiner	PRON	of me (genitive)
-du	PRON	you (singular, informal)
-dich	PRON	you (singular, informal, object) | yourself
-dir	PRON	you, to you (singular, informal) | yourself, to yourself
-deiner	PRON	of you (singular, informal, genitive)
-er	PRON	he | it (for a masculine noun)
-ihn	PRON	him | it (for a masculine noun)
-ihm	PRON	him, to him | it, to it (for a masculine or neuter noun)
-seiner	PRON	of him, of it (genitive)
-sie	PRON	she | her (object) | it (for a feminine noun) | they | them (object)
-Sie	PRON	you (formal, singular or plural)
-ihr	PRON	you (plural, informal) | her, to her (dative of sie, "she") | it, to it (for a feminine noun: "die Photosynthese und alle, die von ihr abhängen", photosynthesis and everything that depends on it)
-ihrer	PRON	of her, of them (genitive)
-Ihrer	PRON	of you (formal, genitive)
+meiner	PRON	of me
+du	PRON	you, to one person you know well; strangers get Sie → Sie
+dich	PRON	you, to one person you know well | yourself
+dir	PRON	you, to you, to one person you know well | yourself, to yourself
+deiner	PRON	of you, to one person you know well
+er	PRON	he | it, for a masculine noun: German nouns keep their gender, so a table is er
+ihn	PRON	him | it, for a masculine noun
+ihm	PRON	him, to him | it, to it, for a masculine or neuter noun
+seiner	PRON	of him, of it
+sie	PRON	she | her | it, for a feminine noun | they | them
+Sie	PRON	you, politely, to one person or more; people you know well get du → du
+ihr	PRON	you, to several people you know well | her, to her | it, to it, for a feminine noun
+ihrer	PRON	of her, of them
+Ihrer	PRON	of you, politely
 ihnen	PRON	them, to them
-Ihnen	PRON	you, to you (formal)
-es	PRON	it | there, it (as a dummy subject: "es gibt", there is; "es regnet", it is raining)
+Ihnen	PRON	you, to you, politely
+es	PRON	it | there, it: a subject that means nothing, as in there is (es gibt) or it's raining (es regnet)
 wir	PRON	we
 uns	PRON	us, to us | ourselves, each other
-unser	PRON	of us (genitive)
-euch	PRON	you, to you (plural, informal) | yourselves, each other
-euer	PRON	of you (plural, informal, genitive)
-sich	PRON	himself, herself, itself, themselves (reflexive) | yourself, yourselves (with formal Sie) | each other | (with many verbs, no English equivalent: "sich freuen", to be glad)
-man	PRON	one, you, people, they (someone in general: "man sagt", people say)
+unser	PRON	of us
+euch	PRON	you, to you, to several people you know well | yourselves, each other
+euer	PRON	of you, to several people you know well
+sich	PRON	himself, herself, itself, themselves: the action goes back to the one doing it | yourself, with Sie | each other | part of many verbs, not translated: to be glad (sich freuen)
+man	PRON	one, you, people: anyone at all: people say (man sagt)
 
 ## Possessives
 mein	DET	my
 meine	DET	my
-meinen	DET	my (masculine object; plural dative)
-meinem	DET	my, to my (dative)
-meiner	DET	of my, to my (feminine genitive or dative; plural genitive)
-meines	DET	of my (genitive)
-dein	DET	your (singular, informal)
-deine	DET	your (singular, informal)
-deinen	DET	your (singular, informal)
-deinem	DET	your, to your (singular, informal, dative)
-deiner	DET	of your, to your (singular, informal)
-deines	DET	of your (singular, informal, genitive)
+meinen	DET	my
+meinem	DET	my, to my
+meiner	DET	of my, to my
+meines	DET	of my
+dein	DET	your, to someone you call du
+deine	DET	your, to someone you call du
+deinen	DET	your, to someone you call du
+deinem	DET	your, to your, to someone you call du
+deiner	DET	of your, to your, to someone you call du
+deines	DET	of your, to someone you call du
 sein	DET	his, its
 seine	DET	his, its
-seinen	DET	his, its (masculine object; plural dative)
-seinem	DET	his, its, to his (dative)
-seiner	DET	of his, to his (feminine genitive or dative; plural genitive)
-seines	DET	of his, of its (genitive)
-ihr	DET	her, its (for a feminine owner) | their
+seinen	DET	his, its
+seinem	DET	his, its, to his
+seiner	DET	of his, to his
+seines	DET	of his, of its
+ihr	DET	her, its, for a feminine owner | their
 ihre	DET	her, its | their
-ihren	DET	her, its, their (masculine object; plural dative)
-ihrem	DET	her, its, their, to her, to their (dative)
+ihren	DET	her, its, their
+ihrem	DET	her, its, their, to her, to their
 ihrer	DET	of her, of their, to her, to their
-ihres	DET	of her, of their (genitive)
-Ihr	DET	your (formal)
-Ihre	DET	your (formal)
-Ihren	DET	your (formal; masculine object, plural dative)
-Ihrem	DET	your, to your (formal, dative)
-Ihres	DET	of your (formal, genitive)
+ihres	DET	of her, of their
+Ihr	DET	your, politely
+Ihre	DET	your, politely
+Ihren	DET	your, politely
+Ihrem	DET	your, to your, politely
+Ihres	DET	of your, politely
 unser	DET	our
 unsere	DET	our
 unsre	DET	our
-unseren	DET	our (masculine object; plural dative)
-unsren	DET	our (masculine object; plural dative)
-unserem	DET	our, to our (dative)
-unsrem	DET	our, to our (dative)
+unseren	DET	our
+unsren	DET	our
+unserem	DET	our, to our
+unsrem	DET	our, to our
 unserer	DET	of our, to our
 unsrer	DET	of our, to our
-unseres	DET	of our (genitive)
-unsres	DET	of our (genitive)
-euer	DET	your (plural, informal)
-eure	DET	your (plural, informal)
-euren	DET	your (plural, informal)
-eurem	DET	your, to your (plural, informal, dative)
-eurer	DET	of your, to your (plural, informal)
-eures	DET	of your (plural, informal, genitive)
+unseres	DET	of our
+unsres	DET	of our
+euer	DET	your, to several people you know well
+eure	DET	your, to several people you know well
+euren	DET	your, to several people you know well
+eurem	DET	your, to your, to several people you know well
+eurer	DET	of your, to your, to several people you know well
+eures	DET	of your, to several people you know well
 
 ## Demonstratives, interrogatives, relatives
-dieser	DET	this, that (masculine; feminine genitive or dative; plural genitive)
+dieser	DET	this, that
 dieser	PRON	this one, that one
 diese	DET	this, these
 diese	PRON	this one, these, they
-dieses	DET	this (neuter); of this (genitive)
+dieses	DET	this; of this
 dieses	PRON	this one, this
-diesem	DET	this, to this (dative)
+diesem	DET	this, to this
 diesem	PRON	this one, to this one
-diesen	DET	this (masculine object); these, to these (plural dative)
+diesen	DET	this, these, to these
 diesen	PRON	this one, these
-jener	DET	that (formal or literary)
-jene	DET	that, those
+jener	DET	that, further away or earlier; more formal than dieser
+jene	DET	that, those, further away or earlier
 jene	PRON	that one, those
-jenes	DET	that (neuter)
-jenem	DET	that, to that (dative)
-jenen	DET	that (masculine object); those, to those (plural dative)
-welcher	DET	which, what (question)
-welcher	PRON	who, which, that (relative) | some, any (colloquial: "hast du welche?", do you have any?)
-welche	DET	which, what (question)
-welche	PRON	who, which, that (relative) | some, any (colloquial)
-welches	DET	which, what (question)
-welches	PRON	which, that (relative)
+jenes	DET	that, further away or earlier
+jenem	DET	that, to that
+jenen	DET	that, those, to those
+welcher	DET	which, what
+welcher	PRON	who, which, that | some, any, in speech: do you have any? (hast du welche?)
+welche	DET	which, what
+welche	PRON	who, which, that | some, any, in speech
+welches	DET	which, what
+welches	PRON	which, that
 welchem	DET	which, to which
-welchem	PRON	to whom, to which (relative)
+welchem	PRON	to whom, to which
 welchen	DET	which
-welchen	PRON	whom, which (relative)
-wer	PRON	who | whoever | someone (colloquial)
-wen	PRON	whom, who (object)
-wem	PRON	to whom, who (dative)
+welchen	PRON	whom, which
+wer	PRON	who | whoever | someone, in speech
+wen	PRON	whom, who
+wem	PRON	to whom, who
 wessen	PRON	whose
-was	PRON	what | which, that ("alles, was", everything that) | something (colloquial, for "etwas")
+was	PRON	what | which, that: everything that (alles, was) | something, in speech, for etwas → etwas
 solche	DET	such
 solcher	DET	such
 solches	DET	such
@@ -167,24 +174,24 @@ jeder	PRON	everyone, everybody, each one
 jede	DET	every, each
 jede	PRON	each one, everyone
 jedes	DET	every, each
-jedem	DET	every, each, to every (dative)
+jedem	DET	every, each, to every
 jedem	PRON	everyone, to everyone
-jeden	DET	every, each (masculine object)
-jeden	PRON	everyone (object)
-alle	DET	all, every ("alle zwei Jahre", every two years)
+jeden	DET	every, each
+jeden	PRON	everyone
+alle	DET	all, every: every two years (alle zwei Jahre)
 alle	PRON	all, everyone, everybody
 alles	PRON	everything, all
-allem	PRON	all, everything (dative: "vor allem", above all, especially; "trotz allem", in spite of everything)
+allem	PRON	all, everything: above all (vor allem), in spite of everything (trotz allem)
 allen	DET	all, to all
 allen	PRON	all, everyone, to everyone
-aller	DET	of all ("aus aller Welt", from all over the world)
+aller	DET	of all: from all over the world (aus aller Welt)
 viele	DET	many
 viele	PRON	many, many people
-vielen	DET	many, to many ("vielen Dank", many thanks)
+vielen	DET	many, to many: many thanks (vielen Dank)
 vieler	DET	of many
 einige	DET	some, a few, several
 einige	PRON	some, a few
-einigen	DET	some, a few (dative)
+einigen	DET	some, a few
 einiger	DET	of some, of a few
 manche	DET	some, many a
 manche	PRON	some, some people
@@ -195,202 +202,202 @@ beiden	PRON	both, the two
 jemand	PRON	someone, somebody, anyone
 niemand	PRON	nobody, no one
 etwas	PRON	something, anything
-etwas	DET	some, a little ("etwas Salz", some salt)
+etwas	DET	some, a little: some salt (etwas Salz)
 nichts	PRON	nothing, not anything
-selbst	PRON	myself, yourself, himself, herself, itself, ourselves, themselves (emphatic: "ich selbst", I myself)
+selbst	PRON	myself, yourself, himself, herself, itself, ourselves, themselves: stresses that it's that very one: I myself (ich selbst)
 
 ## Preposition + article contractions
-am	ADP	at the, on the (an dem: "am Montag", on Monday; "am Fluss", by the river)
-am	PART	(with a superlative) the most, the ...-est ("am besten", best; "am schnellsten", fastest) | (colloquial, with a verb noun) in the middle of ("ich bin am Arbeiten", I'm working)
-im	ADP	in the (in dem: "im Haus", in the house; "im Mai", in May)
-ins	ADP	into the, to the (in das: "ins Kino", to the cinema)
-zum	ADP	to the, for the (zu dem: "zum Bahnhof", to the station; "zum Beispiel", for example) | as of, on (with a date: "zum 1. Mai", as of 1 May) | as (a role: "zum Präsidenten gewählt", elected president)
-zur	ADP	to the, for the (zu der: "zur Schule", to school) | as (a role: "zur Vorsitzenden berufen", appointed chair)
-vom	ADP	from the, of the, by the (von dem)
-beim	ADP	at the, near the, while (bei dem: "beim Arzt", at the doctor's; "beim Essen", while eating) | with, in the case of ("beim neuen Modell", with the new model)
-ans	ADP	to the, onto the (an das)
-aufs	ADP	onto the, on the (auf das)
-übers	ADP	over the, about the (über das)
-fürs	ADP	for the (für das)
+am	ADP	an and dem joined: on, at: on Monday (am Montag), by the river (am Fluss)
+am	PART	the most, with a superlative: best (am besten) | in the middle of doing it, in speech: I'm working (ich bin am Arbeiten)
+im	ADP	in and dem joined: in the: in the house (im Haus), in May (im Mai)
+ins	ADP	in and das joined: into, to: to the cinema (ins Kino)
+zum	ADP	zu and dem joined: to the, for: to the station (zum Bahnhof), for example (zum Beispiel) | from a date on: as of 1 May (zum 1. Mai) | into a role: elected president (zum Präsidenten gewählt)
+zur	ADP	zu and der joined: to the: to school (zur Schule) | into a role: appointed chair (zur Vorsitzenden berufen)
+vom	ADP	von and dem joined: from the, of the, by the
+beim	ADP	bei and dem joined: at, near: at the doctor's (beim Arzt) | while doing it: while eating (beim Essen) | with, in the case of: with the new model (beim neuen Modell)
+ans	ADP	an and das joined: to, onto
+aufs	ADP	auf and das joined: onto, on
+übers	ADP	über and das joined: over, about
+fürs	ADP	für and das joined: for
 
 ## Forms of sein, haben and werden
 # Past and subjunctive forms a reader can't connect to their tense by
 # themselves: Wiktionary's entry only says "to be". The protocol has no
 # inflection tables, so these are entries of their own.
-war	AUX	was ("es war kalt", it was cold) → sein | had (past perfect with verbs of motion and change: "er war gegangen", he had gone)
-warst	AUX	were (du: "du warst dort", you were there) → sein | had (past perfect: "du warst gekommen", you had come)
-waren	AUX	were ("wir waren müde", we were tired) → sein | had (past perfect: "sie waren gekommen", they had come)
-wart	AUX	were (ihr) → sein | had (past perfect)
-wäre	AUX	would be ("das wäre schön", that would be nice) → sein | were (in a condition: "wenn ich reich wäre", if I were rich) | would have (with verbs of motion and change: "er wäre gekommen", he would have come)
-wärst	AUX	would be, were (du) → sein | would have (with verbs of motion and change)
-wären	AUX	would be, were (wir, sie, Sie: "das wären zwei Euro", that would be two euros) → sein | would have (with verbs of motion and change)
-wärt	AUX	would be, were (ihr) → sein | would have (with verbs of motion and change)
-sei	AUX	is, be (reported speech: "er sagt, er sei krank", he says he is ill) → sein | be! (command: "sei still!", be quiet!) | let ... be ("es sei denn", unless)
-seien	AUX	are, be (reported speech, plural: "sie seien zufrieden", they are said to be satisfied) → sein | let us be ("seien wir ehrlich", let's be honest)
-gewesen	AUX	been ("ich bin dort gewesen", I have been there) → sein
-hatte	AUX	had ("ich hatte keine Zeit", I had no time) → haben | had (past perfect: "sie hatte gegessen", she had eaten)
-hattest	AUX	had (du) → haben | had (past perfect)
-hatten	AUX	had (wir, sie, Sie) → haben | had (past perfect: "wir hatten gewartet", we had waited)
-hattet	AUX	had (ihr) → haben | had (past perfect)
-hätte	AUX	would have ("ich hätte gern einen Kaffee", I would like a coffee; "das hätte ich nicht gedacht", I wouldn't have thought so) → haben | had (in a condition: "wenn ich Zeit hätte", if I had time) | could have, should have (with a modal: "er hätte kommen können", he could have come)
-hättest	AUX	would have, had (du) → haben | could have, should have (with a modal)
-hätten	AUX	would have, had (wir, sie, Sie) → haben | could have, should have (with a modal)
-hättet	AUX	would have, had (ihr) → haben | could have, should have (with a modal)
-gehabt	AUX	had ("ich habe Glück gehabt", I was lucky) → haben
-wurde	AUX	was, became (past: "es wurde dunkel", it became dark) → werden | was (passive: "das Haus wurde gebaut", the house was built)
-wurdest	AUX	were, became (du) → werden | were (passive)
-wurden	AUX	were, became (wir, sie, Sie) → werden | were (passive: "sie wurden gewählt", they were elected)
-wurdet	AUX	were, became (ihr) → werden | were (passive)
-würde	AUX	would ("ich würde gern kommen", I would like to come; "das würde helfen", that would help) → werden
-würdest	AUX	would (du: "würdest du mir helfen?", would you help me?) → werden
-würden	AUX	would (wir, sie, Sie: "würden Sie bitte...", would you please...) → werden
-würdet	AUX	would (ihr) → werden
-worden	AUX	been (passive perfect: "es ist gebaut worden", it has been built) → werden
-geworden	AUX	become ("es ist kalt geworden", it has become cold) → werden
+war	AUX	past of sein: was: it was cold (es war kalt) → sein | had, with verbs of moving or changing: he had gone (er war gegangen)
+warst	AUX	past of sein: were → sein | had: you had come (du warst gekommen)
+waren	AUX	past of sein: were: we were tired (wir waren müde) → sein | had: they had come (sie waren gekommen)
+wart	AUX	past of sein: were → sein | had
+wäre	AUX	form of sein for what is imagined: would be: that would be nice (das wäre schön) → sein | in an "if" that isn't true: if I were rich (wenn ich reich wäre) | would have, with verbs of moving or changing: he would have come (er wäre gekommen)
+wärst	AUX	form of sein for what is imagined: would be, were → sein | would have, with verbs of moving or changing
+wären	AUX	form of sein for what is imagined: would be, were: that would be two euros (das wären zwei Euro) → sein | would have, with verbs of moving or changing
+wärt	AUX	form of sein for what is imagined: would be, were → sein | would have, with verbs of moving or changing
+sei	AUX	form of sein that reports what someone said, without vouching for it: he says he is ill (er sagt, er sei krank) → sein | be!: be quiet! (sei still!) | es sei denn: unless
+seien	AUX	form of sein that reports what someone said: they are said to be satisfied (sie seien zufrieden) → sein | let's be: let's be honest (seien wir ehrlich)
+gewesen	AUX	form of sein: been: I have been there (ich bin dort gewesen) → sein
+hatte	AUX	past of haben: had: I had no time (ich hatte keine Zeit) → haben | had done: she had eaten (sie hatte gegessen)
+hattest	AUX	past of haben: had → haben | had done
+hatten	AUX	past of haben: had → haben | had done: we had waited (wir hatten gewartet)
+hattet	AUX	past of haben: had → haben | had done
+hätte	AUX	form of haben for what is wished, imagined or said politely: I'd like a coffee (ich hätte gern einen Kaffee) → haben | in an "if" that isn't true: if I had time (wenn ich Zeit hätte) | with können, sollen, müssen: could have or should have, but didn't (er hätte kommen können)
+hättest	AUX	form of haben for what is imagined: would have, had → haben | could have, should have, but didn't
+hätten	AUX	form of haben for what is imagined: would have, had → haben | could have, should have, but didn't
+hättet	AUX	form of haben for what is imagined: would have, had → haben | could have, should have, but didn't
+gehabt	AUX	form of haben: had: I was lucky (ich habe Glück gehabt) → haben
+wurde	AUX	past of werden: became, got: it got dark (es wurde dunkel) → werden | was done: the house was built (das Haus wurde gebaut)
+wurdest	AUX	past of werden: became → werden | were done
+wurden	AUX	past of werden: became → werden | were done: they were elected (sie wurden gewählt)
+wurdet	AUX	past of werden: became → werden | were done
+würde	AUX	form of werden for what is imagined or asked politely: would: that would help (das würde helfen) → werden
+würdest	AUX	form of werden: would: would you help me? (würdest du mir helfen?) → werden
+würden	AUX	form of werden: would: would you please ... (würden Sie bitte ...) → werden
+würdet	AUX	form of werden: would → werden
+worden	AUX	form of werden: been, in "has been done": it has been built (es ist gebaut worden) → werden
+geworden	AUX	form of werden: become, got: it has got cold (es ist kalt geworden) → werden
 
 ## Present, past and subjunctive forms of the modal verbs
-kann	AUX	can, is able to ("ich kann schwimmen", I can swim; "er kann Deutsch", he speaks German) → können | may, might ("das kann sein", that may be)
-kannst	AUX	can (du: "kannst du mir helfen?", can you help me?) → können
-muss	AUX	must, has to ("ich muss gehen", I have to go) → müssen | must be (a guess: "das muss schwer sein", that must be hard)
-musst	AUX	must, have to (du: "du musst nicht", you don't have to) → müssen
-darf	AUX	may, is allowed to ("darf ich?", may I?; "man darf nicht rauchen", smoking isn't allowed) → dürfen
-will	AUX	wants (to) ("ich will nach Hause", I want to go home) → wollen
-willst	AUX	want (to) (du: "was willst du?", what do you want?) → wollen
-soll	AUX	is to, should, is supposed to ("was soll ich tun?", what should I do?) → sollen | is said to ("er soll reich sein", he is said to be rich)
-mag	AUX	like(s) ("ich mag Kaffee", I like coffee) → mögen | may (a guess: "das mag sein", that may be)
-konnte	AUX	could, was able to (past: "ich konnte nicht schlafen", I couldn't sleep) → können
-konnten	AUX	could, were able to (past) → können
-könnte	AUX	could, might ("das könnte stimmen", that could be true; "könnte ich...?", could I...?) → können
-könnten	AUX	could, might (wir, sie, Sie: "könnten Sie mir helfen?", could you help me?) → können
-musste	AUX	had to (past: "ich musste gehen", I had to go) → müssen
-mussten	AUX	had to (past) → müssen
-müsste	AUX	would have to, ought to, should ("das müsste reichen", that should be enough) → müssen
-müssten	AUX	would have to, ought to, should → müssen
-sollte	AUX	should, ought to ("du solltest schlafen", you should sleep) → sollen | was supposed to (past: "er sollte kommen", he was supposed to come) | should, if (in a condition: "sollte es regnen", should it rain)
-sollten	AUX	should, ought to → sollen | were supposed to (past)
-solltest	AUX	should, ought to (du) → sollen
-wollte	AUX	wanted to (past: "ich wollte dich anrufen", I wanted to call you) → wollen | would like to (polite: "ich wollte fragen, ob...", I wanted to ask whether...)
-wollten	AUX	wanted to (past) → wollen
-durfte	AUX	was allowed to (past) → dürfen
-durften	AUX	were allowed to (past) → dürfen
-dürfte	AUX	would be allowed to → dürfen | is likely to, probably ("das dürfte reichen", that should probably be enough)
-dürften	AUX	would be allowed to → dürfen | are likely to, probably
-möchte	AUX	would like (to) ("ich möchte einen Kaffee", I would like a coffee; "ich möchte gehen", I would like to go) → mögen
-möchten	AUX	would like (to) (wir, sie, Sie: "möchten Sie etwas trinken?", would you like something to drink?) → mögen
-möchtest	AUX	would like (to) (du) → mögen
-mochte	AUX	liked (past of mögen: "ich mochte ihn", I liked him) → mögen
+kann	AUX	form of können: can, is able to: I can swim (ich kann schwimmen) → können | may be, might: that may be (das kann sein)
+kannst	AUX	form of können: can → können
+muss	AUX	form of müssen: must, has to: I have to go (ich muss gehen) → müssen | must be: a confident guess: that must be hard (das muss schwer sein)
+musst	AUX	form of müssen: must, have to; with nicht, don't have to, not "must not": you don't have to (du musst nicht) → müssen
+darf	AUX	form of dürfen: may, is allowed to: may I? (darf ich?); with nicht, must not → dürfen
+will	AUX	form of wollen: wants to, not the English "will": I want to go home (ich will nach Hause) → wollen
+willst	AUX	form of wollen: want to, not the English "will": what do you want? (was willst du?) → wollen
+soll	AUX	form of sollen: should, is to, because someone else wants it: what should I do? (was soll ich tun?) → sollen | is said to: he's said to be rich (er soll reich sein)
+mag	AUX	form of mögen: likes: I like coffee (ich mag Kaffee) → mögen | may, a guess: that may be (das mag sein)
+konnte	AUX	past of können: could, was able to: I couldn't sleep (ich konnte nicht schlafen) → können
+konnten	AUX	past of können: could, were able to → können
+könnte	AUX	form of können for what is imagined: could, might: that could be true (das könnte stimmen) → können
+könnten	AUX	form of können for what is imagined or asked politely: could you help me? (könnten Sie mir helfen?) → können
+musste	AUX	past of müssen: had to: I had to go (ich musste gehen) → müssen
+mussten	AUX	past of müssen: had to → müssen
+müsste	AUX	form of müssen for what you'd expect: should, would have to: that should be enough (das müsste reichen) → müssen
+müssten	AUX	form of müssen for what you'd expect: should, would have to → müssen
+sollte	AUX	form of sollen: should, ought to: you should sleep (du solltest schlafen) → sollen | was supposed to: he was supposed to come (er sollte kommen) | should it, if: should it rain (sollte es regnen)
+sollten	AUX	form of sollen: should, ought to → sollen | were supposed to
+solltest	AUX	form of sollen: should, ought to → sollen
+wollte	AUX	past of wollen: wanted to: I wanted to call you (ich wollte dich anrufen) → wollen | softens a request: I wanted to ask whether ... (ich wollte fragen, ob ...)
+wollten	AUX	past of wollen: wanted to → wollen
+durfte	AUX	past of dürfen: was allowed to → dürfen
+durften	AUX	past of dürfen: were allowed to → dürfen
+dürfte	AUX	form of dürfen: would be allowed to → dürfen | probably: a careful guess: that should probably be enough (das dürfte reichen)
+dürften	AUX	form of dürfen: would be allowed to → dürfen | probably: a careful guess
+möchte	AUX	form of mögen: would like, the polite way to say what you want: I'd like a coffee (ich möchte einen Kaffee) → mögen
+möchten	AUX	form of mögen: would like: would you like a drink? (möchten Sie etwas trinken?) → mögen
+möchtest	AUX	form of mögen: would like → mögen
+mochte	AUX	past of mögen: liked: I liked him (ich mochte ihn) → mögen
 
 ## Forms of the commonest strong verbs
-gibt	VERB	gives ("er gibt mir das Buch", he gives me the book) → geben | es gibt: there is, there are ("es gibt keine Milch", there's no milk)
-gab	VERB	gave ("sie gab ihm das Geld", she gave him the money) → geben | es gab: there was, there were
-gegeben	VERB	given ("er hat es mir gegeben", he gave it to me) → geben | es hat gegeben: there has been, there was
-weiß	VERB	know(s) ("ich weiß", I know; "er weiß es nicht", he doesn't know) → wissen
-weißt	VERB	know (du: "weißt du?", do you know?) → wissen
-wusste	VERB	knew ("ich wusste es", I knew it) → wissen
-kam	VERB	came ("er kam spät", he came late) → kommen
-kamen	VERB	came (wir, sie, Sie) → kommen
-ging	VERB	went ("sie ging nach Hause", she went home) → gehen | es ging um: it was about
-gingen	VERB	went (wir, sie, Sie) → gehen
-gegangen	VERB	gone, went ("er ist gegangen", he has gone, he left) → gehen
-sieht	VERB	sees ("er sieht nichts", he sees nothing) → sehen | sieht aus: looks ("sie sieht müde aus", she looks tired)
-sah	VERB	saw ("ich sah ihn", I saw him) → sehen
-gesehen	VERB	seen, saw ("ich habe ihn gesehen", I have seen him, I saw him) → sehen
-nimmt	VERB	takes ("er nimmt den Bus", he takes the bus) → nehmen
-nahm	VERB	took ("sie nahm das Buch", she took the book) → nehmen
-genommen	VERB	taken, took ("ich habe es genommen", I took it) → nehmen
-fand	VERB	found ("er fand den Schlüssel", he found the key) → finden | thought ("ich fand es gut", I thought it was good)
-gefunden	VERB	found ("ich habe es gefunden", I found it) → finden
-stand	VERB	stood ("er stand an der Tür", he stood at the door) → stehen | stand in: said, was written in ("es stand in der Zeitung", it was in the paper)
-standen	VERB	stood (wir, sie, Sie) → stehen
-lag	VERB	lay, was (lying) ("das Buch lag auf dem Tisch", the book was on the table) → liegen
-blieb	VERB	stayed, remained ("er blieb zu Hause", he stayed at home) → bleiben
-hält	VERB	holds, stops ("der Bus hält hier", the bus stops here) → halten | hält für: thinks, considers ("er hält es für richtig", he thinks it's right)
-lässt	VERB	lets, leaves ("er lässt mich gehen", he lets me go) → lassen | has (something) done ("sie lässt das Auto reparieren", she has the car repaired)
-ließ	VERB	let, left ("er ließ mich gehen", he let me go) → lassen | had (something) done
-trat	VERB	stepped, kicked ("er trat ins Zimmer", he stepped into the room) → treten
-spricht	VERB	speaks, talks ("sie spricht Deutsch", she speaks German) → sprechen | spricht für: suggests, speaks for ("das spricht für ihn", that speaks in his favour; "vieles spricht dafür", there's a lot to suggest it)
-sprach	VERB	spoke, talked → sprechen
-gesprochen	VERB	spoken, spoke ("wir haben darüber gesprochen", we talked about it) → sprechen
-bekam	VERB	got, received ("ich bekam einen Brief", I got a letter) → bekommen
-schrieb	VERB	wrote → schreiben
-geschrieben	VERB	written, wrote ("er hat einen Brief geschrieben", he wrote a letter) → schreiben
-brachte	VERB	brought ("er brachte Blumen", he brought flowers) → bringen
-gebracht	VERB	brought ("sie hat es gebracht", she brought it) → bringen
-dachte	VERB	thought ("ich dachte, du kommst", I thought you were coming) → denken
-gedacht	VERB	thought ("ich habe an dich gedacht", I thought of you) → denken
-tat	VERB	did ("er tat nichts", he did nothing) → tun | es tat mir leid: I was sorry
-getan	VERB	done, did ("was hast du getan?", what have you done?) → tun
-fällt	VERB	falls ("der Regen fällt", the rain falls) → fallen | fällt auf: is noticeable; fällt schwer: is hard (for someone)
-fiel	VERB	fell → fallen
-gilt	VERB	is valid, applies, counts ("das gilt für alle", that applies to everyone) → gelten | gilt als: is considered ("er gilt als Experte", he is considered an expert)
-galt	VERB	was valid, applied | galt als: was considered → gelten
-begann	VERB	began, started ("es begann zu regnen", it began to rain) → beginnen
-trifft	VERB	meets, hits ("er trifft seine Freunde", he meets his friends) → treffen | trifft zu: applies, is true
-läuft	VERB	runs, walks, is on ("der Film läuft", the film is on; "wie läuft's?", how's it going?) → laufen
-hilft	VERB	helps ("das hilft", that helps) → helfen
-zog	VERB	pulled, moved ("sie zog nach Berlin", she moved to Berlin) → ziehen
-gezogen	VERB	pulled, moved ("wir sind umgezogen", we have moved) → ziehen
-fuhr	VERB	drove, went (by vehicle) → fahren
-fährt	VERB	drives, goes (by vehicle) ("der Zug fährt um acht", the train leaves at eight) → fahren
-hieß	VERB	was called ("er hieß Paul", his name was Paul) → heißen
-rief	VERB	called, shouted → rufen
-wuchs	VERB	grew → wachsen
-starb	VERB	died ("er starb 1900", he died in 1900) → sterben
-geboren	VERB	born ("ich bin 1990 geboren", I was born in 1990) → gebären
-bot	VERB	offered ("er bot mir Hilfe an", he offered me help) → bieten
+gibt	VERB	form of geben: gives → geben | es gibt: there is, there are: there's no milk (es gibt keine Milch)
+gab	VERB	past of geben: gave → geben | es gab: there was, there were
+gegeben	VERB	form of geben: given → geben | es hat gegeben: there has been, there was
+weiß	VERB	form of wissen: knows, as a fact; knowing a person or place is kennen: I know (ich weiß) → wissen
+weißt	VERB	form of wissen: know, as a fact: do you know? (weißt du?) → wissen
+wusste	VERB	past of wissen: knew → wissen
+kam	VERB	past of kommen: came → kommen
+kamen	VERB	past of kommen: came → kommen
+ging	VERB	past of gehen: went → gehen | es ging um: it was about
+gingen	VERB	past of gehen: went → gehen
+gegangen	VERB	form of gehen: gone, left: he has gone (er ist gegangen) → gehen
+sieht	VERB	form of sehen: sees → sehen | sieht aus: looks: she looks tired (sie sieht müde aus)
+sah	VERB	past of sehen: saw → sehen
+gesehen	VERB	form of sehen: seen, saw: I saw him (ich habe ihn gesehen) → sehen
+nimmt	VERB	form of nehmen: takes: he takes the bus (er nimmt den Bus) → nehmen
+nahm	VERB	past of nehmen: took → nehmen
+genommen	VERB	form of nehmen: taken, took → nehmen
+fand	VERB	past of finden: found → finden | thought, as an opinion: I thought it was good (ich fand es gut)
+gefunden	VERB	form of finden: found → finden
+stand	VERB	past of stehen: stood → stehen | stand in: was written in: it was in the paper (es stand in der Zeitung)
+standen	VERB	past of stehen: stood → stehen
+lag	VERB	past of liegen: lay, was lying: the book was on the table (das Buch lag auf dem Tisch) → liegen
+blieb	VERB	past of bleiben: stayed, remained: he stayed at home (er blieb zu Hause) → bleiben
+hält	VERB	form of halten: holds, stops: the bus stops here (der Bus hält hier) → halten | hält für: takes it for, thinks: he thinks it's right (er hält es für richtig)
+lässt	VERB	form of lassen: lets, leaves → lassen | has it done by someone else: she has the car repaired (sie lässt das Auto reparieren)
+ließ	VERB	past of lassen: let, left → lassen | had it done by someone else
+trat	VERB	past of treten: stepped, kicked: he stepped into the room (er trat ins Zimmer) → treten
+spricht	VERB	form of sprechen: speaks, talks → sprechen | spricht für: is a reason to believe or support something: that speaks in his favour (das spricht für ihn)
+sprach	VERB	past of sprechen: spoke, talked → sprechen
+gesprochen	VERB	form of sprechen: spoken, talked: we talked about it (wir haben darüber gesprochen) → sprechen
+bekam	VERB	past of bekommen: got, received; not "became", which is wurde: I got a letter (ich bekam einen Brief) → bekommen
+schrieb	VERB	past of schreiben: wrote → schreiben
+geschrieben	VERB	form of schreiben: written, wrote → schreiben
+brachte	VERB	past of bringen: brought → bringen
+gebracht	VERB	form of bringen: brought → bringen
+dachte	VERB	past of denken: thought: I thought you were coming (ich dachte, du kommst) → denken
+gedacht	VERB	form of denken: thought: I thought of you (ich habe an dich gedacht) → denken
+tat	VERB	past of tun: did → tun | es tat mir leid: I was sorry
+getan	VERB	form of tun: done, did: what have you done? (was hast du getan?) → tun
+fällt	VERB	form of fallen: falls → fallen | fällt auf: stands out; fällt schwer: is hard for someone
+fiel	VERB	past of fallen: fell → fallen
+gilt	VERB	form of gelten: counts, applies: that applies to everyone (das gilt für alle) → gelten | gilt als: is considered: he's considered an expert (er gilt als Experte)
+galt	VERB	past of gelten: counted, applied → gelten | galt als: was considered
+begann	VERB	past of beginnen: began, started → beginnen
+trifft	VERB	form of treffen: meets, hits → treffen | trifft zu: is true, applies
+läuft	VERB	form of laufen: runs, walks → laufen | of a film or a plan, is on, is going: the film is on (der Film läuft), how's it going? (wie läuft's?)
+hilft	VERB	form of helfen: helps → helfen
+zog	VERB	past of ziehen: pulled; moved, to a new home: she moved to Berlin (sie zog nach Berlin) → ziehen
+gezogen	VERB	form of ziehen: pulled, moved → ziehen
+fuhr	VERB	past of fahren: drove, went by vehicle → fahren
+fährt	VERB	form of fahren: drives, goes by vehicle, leaves: the train leaves at eight (der Zug fährt um acht) → fahren
+hieß	VERB	past of heißen: was called: his name was Paul (er hieß Paul) → heißen
+rief	VERB	past of rufen: called, shouted → rufen
+wuchs	VERB	past of wachsen: grew → wachsen
+starb	VERB	past of sterben: died → sterben
+geboren	VERB	form of gebären: born: I was born in 1990 (ich bin 1990 geboren) → gebären
+bot	VERB	past of bieten: offered: he offered me help (er bot mir Hilfe an) → bieten
 
 ## Units and abbreviations
 # The dump spells these as other words (KG "basement", KM "base rent"), or
 # not at all.
-g	NOUN	g, gram (symbol: "200 g Mehl", 200 grams of flour)
-kg	NOUN	kg, kilogram (symbol)
-mg	NOUN	mg, milligram (symbol)
-km	NOUN	km, kilometre (symbol: "10 km", ten kilometres)
-m	NOUN	m, metre (symbol: "100 m", a hundred metres)
-cm	NOUN	cm, centimetre (symbol)
-mm	NOUN	mm, millimetre (symbol)
-ml	NOUN	ml, millilitre (symbol)
-min	NOUN	min, minute(s) (abbreviation of Minute)
-Abs	NOUN	paragraph, subsection (abbreviation of Absatz, in laws: "Art. 20 Abs. 1", Article 20(1))
-TL	NOUN	tsp, teaspoon (abbreviation of Teelöffel, in recipes: "1 TL Salz", 1 tsp salt)
-EL	NOUN	tbsp, tablespoon (abbreviation of Esslöffel, in recipes: "2 EL Öl", 2 tbsp oil)
-ca.	ADV	about, approximately (abbreviation of circa: "ca. 20 Minuten", about 20 minutes)
+g	NOUN	gram: 200 grams of flour (200 g Mehl)
+kg	NOUN	kilogram
+mg	NOUN	milligram
+km	NOUN	kilometre
+m	NOUN	metre
+cm	NOUN	centimetre
+mm	NOUN	millimetre
+ml	NOUN	millilitre
+min	NOUN	minute, minutes: short for Minute
+Abs	NOUN	paragraph, subsection of a law: short for Absatz: Article 20(1) (Art. 20 Abs. 1)
+TL	NOUN	teaspoon, in recipes: short for Teelöffel
+EL	NOUN	tablespoon, in recipes: short for Esslöffel
+ca.	ADV	about, roughly: short for circa: about 20 minutes (ca. 20 Minuten)
 
 ## Set phrases English Wiktionary lacks
-zur Zeit	ADV	at the moment, currently (also written zurzeit) | at the time of, in the days of (+ genitive: "zur Zeit Goethes", in Goethe's time)
-zum Ausdruck bringen	VERB	to express, to voice ("seine Sorge zum Ausdruck bringen", to express one's concern)
-zum Ausdruck kommen	VERB	to be expressed, to show ("darin kommt seine Haltung zum Ausdruck", his attitude shows in this)
-zur Verfügung stehen	VERB	to be available ("es stehen zwei Räume zur Verfügung", two rooms are available)
+zur Zeit	ADV	at the moment, now; also written zurzeit | in someone's time: in Goethe's time (zur Zeit Goethes)
+zum Ausdruck bringen	VERB	to express, to put into words
+zum Ausdruck kommen	VERB	to show, to come through: his attitude shows in this (darin kommt seine Haltung zum Ausdruck)
+zur Verfügung stehen	VERB	to be available, there to be used
 zur Verfügung stellen	VERB	to make available, to provide
-in Höhe von	ADP	amounting to, in the amount of ("eine Strafe in Höhe von 500 Euro", a fine of 500 euros)
+in Höhe von	ADP	amounting to, a sum of: a fine of 500 euros (eine Strafe in Höhe von 500 Euro)
 in Form von	ADP	in the form of
-ins Spiel kommen	VERB	to come into play, to become involved
+ins Spiel kommen	VERB	to come into play
 ins Gespräch kommen	VERB	to get talking, to get into conversation
-an Bedeutung gewinnen	VERB	to gain in importance
-an Bedeutung verlieren	VERB	to lose importance
+an Bedeutung gewinnen	VERB	to become more important
+an Bedeutung verlieren	VERB	to become less important
 auf den Markt bringen	VERB	to bring onto the market, to launch
 auf den Markt kommen	VERB	to come onto the market, to be launched
-allen voran	ADV	above all, first and foremost, leading the way
-im Handel	ADV	on the market, in the shops ("im Handel erhältlich", available in shops)
-im Laufe	ADP	in the course of, during (+ genitive: "im Laufe der Zeit", over time; "im Laufe des Tages", during the day)
-im Verlauf	ADP	in the course of (+ genitive or von: "im Verlauf von 18 Jahren", over 18 years)
-im Falle	ADP	in the event of, in case of (+ genitive: "im Falle eines Unfalls", in the event of an accident)
-im Fall	ADP	in the event of, in case of (+ genitive or von)
-außer Kraft setzen	VERB	to repeal, to annul, to suspend (a law or rule)
-außer Kraft treten	VERB	to cease to be in force, to lapse
-daran liegen	VERB	to be due to, to be because of ("das liegt daran, dass...", that's because...)
+allen voran	ADV	above all, leading the way
+im Handel	ADV	in the shops: available in shops (im Handel erhältlich)
+im Laufe	ADP	in the course of, over: over time (im Laufe der Zeit)
+im Verlauf	ADP	in the course of, over: over 18 years (im Verlauf von 18 Jahren)
+im Falle	ADP	in case of, if it happens: in the event of an accident (im Falle eines Unfalls)
+im Fall	ADP	in case of, if it happens
+außer Kraft setzen	VERB	to repeal, to cancel a law or rule
+außer Kraft treten	VERB	to stop being in force, to lapse
+daran liegen	VERB	to be because of: that's because ... (das liegt daran, dass ...)
 
 ## Words with a sense Wiktionary lacks
-nach	ADP	after, past (time: "nach dem Essen", after the meal) | to, towards (places and directions: "nach Berlin", to Berlin; "nach Hause", home) | after, behind (in sequence: "nach Ihnen!", after you!) | according to, by (also after the noun: "meiner Meinung nach", in my opinion) | like, of (with riechen, schmecken, klingen, aussehen: "es riecht nach Rauch", it smells of smoke) | for, about (with Frage, fragen, suchen, Sehnsucht: "die Frage nach dem Sinn", the question of the meaning; "nach dem Weg fragen", to ask the way)
-davon	ADV	from it, from that, off it (place or source: "weit davon entfernt", far from it) | of it, of them (part of a whole: "jeder davon", each of them; "zwei davon", two of them) | about it, of it (with hören, wissen, sprechen: "ich habe davon gehört", I've heard of it) | from that, as a result ("davon wird man müde", that makes you tired)
-relativ	ADV	relatively, fairly ("relativ deutlich", fairly clearly)
-wesentlich	ADV	considerably, much (with a comparative: "wesentlich weniger", considerably fewer) | essentially, substantially
-super	ADV	great, really well (colloquial: "das schmeckt super", that tastes great; "super als Beilage", great as a side dish) | very, really (before an adjective: "super simpel", really simple)
+nach	ADP	later in time or order: after the meal (nach dem Essen), after you (nach Ihnen) | going to a town, a country or a direction; for people and buildings German uses zu: to Berlin (nach Berlin); nach Hause: home | as someone sees or says it, often after the noun: in my opinion (meiner Meinung nach) | what something smells, tastes or sounds like: smells of smoke (riecht nach Rauch) | what you ask about or look for: ask the way (nach dem Weg fragen)
+davon	ADV	away from the thing just mentioned: far from it (weit davon entfernt) | some out of a group or amount already named: two of them (zwei davon) | about the thing just mentioned: I've heard of it (ich habe davon gehört) | as a result of it: that makes you tired (davon wird man müde)
+relativ	ADV	relatively, fairly: fairly clearly (relativ deutlich)
+wesentlich	ADV	much, considerably, with a comparison: considerably fewer (wesentlich weniger) | essentially, in the main
+super	ADV	(colloquial) great, really well: that tastes great (das schmeckt super) | (colloquial) very, really: really simple (super simpel)
 
 ## Declined forms of weiter "further"
 # Wiktionary has weiter only as an adverb, so these were forms of weit "wide".
-weitere	ADJ	further, additional, other ("weitere Informationen", further information; "eine weitere Frage", another question)
-weiteren	ADJ	further, additional, other ("im weiteren Verlauf", in the further course; "einen weiteren Versuch", another attempt)
-weiterer	ADJ	further, additional, another ("ein weiterer Punkt", another point)
-weiteres	ADJ	further, additional, another ("ein weiteres Jahr", another year) | ohne Weiteres: readily, without further ado
-weiterem	ADJ	further, additional, another ("mit weiterem Zubehör", with further accessories)
+weitere	ADJ	further, more, another: another question (eine weitere Frage)
+weiteren	ADJ	further, more, another: another attempt (einen weiteren Versuch)
+weiterer	ADJ	further, another: another point (ein weiterer Punkt)
+weiteres	ADJ	further, another: another year (ein weiteres Jahr) | ohne Weiteres: just like that, readily
+weiterem	ADJ	further, more: with more accessories (mit weiterem Zubehör)
