@@ -4,8 +4,8 @@
 # particle and auxiliary entries for every word listed here; content words stay.
 # The analyzer (`context.analyzer` in language.toml) splits a clicked verb into
 # its morphemes (勉強|し|て|い|ます), and each ending shows its line here, found
-# by the morpheme's base form: たら has base た, でしょう has base です, so
-# their senses are on those lines. A word written in kana that Wiktionary only
+# by its spelling first (でしょう, たら), else by its base form (です, た). A
+# word written in kana that Wiktionary only
 # redirects to its kanji spelling (つまり -> 詰まり) is found through the
 # redirect; lines here are for what Wiktionary lacks or says badly.
 # See apps/importer/src/grammar.ts.
@@ -19,9 +19,13 @@
 
 ## Endings of verbs and adjectives
 ます	AUX	makes a verb polite: eat (食べます)
-た	AUX	past: the action or state is over: ate (食べた) | already done, finished by now: have already eaten (もう食べた) | たら: if or when this happens, then what follows: if you go, when you go (行ったら) | たり: names a few actions as examples, among others: eating, drinking and so on (食べたり飲んだり)
-だ	AUX	closes a statement, plainly and firmly; polite speech uses です: he's a student (学生だ) → です | だろう, だろ: probably, or ..., right?: it'll probably rain (雨だろう) | the past ending た, spelled だ after some verbs: read (読んだ) → た
-です	AUX	closes a statement politely, where plain speech uses だ: I'm a student (学生です) → だ | after an い-adjective, only makes it polite: it's expensive (高いです) | でしょう, でしょ: probably, or ..., right?, politely: it'll probably rain (雨でしょう)
+た	AUX	past: the action or state is over: ate (食べた) | already done, finished by now: have already eaten (もう食べた)
+だ	AUX	closes a statement, plainly and firmly; polite speech uses です: he's a student (学生だ) → です | the past ending た, spelled だ after some verbs: read (読んだ) → た
+です	AUX	closes a statement politely, where plain speech uses だ: I'm a student (学生です) → だ | after an い-adjective, only makes it polite: it's expensive (高いです)
+でしょう/でしょ	AUX	(polite だろう) probably: a guess: it'll probably rain (雨でしょう) → だろう | ..., right?: checks that the listener agrees: you get it, right? (分かるでしょ)
+だろう/だろ	AUX	probably, I suppose: a guess: it'll probably rain (雨だろう) | ..., right?: checks that the listener agrees, bluntly: you know that, right? (知ってるだろ)
+たら	AUX	if, when: once this happens, then what follows: if you go, when you go (行ったら) | when, and found that: when I woke up, it was raining (起きたら雨だった)
+たり	PART	names a few actions as examples, among others: eating, drinking and so on (食べたり飲んだり)
 て	PART	joins a verb to what comes next; the actions happen one after another: eat and sleep (食べて寝る) | how or why something happens: came on foot (歩いて来た), was late because it rained (雨が降って遅れた)
 いる	AUX	the action is going on right now: is eating (食べている) | the state an action left behind: is married (結婚している)
 てる	AUX	(casual ている) going on now, or its result is still there: is eating (食べてる) → ている
@@ -46,14 +50,14 @@
 なきゃ	AUX	(casual なければ) have to: I have to go (行かなきゃ) → なければ | if you don't, unless: you won't know unless you try (やらなきゃ分からない)
 なくちゃ	AUX	(casual なくてはいけない) have to: I have to go (行かなくちゃ) → なくてはいけない
 なかった	AUX	didn't, wasn't: the past of ない: didn't go (行かなかった) → ない
-なければ	AUX	if not, unless: if you don't go (行かなければ) → ない | なければならない, なければいけない: must, have to: I have to go (行かなければならない)
-なくて	AUX	not, and; often the reason: I didn't understand, so ... (分からなくて) → ない | なくてもいい: you don't have to: you don't have to go (行かなくてもいい)
+なければ	AUX	if not, unless: a form of ない: if you don't go (行かなければ) → ない | なければならない, なければいけない: must, have to: I have to go (行かなければならない)
+なくて	AUX	not, and: a form of ない, often giving the reason: I didn't understand, so ... (分からなくて) → ない | なくてもいい: you don't have to: you don't have to go (行かなくてもいい)
 ました	AUX	the past of ます: did it, said politely: ate (食べました) → ます
-ません	AUX	not, said politely: don't eat (食べません) → ます
-ませんでした	AUX	didn't, said politely: didn't eat (食べませんでした) → ます
-でした	AUX	was, were, said politely: was a student (学生でした) → です
-だった	AUX	was, were, in plain speech: was a student (学生だった) → だ
-たかった	AUX	wanted to: wanted to eat (食べたかった) → たい
+ません	AUX	not, the polite ます form: don't eat (食べません) → ます
+ませんでした	AUX	didn't, the polite ます form: didn't eat (食べませんでした) → ます
+でした	AUX	was, were: the past of です: was a student (学生でした) → です
+だった	AUX	was, were: the past of だ: was a student (学生だった) → だ
+たかった	AUX	wanted to: the past of たい: wanted to eat (食べたかった) → たい
 ている	AUX	the action is going on right now: is eating (食べている) | the state an action left behind: is married (結婚している) | something done regularly, as a habit or job: works at a bank (銀行で働いている)
 ておく	AUX	do it now, ready for later: buy it in advance (買っておく) | leave it as it is, on purpose: leave it open (開けておく)
 てしまう	AUX	happened against your will, often with regret: I forgot (忘れてしまった) | done completely, nothing left: ate it all up (食べてしまった)
@@ -106,7 +110,7 @@
 じゃないですか	PART	you know, isn't it?: politely expects the listener to agree: it's important, isn't it? (大事じゃないですか)
 んです	AUX	explains, gives the background: the thing is, you see (行くんです) | んですか: asks for an explanation: what happened? (どうしたんですか)
 のです	AUX	explains, or gives the background, more formally than んです: the thing is, you see (行くのです) → んです | のですか: asks for an explanation
-なんです	AUX	explains, after a noun: the thing is, you see (学生なんです) → んです
+なんです	AUX	んです after a noun: the thing is, you see (学生なんです) → んです
 んだ	AUX	(casual んです) explains, or gives the background: I'm going, you see (行くんだ) → んです | んだって: passes on what you heard
 ように	SCONJ	as, the way: as I said before (前に言ったように) | so that: aiming at a result: so as to be in time (間に合うように) | ようにする: make a habit of, make sure to (早く寝るようにする) → ようにする | ようになる: come to, a change that happened little by little (話せるようになった) → ようになる
 そのため	CCONJ	therefore, for that reason: what follows is the result of what came before
