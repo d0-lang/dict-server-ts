@@ -190,6 +190,13 @@ export const wholeIds = (
   // its own (`하지만`).
   const verbal =
     headPos.has("VERB") || headPos.has("ADJ") || derived.length > 0;
+  const last = w.at(-1)!;
+  // Not a verb's form (`して` is する's, not "and"; `至って` the verb's,
+  // not "very"): an adjective's (`別に`).
+  const formWord =
+    last !== head &&
+    formEndingOf(c, last) !== undefined &&
+    !headPos.has("VERB");
   // Only of a stem that inflects (not the copula `이`, whose `이어` is `잇다`'s).
   const stem = headPos.size === 0 || headPos.has("VERB") || headPos.has("ADJ");
   const stemForms =
@@ -217,9 +224,11 @@ export const wholeIds = (
     // when it no longer inflects (`하지만` "but", of `하다` + `-지만`;
     // `例えば` "for example"), unless it names something: a noun spelled
     // alike is another word (`하지` "summer solstice", for `하` + `-지`).
+    // Without spaces, only of a word that ends in a form ending, even after
+    // a noun used as a な-adjective: `別に` "not particularly" and `急に`
+    // "suddenly" before `別`, `急`.
     const own = (row: FormRow) =>
-      c.settings.spacedWords &&
-      verbal &&
+      ((c.settings.spacedWords && verbal) || formWord) &&
       form === written &&
       row.source === FormSource.Lemma &&
       LEXICALIZED.has(row.pos) &&
@@ -260,7 +269,10 @@ export const wholeIds = (
     // redirects there). A kana lemma is its own reading (`なる`).
     const reading =
       head.reading === undefined ? undefined : hiragana(head.reading);
+    // The word itself as written is read as the whole word, not its head
+    // (`別に` べつに, against `別` べつ).
     const misread = (row: FormRow) => {
+      if (own(row)) return 0;
       const readings = [
         ...c.infoOf(row.id).readings,
         ...(isKana(row.lemma) ? [hiragana(row.lemma)] : []),
@@ -555,6 +567,14 @@ const knownRuns = (
   return runs;
 };
 
+/** The form ending `m` is (`formEndings`: the て of `食べて`, the に of `確かに`). */
+const formEndingOf = (c: Click, m: Morpheme) =>
+  c.settings.formEndings.find(
+    (ending) =>
+      hasPos(m.pos, ending.pos) &&
+      (ending.surface === undefined || ending.surface.includes(m.surface)),
+  );
+
 /**
  * The parts with each form ending moved onto the part before it, which it
  * closes (`並ん|で` is `並んで`): that part's entries get the ending's label,
@@ -569,12 +589,7 @@ const withFormEndings = (
   parts: ReadonlyArray<Part & { readonly from: number; readonly to: number }>,
   shown: ReadonlySet<number>,
 ): ReadonlyArray<Part> => {
-  const endingOf = (m: Morpheme) =>
-    c.settings.formEndings.find(
-      (ending) =>
-        hasPos(m.pos, ending.pos) &&
-        (ending.surface === undefined || ending.surface.includes(m.surface)),
-    );
+  const endingOf = (m: Morpheme) => formEndingOf(c, m);
   const out: Array<Part> = [];
   /** Whether the last part takes in the parts after it: what follows a form ending. */
   let open = false;
