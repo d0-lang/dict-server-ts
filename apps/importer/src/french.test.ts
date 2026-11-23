@@ -68,9 +68,40 @@ const LINES = [
     ],
     senses: [{ glosses: ["to go (Louisiana)"] }],
   },
+  {
+    word: "être",
+    pos: "verb",
+    senses: [{ glosses: ["to be"] }],
+    sounds: [{ ipa: "/ɛtʁ/" }],
+  },
+  // `est` "is" sounds unlike `est` "east": its form-of line has the sound.
+  {
+    word: "est",
+    pos: "noun",
+    senses: [{ glosses: ["east"] }],
+    sounds: [{ ipa: "/ɛst/" }],
+  },
+  {
+    word: "est",
+    pos: "verb",
+    senses: [
+      {
+        glosses: ["third-person singular present indicative of être"],
+        form_of: [{ word: "être" }],
+        tags: ["form-of"],
+      },
+    ],
+    sounds: [
+      { ipa: "/ɛ/" },
+      {
+        audio: "Fr-est.ogg",
+        ogg_url: "https://upload.wikimedia.org/Fr-est.ogg",
+      },
+    ],
+  },
 ].map((line) => JSON.stringify({ lang_code: "fr", ...line }));
 
-/** Lines for two irregular forms, each pointing at its verb. */
+/** Lines for two irregular forms, each pointing at its verb, and `est`. */
 const GRAMMAR = [
   {
     lemma: "pris",
@@ -84,6 +115,7 @@ const GRAMMAR = [
     senses: ["goes (il va; aller)"],
     see: [["aller"]],
   },
+  { lemma: "est", pos: "AUX", senses: ["is (il est; être)"], see: [["être"]] },
 ] as const;
 
 const imported = Effect.acquireRelease(
@@ -139,5 +171,24 @@ describe("French import with lines for irregular verb forms", () => {
         "pris ADJ",
       ]);
     }).pipe(Effect.scoped),
+  );
+
+  it.effect(
+    "gives a line the sounds of its verb form, not of a noun spelled alike",
+    () =>
+      Effect.gen(function* () {
+        const db = yield* imported;
+        const sounds = db
+          .query<{ kind: string; value: string }, []>(
+            `SELECT p.kind, p.value FROM entries e JOIN pronunciations p ON p.entry_id = e.id
+             WHERE e.lemma = 'est' AND e.source_pos = 'grammar' ORDER BY p.idx`,
+          )
+          .all()
+          .map((row) => `${row.kind} ${row.value}`);
+        assert.deepStrictEqual(sounds, [
+          "ipa /ɛ/",
+          "audio https://upload.wikimedia.org/Fr-est.ogg",
+        ]);
+      }).pipe(Effect.scoped),
   );
 });

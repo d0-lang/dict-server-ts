@@ -12,12 +12,17 @@ import type {
   DerivedSense,
   FormOfLink,
   ImportEntry,
+  TransformResult,
 } from "../transform/transform.ts";
 import type { Redirect, WriterContext } from "./passes/context.ts";
 import { addRedirects } from "./passes/redirects.ts";
 import { addDegreeForms, settleDegreeEntries } from "./passes/degrees.ts";
 import { copyDerivedMeanings } from "./passes/derived.ts";
-import { dropUnreachedEntries, replaceGrammarWords } from "./passes/grammar.ts";
+import {
+  copyGrammarPronunciations,
+  dropUnreachedEntries,
+  replaceGrammarWords,
+} from "./passes/grammar.ts";
 import {
   countUnresolvedLinks,
   followLinkChains,
@@ -120,6 +125,18 @@ export const makeWriter = (
     marked     INTEGER NOT NULL,
     PRIMARY KEY (form, lemma, source_pos)
   ) WITHOUT ROWID`);
+
+  // Sounds of form-of-only lines (`va`), for the words the grammar file lists.
+  sqlite.run(`CREATE TEMP TABLE form_of_sounds (
+    form  TEXT NOT NULL,
+    pos   TEXT NOT NULL,
+    kind  TEXT NOT NULL,
+    value TEXT NOT NULL
+  )`);
+  const insertSound = sqlite.prepare(
+    "INSERT INTO form_of_sounds (form, pos, kind, value) VALUES (?, ?, ?, ?)",
+  );
+  const grammarKeys = new Set(grammar.map((entry) => lookupKey(entry.lemma)));
 
   const insertEntry = sqlite.prepare(
     "INSERT INTO entries (id, lemma, pos, source_pos, etymology, case_class, features, pages) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -417,10 +434,17 @@ export const makeWriter = (
         readonly reflexiveEntries?: ReadonlyArray<ImportEntry>;
         readonly formOf: ReadonlyArray<FormOfLink>;
         readonly redirect?: Redirect;
+        readonly formOfSounds?: TransformResult["formOfSounds"];
       }>,
     ) => {
       for (const item of items) {
         if (item.redirect !== undefined) redirects.push(item.redirect);
+        const sounds = item.formOfSounds;
+        if (sounds !== undefined && grammarKeys.has(sounds.form)) {
+          for (const pron of sounds.pronunciations) {
+            insertSound.run(sounds.form, sounds.pos, pron.kind, pron.value);
+          }
+        }
         if (item.entry !== undefined) writeEntry(item.entry);
         for (const entry of item.reflexiveEntries ?? []) writeEntry(entry);
         if (item.historicalEntry !== undefined) {
@@ -497,6 +521,8 @@ export const makeWriter = (
     // Then the steps that need every form in place (and `replaceGrammarWords`
     // the links, to tell which rows only the fallback added).
     sqlite.transaction(() => {
+      // Before Wiktionary's entries the lines replace are dropped.
+      copyGrammarPronunciations(ctx);
       replaceGrammarWords(ctx);
       replaceNumerals(ctx);
       dropUnreachedEntries(ctx);
@@ -505,6 +531,7 @@ export const makeWriter = (
       addLetterVariants(ctx);
     })();
     sqlite.run("DROP TABLE form_of_pending");
+    sqlite.run("DROP TABLE form_of_sounds");
     sqlite.run("DROP INDEX forms_entry_tmp");
     return { added, unresolved };
   };

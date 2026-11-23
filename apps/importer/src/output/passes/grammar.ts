@@ -1,4 +1,9 @@
-import { FormSource, GRAMMAR_SOURCE_POS } from "@dict/core/schema";
+import { lookupKey } from "@dict/core/lookupKey";
+import {
+  FormSource,
+  GRAMMAR_SOURCE_POS,
+  NUMERAL_SOURCE_POS,
+} from "@dict/core/schema";
 import { GRAMMAR_POS } from "../../grammar.ts";
 import type { WriterContext } from "./context.ts";
 
@@ -101,4 +106,70 @@ export const dropUnreachedEntries = ({ sqlite, counts }: WriterContext) => {
   counts.entries -= sqlite.run(
     `DELETE FROM entries WHERE id ${unreached}`,
   ).changes;
+};
+
+/**
+ * A grammar-file line sounds like Wiktionary's word of its part of speech:
+ * it takes the pronunciations (IPA, recordings, a reading or romanization) of
+ * the entries it shares its word and part of speech with (`저` PRON: `jeo`),
+ * then of the form-of lines of that word (`va`, "inflection of aller": /va/),
+ * which have no entry to keep them. An `AUX` line also takes a verb's (`est`
+ * "is": /ɛ/, the verb form, not `est` "east", the noun: /ɛst/). A word whose
+ * part of speech Wiktionary doesn't give it is left without: another entry
+ * spelled alike may sound otherwise. Runs before `replaceGrammarWords` drops
+ * the entries the lines replace. Reads `form_of_sounds`.
+ */
+export const copyGrammarPronunciations = ({
+  sqlite,
+  counts,
+}: WriterContext) => {
+  const lines = sqlite
+    .query<{ id: number; lemma: string; pos: string }, []>(
+      `SELECT id, lemma, pos FROM entries
+       WHERE source_pos = '${GRAMMAR_SOURCE_POS}'
+         AND id NOT IN (SELECT entry_id FROM pronunciations)
+       ORDER BY id`,
+    )
+    .all();
+  const own = sqlite.query<{ kind: string; value: string }, [string, string]>(
+    `SELECT p.kind, p.value FROM forms f
+     JOIN entries e ON e.id = f.entry_id
+     JOIN pronunciations p ON p.entry_id = e.id
+     WHERE f.form = ?1 AND f.source = ${FormSource.Lemma}
+       AND e.source_pos NOT IN ('${GRAMMAR_SOURCE_POS}', '${NUMERAL_SOURCE_POS}')
+       AND e.pos IN (SELECT value FROM json_each(?2))
+     ORDER BY e.id, p.idx`,
+  );
+  const formOf = sqlite.query<
+    { kind: string; value: string },
+    [string, string]
+  >(
+    `SELECT kind, value FROM form_of_sounds
+     WHERE form = ?1 AND pos IN (SELECT value FROM json_each(?2))
+     ORDER BY rowid`,
+  );
+  const insert = sqlite.prepare(
+    "INSERT INTO pronunciations (entry_id, idx, kind, value) VALUES (?, ?, ?, ?)",
+  );
+  for (const line of lines) {
+    const key = lookupKey(line.lemma);
+    const pos = JSON.stringify(
+      line.pos === "AUX" ? ["AUX", "VERB"] : [line.pos],
+    );
+    const seen = new Set<string>();
+    for (const pron of [...own.all(key, pos), ...formOf.all(key, pos)]) {
+      const k = `${pron.kind}\u0000${pron.value}`;
+      // One reading: the first, as an entry has.
+      if (
+        seen.has(k) ||
+        (pron.kind === "reading" &&
+          [...seen].some((s) => s.startsWith("reading\u0000")))
+      ) {
+        continue;
+      }
+      insert.run(line.id, seen.size, pron.kind, pron.value);
+      seen.add(k);
+      counts.pronunciations++;
+    }
+  }
 };

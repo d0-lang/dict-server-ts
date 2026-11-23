@@ -156,6 +156,16 @@ export type TransformResult = {
     readonly form: string;
     readonly targets: ReadonlyArray<string>;
   };
+  /**
+   * The sounds of a line that is only form-of links (`va`, "inflection of
+   * aller"), which has no entry to keep them: a grammar-file line for the
+   * word takes them (`copyGrammarPronunciations`).
+   */
+  readonly formOfSounds?: {
+    readonly form: string;
+    readonly pos: UdPos;
+    readonly pronunciations: ImportEntry["pronunciations"];
+  };
 };
 
 /** The most specific gloss of wiktextract's parent-to-child path. */
@@ -968,8 +978,22 @@ export const transformEntry = (
         .filter((link) => link.lemma !== form)
         .map((link) => ({ ...link, form })),
     );
+    const sounds = pickPronunciations(
+      rules,
+      raw.sounds ?? [],
+      withAdded(reading, added),
+    );
     return {
       entry: undefined,
+      ...(sounds.length > 0
+        ? {
+            formOfSounds: {
+              form: lemmaKey,
+              pos: toUdPos(raw.pos),
+              pronunciations: sounds,
+            },
+          }
+        : {}),
       ...(historicalSenses.groups.size > 0
         ? { historicalEntry: makeEntry(historicalSenses.senses(), []) }
         : {}),
