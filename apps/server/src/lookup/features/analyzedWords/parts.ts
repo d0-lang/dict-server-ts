@@ -599,9 +599,12 @@ const withFormEndings = (
     const ending = part.from > head ? endingOf(first) : undefined;
     const before = out.at(-1);
     if (ending !== undefined && before !== undefined) {
-      const own = first.bases
-        .flatMap((base) => grammarIds(c.db, base))
-        .filter((id) => !shown.has(id) && !before.ids.includes(id));
+      const own =
+        ending.line === false
+          ? []
+          : first.bases
+              .flatMap((base) => grammarIds(c.db, base))
+              .filter((id) => !shown.has(id) && !before.ids.includes(id));
       out[out.length - 1] = {
         ...before,
         text: before.text + first.surface,

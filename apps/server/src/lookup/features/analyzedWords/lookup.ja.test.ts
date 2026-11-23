@@ -72,9 +72,9 @@ describe("words found by the analyzer, in a script without spaces", () => {
           `${entry.lemma} ${entry.pos}${entry.labels ? ` (${entry.labels.join(", ")})` : ""}`,
       );
     // UniDic: 普通|に|いい, with に the auxiliary だ, not the particle.
+    // Without だ's line: the label says it, and "is" would mislead.
     assert.deepStrictEqual(look("に", "普通にいい機種です。"), [
       "普通 ADJ (adverb)",
-      "だ AUX",
     ]);
     assert.deepStrictEqual(look("いい", "普通にいい機種です。"), ["いい ADJ"]);
     // A word spelled as written stays first: 別に "not particularly", then
