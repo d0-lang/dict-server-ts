@@ -303,6 +303,40 @@ export const wholeIds = (
   return [];
 };
 
+/** `entries.source_pos` of entries for a suffix (`的` "-ic", `人` じん "person from"). */
+const SUFFIX_SOURCE_POS = new Set(["suffix"]);
+
+/**
+ * A suffix after the head is shown by its entries as a suffix (`的` of
+ * `基礎的` is "-ic", not the noun まと "target", nor the kanji's meaning in
+ * compounds, "target; bright"; `人` of `日本人` is じん "person from", not
+ * ひと "person"), those read as the analyzer reads it first. Other
+ * morphemes, and suffixes without such entries, keep `rows`.
+ */
+const asSuffix = (
+  c: Click,
+  morpheme: Morpheme,
+  afterHead: boolean,
+  rows: ReadonlyArray<FormRow>,
+): ReadonlyArray<FormRow> => {
+  if (!afterHead || !hasPos(morpheme.pos, c.settings.suffixes)) return rows;
+  const reading =
+    morpheme.reading === undefined ? undefined : hiragana(morpheme.reading);
+  const readAs = (row: FormRow) => {
+    const readings = c.infoOf(row.id).readings;
+    return (
+      reading === undefined ||
+      readings.length === 0 ||
+      readings.includes(reading)
+    );
+  };
+  const suffixes = rows.filter((row) => SUFFIX_SOURCE_POS.has(row.sourcePos));
+  // UniDic reads a suffix by its lemma, which may not be how it is read
+  // after this word (`人` ニン, against じん in `日本人`): then all of them.
+  const read = suffixes.filter(readAs);
+  return read.length > 0 ? read : suffixes.length > 0 ? suffixes : rows;
+};
+
 /**
  * A word made with a suffix (`機械|屋` "mechanic") is not the word before
  * the suffix (`機械` "machine"), nor a compound its first part (`발색|단`,
@@ -446,9 +480,10 @@ export const morphemeParts = (
     // for the verb's stem).
     const upos = c.uposOf(morpheme);
     const content = [...upos].some((tag) => CONTENT_UPOS.has(tag));
-    const own = found.filter(
+    const fitting = found.filter(
       (row) => !content || upos.has(row.pos) || !FUNCTION_UPOS.has(row.pos),
     );
+    const own = asSuffix(c, morpheme, i > head && head >= 0, fitting);
     // A prefix is shown by its entries as a prefix first (`御` "used to
     // respectfully refer to…" for `お`), then as another word, and as a
     // syllable or character last.

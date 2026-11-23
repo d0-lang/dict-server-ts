@@ -179,13 +179,16 @@ export const presentResult = (
       ...grammar,
       labels: unique([...grammar.labels, ...(entry.labels ?? [])]),
     };
-    // A context entry stays apart from an own entry with the same headword.
+    // A context entry stays apart from an own entry with the same headword,
+    // and what a character means from the word it spells (`的` "target" in
+    // compounds, and `的` "-ic", both てき).
     const key = JSON.stringify([
       head.lemma,
       entry.pos,
       head.labels,
       segment,
       entry.match,
+      entry.characterMeaning === true,
     ]);
     // A different reading is a different headword (`人前` as ひとまえ "the
     // public" and as にんまえ "portion of food"). An entry without one joins

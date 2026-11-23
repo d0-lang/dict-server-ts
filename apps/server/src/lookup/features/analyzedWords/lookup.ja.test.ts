@@ -144,6 +144,43 @@ describe("words found by the analyzer, in a script without spaces", () => {
     assert.strictEqual(entries[0]!.lemma, "製品");
   });
 
+  it("shows a suffix by its entries as a suffix, read as after the word", () => {
+    const db = dictionary([
+      ["基礎", "NOUN", [], ["foundation"], "noun", undefined, "きそ"],
+      ["的", "X", [], ["-ic, -ical"], "suffix", undefined, "てき"],
+      ["的", "X", [], ["target", "bright"], "affix", undefined, "てき"],
+      ["的", "NOUN", [], ["a target"], "noun", undefined, "まと"],
+      ["日本", "PROPN", [], ["Japan"], "name", undefined, "にほん"],
+      ["人", "NOUN", [], ["a person"], "noun", undefined, "ひと"],
+      ["人", "X", [], ["counter for people"], "counter", undefined, "にん"],
+      ["人", "X", [], ["person from"], "suffix", undefined, "じん"],
+    ]);
+    const partsOf = (word: string, context: string) => {
+      const { entries, segments } = lookupWord(
+        db,
+        languageOf("ja_en"),
+        word,
+        context,
+        1,
+      );
+      return segments?.map(
+        (segment) =>
+          `${segment.text}: ${(segment.entries ?? []).map((i) => entries[i]!.senses[0]!.glosses[0]).join(", ")}`,
+      );
+    };
+    // the analyzer: 基礎|的 (接尾辞, テキ), not the kanji in 目的, nor まと
+    assert.deepStrictEqual(partsOf("基礎", "基礎的な知識。"), [
+      "基礎: foundation",
+      "的: -ic, -ical",
+    ]);
+    // the analyzer: 日本|人 (接尾辞, ニン, its lemma's reading), so じん the
+    // suffix, though read otherwise
+    assert.deepStrictEqual(partsOf("人", "日本人です。"), [
+      "日本: Japan",
+      "人: person from",
+    ]);
+  });
+
   it("gives the word's entries to a head with none of its own, so it can be picked", () => {
     const db = dictionary([
       // The dictionary has 飲む under its kana, as Wiktionary does.

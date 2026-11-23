@@ -8,6 +8,8 @@ const japanese = dictionary([
   ["割", "X", [], ["proportion"], "character"],
   ["割", "X", [], ["cut, division"], "affix", undefined, "かつ"],
   ["割", "X", [], ["divide"], "affix", undefined, "かつ"],
+  ["的", "X", [], ["-ic, -ical"], "suffix", undefined, "てき"],
+  ["的", "X", [], ["target", "bright, clear"], "affix", undefined, "てき"],
   ["三", "NUM", [], ["three, 3"], "num", undefined, "さん"],
   ["三", "NUM", [], ["three"], "num", undefined, "サン"],
   ["三", "NUM", [], ["three"], "num", undefined, "み"],
@@ -31,6 +33,13 @@ describe("Japanese headwords", () => {
     assert.deepStrictEqual(lookup("割"), [
       // a character entry ranks last, and joins the first
       "割 かつ: cut, division, divide, proportion",
+    ]);
+  });
+
+  it("keeps what a character means in compounds apart from the suffix", () => {
+    assert.deepStrictEqual(lookup("的"), [
+      "的 てき: -ic, -ical",
+      "的 てき: target, bright, clear",
     ]);
   });
 
