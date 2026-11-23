@@ -35,6 +35,9 @@
 # apps/server/src/lookup/features/analyzedWords/parts.ts). "→ word" links a
 # sense to that word's line.
 します/しました/しません/しませんでした/しましょう	AUX	polite する: do (勉強します, (I) study; しました, did; しません, don't; しましょう, let's do) → する
+なら	AUX	if (conditional of だ: 行くなら, if (you're) going; 学生なら, if (you're) a student; 出来るなら, if possible) | as for, speaking of (after a noun: 日本料理なら寿司, when it comes to Japanese food, sushi) | それなら: in that case
+なきゃ	AUX	must, have to (casual なければ, often with いけない or ならない left out: 行かなきゃ, (I) have to go) → ない | if not, unless (やらなきゃ分からない, you won't know unless you try)
+なくちゃ	AUX	must, have to (casual なくては, often with いけない or ならない left out: 行かなくちゃ, (I) have to go) → ない
 なかった	AUX	past of ない: didn't, wasn't (言えなかった, couldn't say; 行かなかった, didn't go; 高くなかった, wasn't expensive) → ない
 なければ	AUX	ば form of ない: if not, unless (行かなければ, if (you) don't go) → ない | なければならない, なければいけない: must, have to (行かなければならない, (I) have to go)
 なくて	AUX	て form of ない: not ... and; because (it) doesn't (分からなくて, not understanding, ...) → ない | なくてもいい: don't have to (行かなくてもいい, (you) don't have to go)
@@ -57,6 +60,9 @@
 
 ## Endings after a な-adjective
 # X: only adds, so な keeps Wiktionary's particle entries (行くな, "don't").
+# に of 確かに: an adverb, shown after the adjective's entries (labelled
+# "adverb") in place of だ "is", which UniDic's lemma would give.
+に	X	after a な-adjective: makes it an adverb (静かに, quietly; 確かに, certainly; 普通に, normally; 簡単に, easily)
 な	X	joins a な-adjective to the noun it describes (静かな部屋, a quiet room; 好きな人, a person (I) like); also before の, ので, のに (静かなので, because it's quiet)
 
 ## Particles

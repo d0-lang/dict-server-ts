@@ -62,6 +62,7 @@ describe("words found by the analyzer, in a script without spaces", () => {
       ["に", "PART", [], ["to, at"]],
       ["機種", "NOUN", [], ["model"]],
       ["だ", "AUX", [], ["is"], "grammar"],
+      ["に", "X", [], ["after a な-adjective: makes it an adverb"], "grammar"],
       ["やる", "VERB", ["やり"], ["to do"]],
       ["たい", "AUX", ["たく"], ["want to"], "grammar"],
       ["ない", "AUX", [], ["not"], "grammar"],
@@ -72,9 +73,10 @@ describe("words found by the analyzer, in a script without spaces", () => {
           `${entry.lemma} ${entry.pos}${entry.labels ? ` (${entry.labels.join(", ")})` : ""}`,
       );
     // UniDic: 普通|に|いい, with に the auxiliary だ, not the particle.
-    // Without だ's line: the label says it, and "is" would mislead.
+    // With に's own line, not だ's (its base form), which reads as "is".
     assert.deepStrictEqual(look("に", "普通にいい機種です。"), [
       "普通 ADJ (adverb)",
+      "に X",
     ]);
     assert.deepStrictEqual(look("いい", "普通にいい機種です。"), ["いい ADJ"]);
     // A word spelled as written stays first: 別に "not particularly", then
@@ -99,6 +101,18 @@ describe("words found by the analyzer, in a script without spaces", () => {
         .entries.slice(0, 2)
         .map((entry) => `${entry.lemma} ${entry.pos}`),
       ["別に INTJ", "別 ADJ"],
+    );
+    // An adjective's form is of an adjective entry: 風 (UniDic: a noun used
+    // as a な-adjective) is also a spelling of 振りする, which is no adverb.
+    const fuu = dictionary([
+      ["風", "NOUN", [], ["way, manner"], undefined, undefined, "ふう"],
+      ["振りする", "VERB", ["風"], ["to pretend"]],
+      ["だ", "AUX", [], ["is"], "grammar"],
+    ]);
+    assert.strictEqual(
+      lookupWord(fuu, languageOf("ja_en"), "風", "こんな風に考える。", 1)
+        .entries[0]!.lemma,
+      "風",
     );
     // After an auxiliary, ない still joins: やり|たく|ない.
     assert.deepStrictEqual(look("ない", "やりたくない。"), [

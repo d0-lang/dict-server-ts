@@ -64,9 +64,9 @@ suffixes = ["接尾辞"]
 # The て form ends the piece before it, as a reader takes it: 並んで|います,
 # 使わ|れて|います, not 並ん|で|い|ます. That piece's entries are labelled.
 # に after a な-adjective is だ's adverb form, which also ends the piece:
-# 確かに "certainly", 静かに "quietly", labelled like the て form, without
-# だ's line, which a reader would take for "is".
-formEndings = [{ pos = ["助詞-接続助詞"], surface = ["て", "で"], label = "て form" }, { pos = ["助動詞"], surface = ["に"], label = "adverb", line = false }]
+# 確かに "certainly", 静かに "quietly", labelled like the て form, with に's
+# own line (grammar.tsv), not だ's, which a reader would take for "is".
+formEndings = [{ pos = ["助詞-接続助詞"], surface = ["て", "で"], label = "て form" }, { pos = ["助動詞"], surface = ["に"], label = "adverb" }]
 
 # UniDic reads よ between two nouns as the stem of よい "good", and the noun
 # after it as a suffix: 鏡|よ|鏡|よ "mirror, mirror". The stem goes on with

@@ -574,12 +574,6 @@ const Context = doc(
                     Schema.String,
                     "The label on the entries of the piece it ends (`て form`), explained in the language's `labels.toml`.",
                   ),
-                  line: Schema.optionalKey(
-                    doc(
-                      Schema.Boolean,
-                      "Whether the ending's own grammar-file line, by its base form, follows the piece's entries (default true). Off where the label says it all and the line would mislead: `に` of `確かに` is `だ` \"is\".",
-                    ),
-                  ),
                 }),
               ),
               "Endings that make a form of the piece before them, as a reader takes it: the ending closes that piece's segment, whose entries get `label`, with the ending's own line after them (`並んで`: `並ぶ` [て form] and `て`). What follows starts a segment that runs to the word's end or the next such ending (`並んで|います`, `作って|みました`).",

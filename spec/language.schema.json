@@ -667,10 +667,6 @@
                   "label": {
                     "type": "string",
                     "description": "The label on the entries of the piece it ends (`て form`), explained in the language's `labels.toml`."
-                  },
-                  "line": {
-                    "type": "boolean",
-                    "description": "Whether the ending's own grammar-file line, by its base form, follows the piece's entries (default true). Off where the label says it all and the line would mislead: `に` of `確かに` is `だ` \"is\"."
                   }
                 },
                 "required": [

@@ -191,10 +191,11 @@ export const wholeIds = (
   const verbal =
     headPos.has("VERB") || headPos.has("ADJ") || derived.length > 0;
   const last = w.at(-1)!;
-  // Not a verb's form (`して` is する's, not "and"; `至って` the verb's,
-  // not "very"): an adjective's (`別に`).
+  // An adjective's form: the head and the form ending right after it
+  // (`別|に`). Not a verb's (`して` is する's, not "and"; `至って` the
+  // verb's, not "very"), nor a する-noun's (`学習|さ|せ|て`).
   const formWord =
-    last !== head &&
+    w.indexOf(last) === w.indexOf(head) + 1 &&
     formEndingOf(c, last) !== undefined &&
     !headPos.has("VERB");
   // Only of a stem that inflects (not the copula `이`, whose `이어` is `잇다`'s).
@@ -247,8 +248,12 @@ export const wholeIds = (
       headPos.size > 0;
     if (spelledAlike && fitting.length === 0) continue;
     const read = spelledAlike ? fitting : found;
+    // An adjective's form (`普通に`) is of an adjective entry: not a verb's
+    // that the spelling also reaches (`風` is `振りする`'s too, for `風に`
+    // "this way"); with none, the word's entries stay.
     const inflecting = read.filter(
-      (row) => INFLECTING.has(row.pos) || own(row),
+      (row) =>
+        (formWord ? row.pos === "ADJ" : INFLECTING.has(row.pos)) || own(row),
     );
     const kept = inflected && inflecting.length > 0 ? inflecting : read;
     // The base forms' own entries first, the last named first: it is the
@@ -599,12 +604,17 @@ const withFormEndings = (
     const ending = part.from > head ? endingOf(first) : undefined;
     const before = out.at(-1);
     if (ending !== undefined && before !== undefined) {
-      const own =
-        ending.line === false
-          ? []
-          : first.bases
-              .flatMap((base) => grammarIds(c.db, base))
-              .filter((id) => !shown.has(id) && !before.ids.includes(id));
+      // The ending's own line: an ending's line spelled as it is written
+      // (`に` "makes an adverb", not its base form `だ` "is"), else its base
+      // form's (`で` is `て`).
+      const spelled = grammarIds(c.db, first.surface).filter(
+        (id) => c.infoOf(id).pos === "X",
+      );
+      const own = (
+        spelled.length > 0
+          ? spelled
+          : first.bases.flatMap((base) => grammarIds(c.db, base))
+      ).filter((id) => !shown.has(id) && !before.ids.includes(id));
       out[out.length - 1] = {
         ...before,
         text: before.text + first.surface,
