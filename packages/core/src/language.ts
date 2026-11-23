@@ -144,6 +144,12 @@ const Import = doc(
               "Tags of a variety that is this language but not its main one (Chinese `Taiwanese-Mandarin`): such a sense stays, also with one of `others` (`喬` \"to negotiate\", tagged Hokkien too), after the word's other senses, and an entry of only such senses after the word's other entries.",
             ),
           ),
+          laterNotWith: Schema.optionalKey(
+            doc(
+              strings,
+              "Tags of `others` with which a `later` tag doesn't keep a sense: the pair notes a spelling, not a sense (Chinese `Jin`: `著` zhù \"famous\" is tagged Jin and Taiwanese Mandarin, the varieties that spell it so, though `着` doesn't mean it).",
+            ),
+          ),
         }),
         "Varieties written under this language's header that its readers don't use: a sense tagged with one of `others` and none of `keep` is dropped, and so is a form tagged with one of `others`. A word left with no sense has no entry (Cantonese `咩`), unlike a historical stage's.",
       ),

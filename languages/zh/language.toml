@@ -23,8 +23,10 @@ markedAlternatives = true
 # in Mandarin texts. Taiwanese Mandarin is Mandarin, but not the mainland's
 # most texts are written in: its senses come after the others, and a line of
 # only such senses after the word's other lines (喬 "to negotiate", tagged
-# Hokkien too; 著 zhe and zhù, tagged Jin too, after 著 zhuó).
-varieties = { others = ["Cantonese", "Hokkien", "Min", "Hakka", "Wu", "Teochew", "Xiang", "Gan", "Jin", "Puxian-Min", "Taiwanese-Hokkien", "Zhangzhou-Hokkien", "Xiamen", "Quanzhou", "Zhangzhou", "Leizhou-Min", "Pinghua", "Hainanese", "Jinjiang-Hokkien", "Penang-Hokkien", "Taishanese", "Sixian", "Hailu", "Dabu", "Raoping", "Zhao'an", "Longyan-Min", "Coastal-Min", "Yilan-Hokkien", "Penghu-Hokkien", "Sanxia-Hokkien", "Taichung-Hokkien", "Lukang-Hokkien", "Hsinchu-Hokkien", "Kaohsiung-Hokkien", "Huizhou", "Waxiang", "Dungan", "Sichuanese"], keep = ["Mandarin", "literary", "Classical"], later = ["Taiwanese-Mandarin"] }
+# Hokkien too; 有夠, 龜毛 with Min). Not with Jin: the only such senses are
+# 著's zhe and zhù lines (20), where the pair names the varieties that spell
+# them 著, and 着 doesn't mean "famous" (著名 keeps 著).
+varieties = { others = ["Cantonese", "Hokkien", "Min", "Hakka", "Wu", "Teochew", "Xiang", "Gan", "Jin", "Puxian-Min", "Taiwanese-Hokkien", "Zhangzhou-Hokkien", "Xiamen", "Quanzhou", "Zhangzhou", "Leizhou-Min", "Pinghua", "Hainanese", "Jinjiang-Hokkien", "Penang-Hokkien", "Taishanese", "Sixian", "Hailu", "Dabu", "Raoping", "Zhao'an", "Longyan-Min", "Coastal-Min", "Yilan-Hokkien", "Penghu-Hokkien", "Sanxia-Hokkien", "Taichung-Hokkien", "Lukang-Hokkien", "Hsinchu-Hokkien", "Kaohsiung-Hokkien", "Huizhou", "Waxiang", "Dungan", "Sichuanese"], keep = ["Mandarin", "literary", "Classical"], later = ["Taiwanese-Mandarin"], laterNotWith = ["Jin"] }
 # The reading is Hanyu Pinyin, which 200,380 lines give (學習: xuéxí): a
 # learner sounds the word out by it. Only the standard pronunciation's: not
 # Sichuanese (說 so²) or Xi'an (shě).

@@ -158,18 +158,28 @@ const LINES = [
   // An etymology of only Taiwanese Mandarin senses ranks after the page's
   // others.
   {
-    word: "著",
-    pos: "character",
+    word: "鬱卒",
+    pos: "adj",
     etymology_number: 1,
-    sounds: [pinyin("zhù", "Standard")],
-    senses: [{ glosses: ["famous"], tags: ["Jin", "Taiwanese-Mandarin"] }],
+    senses: [
+      { glosses: ["depressed"], tags: ["Hokkien", "Taiwanese-Mandarin"] },
+    ],
   },
+  {
+    word: "鬱卒",
+    pos: "adj",
+    etymology_number: 2,
+    senses: [{ glosses: ["gloomy"] }],
+  },
+  // With Jin, the tags name the varieties that spell it so: no sense of 着.
   {
     word: "著",
     pos: "character",
-    etymology_number: 2,
-    sounds: [pinyin("zhù", "Standard"), pinyin("zhuó", "Standard")],
-    senses: [{ glosses: ["to wear"] }],
+    sounds: [pinyin("zhù", "Standard")],
+    senses: [
+      { glosses: ["famous"], tags: ["Jin", "Taiwanese-Mandarin"] },
+      { glosses: ["to wear"] },
+    ],
   },
   // Later etymologies repeat the page's sounds: one with none of its own
   // and several on the page has no reading.
@@ -414,10 +424,11 @@ describe("Chinese import", () => {
         assert.deepStrictEqual(lemmasOf(db, "有夠"), [
           '有夠: ["enough"] ["(Taiwanese Mandarin) very"]',
         ]);
-        assert.deepStrictEqual(lemmasOf(db, "著"), [
-          '著: ["to wear"] (zhuó)',
-          '著: ["(Taiwanese Mandarin) famous"] (zhù)',
+        assert.deepStrictEqual(lemmasOf(db, "鬱卒"), [
+          '鬱卒: ["gloomy"]',
+          '鬱卒: ["(Taiwanese Mandarin) depressed"]',
         ]);
+        assert.deepStrictEqual(lemmasOf(db, "著"), ['著: ["to wear"] (zhù)']);
       }).pipe(Effect.scoped),
   );
 
