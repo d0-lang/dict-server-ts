@@ -137,12 +137,14 @@ describe("replaceGrammarWords", () => {
         [2, "aller", "VERB", "verb"],
         [3, "vader", "VERB", "verb"],
         [4, "va", "INTJ", "intj"],
+        [5, "aller se faire voir", "VERB", "verb"],
       ],
       [
         ["va", 1, FormSource.Lemma],
         ["va", 2, FormSource.Inflection],
         ["va", 3, FormSource.Inflection],
         ["va", 4, FormSource.Lemma],
+        ["va", 5, FormSource.Inflection],
       ],
     );
     sqlite.run(`INSERT INTO senses VALUES (1, 0, '["goes"]', '["aller"]')`);
@@ -151,6 +153,8 @@ describe("replaceGrammarWords", () => {
       "va VERB",
       "aller VERB",
       "va INTJ",
+      // A phrase made from the verb stays too (Polish `mieć się` for `mam`).
+      "aller se faire voir VERB",
     ]);
   });
 

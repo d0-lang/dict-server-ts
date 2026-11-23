@@ -5,6 +5,12 @@
 # adverbs and other content words stay (`di` the letter, `era` "age"), unless
 # a line lists that part of speech too. A word's lines come first in the
 # popover, in this file's order, so its commonest use goes first. Case matters.
+# Irregular verb forms a reader can't connect to their infinitive get lines of
+# their own (`può` "can", `fece` "did"): the protocol has no inflection
+# tables. "→ potere" links the line to its verb, which the popover still shows
+# after it; a VERB line replaces Wiktionary's other verbs for the word.
+# Forms whose noun or adjective is as common are left out (`dato` "data",
+# `danno` "damage", `successo` "success", `aperto` "open", `visto` "visa").
 # See apps/importer/src/grammar.ts.
 
 ## Articles
@@ -83,52 +89,127 @@ se	SCONJ	if, whether (se piove, if it rains; non so se, I don't know whether)
 se	PRON	himself, herself, themselves (si before lo, la, ne: se ne va, he leaves)
 
 ## Forms of essere "to be" (also the auxiliary of the past of many verbs)
-è	AUX	is (è grande, it is big) | has (with a past participle: è arrivato, he has arrived)
-sono	AUX	am, are (sono stanco, I am tired; sono qui, they are here) | have (with a past participle: sono arrivati, they have arrived)
-sei	AUX	are (tu sei, you are)
+è	AUX	is (è grande, it is big) → essere | has (with a past participle: è arrivato, he has arrived)
+sono	AUX	am, are (sono stanco, I am tired; sono qui, they are here) → essere | have (with a past participle: sono arrivati, they have arrived)
+sei	AUX	are (tu sei, you are) → essere
 sei	NUM	six
-siamo	AUX	are (noi siamo, we are)
-siete	AUX	are (voi siete, you are)
-era	AUX	was, used to be (era grande, it was big) | had (with a past participle: era arrivato, he had arrived)
-erano	AUX	were, used to be | had (with a past participle)
-ero	AUX	was (io ero, I was)
-eravamo	AUX	were (noi eravamo, we were)
-fu	AUX	was (past historic: fu un successo, it was a success)
-furono	AUX	were (past historic)
-sarà	AUX	will be | must be (guessing: sarà vero, it must be true)
-saranno	AUX	will be
-sarebbe	AUX	would be | would have (with a past participle: sarebbe andato, he would have gone)
-sarebbero	AUX	would be | would have (with a past participle: sarebbero arrivati, they would have arrived)
+siamo	AUX	are (noi siamo, we are) → essere
+siete	AUX	are (voi siete, you are) → essere
+era	AUX	was, used to be (era grande, it was big) → essere | had (with a past participle: era arrivato, he had arrived)
+erano	AUX	were, used to be → essere | had (with a past participle)
+ero	AUX	was (io ero, I was) → essere
+eravamo	AUX	were (noi eravamo, we were) → essere
+fu	AUX	was (past historic: fu un successo, it was a success) → essere
+furono	AUX	were (past historic) → essere
+sarà	AUX	will be → essere | must be (guessing: sarà vero, it must be true)
+saranno	AUX	will be → essere
+sarebbe	AUX	would be → essere | would have (with a past participle: sarebbe andato, he would have gone)
+sarebbero	AUX	would be → essere | would have (with a past participle: sarebbero arrivati, they would have arrived)
 sia	CCONJ	both ... and (sia ... sia, sia ... che: sia io sia lui, both me and him) | whether ... or (sia che piova, sia che no, whether it rains or not)
-sia	AUX	is, be (subjunctive: penso che sia vero, I think it is true)
-siano	AUX	are, be (subjunctive)
-fosse	AUX	were, was (past subjunctive: se fosse vero, if it were true)
-fossero	AUX	were (past subjunctive)
+sia	AUX	is, be (subjunctive: penso che sia vero, I think it is true) → essere
+siano	AUX	are, be (subjunctive) → essere
+fosse	AUX	were, was (past subjunctive: se fosse vero, if it were true) → essere
+fossero	AUX	were (past subjunctive) → essere
 c'è	AUX	there is (c'è un problema, there is a problem) | is (here, in: c'è Marco?, is Marco there?)
 ci sono	AUX	there are
 
 ## Forms of avere "to have" (also the auxiliary of the past)
-ho	AUX	I have (ho fame, I'm hungry) | have (with a past participle: ho detto, I have said, I said)
-hai	AUX	you have | have (with a past participle: hai detto, you said)
-ha	AUX	has (ha due figli, he has two children) | has (with a past participle: ha detto, he said)
-abbiamo	AUX	we have | have (with a past participle: abbiamo detto, we said)
-avete	AUX	you have (plural) | have (with a past participle)
-hanno	AUX	they have | have (with a past participle: hanno detto, they said)
-aveva	AUX	had | had (with a past participle: aveva detto, he had said)
-avevano	AUX	had | had (with a past participle)
-avrà	AUX	will have
-avrebbe	AUX	would have | would have (with a past participle: avrebbe detto, he would have said)
-abbia	AUX	have, has (subjunctive: che abbia, that he has)
+ho	AUX	I have (ho fame, I'm hungry) → avere | have (with a past participle: ho detto, I have said, I said)
+hai	AUX	you have → avere | have (with a past participle: hai detto, you said)
+ha	AUX	has (ha due figli, he has two children) → avere | has (with a past participle: ha detto, he said)
+abbiamo	AUX	we have → avere | have (with a past participle: abbiamo detto, we said)
+avete	AUX	you have (plural) → avere | have (with a past participle)
+hanno	AUX	they have → avere | have (with a past participle: hanno detto, they said)
+aveva	AUX	had → avere | had (with a past participle: aveva detto, he had said)
+avevano	AUX	had → avere | had (with a past participle)
+avrà	AUX	will have → avere
+avrebbe	AUX	would have → avere | would have (with a past participle: avrebbe detto, he would have said)
+abbia	AUX	have, has (subjunctive: che abbia, that he has) → avere
 
 ## The past participle of essere (and stare), "been"
 # The noun stato "state" first: after essere or avere, the participle hint
 # (`participleEndings`) puts the auxiliary first (`è stato`).
 stato	NOUN	state, condition (lo stato di salute, the state of health) | state, country (lo Stato, the State) | status
-stato	AUX	been (essere: è stato, he has been, it was; è stato fatto, it was done) | stayed (stare)
-stata	AUX	been (feminine: è stata, she has been, it was)
+stato	AUX	been (essere: è stato, he has been, it was; è stato fatto, it was done) → essere | stayed (stare) → stare
+stata	AUX	been (feminine: è stata, she has been, it was) → essere
 stati	NOUN	states, countries (gli Stati Uniti, the United States)
-stati	AUX	been (masculine plural: sono stati, they have been, they were)
-state	AUX	been (feminine plural: sono state, they have been, they were) | stay, be (imperative of stare: state zitti, be quiet)
+stati	AUX	been (masculine plural: sono stati, they have been, they were) → essere
+state	AUX	been (feminine plural: sono state, they have been, they were) → essere | stay, be (imperative of stare: state zitti, be quiet) → stare
+
+## Forms of the commonest irregular verbs
+fa	VERB	does, makes (fare: fa caldo, it's hot; fa il medico, he's a doctor) → fare
+faccio	VERB	I do, I make (fare: che faccio?, what do I do?) → fare
+fai	VERB	you do, you make (fare: che fai?, what are you doing?) → fare
+fanno	VERB	do, make (fare: loro fanno) → fare
+fatto	VERB	done, made, did (past participle of fare: ho fatto, I did, I have done) → fare
+fece	VERB	did, made (past historic of fare: fece costruire, he had built) → fare
+faccia	VERB	do, make (subjunctive of fare: che faccia, that he do) → fare | please do (polite command: faccia pure, go ahead)
+va	VERB	goes (andare: va a casa, he goes home) → andare | va bene: all right, okay
+vado	VERB	I go, I'm going (andare: vado a casa, I'm going home) → andare
+vai	VERB	you go (andare: dove vai?, where are you going?) → andare | go! (command: vai via, go away)
+vanno	VERB	go (andare: loro vanno) → andare
+andato	VERB	gone, went (past participle of andare: è andato, he went, he has gone) → andare
+può	VERB	can, may (potere: può venire, he can come; può darsi, maybe) → potere
+posso	VERB	I can, I may (potere: posso entrare?, may I come in?) → potere
+puoi	VERB	you can (potere: puoi aiutarmi?, can you help me?) → potere
+possono	VERB	can, may (potere: loro possono) → potere
+potrà	VERB	will be able to (potere) → potere
+potrebbe	VERB	could, might (potere: potrebbe piovere, it might rain) → potere
+potrebbero	VERB	could, might (potere: loro potrebbero) → potere
+possa	VERB	can, may (subjunctive of potere: che possa, that he can) → potere
+potuto	VERB	been able to, could (past participle of potere: non ho potuto, I couldn't) → potere
+deve	VERB	must, has to (dovere: deve partire, he has to leave) → dovere | must be (a guess: deve essere tardi, it must be late)
+devo	VERB	I must, I have to (dovere) → dovere
+devi	VERB	you must, you have to (dovere) → dovere
+devono	VERB	must, have to (dovere: loro devono) → dovere
+dovrà	VERB	will have to (dovere) → dovere
+dovrebbe	VERB	should, ought to (dovere: dovrebbe arrivare, he should arrive) → dovere
+dovrebbero	VERB	should, ought to (dovere: loro dovrebbero) → dovere
+debba	VERB	must, have to (subjunctive of dovere: che debba, that he must) → dovere
+dovuto	VERB	had to (past participle of dovere: ho dovuto, I had to) → dovere | due, owed (dovuto a, due to)
+vuole	VERB	wants (volere) → volere | vuol dire: means
+voglio	VERB	I want (volere: voglio andare, I want to go) → volere
+vuoi	VERB	you want (volere: vuoi un caffè?, do you want a coffee?) → volere
+vogliono	VERB	want (volere: loro vogliono) → volere
+vorrei	VERB	I would like (volere: vorrei un caffè, I would like a coffee) → volere
+voluto	VERB	wanted (past participle of volere) → volere
+dice	VERB	says, tells (dire: dice che, he says that) → dire
+dico	VERB	I say, I tell (dire: ti dico, I'm telling you) → dire
+dicono	VERB	say, tell (dire: dicono che, they say that) → dire
+detto	VERB	said, told (past participle of dire: ha detto, he said) → dire | called, known as (Lorenzo, detto il Magnifico, Lorenzo, known as the Magnificent)
+sa	VERB	knows (sapere: non lo sa, he doesn't know) → sapere | can (sapere: sa nuotare, he can swim)
+so	VERB	I know (sapere: non lo so, I don't know) → sapere
+sai	VERB	you know (sapere: sai, you know (in speech)) → sapere
+sappia	VERB	know (subjunctive of sapere: che io sappia, as far as I know) → sapere
+viene	VERB	comes (venire: viene domani, he's coming tomorrow) → venire | is (with a past participle, passive: viene usato, it is used)
+vieni	VERB	you come (venire) → venire | come! (command: vieni qui, come here)
+vengono	VERB	come (venire: loro vengono) → venire | are (with a past participle, passive: vengono prodotti, they are produced)
+venne	VERB	came (past historic of venire) → venire | was (with a past participle, passive: venne costruito, it was built)
+venuto	VERB	come, came (past participle of venire: è venuto, he came) → venire
+verrà	VERB	will come (venire) → venire | will be (with a past participle, passive: verrà costruito, it will be built)
+venga	VERB	come (subjunctive of venire: che venga, that he come) → venire | come in (polite command: venga, venga)
+sta	VERB	is, stays (stare: come sta?, how are you?; sta a casa, he stays at home) → stare | is (with a gerund: sta mangiando, he is eating)
+sto	VERB	I am, I stay (stare: sto bene, I'm fine) → stare | I am (with a gerund: sto lavorando, I'm working)
+stai	VERB	you are, you stay (stare: come stai?, how are you?) → stare | you are (with a gerund)
+stanno	VERB	are, stay (stare) → stare | are (with a gerund: stanno arrivando, they are arriving)
+dà	VERB	gives (dare: dà fastidio, it's annoying) → dare
+diede	VERB	gave (past historic of dare) → dare
+vede	VERB	sees (vedere) → vedere
+vedo	VERB	I see (vedere: non vedo, I can't see) → vedere
+vedi	VERB	you see (vedere: vedi?, you see?) → vedere
+vide	VERB	saw (past historic of vedere) → vedere
+messo	VERB	put (past participle of mettere: ha messo, he put) → mettere
+mise	VERB	put (past historic of mettere) → mettere
+preso	VERB	taken, took (past participle of prendere: ho preso, I took) → prendere
+prese	VERB	took (past historic of prendere: prese il potere, he took power) → prendere
+esce	VERB	goes out, comes out (uscire: esce di casa, he leaves the house) → uscire
+rimasto	VERB	stayed, remained (past participle of rimanere: è rimasto, he stayed) → rimanere
+chiesto	VERB	asked (past participle of chiedere: ha chiesto, he asked) → chiedere
+nato	VERB	born (past participle of nascere: è nato a Roma, he was born in Rome) → nascere
+morto	VERB	died (past participle of morire: è morto, he died) → morire
+scritto	VERB	written, wrote (past participle of scrivere: ha scritto, he wrote) → scrivere
+piace	VERB	is pleasing, is liked (piacere: mi piace, I like it; ti piace?, do you like it?) → piacere
+piacciono	VERB	are pleasing, are liked (piacere: mi piacciono, I like them) → piacere
 
 ## Determiners and adverbs
 più	ADV	more (più grande, bigger; più tardi, later) | most (il più grande, the biggest) | no longer, any more (non più) | plus (tre più due, three plus two)

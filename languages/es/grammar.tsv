@@ -5,6 +5,12 @@
 # adverbs and other content words stay (`de` the letter, `son` "tone"), unless
 # a line lists that part of speech too. A word's lines come first in the
 # popover, in this file's order, so its commonest use goes first. Case matters.
+# Irregular verb forms a reader can't connect to their infinitive get lines of
+# their own (`tiene` "has", `hizo` "did"): the protocol has no inflection
+# tables. "→ tener" links the line to its verb, which the popover still shows
+# after it; a VERB line replaces Wiktionary's other verbs for the word.
+# Forms whose noun or adverb is as common are left out (`vino` "wine",
+# `puesto` "post", `fuera` "outside", `cuesta` "slope").
 # See apps/importer/src/grammar.ts.
 
 ## Articles, and the contractions of a and de with el
@@ -96,53 +102,128 @@ mientras	ADV	meanwhile (mientras tanto, in the meantime)
 muy	ADV	very, too (muy grande, very big)
 
 ## Forms of ser and estar "to be", and haber "to have" (also the auxiliary of the past) and "there is"
-es	AUX	is (ser: es grande, it is big)
-son	AUX	are (ser: son grandes, they are big)
-soy	AUX	am (ser)
-eres	AUX	are (ser: tú eres, you are)
-somos	AUX	are (ser: nosotros somos, we are)
-era	AUX	was, used to be (ser: era grande, it was big)
-eran	AUX	were, used to be (ser)
-fue	AUX	was (ser: fue un éxito, it was a success) | went (ir: fue a Madrid, he went to Madrid)
-fueron	AUX	were (ser) | went (ir)
-sea	AUX	be (subjunctive of ser: que sea, that it be; o sea, I mean, that is) | sea ... sea: whether ... or (sea en casa, sea en la calle, whether at home or in the street)
-será	AUX	will be (ser)
-sería	AUX	would be (ser)
-está	AUX	is (estar: está en casa, he is at home; está cansado, he is tired) | is (with a gerund: está comiendo, he is eating)
-están	AUX	are (estar) | are (with a gerund: están comiendo, they are eating)
-estoy	AUX	am (estar) | am (with a gerund: estoy comiendo, I am eating)
-estamos	AUX	are (estar: nosotros estamos, we are) | are (with a gerund: estamos comiendo, we are eating)
-estaba	AUX	was (estar) | was (with a gerund: estaba comiendo, he was eating)
-hay	AUX	there is, there are (hay que + infinitive: one has to, you have to)
-ha	AUX	has (with a past participle: ha dicho, he/she has said)
-han	AUX	have (with a past participle: han dicho, they have said)
-he	AUX	have (with a past participle: he dicho, I have said)
-has	AUX	have (with a past participle: has dicho, you have said)
-hemos	AUX	have (with a past participle: hemos dicho, we have said)
-había	AUX	had (with a past participle: había dicho, had said) | there was, there were (había mucha gente, there were a lot of people)
-habían	AUX	had (with a past participle: habían dicho, they had said)
-haya	AUX	have, has (subjunctive, with a past participle: que haya dicho, that he has said) | there be (subjunctive: que haya, that there be)
-hubo	AUX	there was, there were | had (with a past participle, literary)
-hubiera/hubiese	AUX	had (past subjunctive, with a past participle: si hubiera sabido, if I had known) | would have (with a past participle: lo hubiera hecho, I would have done it) | there were (subjunctive: si hubiera tiempo, if there were time)
-habría	AUX	would have (with a past participle: habría dicho, would have said) | there would be
-habrá	AUX	there will be | will have (with a past participle: habrá dicho, will have said)
+es	AUX	is (ser: es grande, it is big) → ser
+son	AUX	are (ser: son grandes, they are big) → ser
+soy	AUX	am (ser) → ser
+eres	AUX	are (ser: tú eres, you are) → ser
+somos	AUX	are (ser: nosotros somos, we are) → ser
+era	AUX	was, used to be (ser: era grande, it was big) → ser
+eran	AUX	were, used to be (ser) → ser
+fue	AUX	was (ser: fue un éxito, it was a success) → ser | went (ir: fue a Madrid, he went to Madrid) → ir
+fueron	AUX	were (ser) → ser | went (ir) → ir
+sea	AUX	be (subjunctive of ser: que sea, that it be; o sea, I mean, that is) → ser | sea ... sea: whether ... or (sea en casa, sea en la calle, whether at home or in the street)
+será	AUX	will be (ser) → ser
+sería	AUX	would be (ser) → ser
+está	AUX	is (estar: está en casa, he is at home; está cansado, he is tired) → estar | is (with a gerund: está comiendo, he is eating)
+están	AUX	are (estar) → estar | are (with a gerund: están comiendo, they are eating)
+estoy	AUX	am (estar) → estar | am (with a gerund: estoy comiendo, I am eating)
+estamos	AUX	are (estar: nosotros estamos, we are) → estar | are (with a gerund: estamos comiendo, we are eating)
+estaba	AUX	was (estar) → estar | was (with a gerund: estaba comiendo, he was eating)
+hay	AUX	there is, there are (hay que + infinitive: one has to, you have to) → haber
+ha	AUX	has (with a past participle: ha dicho, he/she has said) → haber
+han	AUX	have (with a past participle: han dicho, they have said) → haber
+he	AUX	have (with a past participle: he dicho, I have said) → haber
+has	AUX	have (with a past participle: has dicho, you have said) → haber
+hemos	AUX	have (with a past participle: hemos dicho, we have said) → haber
+había	AUX	had (with a past participle: había dicho, had said) → haber | there was, there were (había mucha gente, there were a lot of people)
+habían	AUX	had (with a past participle: habían dicho, they had said) → haber
+haya	AUX	have, has (subjunctive, with a past participle: que haya dicho, that he has said) → haber | there be (subjunctive: que haya, that there be)
+hubo	AUX	there was, there were → haber | had (with a past participle, literary)
+hubiera/hubiese	AUX	had (past subjunctive, with a past participle: si hubiera sabido, if I had known) → haber | would have (with a past participle: lo hubiera hecho, I would have done it) | there were (subjunctive: si hubiera tiempo, if there were time)
+habría	AUX	would have (with a past participle: habría dicho, would have said) → haber | there would be
+habrá	AUX	there will be → haber | will have (with a past participle: habrá dicho, will have said)
+sido	AUX	been (ser: ha sido, it has been; ha sido construido, it has been built) → ser
+sean	AUX	be (subjunctive of ser: que sean, that they be) → ser
+seas	AUX	be (subjunctive of ser: que seas, that you be) → ser
+estás	AUX	are (estar: tú estás, you are; ¿cómo estás?, how are you?) → estar | are (with a gerund: estás comiendo, you are eating)
+estuvo	AUX	was (estar: estuvo en casa, he was at home) → estar | was (with a gerund: estuvo trabajando, he was working)
+esté	AUX	be, is (subjunctive of estar: que esté bien, that it be all right) → estar
+hayan	AUX	have (subjunctive, with a past participle: que hayan dicho, that they have said) → haber
+habido	AUX	been (haber: ha habido, there has been, there have been) → haber
 
 ## Forms of ir "to go" (ir a + infinitive is the near future) and poder "can"
-voy	AUX	I go, I'm going (ir) | voy a + infinitive: I'm going to (voy a comer, I'm going to eat)
-va	AUX	goes, is going (ir) | va a + infinitive: is going to (va a llover, it's going to rain)
-vamos	AUX	we go, we're going (ir) | vamos a + infinitive: we're going to; let's (vamos a ver, let's see)
-iba	AUX	was going, used to go (ir) | iba a + infinitive: was going to (iba a llamar, I was going to call)
-iban	AUX	were going, used to go (ir) | iban a + infinitive: were going to
-van	AUX	go, are going (ir) | van a + infinitive: are going to
-podía	AUX	could, was able to (poder: no podía dormir, I couldn't sleep)
-podría	AUX	could, might, would be able to (poder: podría llover, it might rain)
-puede	AUX	can, may (poder: puede venir, he can come; puede ser, it may be)
-pueden	AUX	can, may (poder: pueden venir, they can come)
+voy	AUX	I go, I'm going (ir) → ir | voy a + infinitive: I'm going to (voy a comer, I'm going to eat)
+va	AUX	goes, is going (ir) → ir | va a + infinitive: is going to (va a llover, it's going to rain)
+vamos	AUX	we go, we're going (ir) → ir | vamos a + infinitive: we're going to; let's (vamos a ver, let's see)
+iba	AUX	was going, used to go (ir) → ir | iba a + infinitive: was going to (iba a llamar, I was going to call)
+iban	AUX	were going, used to go (ir) → ir | iban a + infinitive: were going to
+van	AUX	go, are going (ir) → ir | van a + infinitive: are going to
+podía	AUX	could, was able to (poder: no podía dormir, I couldn't sleep) → poder
+podría	AUX	could, might, would be able to (poder: podría llover, it might rain) → poder
+puede	AUX	can, may (poder: puede venir, he can come; puede ser, it may be) → poder
+pueden	AUX	can, may (poder: pueden venir, they can come) → poder
+vas	AUX	you go, you're going (ir: tú vas) → ir | vas a + infinitive: you're going to (vas a ver, you'll see)
+vaya	AUX	go (subjunctive of ir: que vaya, that he go; que te vaya bien, good luck) → ir | wow, what a (surprise: ¡vaya!, wow; vaya día, what a day)
+puedo	AUX	I can, I may (poder: no puedo, I can't) → poder
+puedes	AUX	you can, you may (poder: ¿puedes ayudarme?, can you help me?) → poder
+podrá	AUX	will be able to (poder: podrá venir, he will be able to come) → poder
+pueda	AUX	can, may (subjunctive of poder: para que pueda, so that he can) → poder
+puedan	AUX	can, may (subjunctive of poder: para que puedan, so that they can) → poder
 
 ## Verb forms of two verbs, the commoner first
-creo	VERB	I think, I believe (creer: creo que sí, I think so) | I create (crear)
-gustaría	VERB	would like (gustar: me gustaría, I would like; le gustaría, he/she would like)
-sé	VERB	I know (saber: no sé, I don't know) | be! (imperative of ser: sé bueno, be good)
+creo	VERB	I think, I believe (creer: creo que sí, I think so) → creer | I create (crear) → crear
+gustaría	VERB	would like (gustar: me gustaría, I would like; le gustaría, he/she would like) → gustar
+sé	VERB	I know (saber: no sé, I don't know) → saber | be! (imperative of ser: sé bueno, be good)
+
+## Forms of the commonest irregular verbs
+tiene	VERB	has (tener: tiene dos hijos, he has two children) → tener | tiene que + infinitive: has to (tiene que irse, he has to go)
+tengo	VERB	I have (tener: tengo frío, I'm cold; tengo veinte años, I'm twenty) → tener | tengo que + infinitive: I have to
+tienen	VERB	have (tener: ellos tienen) → tener | tienen que + infinitive: have to
+tienes	VERB	you have (tener: tú tienes) → tener | tienes que + infinitive: you have to (tienes que verlo, you have to see it)
+tuvo	VERB	had (tener: tuvo un hijo, she had a son) → tener | tuvo que + infinitive: had to
+tenga	VERB	have (subjunctive of tener: que tenga, that he have) → tener | here you are (tenga, handing something over)
+tendría	VERB	would have (tener) → tener | tendría que + infinitive: would have to, should
+hace	VERB	does, makes (hacer: hace la cena, he makes dinner) → hacer | is (weather: hace frío, it's cold; hace sol, it's sunny)
+hace	ADP	ago (hace dos años, two years ago) | for (hace mucho que no lo veo, I haven't seen him for a long time)
+hago	VERB	I do, I make (hacer: ¿qué hago?, what do I do?) → hacer
+hacen	VERB	do, make (hacer: ellos hacen) → hacer
+haces	VERB	you do, you make (hacer: ¿qué haces?, what are you doing?) → hacer
+hizo	VERB	did, made (hacer: lo hizo, he did it) → hacer
+haría	VERB	would do, would make (hacer) → hacer
+haga	VERB	do, make (subjunctive of hacer: que lo haga, that he do it) → hacer
+dice	VERB	says, tells (decir: dice que sí, he says yes) → decir
+digo	VERB	I say, I tell (decir: te digo, I'm telling you) → decir | I mean (correcting oneself: el lunes, digo, el martes, Monday, I mean, Tuesday)
+dicen	VERB	say, tell (decir: dicen que, they say that) → decir
+dices	VERB	you say, you tell (decir: ¿qué dices?, what are you saying?) → decir
+dijo	VERB	said, told (decir: dijo que no, he said no) → decir
+dije	VERB	I said, I told (decir: te lo dije, I told you so) → decir
+dicho	VERB	said, told (past participle of decir: he dicho, I have said; dicho esto, that said) → decir
+dicho	DET	the said, that (formal: dicho libro, the said book; dichas medidas, those measures)
+diría	VERB	would say (decir: yo diría que, I would say that) → decir
+quiero	VERB	I want (querer: quiero agua, I want water; quiero ir, I want to go) → querer | I love (querer: te quiero, I love you)
+quiere	VERB	wants (querer) → querer | loves | quiere decir: means (¿qué quiere decir?, what does it mean?)
+quieren	VERB	want (querer: ellos quieren) → querer
+quieres	VERB	you want (querer: ¿quieres café?, do you want coffee?) → querer
+quiera	VERB	want (subjunctive of querer: lo que quiera, whatever he wants) → querer
+viene	VERB	comes (venir: viene mañana, he's coming tomorrow) → venir
+vienen	VERB	come (venir: ellos vienen) → venir
+da	VERB	gives (dar: me da miedo, it scares me) → dar
+dan	VERB	give (dar: ellos dan) → dar
+dio	VERB	gave (dar: me dio un libro, he gave me a book) → dar
+ve	VERB	sees (ver: no ve nada, he sees nothing) → ver | go! (command of ir: ve a casa, go home) → ir
+veo	VERB	I see (ver: no veo, I can't see; ya veo, I see) → ver
+vio	VERB	saw (ver: lo vio, he saw it) → ver
+visto	VERB	seen (past participle of ver: he visto, I have seen; ¿has visto?, have you seen?) → ver
+sabe	VERB	knows (saber: no sabe, he doesn't know) → saber | tastes (saber: sabe a chocolate, it tastes of chocolate)
+sabes	VERB	you know (saber: ¿sabes?, you know?) → saber
+saben	VERB	know (saber: ellos saben) → saber
+sepa	VERB	know (subjunctive of saber: que yo sepa, as far as I know) → saber
+pone	VERB	puts (poner: pone la mesa, he sets the table) → poner | se pone: gets, becomes (se pone rojo, he goes red)
+ponen	VERB	put (poner: ellos ponen) → poner
+pongo	VERB	I put (poner: lo pongo aquí, I put it here) → poner
+puso	VERB	put (poner: lo puso, he put it) → poner
+sale	VERB	goes out, comes out, leaves (salir: sale de casa, he leaves the house) → salir | sale bien: turns out well
+salió	VERB	went out, came out, left (salir) → salir
+sigue	VERB	follows, continues, is still (seguir: sigue lloviendo, it's still raining) → seguir
+siguen	VERB	follow, continue, are still (seguir) → seguir
+siento	VERB	I feel (sentir: me siento bien, I feel good) → sentir | lo siento: I'm sorry
+siente	VERB	feels (sentir) → sentir
+oye	VERB	hears (oír) → oír | hey, listen (oye, ¿tienes hora?, hey, have you got the time?)
+encuentra	VERB	finds (encontrar) → encontrar | se encuentra: is, is located (se encuentra en Madrid, it is in Madrid)
+pienso	VERB	I think (pensar: pienso que sí, I think so) → pensar
+empieza	VERB	begins, starts (empezar) → empezar
+vuelve	VERB	returns, comes back (volver) → volver | vuelve a + infinitive: does again (vuelve a llover, it's raining again)
+murió	VERB	died (morir) → morir
 
 ## Words Wiktionary glosses misleadingly for a reader
 vale	INTJ	okay, all right (Spain: ¿vale?, okay?)

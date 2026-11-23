@@ -247,29 +247,58 @@ byście	PART	you would (conditional, plural) | so that you (plural, in żebyści
 ## Forms of być
 # Irregular forms a reader can't connect to "to be" by themselves: the protocol
 # has no inflection tables.
-jestem	AUX	I am ("jestem w domu", I'm at home)
-jesteś	AUX	you are (singular)
-jest	AUX	is ("on jest w domu", he is at home) | there is ("jest problem", there is a problem)
-jesteśmy	AUX	we are
-jesteście	AUX	you are (plural)
-są	AUX	are ("oni są w domu", they are at home) | there are
-był	AUX	was (masculine: "był w domu", he was at home; "był zbudowany", was built) | there was ("był problem", there was a problem)
-była	AUX	was (feminine) | there was
-było	AUX	was, it was (neuter: "było zimno", it was cold) | there was, there were ("było dużo ludzi", there were many people)
-byli	AUX	were (men or mixed groups)
-były	AUX	were (women, children, animals or things)
-będę	AUX	I will be | I will (future: "będę czytać", I will read)
-będziesz	AUX	you will be | you will (future)
-będzie	AUX	will be ("jutro będzie padać", it will rain tomorrow) | will (future: "będzie pracował", he will work) | there will be
-będziemy	AUX	we will be | we will (future)
-będziecie	AUX	you will be (plural) | you will (future)
-będą	AUX	they will be | they will (future)
-byłby	AUX	would be (masculine: "byłby szczęśliwy", he would be happy)
-byłaby	AUX	would be (feminine)
-byłoby	AUX	would be, it would be ("byłoby lepiej", it would be better)
-byliby	AUX	would be (men or mixed groups)
-byłyby	AUX	would be (women, children, animals or things)
-będąc	AUX	being ("będąc w domu", being at home; while one was)
+jestem	AUX	I am ("jestem w domu", I'm at home) → być
+jesteś	AUX	you are (singular) → być
+jest	AUX	is ("on jest w domu", he is at home) → być | there is ("jest problem", there is a problem)
+jesteśmy	AUX	we are → być
+jesteście	AUX	you are (plural) → być
+są	AUX	are ("oni są w domu", they are at home) → być | there are
+był	AUX	was (masculine: "był w domu", he was at home; "był zbudowany", was built) → być | there was ("był problem", there was a problem)
+była	AUX	was (feminine) → być | there was
+było	AUX	was, it was (neuter: "było zimno", it was cold) → być | there was, there were ("było dużo ludzi", there were many people)
+byli	AUX	were (men or mixed groups) → być
+były	AUX	were (women, children, animals or things) → być
+będę	AUX	I will be → być | I will (future: "będę czytać", I will read)
+będziesz	AUX	you will be → być | you will (future)
+będzie	AUX	will be ("jutro będzie padać", it will rain tomorrow) → być | will (future: "będzie pracował", he will work) | there will be
+będziemy	AUX	we will be → być | we will (future)
+będziecie	AUX	you will be (plural) → być | you will (future)
+będą	AUX	they will be → być | they will (future)
+byłby	AUX	would be (masculine: "byłby szczęśliwy", he would be happy) → być
+byłaby	AUX	would be (feminine) → być
+byłoby	AUX	would be, it would be ("byłoby lepiej", it would be better) → być
+byliby	AUX	would be (men or mixed groups) → być
+byłyby	AUX	would be (women, children, animals or things) → być
+będąc	AUX	being ("będąc w domu", being at home; while one was) → być
+
+## Forms of móc, mieć, chcieć, wiedzieć, iść and dać
+mogę	VERB	I can, I may ("mogę pomóc", I can help; "nie mogę", I can't) → móc
+możesz	VERB	you can ("możesz mi pomóc?", can you help me?) → móc
+może	VERB	can, may (he, she or it: "on może przyjść", he can come) → móc
+może	PART	maybe, perhaps ("może jutro", maybe tomorrow) | how about ("może kawy?", how about some coffee?)
+możemy	VERB	we can ("możemy iść", we can go) → móc
+mogą	VERB	they can, may → móc
+mógł	VERB	could, was able to (past, masculine: "nie mógł spać", he couldn't sleep) → móc | could have, might (with by: "mógłby", he could)
+mogła	VERB	could, was able to (past, feminine) → móc
+mogli	VERB	could, were able to (past, plural) → móc
+mam	VERB	I have ("mam kota", I have a cat) → mieć | I am to, I should ("co mam zrobić?", what should I do?)
+masz	VERB	you have ("masz czas?", have you got time?) → mieć | here you are (handing something over: "masz", here)
+ma	VERB	has ("ona ma dwa lata", she is two years old) → mieć | is to, should ("ma przyjść", he is supposed to come)
+mamy	VERB	we have → mieć
+mają	VERB	they have → mieć
+chcę	VERB	I want ("chcę pić", I'm thirsty) → chcieć
+chcesz	VERB	you want ("chcesz kawy?", do you want some coffee?) → chcieć
+chce	VERB	wants (he, she or it) → chcieć | chce się: feel like ("chce mi się pić", I'm thirsty)
+chcemy	VERB	we want → chcieć
+chcą	VERB	they want → chcieć
+wiem	VERB	I know ("nie wiem", I don't know) → wiedzieć
+wiesz	VERB	you know ("wiesz co?", you know what?) → wiedzieć
+wie	VERB	knows (he, she or it) → wiedzieć
+idę	VERB	I go, I'm going, I'm walking (iść: "idę do domu", I'm going home) → iść
+idzie	VERB	goes, is going (he, she or it; iść) → iść | is going (well): "jak idzie?", how's it going?
+idą	VERB	go, are going (they; iść) → iść
+szedł	VERB	was going, was walking (past of iść, masculine) → iść
+da	VERB	will give (he, she or it; dać) → dać | da się: it can be done ("nie da się", it can't be done)
 
 ## Connectives and intensifiers with a sense Wiktionary lacks
 czyli	PART	that is, i.e., in other words ("dwa, czyli para", two, i.e. a pair) | so, which means (a conclusion or the next step: "czyli teraz dodajemy", so now we add)

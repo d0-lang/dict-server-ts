@@ -7,8 +7,9 @@ import type { WriterContext } from "./context.ts";
  * nor its entries with a part of speech the file gives that word (`здесь ADV`
  * replaces Wiktionary's adverb `здесь`; `всё`, listed as a pronoun and a
  * determiner, keeps its adverb "still"). A word the line points at (`→`)
- * keeps its entry: `va VERB` "goes … → aller" replaces Wiktionary's verbs for
- * `va` (`vader`) but keeps `aller`. `X` lines (endings like `-го`, and
+ * keeps its entry, and so do phrases made from it: `va VERB` "goes … → aller"
+ * replaces Wiktionary's verbs for `va` (`vader`) but keeps `aller`, and
+ * `mam VERB` "I have … → mieć" keeps `mieć się`. `X` lines (endings like `-го`, and
  * `な` after a な-adjective) only add: `な` keeps Wiktionary's particle.
  * A contraction of grammar words is one too (`n'` "Prevocalic form of ne.",
  * which Wiktionary files under neither a pronoun nor a particle).
@@ -52,7 +53,9 @@ export const replaceGrammarWords = ({
                AND gf.form = forms.form
                AND NOT EXISTS (
                  SELECT 1 FROM senses gs, json_each(gs.see) target
-                 WHERE gs.entry_id = g.id AND target.value = entries.lemma
+                 WHERE gs.entry_id = g.id
+                   AND (target.value = entries.lemma
+                     OR entries.lemma LIKE target.value || ' %')
                )
            ))
          )
