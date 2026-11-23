@@ -12,249 +12,256 @@
 # Forms whose noun or adjective is as common are left out (`dato` "data",
 # `danno` "damage", `successo` "success", `aperto` "open", `visto` "visa").
 # See apps/importer/src/grammar.ts.
+#
+# Each sense explains what the word does, for a learner reading it next to
+# the sentence: what it expresses, then the English, then a short phrase in
+# brackets when the English alone doesn't settle it ("a and la joined: in
+# the style of: carbonara style (alla carbonara)"). No notes on case or
+# position: the sentence shows those.
+# A form names its base word, which links it: "form of potere: can → potere".
 
 ## Articles
-il	DET	the (masculine singular)
-lo	DET	the (masculine singular, before s + consonant, z, gn, ps, x, y: lo studente, lo zio)
-lo	PRON	him, it (object: lo vedo, I see him/it) | it, so (standing for a clause: lo so, I know (it))
-la	DET	the (feminine singular)
-la	PRON	her, it (object: la vedo, I see her/it) | you (formal object: La ringrazio, thank you)
-i	DET	the (masculine plural: i libri, the books)
-gli	DET	the (masculine plural, before a vowel and the lo sounds: gli amici, gli studenti)
-gli	PRON	to him, to it (indirect object: gli ho detto, I told him) | to them (in speech)
-le	DET	the (feminine plural)
-le	PRON	to her, to you (formal) (indirect object: le ho detto, I told her) | them (feminine object: le vedo, I see them)
-l'	DET	the (il, lo or la before a vowel: l'anno, the year; l'acqua, the water)
-l'	PRON	him, her, it (lo or la before a vowel or h: l'ho visto, I saw him/it)
-un	DET	a, an (masculine; feminine before a vowel is un')
-uno	DET	a, an (masculine, before s + consonant, z, gn, ps, x, y: uno studente)
-uno	PRON	one, someone (uno di loro, one of them; uno dice, one says)
+il	DET	the, for a masculine noun
+lo	DET	the, for a masculine noun starting with s and a consonant, z, gn, ps, x or y: the student (lo studente)
+lo	PRON	him, it: I see him (lo vedo) | it, so: stands for what was just said: I know (lo so)
+la	DET	the, for a feminine noun
+la	PRON	her, it: I see her (la vedo) | you, politely, written La: thank you (La ringrazio)
+i	DET	the, for masculine plural nouns: the books (i libri)
+gli	DET	the, for masculine plural nouns starting with a vowel or the lo sounds: the friends (gli amici)
+gli	PRON	to him, to it: I told him (gli ho detto) | to them, in speech
+le	DET	the, for feminine plural nouns
+le	PRON	to her, to you politely: I told her (le ho detto) | them, for women or feminine nouns: I see them (le vedo)
+l'	DET	the: il, lo or la, shortened before a vowel: the year (l'anno), the water (l'acqua) → il, lo, la
+l'	PRON	him, her, it: lo or la, shortened before a vowel: I saw him (l'ho visto) → lo, la
+un	DET	a, an, for a masculine noun
+uno	DET	a, an, for a masculine noun starting with s and a consonant, z, gn, ps, x or y: a student (uno studente)
+uno	PRON	one, someone: one of them (uno di loro), one says (uno dice)
 uno	NUM	one
-una	DET	a, an (feminine)
-una	PRON	one (feminine: una di loro, one of them)
-una	NUM	one (feminine)
-un'	DET	a, an (feminine before a vowel: un'idea, an idea)
+una	DET	a, an, for a feminine noun
+una	PRON	one: one of them (una di loro)
+una	NUM	one, for a feminine noun
+un'	DET	a, an: una, shortened before a vowel: an idea (un'idea) → una
 
 ## The prepositions di, a, da, in, su and con merged with the article
-del	ADP	of the, from the (di + il) | some (del pane, some bread)
-dello	ADP	of the (di + lo) | some
-della	ADP	of the (di + la) | some (della frutta, some fruit)
-dei	ADP	of the (di + i) | some (dei libri, some books)
-degli	ADP	of the (di + gli) | some
-delle	ADP	of the (di + le) | some
-dell'	ADP	of the (di + l', before a vowel: dell'anno, of the year)
-al	ADP	to the, at the (a + il) | in the, -style (cooking: al dente, al forno)
-allo	ADP	to the, at the (a + lo)
-alla	ADP	to the, at the (a + la) | in the style of (alla carbonara, alla romana)
-ai	ADP	to the, at the (a + i)
-agli	ADP	to the, at the (a + gli)
-alle	ADP	to the, at the (a + le) | at (a time: alle tre, at three o'clock)
-all'	ADP	to the, at the (a + l', before a vowel: all'inizio, at the beginning)
-dal	ADP	from the, by the (da + il) | at the house of (dal medico, at/to the doctor's) | since (dal 2010, since 2010)
-dallo	ADP	from the, by the (da + lo)
-dalla	ADP	from the, by the (da + la) | since
-dai	ADP	from the, by the (da + i)
-dai	INTJ	come on! (encouragement)
-dagli	ADP	from the, by the (da + gli)
-dalle	ADP	from the, by the (da + le) | from (a time: dalle nove, from nine o'clock)
-dall'	ADP	from the, by the (da + l', before a vowel)
-nel	ADP	in the (in + il) | in (a year: nel 2020, in 2020)
-nello	ADP	in the (in + lo)
-nella	ADP	in the (in + la)
-nei	ADP	in the (in + i)
-negli	ADP	in the (in + gli) | in the (decade: negli anni '80, in the eighties)
-nelle	ADP	in the (in + le)
-nell'	ADP	in the (in + l', before a vowel)
-sul	ADP	on the (su + il) | about the (un libro sul tema, a book on the subject)
-sullo	ADP	on the (su + lo)
-sulla	ADP	on the (su + la) | about the
-sui	ADP	on the (su + i) | about, around (a number: sui trent'anni, about thirty)
-sugli	ADP	on the (su + gli)
-sulle	ADP	on the (su + le)
-sull'	ADP	on the (su + l', before a vowel)
-col	ADP	with the (con + il)
-coi	ADP	with the (con + i)
+del	ADP	di and il joined: of the, from the → di | some, an amount: some bread (del pane)
+dello	ADP	di and lo joined: of the → di | some
+della	ADP	di and la joined: of the → di | some, an amount: some fruit (della frutta)
+dei	ADP	di and i joined: of the → di | some: some books (dei libri)
+degli	ADP	di and gli joined: of the → di | some
+delle	ADP	di and le joined: of the → di | some
+dell'	ADP	di and l' joined: of the: of the year (dell'anno) → di
+al	ADP	a and il joined: to the, at the → a | the way it's cooked: firm to the bite (al dente), baked (al forno)
+allo	ADP	a and lo joined: to the, at the → a
+alla	ADP	a and la joined: to the, at the → a | in the style of: carbonara style (alla carbonara)
+ai	ADP	a and i joined: to the, at the → a
+agli	ADP	a and gli joined: to the, at the → a
+alle	ADP	a and le joined: to the, at the → a | at, with a time: at three o'clock (alle tre)
+all'	ADP	a and l' joined: to the, at the: at the beginning (all'inizio) → a
+dal	ADP	da and il joined: from the, by the → da | at or to someone's place: to the doctor's (dal medico) | since: since 2010 (dal 2010)
+dallo	ADP	da and lo joined: from the, by the → da
+dalla	ADP	da and la joined: from the, by the → da | since
+dai	ADP	da and i joined: from the, by the → da
+dai	INTJ	come on!, urging someone on
+dagli	ADP	da and gli joined: from the, by the → da
+dalle	ADP	da and le joined: from the, by the → da | from, with a time: from nine o'clock (dalle nove)
+dall'	ADP	da and l' joined: from the, by the → da
+nel	ADP	in and il joined: in the → in | in, with a year: in 2020 (nel 2020)
+nello	ADP	in and lo joined: in the → in
+nella	ADP	in and la joined: in the → in
+nei	ADP	in and i joined: in the → in
+negli	ADP	in and gli joined: in the → in | in, with a decade: in the eighties (negli anni '80)
+nelle	ADP	in and le joined: in the → in
+nell'	ADP	in and l' joined: in the → in
+sul	ADP	su and il joined: on the → su | about the: a book on the subject (un libro sul tema)
+sullo	ADP	su and lo joined: on the → su
+sulla	ADP	su and la joined: on the → su | about the
+sui	ADP	su and i joined: on the → su | about, roughly, with a number: about thirty (sui trent'anni)
+sugli	ADP	su and gli joined: on the → su
+sulle	ADP	su and le joined: on the → su
+sull'	ADP	su and l' joined: on the → su
+col	ADP	con and il joined: with the → con
+coi	ADP	con and i joined: with the → con
 
 ## Clitic pronouns
-mi	PRON	me, to me (object: mi vede, he sees me) | myself (mi lavo, I wash (myself))
-ti	PRON	you, to you (object: ti vedo, I see you) | yourself (ti lavi, you wash (yourself))
-si	PRON	oneself, himself, herself, themselves (si lava, he washes (himself)) | each other (si amano, they love each other) | one, people, you (impersonal: si dice, people say; qui si mangia bene, you eat well here) | is, are (+ past participle in English: passive, si vendono case, houses are sold; si interrompe, is interrupted) | (part of a verb used with it: si tratta di, it is about; si caratterizza per, is characterized by)
-ci	PRON	us, to us (object: ci vede, he sees us) | ourselves, each other (ci vediamo, see you) | there (ci sono, there are; ci vado, I go there) | about it, of it (ci penso, I think about it) | it takes (with volere: ci vuole tempo, it takes time; ci vogliono due ore, it takes two hours)
-vi	PRON	you, to you (plural object: vi vedo, I see you all) | yourselves | there (formal: vi sono, there are)
-ne	PRON	of it, of them, some (ne ho due, I have two of them; ne parlo, I talk about it) | from there (me ne vado, I'm leaving)
-ce	PRON	us, to us; there (ci before lo, la, li, le, ne: ce l'ho, I have it; ce ne sono, there are some)
-me	PRON	me (after a preposition: per me, for me; mi before lo, la, ne: me lo dai, you give it to me)
-te	PRON	you (after a preposition: con te, with you; ti before lo, la, ne)
-se	SCONJ	if, whether (se piove, if it rains; non so se, I don't know whether)
-se	PRON	himself, herself, themselves (si before lo, la, ne: se ne va, he leaves)
+mi	PRON	me, to me: he sees me (mi vede) | myself: I wash (mi lavo)
+ti	PRON	you, to you: I see you (ti vedo) | yourself
+si	PRON	oneself, himself, herself, themselves: the action goes back to the one doing it: he washes (si lava) | each other: they love each other (si amano) | one, people, you: anyone at all: people say (si dice) | makes the verb passive: houses are sold (si vendono case) | part of many verbs, not translated: it's about (si tratta di)
+ci	PRON	us, to us: he sees us (ci vede) | ourselves, each other: see you (ci vediamo) | there: there are (ci sono), I go there (ci vado) | about it: I think about it (ci penso) | with volere, it takes: it takes time (ci vuole tempo)
+vi	PRON	you, to you, to several people: I see you all (vi vedo) | yourselves | (formal) there: there are (vi sono)
+ne	PRON	of it, of them, some: I have two of them (ne ho due), I talk about it (ne parlo) | from there: I'm leaving (me ne vado)
+ce	PRON	us, to us; there: ci, spelled ce before lo, la, ne: I have it (ce l'ho), there are some (ce ne sono) → ci
+me	PRON	me, after a preposition: for me (per me) | mi, spelled me before lo, la, ne: you give it to me (me lo dai) → mi
+te	PRON	you, after a preposition: with you (con te) | ti, spelled te before lo, la, ne → ti
+se	SCONJ	if, whether: if it rains (se piove), I don't know whether (non so se)
+se	PRON	himself, herself, themselves: si, spelled se before lo, la, ne: he leaves (se ne va) → si
 
 ## Forms of essere "to be" (also the auxiliary of the past of many verbs)
-è	AUX	is (è grande, it is big) → essere | has (with a past participle: è arrivato, he has arrived)
-sono	AUX	am, are (sono stanco, I am tired; sono qui, they are here) → essere | have (with a past participle: sono arrivati, they have arrived)
-sei	AUX	are (tu sei, you are) → essere
+è	AUX	form of essere: is: it's big (è grande) → essere | with verbs of moving or changing, makes the past: he has arrived (è arrivato)
+sono	AUX	form of essere: am, are: I'm tired (sono stanco) → essere | with verbs of moving or changing, makes the past: they have arrived (sono arrivati)
+sei	AUX	form of essere: are: you are (tu sei) → essere
 sei	NUM	six
-siamo	AUX	are (noi siamo, we are) → essere
-siete	AUX	are (voi siete, you are) → essere
-era	AUX	was, used to be (era grande, it was big) → essere | had (with a past participle: era arrivato, he had arrived)
-erano	AUX	were, used to be → essere | had (with a past participle)
-ero	AUX	was (io ero, I was) → essere
-eravamo	AUX	were (noi eravamo, we were) → essere
-fu	AUX	was (past historic: fu un successo, it was a success) → essere
-furono	AUX	were (past historic) → essere
-sarà	AUX	will be → essere | must be (guessing: sarà vero, it must be true)
-saranno	AUX	will be → essere
-sarebbe	AUX	would be → essere | would have (with a past participle: sarebbe andato, he would have gone)
-sarebbero	AUX	would be → essere | would have (with a past participle: sarebbero arrivati, they would have arrived)
-sia	CCONJ	both ... and (sia ... sia, sia ... che: sia io sia lui, both me and him) | whether ... or (sia che piova, sia che no, whether it rains or not)
-sia	AUX	is, be (subjunctive: penso che sia vero, I think it is true) → essere
-siano	AUX	are, be (subjunctive) → essere
-fosse	AUX	were, was (past subjunctive: se fosse vero, if it were true) → essere
-fossero	AUX	were (past subjunctive) → essere
-c'è	AUX	there is (c'è un problema, there is a problem) | is (here, in: c'è Marco?, is Marco there?)
+siamo	AUX	form of essere: are → essere
+siete	AUX	form of essere: are → essere
+era	AUX	past of essere: was, used to be: it was big (era grande) → essere | had: he had arrived (era arrivato)
+erano	AUX	past of essere: were, used to be → essere | had
+ero	AUX	past of essere: was → essere
+eravamo	AUX	past of essere: were → essere
+fu	AUX	past of essere, in written stories: was: it was a success (fu un successo) → essere
+furono	AUX	past of essere, in written stories: were → essere
+sarà	AUX	future of essere: will be → essere | must be, a guess: it must be true (sarà vero)
+saranno	AUX	future of essere: will be → essere
+sarebbe	AUX	form of essere: would be → essere | would have: he would have gone (sarebbe andato)
+sarebbero	AUX	form of essere: would be → essere | would have: they would have arrived (sarebbero arrivati)
+sia	CCONJ	sia ... sia, sia ... che: both ... and: both me and him (sia io sia lui) | whether ... or: whether it rains or not (sia che piova, sia che no)
+sia	AUX	form of essere after che, for opinions, wishes or doubts: I think it's true (penso che sia vero) → essere
+siano	AUX	form of essere after che, for opinions, wishes or doubts → essere
+fosse	AUX	form of essere for what isn't so: were: if it were true (se fosse vero) → essere
+fossero	AUX	form of essere for what isn't so: were → essere
+c'è	AUX	there is: there's a problem (c'è un problema) | is here, is in: is Marco there? (c'è Marco?)
 ci sono	AUX	there are
 
 ## Forms of avere "to have" (also the auxiliary of the past)
-ho	AUX	I have (ho fame, I'm hungry) → avere | have (with a past participle: ho detto, I have said, I said)
-hai	AUX	you have → avere | have (with a past participle: hai detto, you said)
-ha	AUX	has (ha due figli, he has two children) → avere | has (with a past participle: ha detto, he said)
-abbiamo	AUX	we have → avere | have (with a past participle: abbiamo detto, we said)
-avete	AUX	you have (plural) → avere | have (with a past participle)
-hanno	AUX	they have → avere | have (with a past participle: hanno detto, they said)
-aveva	AUX	had → avere | had (with a past participle: aveva detto, he had said)
-avevano	AUX	had → avere | had (with a past participle)
-avrà	AUX	will have → avere
-avrebbe	AUX	would have → avere | would have (with a past participle: avrebbe detto, he would have said)
-abbia	AUX	have, has (subjunctive: che abbia, that he has) → avere
+ho	AUX	form of avere: I have; Italian also has hunger and years: I'm hungry (ho fame) → avere | makes the past: I said, I have said (ho detto)
+hai	AUX	form of avere: you have → avere | makes the past: you said (hai detto)
+ha	AUX	form of avere: has: he has two children (ha due figli) → avere | makes the past: he said (ha detto)
+abbiamo	AUX	form of avere: we have → avere | makes the past: we said (abbiamo detto)
+avete	AUX	form of avere: you have → avere | makes the past
+hanno	AUX	form of avere: they have → avere | makes the past: they said (hanno detto)
+aveva	AUX	past of avere: had → avere | had done: he had said (aveva detto)
+avevano	AUX	past of avere: had → avere | had done
+avrà	AUX	future of avere: will have → avere
+avrebbe	AUX	form of avere: would have → avere | would have done: he would have said (avrebbe detto)
+abbia	AUX	form of avere after che, for opinions, wishes or doubts: that he has (che abbia) → avere
 
 ## The past participle of essere (and stare), "been"
 # The noun stato "state" first: after essere or avere, the participle hint
 # (`participleEndings`) puts the auxiliary first (`è stato`).
-stato	NOUN	state, condition (lo stato di salute, the state of health) | state, country (lo Stato, the State) | status
-stato	AUX	been (essere: è stato, he has been, it was; è stato fatto, it was done) → essere | stayed (stare) → stare
-stata	AUX	been (feminine: è stata, she has been, it was) → essere
-stati	NOUN	states, countries (gli Stati Uniti, the United States)
-stati	AUX	been (masculine plural: sono stati, they have been, they were) → essere
-state	AUX	been (feminine plural: sono state, they have been, they were) → essere | stay, be (imperative of stare: state zitti, be quiet) → stare
+stato	NOUN	state, condition: the state of health (lo stato di salute) | state, country: the State (lo Stato) | status
+stato	AUX	form of essere: been, was: he has been, it was (è stato), it was done (è stato fatto) → essere | form of stare: stayed → stare
+stata	AUX	form of essere: been, was: she has been, it was (è stata) → essere
+stati	NOUN	states, countries: the United States (gli Stati Uniti)
+stati	AUX	form of essere: been, were: they have been, they were (sono stati) → essere
+state	AUX	form of essere: been, were: they have been (sono state) → essere | form of stare: be!: be quiet (state zitti) → stare
 
 ## Forms of the commonest irregular verbs
-fa	VERB	does, makes (fare: fa caldo, it's hot; fa il medico, he's a doctor) → fare
-faccio	VERB	I do, I make (fare: che faccio?, what do I do?) → fare
-fai	VERB	you do, you make (fare: che fai?, what are you doing?) → fare
-fanno	VERB	do, make (fare: loro fanno) → fare
-fatto	VERB	done, made, did (past participle of fare: ho fatto, I did, I have done) → fare
-fece	VERB	did, made (past historic of fare: fece costruire, he had built) → fare
-faccia	VERB	do, make (subjunctive of fare: che faccia, that he do) → fare | please do (polite command: faccia pure, go ahead)
-va	VERB	goes (andare: va a casa, he goes home) → andare | va bene: all right, okay
-vado	VERB	I go, I'm going (andare: vado a casa, I'm going home) → andare
-vai	VERB	you go (andare: dove vai?, where are you going?) → andare | go! (command: vai via, go away)
-vanno	VERB	go (andare: loro vanno) → andare
-andato	VERB	gone, went (past participle of andare: è andato, he went, he has gone) → andare
-può	VERB	can, may (potere: può venire, he can come; può darsi, maybe) → potere
-posso	VERB	I can, I may (potere: posso entrare?, may I come in?) → potere
-puoi	VERB	you can (potere: puoi aiutarmi?, can you help me?) → potere
-possono	VERB	can, may (potere: loro possono) → potere
-potrà	VERB	will be able to (potere) → potere
-potrebbe	VERB	could, might (potere: potrebbe piovere, it might rain) → potere
-potrebbero	VERB	could, might (potere: loro potrebbero) → potere
-possa	VERB	can, may (subjunctive of potere: che possa, that he can) → potere
-potuto	VERB	been able to, could (past participle of potere: non ho potuto, I couldn't) → potere
-deve	VERB	must, has to (dovere: deve partire, he has to leave) → dovere | must be (a guess: deve essere tardi, it must be late)
-devo	VERB	I must, I have to (dovere) → dovere
-devi	VERB	you must, you have to (dovere) → dovere
-devono	VERB	must, have to (dovere: loro devono) → dovere
-dovrà	VERB	will have to (dovere) → dovere
-dovrebbe	VERB	should, ought to (dovere: dovrebbe arrivare, he should arrive) → dovere
-dovrebbero	VERB	should, ought to (dovere: loro dovrebbero) → dovere
-debba	VERB	must, have to (subjunctive of dovere: che debba, that he must) → dovere
-dovuto	VERB	had to (past participle of dovere: ho dovuto, I had to) → dovere | due, owed (dovuto a, due to)
-vuole	VERB	wants (volere) → volere | vuol dire: means
-voglio	VERB	I want (volere: voglio andare, I want to go) → volere
-vuoi	VERB	you want (volere: vuoi un caffè?, do you want a coffee?) → volere
-vogliono	VERB	want (volere: loro vogliono) → volere
-vorrei	VERB	I would like (volere: vorrei un caffè, I would like a coffee) → volere
-voluto	VERB	wanted (past participle of volere) → volere
-dice	VERB	says, tells (dire: dice che, he says that) → dire
-dico	VERB	I say, I tell (dire: ti dico, I'm telling you) → dire
-dicono	VERB	say, tell (dire: dicono che, they say that) → dire
-detto	VERB	said, told (past participle of dire: ha detto, he said) → dire | called, known as (Lorenzo, detto il Magnifico, Lorenzo, known as the Magnificent)
-sa	VERB	knows (sapere: non lo sa, he doesn't know) → sapere | can (sapere: sa nuotare, he can swim)
-so	VERB	I know (sapere: non lo so, I don't know) → sapere
-sai	VERB	you know (sapere: sai, you know (in speech)) → sapere
-sappia	VERB	know (subjunctive of sapere: che io sappia, as far as I know) → sapere
-viene	VERB	comes (venire: viene domani, he's coming tomorrow) → venire | is (with a past participle, passive: viene usato, it is used)
-vieni	VERB	you come (venire) → venire | come! (command: vieni qui, come here)
-vengono	VERB	come (venire: loro vengono) → venire | are (with a past participle, passive: vengono prodotti, they are produced)
-venne	VERB	came (past historic of venire) → venire | was (with a past participle, passive: venne costruito, it was built)
-venuto	VERB	come, came (past participle of venire: è venuto, he came) → venire
-verrà	VERB	will come (venire) → venire | will be (with a past participle, passive: verrà costruito, it will be built)
-venga	VERB	come (subjunctive of venire: che venga, that he come) → venire | come in (polite command: venga, venga)
-sta	VERB	is, stays (stare: come sta?, how are you?; sta a casa, he stays at home) → stare | is (with a gerund: sta mangiando, he is eating)
-sto	VERB	I am, I stay (stare: sto bene, I'm fine) → stare | I am (with a gerund: sto lavorando, I'm working)
-stai	VERB	you are, you stay (stare: come stai?, how are you?) → stare | you are (with a gerund)
-stanno	VERB	are, stay (stare) → stare | are (with a gerund: stanno arrivando, they are arriving)
-dà	VERB	gives (dare: dà fastidio, it's annoying) → dare
-diede	VERB	gave (past historic of dare) → dare
-vede	VERB	sees (vedere) → vedere
-vedo	VERB	I see (vedere: non vedo, I can't see) → vedere
-vedi	VERB	you see (vedere: vedi?, you see?) → vedere
-vide	VERB	saw (past historic of vedere) → vedere
-messo	VERB	put (past participle of mettere: ha messo, he put) → mettere
-mise	VERB	put (past historic of mettere) → mettere
-preso	VERB	taken, took (past participle of prendere: ho preso, I took) → prendere
-prese	VERB	took (past historic of prendere: prese il potere, he took power) → prendere
-esce	VERB	goes out, comes out (uscire: esce di casa, he leaves the house) → uscire
-rimasto	VERB	stayed, remained (past participle of rimanere: è rimasto, he stayed) → rimanere
-chiesto	VERB	asked (past participle of chiedere: ha chiesto, he asked) → chiedere
-nato	VERB	born (past participle of nascere: è nato a Roma, he was born in Rome) → nascere
-morto	VERB	died (past participle of morire: è morto, he died) → morire
-scritto	VERB	written, wrote (past participle of scrivere: ha scritto, he wrote) → scrivere
-piace	VERB	is pleasing, is liked (piacere: mi piace, I like it; ti piace?, do you like it?) → piacere
-piacciono	VERB	are pleasing, are liked (piacere: mi piacciono, I like them) → piacere
+fa	VERB	form of fare: does, makes → fare | is, of the weather: it's hot (fa caldo) | works as: he's a doctor (fa il medico) | ago: two years ago (due anni fa)
+faccio	VERB	form of fare: I do, I make: what do I do? (che faccio?) → fare
+fai	VERB	form of fare: you do, you make: what are you doing? (che fai?) → fare
+fanno	VERB	form of fare: do, make → fare
+fatto	VERB	form of fare: done, made, did: I did (ho fatto) → fare
+fece	VERB	past of fare, in written stories: did, made; with another verb, had it done: he had it built (fece costruire) → fare
+faccia	VERB	form of fare after che: that he do (che faccia) → fare | please do, politely: go ahead (faccia pure)
+va	VERB	form of andare: goes: he goes home (va a casa) → andare | va bene: all right, okay
+vado	VERB	form of andare: I go, I'm going: I'm going home (vado a casa) → andare
+vai	VERB	form of andare: you go: where are you going? (dove vai?) → andare | go!: go away (vai via)
+vanno	VERB	form of andare: go → andare
+andato	VERB	form of andare: gone, went: he went, he has gone (è andato) → andare
+può	VERB	form of potere: can, may: he can come (può venire) → potere | può darsi: maybe
+posso	VERB	form of potere: I can, I may: may I come in? (posso entrare?) → potere
+puoi	VERB	form of potere: you can: can you help me? (puoi aiutarmi?) → potere
+possono	VERB	form of potere: can, may → potere
+potrà	VERB	future of potere: will be able to → potere
+potrebbe	VERB	form of potere: could, might: it might rain (potrebbe piovere) → potere
+potrebbero	VERB	form of potere: could, might → potere
+possa	VERB	form of potere after che: that he can (che possa) → potere
+potuto	VERB	form of potere: could, been able to: I couldn't (non ho potuto) → potere
+deve	VERB	form of dovere: must, has to: he has to leave (deve partire) → dovere | must be, a confident guess: it must be late (deve essere tardi)
+devo	VERB	form of dovere: I must, I have to → dovere
+devi	VERB	form of dovere: you must, you have to → dovere
+devono	VERB	form of dovere: must, have to → dovere
+dovrà	VERB	future of dovere: will have to → dovere
+dovrebbe	VERB	form of dovere: should, ought to: he should arrive (dovrebbe arrivare) → dovere
+dovrebbero	VERB	form of dovere: should, ought to → dovere
+debba	VERB	form of dovere after che: that he must (che debba) → dovere
+dovuto	VERB	form of dovere: had to: I had to (ho dovuto) → dovere | due, owed: due to (dovuto a)
+vuole	VERB	form of volere: wants → volere | vuol dire: means
+voglio	VERB	form of volere: I want: I want to go (voglio andare) → volere
+vuoi	VERB	form of volere: you want: do you want a coffee? (vuoi un caffè?) → volere
+vogliono	VERB	form of volere: want → volere
+vorrei	VERB	form of volere: I would like, the polite way to ask: I'd like a coffee (vorrei un caffè) → volere
+voluto	VERB	form of volere: wanted → volere
+dice	VERB	form of dire: says, tells: he says that (dice che) → dire
+dico	VERB	form of dire: I say, I tell: I'm telling you (ti dico) → dire
+dicono	VERB	form of dire: say, tell: they say that (dicono che) → dire
+detto	VERB	form of dire: said, told: he said (ha detto) → dire | called, known as: Lorenzo, known as the Magnificent (Lorenzo, detto il Magnifico)
+sa	VERB	form of sapere: knows: he doesn't know (non lo sa) → sapere | can, knows how to: he can swim (sa nuotare)
+so	VERB	form of sapere: I know: I don't know (non lo so) → sapere
+sai	VERB	form of sapere: you know; also a filler in speech (sai) → sapere
+sappia	VERB	form of sapere after che: as far as I know (che io sappia) → sapere
+viene	VERB	form of venire: comes: he's coming tomorrow (viene domani) → venire | is done, with a past form: it is used (viene usato)
+vieni	VERB	form of venire: you come → venire | come!: come here (vieni qui)
+vengono	VERB	form of venire: come → venire | are done, with a past form: they are produced (vengono prodotti)
+venne	VERB	past of venire, in written stories: came → venire | was done, with a past form: it was built (venne costruito)
+venuto	VERB	form of venire: come, came: he came (è venuto) → venire
+verrà	VERB	future of venire: will come → venire | will be done, with a past form: it will be built (verrà costruito)
+venga	VERB	form of venire after che: that he come (che venga) → venire | come in, politely (venga, venga)
+sta	VERB	form of stare: is, stays; for how someone is: how are you? (come sta?) → stare | is doing it now: he's eating (sta mangiando)
+sto	VERB	form of stare: I am, I stay: I'm fine (sto bene) → stare | I'm doing it now: I'm working (sto lavorando)
+stai	VERB	form of stare: you are, you stay: how are you? (come stai?) → stare | you're doing it now
+stanno	VERB	form of stare: are, stay → stare | are doing it now: they're arriving (stanno arrivando)
+dà	VERB	form of dare: gives: it's annoying (dà fastidio) → dare
+diede	VERB	past of dare, in written stories: gave → dare
+vede	VERB	form of vedere: sees → vedere
+vedo	VERB	form of vedere: I see: I can't see (non vedo) → vedere
+vedi	VERB	form of vedere: you see: you see? (vedi?) → vedere
+vide	VERB	past of vedere, in written stories: saw → vedere
+messo	VERB	form of mettere: put: he put (ha messo) → mettere
+mise	VERB	past of mettere, in written stories: put → mettere
+preso	VERB	form of prendere: taken, took: I took (ho preso) → prendere
+prese	VERB	past of prendere, in written stories: took: he took power (prese il potere) → prendere
+esce	VERB	form of uscire: goes out, comes out: he leaves the house (esce di casa) → uscire
+rimasto	VERB	form of rimanere: stayed, remained: he stayed (è rimasto) → rimanere
+chiesto	VERB	form of chiedere: asked: he asked (ha chiesto) → chiedere
+nato	VERB	form of nascere: born: he was born in Rome (è nato a Roma) → nascere
+morto	VERB	form of morire: died: he died (è morto) → morire
+scritto	VERB	form of scrivere: written, wrote: he wrote (ha scritto) → scrivere
+piace	VERB	form of piacere: is liked; Italian says it pleases you: I like it (mi piace), do you like it? (ti piace?) → piacere
+piacciono	VERB	form of piacere: are liked, for several things: I like them (mi piacciono) → piacere
 
 ## Determiners and adverbs
-più	ADV	more (più grande, bigger; più tardi, later) | most (il più grande, the biggest) | no longer, any more (non più) | plus (tre più due, three plus two)
-quest'	DET	this (questo or questa before a vowel: quest'anno, this year)
-quell'	DET	that (quello or quella before a vowel: quell'anno, that year)
-ad	ADP	to, at, in (a before a vowel: ad esempio, for example)
-ed	CCONJ	and (e before a vowel, especially e: ed era, and it was)
+più	ADV	more, -er: bigger (più grande), later (più tardi) | the most, with il, la: the biggest (il più grande) | with non, no longer, not anymore (non più) | plus, in sums: three plus two (tre più due)
+quest'	DET	this: questo or questa, shortened before a vowel: this year (quest'anno) → questo
+quell'	DET	that: quello or quella, shortened before a vowel: that year (quell'anno) → quello
+ad	ADP	a, spelled ad before a vowel: for example (ad esempio) → a
+ed	CCONJ	e, spelled ed before a vowel: and it was (ed era) → e
 
 ## Words English Wiktionary lacks, or glosses misleadingly for a reader
 # Wiktionary's `gente` has only archaic senses (gens, lineage).
-gente	NOUN	people (la gente, people; tanta gente, a lot of people) | folk, kind (brava gente, good people)
-ok	INTJ	okay, all right | granted (conceding: ok, è caro, ma..., granted, it's expensive, but...)
-eh	INTJ	eh, huh (asking or agreeing: vero, eh?, right?) | well, uh (hesitation)
+gente	NOUN	people, as one group; Italian says it in the singular: a lot of people (tanta gente) | folk, kind: good people (brava gente)
+ok	INTJ	okay, all right | granted, conceding a point: granted, it's expensive, but ... (ok, è caro, ma ...)
+eh	INTJ	eh, huh, asking or agreeing: right? (vero, eh?) | well, uh: a pause in speech
 
 ## Units, written after a number
-m	SYM	metre, metres
-km	SYM	kilometre, kilometres
-cm	SYM	centimetre, centimetres
-mm	SYM	millimetre, millimetres
-kg	SYM	kilogram, kilograms
-g	SYM	gram, grams
-mAh	SYM	milliampere-hour (battery capacity)
-Ah	SYM	ampere-hour (battery capacity)
+m	SYM	metre
+km	SYM	kilometre
+cm	SYM	centimetre
+mm	SYM	millimetre
+kg	SYM	kilogram
+g	SYM	gram
+mAh	SYM	milliampere-hour, battery capacity
+Ah	SYM	ampere-hour, battery capacity
 
 ## Relatives and pronouns whose Wiktionary entries lack the reader's sense
-quale	PRON	which, who (relative, after an article: il quale, la quale, i quali; al quale, to which, to whom) | which (one)? (quale preferisci?, which do you prefer?)
-quale	DET	which, what (quale libro?, which book?) | such as, like (literary)
-tale	DET	such (una tale situazione, such a situation) | a certain (un tale Marco, a certain Marco)
-tale	PRON	someone, a man (un tale, some guy; quel tale, that man)
-nulla	PRON	nothing, anything (non ho fatto nulla, I didn't do anything) | at all (non è vero nulla, it isn't true at all)
-quello che	PRON	what, the thing that (quello che conta, what matters)
-poi	ADV	then, afterwards, later | also, besides, moreover (adding a point: poi c'è, then there's) | after all, anyway (ma poi, but then)
-lì	ADV	there | that (after a noun with quel: quel giorno lì, that day)
-capito	VERB	understood (capire: hai capito?, do you understand?; capito!, got it!) | happened (capitare: è capitato, it happened)
+quale	PRON	which, who, after an article: to which, to whom (al quale) | which one?: which do you prefer? (quale preferisci?)
+quale	DET	which, what: which book? (quale libro?) | (literary) such as, like
+tale	DET	such: such a situation (una tale situazione) | a certain: a certain Marco (un tale Marco)
+tale	PRON	someone, some man: some guy (un tale), that man (quel tale)
+nulla	PRON	nothing, anything: I didn't do anything (non ho fatto nulla) | at all: it isn't true at all (non è vero nulla)
+quello che	PRON	what, the thing that: what matters (quello che conta)
+poi	ADV	then, afterwards, later | also, besides, adding a point: then there's (poi c'è) | after all, anyway: but then (ma poi)
+lì	ADV	there | that, pointing, after quel and a noun: that day (quel giorno lì)
+capito	VERB	form of capire: understood: do you understand? (hai capito?), got it! (capito!) → capire | form of capitare: happened: it happened (è capitato) → capitare
 
 ## Set phrases English Wiktionary lacks, or glosses misleadingly
 # Wiktionary's `a seguito di` is only "synonym of in seguito a".
 a seguito di	ADP	following, as a result of
-sempre più	ADV	more and more (sempre più spazio, more and more room)
+sempre più	ADV	more and more: more and more room (sempre più spazio)
 sempre meno	ADV	less and less
 a quanto pare	ADV	apparently, it seems
-da qui	ADV	hence, from this | from here (da qui a Roma, from here to Rome) | from now (da qui a domani, from now until tomorrow)
-e via	ADV	and that's it, and off we go | and so on (e via dicendo, and so on)
-fare sì che	VERB	to make sure that, to bring it about that (fanno sì che, they mean that)
+da qui	ADV	hence, from this | from here: from here to Rome (da qui a Roma) | from now: from now until tomorrow (da qui a domani)
+e via	ADV	and that's it, and off we go | and so on (e via dicendo)
+fare sì che	VERB	to make sure that, to bring it about that
 su tutto	ADV	above all, overall
 # `tratta` is also the feminine participle of trarre, which comes first among
 # the verbs after `si`.
-si tratta di	VERB	it is about, it is a matter of, it is (si tratta di un errore, it's a mistake)
+si tratta di	VERB	it's about, it's a matter of, it is: it's a mistake (si tratta di un errore)
