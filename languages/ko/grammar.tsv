@@ -10,6 +10,14 @@
 # Lines are for what Wiktionary lacks or explains only by naming a form.
 # See apps/importer/src/grammar.ts.
 
+## Pronouns
+# Wiktionary lists 저 "that" before 저 "I", and 제 and 내 only as allomorphs:
+# 저는 and 제가 opened on "that, that thing".
+저	PRON	I, me (humble, polite speech: 저는 학생이에요, I'm a student) | that, that one (over there, far from both: 저게 뭐예요?, what's that?)
+저	DET	that (over there, far from both: 저 사람, that person)
+제	PRON	I (humble; 저 before -가: 제가 할게요, I'll do it) → 저 | my (humble; 저의: 제 이름, my name)
+내	PRON	I (나 before -가: 내가 할게, I'll do it) → 나 | my (나의: 내 친구, my friend)
+
 ## Particles
 -이나/-나	PART	or (사진이나 영상, photos or videos) | ... or something (커피나 마실까요?, shall we have coffee or something?) | as many as, a whole (세 시간이나, a whole three hours) | just (instead of something else)
 -이라/-라	PART	called, as: names or quotes what precedes, with 하다 or 부르다 (이것을 김치라 한다, this is called kimchi) | because (it is), being (학생이라 바빠요, (I) am busy because (I) am a student)
@@ -55,6 +63,7 @@
 -을 수 없다/-ㄹ 수 없다/-을 수가 없다/-ㄹ 수가 없다	X	cannot, be unable to (믿을 수 없다, (I) can't believe it)
 -을 수밖에 없다/-ㄹ 수밖에 없다	X	have no choice but to (기다릴 수밖에 없다, (we) have no choice but to wait)
 -을 텐데/-ㄹ 텐데	X	(it) will probably ..., so / but: an expectation (비가 올 텐데, it'll probably rain, so ...)
+-어지다/-아지다/-여지다	X	become, get (after an adjective: 넓어지다, to widen; 좋아지다, to get better) | be done (passive, after a verb: 만들어지다, to be made; 쓰여지다, to be written) → 지다
 -고 있다	X	be ...ing: an action going on (먹고 있다, is eating) | be in the state of (입고 있다, is wearing)
 -고 나서	X	after (doing), and then (먹고 나서, after eating)
 -고 싶다	X	want to (가고 싶다, (I) want to go)

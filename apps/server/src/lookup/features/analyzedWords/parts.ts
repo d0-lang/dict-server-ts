@@ -504,7 +504,9 @@ export const morphemeParts = (
               ranked.map((row) => row.id),
               grammar,
             )
-          : !isHead && grammar.length > 0
+          : // An ending after the head by its line; a prefix keeps its
+            // entries as a prefix first (`저|출산` is 저 "low", not 저 "I").
+            head >= 0 && i > head && grammar.length > 0
             ? grammar
             : ranked.map((row) => row.id),
       isHead,
