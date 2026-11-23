@@ -6,7 +6,9 @@ import type { WriterContext } from "./context.ts";
  * A word in the grammar file shows none of Wiktionary's grammar-word entries,
  * nor its entries with a part of speech the file gives that word (`здесь ADV`
  * replaces Wiktionary's adverb `здесь`; `всё`, listed as a pronoun and a
- * determiner, keeps its adverb "still"). `X` lines (endings like `-го`, and
+ * determiner, keeps its adverb "still"). A word the line points at (`→`)
+ * keeps its entry: `va VERB` "goes … → aller" replaces Wiktionary's verbs for
+ * `va` (`vader`) but keeps `aller`. `X` lines (endings like `-го`, and
  * `な` after a な-adjective) only add: `な` keeps Wiktionary's particle.
  * A contraction of grammar words is one too (`n'` "Prevocalic form of ne.",
  * which Wiktionary files under neither a pronoun nor a particle).
@@ -48,6 +50,10 @@ export const replaceGrammarWords = ({
              SELECT g.pos FROM forms gf JOIN entries g ON g.id = gf.entry_id
              WHERE gf.source = ${FormSource.Lemma} AND g.source_pos = '${GRAMMAR_SOURCE_POS}'
                AND gf.form = forms.form
+               AND NOT EXISTS (
+                 SELECT 1 FROM senses gs, json_each(gs.see) target
+                 WHERE gs.entry_id = g.id AND target.value = entries.lemma
+               )
            ))
          )
      )`,

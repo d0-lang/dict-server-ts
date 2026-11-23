@@ -36,12 +36,13 @@ Two importer gaps were found here, both fixed:
 
 ### Grammar words
 
-`grammar.tsv`, 155 lines, written without a reader. The plain import's popovers for the commonest words were mostly fine (Wiktionary's French is good), but these needed lines:
+`grammar.tsv`, 269 lines (155 before issue #54), written without a reader. The plain import's popovers for the commonest words were mostly fine (Wiktionary's French is good), but these needed lines:
 - **articles and contractions:** `la` and `les` opened on the pronoun, `une` on "front page", `des`, `du`, `au` and `aux` on the bare `de` or `à` ("to"), not "of the" or "some". `au` and `aux` also mean "with" (`riz aux légumes`).
 - **elided forms:** `l'`, `d'`, `qu'`, `j'`, `n'`, `s'`, `c'`, `m'`, `t'`, `jusqu'`, `lorsqu'`, `puisqu'`.
 - **possessives and personal pronouns,** with the impersonal `il` (`il y a`, `il faut`).
 - **être and avoir:** `est` opened on "east", `a` on the letter, `été` on "summer", `ayant` on "haver", `fut` on `fût`. Their common forms are `AUX` lines ("is", "has", "been"), which come first and leave Wiktionary's other entries after them.
 - **broken or misleading glosses:** `dès` ("Audio (France (Vosges)): (file)"), `pas` "step" first, `son` "sound" first, `quelques` "some (singular)", `parce` "only used in parce que", `bah` "No.", `voire` "truly", `donc`, `ainsi` (`ainsi que`), `encore` "also", `-là` "always used with ce".
+- **irregular verb forms** (2026-11-23, issue #54): `va` showed only `aller` (and `vader`, a Louisiana verb), with nothing to say which form it is. The commonest forms of aller, faire, pouvoir, vouloir, devoir, savoir, falloir, valoir, venir, tenir, voir, vivre, dire, prendre and mettre, and the rest of être's and avoir's, are lines of their own ("goes, is going", "can", "would like") that point at their verb (`→ aller`). The verb still shows after the line; a `VERB` line replaces Wiktionary's other verbs for the word (`vader`, `dit` "surname", `ailler` for `aille`). `vienne` was left out: it took first place from `Vienne`, the city. A participle line (`pris`, `mis`, `dû`) no longer ends a declined form's chain: `prise` still reaches `prendre` (`prise en compte`).
 - **units after numbers** (`g`, `kg`, `km`, `cm`, `mm`, `ml`, `cl`): `g` gave "abbreviation of j'ai".
 - **set phrases English Wiktionary lacks:** `plus tôt`, `en un coup`, `l'ensemble de`, `au sens large` (Wiktionary's "in every sense of the word" is wrong), `aller à l'encontre de`, `masse salariale`, `faux bourdon`.
 
