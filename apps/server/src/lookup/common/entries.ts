@@ -20,6 +20,13 @@ export type LookupEntry = {
   readonly lemma: string;
   readonly pos: UdPos;
   readonly features?: string;
+  /**
+   * Until `presentResult`: set on an entry for what a character means, as a
+   * character or in compounds (wiktextract's `character` and `affix`: `的`
+   * "target; bright" in `目的`). It merges only with such entries, never
+   * with the word spelled and read alike (`的` "-ic").
+   */
+  readonly characterMeaning?: true;
   readonly labels?: ReadonlyArray<string>;
   /** For an entry the context adds: the parts of `context` it covers. */
   readonly match?: ReadonlyArray<string>;
@@ -189,6 +196,9 @@ const rankedIds = (
     )
     .map((row) => row.id);
 
+/** `entries.source_pos` of entries for what a character means (`LookupEntry.characterMeaning`). */
+const CHARACTER_MEANING: ReadonlySet<string> = new Set(["character", "affix"]);
+
 /** Row shapes of `loadEntries`' queries; the JSON columns still as text. */
 type HeadRow = {
   readonly id: number;
@@ -196,6 +206,7 @@ type HeadRow = {
   readonly pos: UdPos;
   readonly features: string | null;
   readonly pages: string | null;
+  readonly sourcePos: string;
 };
 type SenseRow = {
   readonly entryId: number;
@@ -234,7 +245,7 @@ export const loadEntries = (
   const list = JSON.stringify(ids);
   const heads = db.$client
     .query<HeadRow, [string]>(
-      `SELECT id, lemma, pos, features, pages FROM entries
+      `SELECT id, lemma, pos, features, pages, source_pos AS sourcePos FROM entries
        WHERE id IN (SELECT value FROM json_each(?1))`,
     )
     .all(list);
@@ -282,6 +293,9 @@ export const loadEntries = (
       lemma: head.lemma,
       pos: head.pos,
       ...(head.features !== null ? { features: head.features } : {}),
+      ...(CHARACTER_MEANING.has(head.sourcePos)
+        ? { characterMeaning: true as const }
+        : {}),
       ...(pages.length > 0 ? { pages } : {}),
       ...(Object.keys(pron).length > 0 ? { pron } : {}),
       senses: (senseRows.get(id) ?? []).map((s) => ({
