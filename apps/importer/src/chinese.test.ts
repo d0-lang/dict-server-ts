@@ -112,6 +112,103 @@ const LINES = [
     pos: "particle",
     senses: [{ glosses: ["question particle"], tags: ["Cantonese"] }],
   },
+  // A sense and its subsense, both literary: one sense, labelled once.
+  {
+    word: "之",
+    pos: "character",
+    senses: [
+      { glosses: ["to go"], tags: ["literary"] },
+      { glosses: ["to go", "to sprout"], tags: ["literary"] },
+    ],
+  },
+  // Two words, an entry per part of speech each: too few for a letter pair.
+  ...["驗證", "考驗"].flatMap((traditional) =>
+    ["noun", "verb"].map((pos) => ({
+      ...word(traditional, traditional.replace("驗", "验"), "to test"),
+      pos,
+    })),
+  ),
+  { word: "驗", pos: "character", senses: [{ glosses: ["to examine"] }] },
+  // Taiwanese Mandarin, also tagged another variety: kept, after the rest.
+  {
+    word: "喬",
+    pos: "character",
+    etymology_number: 1,
+    sounds: [pinyin("qiáo (qiao²)", "Standard")],
+    senses: [{ glosses: ["tall"] }],
+  },
+  {
+    word: "喬",
+    pos: "character",
+    etymology_number: 2,
+    // No sounds of its own, but the page's are one reading.
+    sounds: [pinyin("qiáo (qiao²)", "Standard")],
+    senses: [
+      { glosses: ["to negotiate"], tags: ["Hokkien", "Taiwanese-Mandarin"] },
+    ],
+  },
+  {
+    word: "有夠",
+    pos: "adv",
+    senses: [
+      { glosses: ["very"], tags: ["Hokkien", "Taiwanese-Mandarin"] },
+      { glosses: ["enough"] },
+    ],
+  },
+  // An etymology of only Taiwanese Mandarin senses ranks after the page's
+  // others.
+  {
+    word: "著",
+    pos: "character",
+    etymology_number: 1,
+    sounds: [pinyin("zhù", "Standard")],
+    senses: [{ glosses: ["famous"], tags: ["Jin", "Taiwanese-Mandarin"] }],
+  },
+  {
+    word: "著",
+    pos: "character",
+    etymology_number: 2,
+    sounds: [pinyin("zhù", "Standard"), pinyin("zhuó", "Standard")],
+    senses: [{ glosses: ["to wear"] }],
+  },
+  // Later etymologies repeat the page's sounds: one with none of its own
+  // and several on the page has no reading.
+  {
+    word: "底",
+    pos: "character",
+    etymology_number: 1,
+    sounds: [pinyin("dǐ (di³)", "Standard")],
+    senses: [{ glosses: ["bottom"] }],
+  },
+  {
+    word: "底",
+    pos: "character",
+    etymology_number: 2,
+    sounds: [pinyin("dǐ (di³)", "Standard"), pinyin("de", "Standard")],
+    senses: [{ glosses: ["possessive particle"] }],
+  },
+  {
+    word: "底",
+    pos: "character",
+    etymology_number: 3,
+    sounds: [pinyin("dǐ (di³)", "Standard"), pinyin("de", "Standard")],
+    senses: [{ glosses: ["which"] }],
+  },
+  // Another part of speech of an etymology read already: read as it was.
+  {
+    word: "了",
+    pos: "particle",
+    etymology_number: 1,
+    sounds: [pinyin("le", "Standard"), pinyin("liǎo", "Standard")],
+    senses: [{ glosses: ["perfective particle"] }],
+  },
+  {
+    word: "了",
+    pos: "verb",
+    etymology_number: 1,
+    sounds: [pinyin("le", "Standard"), pinyin("liǎo", "Standard")],
+    senses: [{ glosses: ["to finish"] }],
+  },
   {
     word: "悅",
     pos: "character",
@@ -284,6 +381,60 @@ describe("Chinese import", () => {
         ]);
         assert.deepStrictEqual(lemmasOf(db, "吾"), ['吾: ["(literary) my"]']);
         assert.deepStrictEqual(lemmasOf(db, "咩"), []);
+      }).pipe(Effect.scoped),
+  );
+
+  it.effect("keeps a sense and its subsense one sense, labelled once", () =>
+    Effect.gen(function* () {
+      const db = yield* imported;
+      assert.deepStrictEqual(lemmasOf(db, "之"), [
+        '之: ["(literary) to go","to sprout"]',
+      ]);
+    }).pipe(Effect.scoped),
+  );
+
+  it.effect(
+    "counts a word once for a letter pair, though it has an entry per part of speech",
+    () =>
+      Effect.gen(function* () {
+        const db = yield* imported;
+        assert.deepStrictEqual(lemmasOf(db, "验"), []);
+      }).pipe(Effect.scoped),
+  );
+
+  it.effect(
+    "keeps Taiwanese Mandarin senses after the others, and their lines after the page's",
+    () =>
+      Effect.gen(function* () {
+        const db = yield* imported;
+        assert.deepStrictEqual(lemmasOf(db, "喬"), [
+          '喬: ["tall"] (qiáo)',
+          '喬: ["(Taiwanese Mandarin) to negotiate"] (qiáo)',
+        ]);
+        assert.deepStrictEqual(lemmasOf(db, "有夠"), [
+          '有夠: ["enough"] ["(Taiwanese Mandarin) very"]',
+        ]);
+        assert.deepStrictEqual(lemmasOf(db, "著"), [
+          '著: ["to wear"] (zhuó)',
+          '著: ["(Taiwanese Mandarin) famous"] (zhù)',
+        ]);
+      }).pipe(Effect.scoped),
+  );
+
+  it.effect(
+    "reads a line with no sounds of its own as its etymology, or not at all",
+    () =>
+      Effect.gen(function* () {
+        const db = yield* imported;
+        assert.deepStrictEqual(lemmasOf(db, "底"), [
+          '底: ["bottom"] (dǐ)',
+          '底: ["possessive particle"] (de)',
+          '底: ["which"]',
+        ]);
+        assert.deepStrictEqual(lemmasOf(db, "了"), [
+          '了: ["perfective particle"] (le, liǎo)',
+          '了: ["to finish"] (le, liǎo)',
+        ]);
       }).pipe(Effect.scoped),
   );
 

@@ -27,7 +27,7 @@ import {
   languagePair,
   type LanguageRules,
 } from "./transform/languages.ts";
-import { transformEntry } from "./transform/transform.ts";
+import { transformEntry, type TransformResult } from "./transform/transform.ts";
 
 export { ImportError } from "./errors.ts";
 export type { ImportStats } from "./stats.ts";
@@ -37,6 +37,12 @@ export const RAW_DUMP_URL =
   "https://kaikki.org/dictionary/raw-wiktextract-data.jsonl.gz";
 
 const DEFAULT_BATCH_SIZE = 1000;
+
+/** The reading a line's entry got, whichever entry it made. */
+const resultReading = (result: TransformResult): string | undefined =>
+  [result.entry, result.laterEntry, result.historicalEntry]
+    .find((entry) => entry !== undefined)
+    ?.pronunciations.find((p) => p.kind === "reading")?.value;
 
 export type ImportOptions = {
   /** wiktextract `lang_code`; needs `languages/<lang>/language.toml` */
@@ -154,19 +160,30 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
 
   // A page's later etymologies repeat the sounds of the earlier ones (the
   // particle `的` lists `dì`, `dí` of "bright" before its own `de`): each line
-  // reads only the sounds its page hasn't given yet.
+  // reads only the sounds its page hasn't given yet, and a line with none of
+  // its own as its etymology's earlier line did.
   let page = "";
   let pageSounds = new Set<string>();
+  let pageReadings = new Map<string, string>();
   const writeBatch = (batch: ReadonlyArray<WiktextractEntry>) => {
     const results = batch.map((raw) => {
       if (raw.word !== page) {
         page = raw.word;
         pageSounds = new Set();
+        pageReadings = new Map();
       }
-      const result = transformEntry(withGrammar, raw, pageSounds);
+      const etymology = String(raw.etymology_number ?? "");
+      const result = transformEntry(
+        withGrammar,
+        raw,
+        pageSounds,
+        pageReadings.get(etymology),
+      );
       for (const sound of raw.sounds ?? []) {
         if (sound.zh_pron !== undefined) pageSounds.add(sound.zh_pron);
       }
+      const reading = resultReading(result);
+      if (reading !== undefined) pageReadings.set(etymology, reading);
       return result;
     });
     results.forEach((result) => tallyResult(tally, result));

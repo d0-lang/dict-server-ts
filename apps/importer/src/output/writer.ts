@@ -180,6 +180,8 @@ export const makeWriter = (
   let lastId = 0;
   const byKey = new Map<string, EntryState>();
   const historicalEntries: Array<ImportEntry> = [];
+  /** Entries of only `varieties.later` senses, written after the dump. */
+  const laterEntries: Array<ImportEntry> = [];
   const verbalNouns: Array<{ form: string; entryId: number }> = [];
   const participleForms: Array<{ form: string; entryId: number }> = [];
   /** entry id -> gloss -> its derived sense */
@@ -411,6 +413,7 @@ export const makeWriter = (
       items: ReadonlyArray<{
         readonly entry: ImportEntry | undefined;
         readonly historicalEntry?: ImportEntry;
+        readonly laterEntry?: ImportEntry;
         readonly reflexiveEntries?: ReadonlyArray<ImportEntry>;
         readonly formOf: ReadonlyArray<FormOfLink>;
         readonly redirect?: Redirect;
@@ -423,6 +426,7 @@ export const makeWriter = (
         if (item.historicalEntry !== undefined) {
           historicalEntries.push(item.historicalEntry);
         }
+        if (item.laterEntry !== undefined) laterEntries.push(item.laterEntry);
         writeLinks(item.formOf);
       }
     },
@@ -471,6 +475,8 @@ export const makeWriter = (
     // The passes find and move forms by entry; the shipped file has no use for
     // that index, so it is dropped again before the file is compacted.
     sqlite.run("CREATE INDEX forms_entry_tmp ON forms(entry_id)");
+    // After every other line's entry, so they rank last among the word's.
+    sqlite.transaction(() => laterEntries.forEach(writeEntry))();
     // Words that depend on others, which may come later in the dump.
     restoreHistoricalEntries();
     // The word in the other script is a lemma before any link resolves, so a

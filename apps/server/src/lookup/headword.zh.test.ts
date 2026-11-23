@@ -13,6 +13,11 @@ describe("Chinese headwords in both scripts", () => {
     assert.deepStrictEqual(shown("学习"), ["学习 (學習)"]);
   });
 
+  it("shows the other spelling with the word's capitals, not as stored", () => {
+    assert.deepStrictEqual(shown("BB機"), ["BB機 (BB机)"]);
+    assert.deepStrictEqual(shown("BB机"), ["BB机 (BB機)"]);
+  });
+
   it("shows a word written alike in both scripts as it is", () => {
     assert.deepStrictEqual(shown("很"), ["很"]);
   });

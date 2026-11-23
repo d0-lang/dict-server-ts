@@ -88,6 +88,7 @@ export type LanguageRules = {
   readonly varieties?: {
     readonly others: ReadonlyArray<string>;
     readonly keep: ReadonlyArray<string>;
+    readonly later?: ReadonlyArray<string>;
   };
   /** Whole tag sets of the sounds that give the reading (Chinese `Mandarin` + `Pinyin`). */
   readonly readingSounds?: ReadonlyArray<ReadonlyArray<string>>;
@@ -114,8 +115,8 @@ export const languagePair = (rules: LanguageRules): string =>
 
 /**
  * Whether the tags mark a variety the language's readers don't use
- * (`varieties`): one of `others`, and none of `keep` (Cantonese, but not
- * "literary or Hakka").
+ * (`varieties`): one of `others`, and none of `keep` or `later` (Cantonese,
+ * but not "literary or Hakka").
  */
 export const isOtherVariety = (
   rules: LanguageRules,
@@ -123,7 +124,17 @@ export const isOtherVariety = (
 ): boolean =>
   rules.varieties !== undefined &&
   tags.some((t) => rules.varieties!.others.includes(t)) &&
-  !tags.some((t) => rules.varieties!.keep.includes(t));
+  !tags.some((t) => rules.varieties!.keep.includes(t)) &&
+  !isLaterVariety(rules, tags);
+
+/**
+ * Whether the tags mark a variety kept after the word's other senses
+ * (`varieties.later`: Taiwanese Mandarin).
+ */
+export const isLaterVariety = (
+  rules: LanguageRules,
+  tags: ReadonlyArray<string> = [],
+): boolean => tags.some((t) => (rules.varieties?.later ?? []).includes(t));
 
 /** Whether the tags mark a historical stage of the language. */
 export const isHistorical = (

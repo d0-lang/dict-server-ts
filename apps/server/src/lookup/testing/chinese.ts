@@ -67,6 +67,7 @@ const words: ReadonlyArray<
   ["會", "会", "X", "meeting"],
   ["都會", "都会", "NOUN", "metropolis"],
   ["年", "年", "X", "year"],
+  ["BB機", "BB机", "NOUN", "pager"],
 ];
 
 export const chinese = (() => {

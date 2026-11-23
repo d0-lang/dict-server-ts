@@ -34,7 +34,8 @@ const otherScriptLetters = (
   const kept = new Map<string, number>();
   const rows = sqlite
     .query<{ lemma: string; form: string }, [number]>(
-      `SELECT e.lemma AS lemma, f.form AS form FROM forms f JOIN entries e ON e.id = f.entry_id
+      // A word once, though it has an entry per part of speech (`學習`).
+      `SELECT DISTINCT e.lemma AS lemma, f.form AS form FROM forms f JOIN entries e ON e.id = f.entry_id
        WHERE f.source = ?1 AND f.form <> e.lemma`,
     )
     .all(FormSource.Lemma);
@@ -66,7 +67,7 @@ const otherScriptLetters = (
   // `里` mostly stands for, though many words keep `里` "li" as it is.
   const lines = sqlite
     .query<{ lemma: string; form: string }, [number]>(
-      `SELECT e.lemma AS lemma, f.form AS form FROM forms f JOIN entries e ON e.id = f.entry_id
+      `SELECT DISTINCT e.lemma AS lemma, f.form AS form FROM forms f JOIN entries e ON e.id = f.entry_id
        WHERE f.source = ?1 AND e.source_pos = '${GRAMMAR_SOURCE_POS}' AND f.form <> e.lemma`,
     )
     .all(FormSource.Lemma);

@@ -155,6 +155,13 @@
                 "type": "string"
               },
               "description": "Tags that keep a sense with one of `others`: it is used in this language too (`Mandarin`; `literary`, as in \"(literary or Hakka) my\" for `吾`)."
+            },
+            "later": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Tags of a variety that is this language but not its main one (Chinese `Taiwanese-Mandarin`): such a sense stays, also with one of `others` (`喬` \"to negotiate\", tagged Hokkien too), after the word's other senses, and an entry of only such senses after the word's other entries."
             }
           },
           "required": [

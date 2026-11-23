@@ -138,6 +138,12 @@ const Import = doc(
             strings,
             'Tags that keep a sense with one of `others`: it is used in this language too (`Mandarin`; `literary`, as in "(literary or Hakka) my" for `吾`).',
           ),
+          later: Schema.optionalKey(
+            doc(
+              strings,
+              "Tags of a variety that is this language but not its main one (Chinese `Taiwanese-Mandarin`): such a sense stays, also with one of `others` (`喬` \"to negotiate\", tagged Hokkien too), after the word's other senses, and an entry of only such senses after the word's other entries.",
+            ),
+          ),
         }),
         "Varieties written under this language's header that its readers don't use: a sense tagged with one of `others` and none of `keep` is dropped, and so is a form tagged with one of `others`. A word left with no sense has no entry (Cantonese `咩`), unlike a historical stage's.",
       ),

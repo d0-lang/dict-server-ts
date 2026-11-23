@@ -15,6 +15,20 @@ const spellingsByDb = new WeakMap<
 >();
 
 /**
+ * `form`, a lookup key, cased as `lemma` is letter for letter (`BB机` of
+ * `BB機`, stored as `bb机`).
+ */
+const casedAs = (lemma: string, form: string): string => {
+  const letters = [...lemma];
+  const key = [...form];
+  return letters.length === key.length
+    ? key
+        .map((c, i) => (lookupKey(letters[i]!) === c ? letters[i]! : c))
+        .join("")
+    : form;
+};
+
+/**
  * The lemma's spellings stored as its lemma besides itself (`学习` of `學習`),
  * gathered once per file: entries have no index by lemma.
  */
@@ -33,7 +47,7 @@ const otherSpellings = (
       .all(FormSource.Lemma);
     for (const { lemma, form } of rows) {
       if (form === lookupKey(lemma)) continue;
-      map.set(lemma, [...(map.get(lemma) ?? []), form]);
+      map.set(lemma, [...(map.get(lemma) ?? []), casedAs(lemma, form)]);
     }
     byLemma = map;
     spellingsByDb.set(db, byLemma);

@@ -6,7 +6,7 @@ Data: `data/raw/zh.jsonl`, filtered from the 2026-11-01 dump: 328,919 lines.
 - 125,147 are `soft-redirect` lines: simplified spellings with no gloss, pointing at their traditional page (学习 → 學習).
 - Parts of speech: 91,611 nouns, 34,677 verbs, 30,085 `character` lines (a character's whole page), 19,500 names, 11,422 adjectives, 9,944 phrases (chengyu, set phrases).
 - 200,380 lines give a Mandarin pronunciation.
-- `data/zh_en.sqlite` (38 MB) has about 155,600 entries; 151,201 have a pinyin reading. 89,864 lemma rows spell an entry in simplified characters.
+- `data/zh_en.sqlite` (38 MB) has about 155,600 entries; 151,023 have a pinyin reading. 89,864 lemma rows spell an entry in simplified characters.
 
 Corpus: `../corpus/zh`, gathered 2026-11-22 (corpus branch `chinese`). Words are counted with jieba's units (see Eval): 93,607.
 - **Spoken:** 72,514 characters in 16 YouTube videos, 10 genres: food, economy, talks (一席, TEDx), tech reviews, travel vlogs, DW news, a book review. 9 have simplified subtitles, 7 traditional (Taiwan, DW). The largest is 11.4% of the spoken text. Chinese videos rarely have auto-captions, so these are the uploaders' own subtitles, punctuated by Haiku and otherwise unchanged (`repair.ts` `subs`, `punctuate-prompt.md`).
@@ -23,13 +23,13 @@ Wiktionary keeps a word's content on its traditional page and names its simplifi
 
 ## Varieties
 
-The Chinese header holds every variety. Senses tagged Cantonese (12,187), Hokkien (9,902), Min, Hakka, Wu and smaller ones are another language's words to a Mandarin reader: a sample of the Cantonese-only senses is 住 "for now", 扯 "to leave", 梗 "of course", 咩 the question particle. Decision (the user's): drop them unless also tagged Mandarin (欠缺, 指甲鉗, about 100) or literary ("(literary or Hakka) my" for 吾: literary Chinese is read in Mandarin texts). `import.varieties`: 43,265 senses dropped; a word left with none has no entry (咩). Sichuanese and Dungan are Mandarin dialects but not the standard: dropped too.
+The Chinese header holds every variety. Senses tagged Cantonese (12,187), Hokkien (9,902), Min, Hakka, Wu and smaller ones are another language's words to a Mandarin reader: a sample of the Cantonese-only senses is 住 "for now", 扯 "to leave", 梗 "of course", 咩 the question particle. Decision (the user's): drop them unless also tagged Mandarin (欠缺, 指甲鉗, about 100) or literary ("(literary or Hakka) my" for 吾: literary Chinese is read in Mandarin texts). Taiwanese Mandarin stays, also with another variety's tag (喬 "to negotiate", 有夠 "very", 龜毛 "picky": 67 senses more, 276 in all), after the word's other senses, and a line of only such senses after the page's other lines (`varieties.later`, r7): Wiktionary tags 著's zhe and zhù lines `Jin` + `Taiwanese-Mandarin`, so 着 shows "famous" too, but after 著 zhuó. `import.varieties`: 43,265 senses dropped; a word left with none has no entry (咩). Sichuanese and Dungan are Mandarin dialects but not the standard: dropped too.
 
 There is no separate Classical Chinese in the dump: `Classical` (535) and `literary` (14,548) are sense tags. Decision (the user's): keep and label them (`import.glossLabels`: `(literary) to go` for 之), with Taiwan, Mainland China, Hong Kong, Singapore and Malaysia usage.
 
 ## Reading and pronunciation
 
-- **Reading:** Hanyu Pinyin, `pron.reading` (`import.readingSounds`: a sound tagged exactly Mandarin + Pinyin, with or without Standard): 學習 xuéxí. A page's later etymologies repeat its earlier sounds (`的` the particle lists `dì`, `dí` of "bright" before its `de`), so a line reads only the sounds its page hasn't given yet.
+- **Reading:** Hanyu Pinyin, `pron.reading` (`import.readingSounds`: a sound tagged exactly Mandarin + Pinyin, with or without Standard): 學習 xuéxí. A page's later etymologies repeat its earlier sounds (`的` the particle lists `dì`, `dí` of "bright" before its `de`), so a line reads only the sounds its page hasn't given yet. A line with none of its own reads as its etymology's earlier line (another part of speech), else as the page's sounds only when they are one reading (喬's seven etymologies, qiáo), else not at all: 底 "which" used to read `dǐ, de, di` (698 lines). The server shows an entry with no reading in the first group with its headword, under that group's reading (r7): 底 "which" under dǐ, 貓 "modem" under māo, but 那 "how" under nà.
 - **IPA:** standard Mandarin's only (`import.standardPronTags`): a line gives up to 70 IPA strings, one per variety and city (我: Chengdu, Xi'an, Cantonese, Hokkien, Wu...).
 - Grammar-file lines have no reading yet.
 - Pinyin input (a reader clicking `xuéxí`) is not looked up: 73,647 Mandarin romanization pages would allow it later.
@@ -80,6 +80,9 @@ Sample from r0 (`../corpus/eval/out/zh/r0/gate`), 2,200 items. API and extension
 | r3 | grammar file, readings per etymology, a part's grammar line beside its entries, phrases over whole words, standard IPA | 92.8 (92.8) of 515 | 93.6 (93.8) of 677 | 88.5 (92.6) of 976 | 89.9 |
 | r4 | a letter's own entries before its line, the piece inside a word first, words don't inflect, digits stop at Han, no `是因為` | 95.9 (96.1) of 515 | 96.5 (96.9) of 677 | 91.0 (94.9) of 975 | 92.5 |
 | r5 | ties by letters alone, locatives, senses Wiktionary lacks, `里` prefers `裡` | **97.7** (97.9) of 515 | **96.6** (97.0) of 677 | **91.1** (95.2) of 975 | 93.0 |
+| r7 | review fixes: a sense and its subsense stay one, letter pairs count words, the other spelling keeps the word's capitals; Taiwanese Mandarin after the rest; no reading guessed for an etymology without sounds | **97.5** (97.7) of 515 | **96.8** (97.2) of 677 | **90.9** (95.1) of 975 | 93.0 |
+
+r7 (r6 was imported, not collected) changed 129 of the 2,200 popovers: 1 better, 3 worse by the judge, all three the same senses arranged otherwise (啦 and 搭 merge an etymology with no reading into the first group, 盤's "(Taiwanese Mandarin) overpriced" goes last). The grammar gate's 0.2 is 啦. Judging cost $0.11.
 
 r2 (the grammar file alone) was collected and classified (342 better, 19 worse), not judged; r3 replaces it. The classified diffs' "worse" items led to r4's fixes (a letter's grammar line ahead of its own meaning in a compound: 过程, 回家, 演唱会; 好事 losing its noun; 是因為).
 

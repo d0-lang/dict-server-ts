@@ -472,7 +472,8 @@ const wordPieces = (
   return pieces;
 };
 
-const analyzers = new WeakMap<Language, Analyzer>();
+/** By dictionary: `words` reads it, and a file is one language's. */
+const analyzers = new WeakMap<DictionaryDb, Analyzer>();
 
 /**
  * The language's analyzer, or undefined when it names none. `words` reads the
@@ -484,7 +485,7 @@ export const analyzerFor = (
 ): Analyzer | undefined => {
   const settings = language.context.analyzer;
   if (settings === undefined) return undefined;
-  const cached = analyzers.get(language);
+  const cached = analyzers.get(db);
   if (cached !== undefined) return cached;
   const tokenize: Analyzer = (text) =>
     reread(morphemesOf(text, 0), settings.reread);
@@ -575,7 +576,7 @@ export const analyzerFor = (
     }
     return morphemes;
   };
-  analyzers.set(language, analyze);
+  analyzers.set(db, analyze);
   return analyze;
 };
 
