@@ -6,341 +6,341 @@
 
 ## Personal pronouns
 ja	PRON	I
-mnie	PRON	me (genitive or accusative: "nie ma mnie", I'm not here; "widzisz mnie", you see me) | to me (dative, stressed) | me (after prepositions: "o mnie", about me; "u mnie", at my place)
-mi	PRON	me, to me (dative, unstressed: "daj mi", give me; "podoba mi się", I like it)
-mną	PRON	me (instrumental, after prepositions: "ze mną", with me; "nade mną", above me)
-ty	PRON	you (singular, informal)
-ciebie	PRON	you (singular, genitive or accusative, stressed) | you (after prepositions: "dla ciebie", for you)
-cię	PRON	you (singular, genitive or accusative, unstressed: "kocham cię", I love you)
-tobie	PRON	to you (singular, dative, stressed) | you (after prepositions: "o tobie", about you)
-ci	PRON	you, to you (singular, dative, unstressed: "dziękuję ci", I thank you) | these, those (men or mixed groups: "ci ludzie", these people)
-tobą	PRON	you (singular, instrumental: "z tobą", with you)
-on	PRON	he | it (for a masculine noun)
-jego	PRON	him, it (genitive or accusative, stressed: "nie ma jego", he isn't here)
+mnie	PRON	me: I'm not here (nie ma mnie), you see me (widzisz mnie) | to me, the long form, when the word is stressed → mi | me: about me (o mnie), at my place (u mnie)
+mi	PRON	me, to me, the everyday short form: give me (daj mi), I like it (podoba mi się) → mnie
+mną	PRON	me: with me (ze mną)
+ty	PRON	you, to one person you know well; strangers get pan or pani → pan, pani
+ciebie	PRON	you, the long form, when the word is stressed or follows a preposition: for you (dla ciebie) → cię
+cię	PRON	you, the everyday short form: I love you (kocham cię) → ciebie
+tobie	PRON	to you, the long form, when the word is stressed | you: about you (o tobie)
+ci	PRON	to you, the everyday short form: thank you (dziękuję ci) → tobie | these, those, for men or mixed groups: these people (ci ludzie)
+tobą	PRON	you: with you (z tobą)
+on	PRON	he | it, for a masculine noun: Polish nouns keep their gender, so a table is on
+jego	PRON	him, it, the long form, when the word is stressed: he isn't here (nie ma jego) → go
 jego	DET	his, its
-go	PRON	him, it (genitive or accusative, unstressed: "widzę go", I see him)
-niego	PRON	him, it (after prepositions: "dla niego", for him; "do niego", to him)
-jemu	PRON	to him, to it (dative, stressed)
-mu	PRON	to him, to it (dative, unstressed: "daj mu", give him)
-niemu	PRON	him, it (dative after prepositions: "ku niemu", towards him)
-nim	PRON	him, it (instrumental or locative after prepositions: "z nim", with him; "o nim", about him)
-nim	SCONJ	before (literary, for zanim)
-ona	PRON	she | it (for a feminine noun)
-jej	PRON	her, to her (genitive or dative: "nie ma jej", she isn't here; "daj jej", give her)
+go	PRON	him, it, the everyday short form: I see him (widzę go) → jego
+niego	PRON	him, it: jego after a preposition: for him (dla niego), to him (do niego) → jego
+jemu	PRON	to him, to it, the long form, when the word is stressed → mu
+mu	PRON	to him, to it, the everyday short form: give him (daj mu) → jemu
+niemu	PRON	him, it: jemu after a preposition: towards him (ku niemu) → jemu
+nim	PRON	him, it: with him (z nim), about him (o nim)
+nim	SCONJ	(literary) before; the everyday word is zanim → zanim
+ona	PRON	she | it, for a feminine noun
+jej	PRON	her, to her: she isn't here (nie ma jej), give her (daj jej)
 jej	DET	her, its
-niej	PRON	her, it (after prepositions: "o niej", about her; "do niej", to her)
-ją	PRON	her, it (accusative: "widzę ją", I see her)
-nią	PRON	her, it (instrumental, after prepositions: "z nią", with her)
+niej	PRON	her, it: jej after a preposition: about her (o niej), to her (do niej) → jej
+ją	PRON	her, it: I see her (widzę ją)
+nią	PRON	her, it: with her (z nią)
 ono	PRON	it
-je	PRON	them (accusative, for women, children, animals or things: "widzę je", I see them) | it (accusative of ono)
+je	PRON	them, for women, children, animals or things: I see them (widzę je) | it
 my	PRON	we
-nas	PRON	us (genitive, accusative or locative: "dla nas", for us; "o nas", about us)
-nam	PRON	us, to us (dative)
-nami	PRON	us (instrumental: "z nami", with us)
-wy	PRON	you (plural)
-was	PRON	you (plural, genitive, accusative or locative: "dla was", for you)
-wam	PRON	you, to you (plural, dative)
-wami	PRON	you (plural, instrumental: "z wami", with you)
-oni	PRON	they (men or mixed groups)
-one	PRON	they (women, children, animals or things)
-ich	PRON	them (genitive, or accusative for men or mixed groups: "widzę ich", I see them)
+nas	PRON	us: for us (dla nas), about us (o nas)
+nam	PRON	us, to us
+nami	PRON	us: with us (z nami)
+wy	PRON	you, to several people
+was	PRON	you, to several people: for you (dla was)
+wam	PRON	you, to you, to several people
+wami	PRON	you: with you (z wami)
+oni	PRON	they, for men or mixed groups
+one	PRON	they, for women, children, animals or things
+ich	PRON	them: I see them (widzę ich)
 ich	DET	their
-nich	PRON	them (after prepositions: "dla nich", for them; "o nich", about them)
-im	PRON	them, to them (dative: "daj im", give them)
-nimi	PRON	them (instrumental: "z nimi", with them)
+nich	PRON	them: ich after a preposition: for them (dla nich), about them (o nich) → ich
+im	PRON	them, to them: give them (daj im)
+nimi	PRON	them: with them (z nimi)
 
 ## Reflexive
 się	PRON	the action goes back to the one doing it: washes (myje się) | each other: they know each other (znają się) | part of many verbs, not translated: I'm afraid (boję się); or makes the verb general: people say (mówi się)
-siebie	PRON	oneself, each other (genitive or accusative: "dla siebie", for oneself) | home, one's own place ("u siebie", at home, at one's place; "do siebie", home)
+siebie	PRON	oneself, each other: for oneself (dla siebie) | home, one's own place: at home (u siebie), home (do siebie)
 sobie	PRON	for or to yourself: I bought myself (kupiłem sobie) | about or around yourself: about oneself (o sobie) | (casual) makes it relaxed, done at one's own pace: strolls along (idzie sobie)
-sobą	PRON	oneself (instrumental: "przed sobą", in front of oneself; "pociągać za sobą", to entail) | each other ("między sobą", among themselves)
+sobą	PRON	oneself: in front of oneself (przed sobą); pociągać za sobą: to bring with it, to entail | each other: among themselves (między sobą)
 
 ## Possessives
 mój	DET	my, mine
 moja	DET	my, mine
 moje	DET	my, mine
-mojego	DET	my, mine (genitive; masculine animate accusative)
-mojej	DET	my, mine (feminine genitive, dative or locative)
-mojemu	DET	my, to my (dative)
-moim	DET	my (instrumental or locative; plural dative)
-moją	DET	my (feminine accusative or instrumental)
-moi	DET	my (men or mixed groups)
-moich	DET	my, mine (plural genitive, locative; men accusative)
-moimi	DET	my (plural instrumental)
-twój	DET	your, yours (singular)
-twoja	DET	your, yours (singular)
-twoje	DET	your, yours (singular)
-twojego	DET	your, yours (singular, genitive)
-twojej	DET	your, yours (singular, feminine genitive, dative or locative)
-twojemu	DET	your, to your (singular, dative)
-twoim	DET	your (singular, instrumental or locative)
-twoją	DET	your (singular, feminine accusative or instrumental)
-twoi	DET	your (singular owner; men or mixed groups)
-twoich	DET	your, yours (singular owner; plural genitive)
-twoimi	DET	your (singular owner; plural instrumental)
-swój	DET	one's own: my, your, his, her, its, our, their own (refers back to the subject)
-swoja	DET	one's own (refers back to the subject)
-swoje	DET	one's own (refers back to the subject)
-swojego	DET	one's own (genitive)
-swojej	DET	one's own (feminine genitive, dative or locative)
-swojemu	DET	one's own, to one's own (dative)
-swoim	DET	one's own (instrumental or locative)
-swoją	DET	one's own (feminine accusative or instrumental)
-swoi	DET	one's own (men or mixed groups) | one's own people ("swoi", our people)
-swoich	DET	one's own (plural genitive or locative)
-swoimi	DET	one's own (plural instrumental)
+mojego	DET	my, mine
+mojej	DET	my, mine
+mojemu	DET	my, to my
+moim	DET	my
+moją	DET	my
+moi	DET	my, for men or mixed groups
+moich	DET	my, mine
+moimi	DET	my
+twój	DET	your, yours, to one person
+twoja	DET	your, yours, to one person
+twoje	DET	your, yours, to one person
+twojego	DET	your, yours
+twojej	DET	your, yours
+twojemu	DET	your, to your
+twoim	DET	your
+twoją	DET	your
+twoi	DET	your, for men or mixed groups
+twoich	DET	your, yours
+twoimi	DET	your
+swój	DET	one's own: my, your, his, her, our, their, whoever the subject is; Polish uses it where English repeats "his" or "my"
+swoja	DET	one's own: whoever the subject is
+swoje	DET	one's own: whoever the subject is
+swojego	DET	one's own
+swojej	DET	one's own
+swojemu	DET	one's own, to one's own
+swoim	DET	one's own
+swoją	DET	one's own
+swoi	DET	one's own, for men or mixed groups | swoi: our people, one's own people
+swoich	DET	one's own
+swoimi	DET	one's own
 nasz	DET	our, ours
 nasza	DET	our, ours
 nasze	DET	our, ours
-naszego	DET	our, ours (genitive)
-naszej	DET	our, ours (feminine genitive, dative or locative)
-naszemu	DET	our, to our (dative)
-naszym	DET	our (instrumental or locative)
-naszą	DET	our (feminine accusative or instrumental)
-nasi	DET	our (men or mixed groups) | our people, our side
-naszych	DET	our, ours (plural genitive or locative)
-naszymi	DET	our (plural instrumental)
-wasz	DET	your, yours (plural)
-wasza	DET	your, yours (plural)
-wasze	DET	your, yours (plural)
-waszego	DET	your, yours (plural owner, genitive)
-waszej	DET	your, yours (plural owner, feminine genitive, dative or locative)
-waszemu	DET	your, to your (plural owner, dative)
-waszym	DET	your (plural owner, instrumental or locative)
-waszą	DET	your (plural owner, feminine accusative or instrumental)
-wasi	DET	your (plural owner; men or mixed groups)
-waszych	DET	your, yours (plural owner; plural genitive)
+naszego	DET	our, ours
+naszej	DET	our, ours
+naszemu	DET	our, to our
+naszym	DET	our
+naszą	DET	our
+nasi	DET	our, for men or mixed groups | our people, our side
+naszych	DET	our, ours
+naszymi	DET	our
+wasz	DET	your, yours, to several people
+wasza	DET	your, yours, to several people
+wasze	DET	your, yours, to several people
+waszego	DET	your, yours
+waszej	DET	your, yours
+waszemu	DET	your, to your
+waszym	DET	your
+waszą	DET	your
+wasi	DET	your, for men or mixed groups
+waszych	DET	your, yours
 
 ## Demonstratives
-ten	DET	this, that (masculine)
+ten	DET	this, that
 ten	PRON	this one, that one
-ten	PART	(colloquial filler) um, like ("no, ten...", well, um...)
-ta	DET	this, that (feminine)
+ten	PART	(colloquial) um, like: a filler while you look for a word: well, um ... (no, ten ...)
+ta	DET	this, that
 ta	PRON	this one, that one
-to	DET	this, that (neuter)
-to	PRON	this, that, it ("to jest dobre", this is good) | (linking two things) is, are ("Warszawa to stolica", Warsaw is the capital)
-to	PART	(for emphasis or to move on) so, then, well ("to idziemy?", so are we going?)
-tego	DET	this, that (genitive; masculine animate accusative)
-tego	PRON	this, that, it (genitive: "nie wiem tego", I don't know that)
-tej	DET	this, that (feminine genitive, dative or locative)
-temu	DET	this, that, to this (dative)
-temu	PRON	to this, to that (dative)
-temu	ADP	ago (after a time: "dwa lata temu", two years ago)
-tym	DET	this, that (instrumental or locative; plural dative)
-tym	PRON	this, that, it (instrumental or locative: "o tym", about it; "z tym", with that)
-tym	PART	(with a comparative) the ("tym lepiej", all the better; "im więcej, tym lepiej", the more the better)
-tę	DET	this, that (feminine accusative)
-tą	DET	this, that (feminine instrumental; colloquial accusative)
-te	DET	these, those (women, children, animals or things)
+to	DET	this, that
+to	PRON	this, that, it: this is good (to jest dobre) | stands for "is" between two things: Warsaw is the capital (Warszawa to stolica)
+to	PART	so, then, well: moves things on: so are we going? (to idziemy?)
+tego	DET	this, that
+tego	PRON	this, that, it: I don't know that (nie wiem tego)
+tej	DET	this, that
+temu	DET	this, that, to this
+temu	PRON	to this, to that
+temu	ADP	ago, after a length of time: two years ago (dwa lata temu)
+tym	DET	this, that
+tym	PRON	this, that, it: about it (o tym), with that (z tym)
+tym	PART	the, with a comparison: all the better (tym lepiej), the more the better (im więcej, tym lepiej)
+tę	DET	this, that
+tą	DET	this, that
+te	DET	these, those, for women, children, animals or things
 te	PRON	these, those
-tych	DET	these, those (plural genitive or locative; men accusative)
-tych	PRON	these, those (plural genitive or locative)
-tymi	DET	these, those (plural instrumental)
-tamten	DET	that (over there)
-tamta	DET	that (over there)
-tamto	DET	that (over there)
+tych	DET	these, those
+tych	PRON	these, those
+tymi	DET	these, those
+tamten	DET	that, over there; further away than ten
+tamta	DET	that, over there
+tamto	DET	that, over there
 tamto	PRON	that
-tamtego	DET	that (over there; genitive)
-tamtej	DET	that (over there; feminine genitive, dative or locative)
-tamtym	DET	that (over there; instrumental or locative)
-tamci	DET	those (men or mixed groups)
-tamte	DET	those
-tamtych	DET	those (genitive or locative)
-taki	DET	such, like this, like that | ("taki sam", the same)
+tamtego	DET	that, over there
+tamtej	DET	that, over there
+tamtym	DET	that, over there
+tamci	DET	those, over there, for men or mixed groups
+tamte	DET	those, over there
+tamtych	DET	those, over there
+taki	DET	such, like this, like that | taki sam: the same
 taka	DET	such, like this, like that
 takie	DET	such, like this, like that
-takiego	DET	such (genitive: "czegoś takiego", something like that)
-takiej	DET	such (feminine genitive, dative or locative)
-takim	DET	such (instrumental or locative)
-taką	DET	such (feminine accusative or instrumental)
-tacy	DET	such (men or mixed groups)
-takich	DET	such (plural genitive or locative)
+takiego	DET	such: something like that (czegoś takiego)
+takiej	DET	such
+takim	DET	such
+taką	DET	such
+tacy	DET	such, for men or mixed groups
+takich	DET	such
 
 ## Interrogatives and relatives
-kto	PRON	who | whoever, anyone who ("kto chce, może iść", whoever wants can go)
-kogo	PRON	whom, who (genitive or accusative: "kogo widzisz?", who do you see?)
-komu	PRON	to whom, who (dative: "komu to dałeś?", who did you give it to?)
-kim	PRON	whom, who (instrumental or locative: "z kim?", with whom?; "o kim?", about whom?)
-co	PRON	what | which, that (relative: "to, co mówisz", what you say)
-co	ADP	every ("co roku", every year; "co chwilę", every moment)
-co	PART	(in questions or exclamations) what, how ("co za dzień!", what a day!) | (at the end of a sentence) right?, eh? ("fajne, co?", nice, right?)
-czego	PRON	what (genitive: "czego szukasz?", what are you looking for?) | why, what for (colloquial: "czego się gapisz?", what are you staring at?)
-czemu	PRON	to what (dative)
-czemu	ADV	why (colloquial: "czemu nie?", why not?)
-czym	PRON	what (instrumental or locative: "czym jedziesz?", how are you travelling?; "o czym?", about what?)
+kto	PRON	who | whoever, anyone who: whoever wants can go (kto chce, może iść)
+kogo	PRON	whom, who: who do you see? (kogo widzisz?)
+komu	PRON	to whom, who: who did you give it to? (komu to dałeś?)
+kim	PRON	whom, who: with whom? (z kim?), about whom? (o kim?)
+co	PRON	what | which, that: what you say (to, co mówisz)
+co	ADP	every, for regular repeats: every year (co roku), every moment (co chwilę)
+co	PART	what, how, in exclamations: what a day! (co za dzień!) | right?, eh?, at the end of a sentence: nice, right? (fajne, co?)
+czego	PRON	what: what are you looking for? (czego szukasz?) | (colloquial) why, what for: what are you staring at? (czego się gapisz?)
+czemu	PRON	to what
+czemu	ADV	(colloquial) why: why not? (czemu nie?)
+czym	PRON	what, by what: how are you travelling? (czym jedziesz?), about what? (o czym?)
 który	DET	which, what
-który	PRON	who, which, that (relative)
+który	PRON	who, which, that: joins a description to a noun
 która	DET	which, what
-która	PRON	who, which, that (relative)
+która	PRON	who, which, that
 które	DET	which, what
-które	PRON	which, that (relative)
-którego	PRON	whom, which, whose (genitive; masculine animate accusative)
-której	PRON	whom, which, whose (feminine genitive, dative or locative)
-któremu	PRON	to whom, to which (dative)
-którym	PRON	whom, which (instrumental or locative; plural dative)
-którą	PRON	whom, which (feminine accusative or instrumental)
-którzy	PRON	who (men or mixed groups)
-których	PRON	whom, which, whose (plural genitive or locative; men accusative)
-którymi	PRON	whom, which (plural instrumental)
-jaki	DET	what, what kind of, which | such as, like (relative)
+które	PRON	which, that
+którego	PRON	whom, which, whose
+której	PRON	whom, which, whose
+któremu	PRON	to whom, to which
+którym	PRON	whom, which
+którą	PRON	whom, which
+którzy	PRON	who, for men or mixed groups
+których	PRON	whom, which, whose
+którymi	PRON	whom, which
+jaki	DET	what, what kind of, which | such as, like
 jaka	DET	what, what kind of, which
 jakie	DET	what, what kind of, which
-jakiego	DET	what, what kind of (genitive)
-jakiej	DET	what, what kind of (feminine genitive, dative or locative)
-jakim	DET	what, what kind of (instrumental or locative)
-jaką	DET	what, what kind of (feminine accusative or instrumental)
-jacy	DET	what, what kind of (men or mixed groups)
-jakich	DET	what, what kind of (plural genitive or locative)
+jakiego	DET	what, what kind of
+jakiej	DET	what, what kind of
+jakim	DET	what, what kind of
+jaką	DET	what, what kind of
+jacy	DET	what, what kind of, for men or mixed groups
+jakich	DET	what, what kind of
 
 ## Quantifiers and indefinites
 każdy	DET	every, each
 każdy	PRON	everyone, everybody, each one
 każda	DET	every, each
 każde	DET	every, each
-każdego	DET	every, each (genitive; masculine animate accusative: "każdego dnia", every day)
-każdego	PRON	everyone (genitive or accusative)
-każdej	DET	every, each (feminine genitive, dative or locative)
-każdemu	DET	every, to every (dative)
+każdego	DET	every, each: every day (każdego dnia)
+każdego	PRON	everyone
+każdej	DET	every, each
+każdemu	DET	every, to every
 każdemu	PRON	everyone, to everyone
-każdym	DET	every, each (instrumental or locative)
-każdą	DET	every, each (feminine accusative or instrumental)
+każdym	DET	every, each
+każdą	DET	every, each
 wszystko	PRON	everything, all
-wszystkiego	PRON	everything (genitive: "wszystkiego najlepszego", all the best)
-wszystkiego	PART	in all, in total ("wszystkiego dziesięć osób", ten people in all)
-wszystkim	PRON	everyone, to everyone (dative) | everything (instrumental or locative: "o wszystkim", about everything)
-wszyscy	PRON	everyone, everybody, all (men or mixed groups)
-wszystkie	DET	all (women, children, animals or things)
+wszystkiego	PRON	everything: all the best (wszystkiego najlepszego)
+wszystkiego	PART	in all, in total: ten people in all (wszystkiego dziesięć osób)
+wszystkim	PRON	everyone, to everyone | everything: about everything (o wszystkim)
+wszyscy	PRON	everyone, all, for men or mixed groups
+wszystkie	DET	all, for women, children, animals or things
 wszystkie	PRON	all of them
-wszystkich	PRON	everyone, all (genitive, locative; men accusative)
-wszystkich	DET	all (genitive or locative)
-wszystkimi	PRON	everyone, all (instrumental)
-nic	PRON	nothing ("nic nie wiem", I don't know anything)
-niczego	PRON	nothing (genitive)
-niczym	PRON	nothing (instrumental or locative: "o niczym", about nothing) | like (literary: "niczym ptak", like a bird)
-nikt	PRON	nobody, no one
-nikogo	PRON	nobody, no one (genitive or accusative)
-nikomu	PRON	to nobody, nobody (dative)
-nikim	PRON	nobody (instrumental or locative)
+wszystkich	PRON	everyone, all
+wszystkich	DET	all
+wszystkimi	PRON	everyone, all
+nic	PRON	nothing; the verb takes nie as well: I don't know anything (nic nie wiem)
+niczego	PRON	nothing
+niczym	PRON	nothing: about nothing (o niczym) | (literary) like: like a bird (niczym ptak)
+nikt	PRON	nobody, no one; the verb takes nie as well
+nikogo	PRON	nobody, no one
+nikomu	PRON	nobody, to nobody
+nikim	PRON	nobody
 coś	PRON	something, anything
-coś	PART	(colloquial) somehow, for some reason ("coś mi nie pasuje", somehow it doesn't suit me) | about, something like ("coś koło piątej", about five o'clock)
-czegoś	PRON	something, anything (genitive: "czegoś takiego", anything like that)
-czymś	PRON	something (instrumental or locative)
+coś	PART	(colloquial) somehow, for some reason: somehow it doesn't suit me (coś mi nie pasuje) | about, something like: about five o'clock (coś koło piątej)
+czegoś	PRON	something, anything: anything like that (czegoś takiego)
+czymś	PRON	something
 ktoś	PRON	someone, somebody
-kogoś	PRON	someone, somebody (genitive or accusative)
-komuś	PRON	to someone (dative)
-kimś	PRON	someone (instrumental or locative)
-sam	DET	alone, by oneself | himself, myself, yourself (emphatic: "sam to zrobiłem", I did it myself) | the very ("sam środek", the very middle)
-sama	DET	alone, by herself | herself, myself (emphatic) | the very
-samo	DET	alone, by itself | the same ("to samo", the same thing)
+kogoś	PRON	someone, somebody
+komuś	PRON	to someone
+kimś	PRON	someone
+sam	DET	alone, by oneself | himself, myself: stresses that no one else did it: I did it myself (sam to zrobiłem) | the very: the very middle (sam środek)
+sama	DET	alone, by herself | herself, myself: stresses that no one else did it | the very
+samo	DET	alone, by itself | to samo: the same thing
 
 ## Conjunctions the dump lacks (wiktextract has no Polish line for i)
-i	CCONJ	and ("ty i ja", you and I; "i tak dalej", and so on) | too, also, even ("i on to wie", even he knows it)
+i	CCONJ	and: you and I (ty i ja), and so on (i tak dalej) | too, even: even he knows it (i on to wie)
 
 ## Conditional particles
-by	PART	would (conditional: "fajnie by było", it would be nice; "co by było", what would happen)
-by	SCONJ	in order to, so that ("przyszedł, by pomóc", he came to help)
-bym	PART	I would (conditional, on the verb or apart from it: "zrobiłbym", I would do; "chętnie bym poszedł", I would gladly go) | so that I (in żebym, abym)
-byś	PART	you would (conditional, singular: "mógłbyś", could you) | so that you (in żebyś, abyś)
-byśmy	PART	we would (conditional: "moglibyśmy", we could; "byśmy wszystko wyrzucili", we would throw everything away) | so that we (in żebyśmy, abyśmy)
-byście	PART	you would (conditional, plural) | so that you (plural, in żebyście, abyście)
+by	PART	would: it would be nice (fajnie by było), what would happen (co by było)
+by	SCONJ	so that, in order to: he came to help (przyszedł, by pomóc)
+bym	PART	I would; often joined to the verb: I would do (zrobiłbym), I would gladly go (chętnie bym poszedł) | so that I, in żebym or abym
+byś	PART	you would; often joined to the verb: could you (mógłbyś) | so that you, in żebyś or abyś
+byśmy	PART	we would; often joined to the verb: we could (moglibyśmy) | so that we, in żebyśmy or abyśmy
+byście	PART	you would, to several people | so that you, in żebyście or abyście
 
 ## Forms of być
 # Irregular forms a reader can't connect to "to be" by themselves: the protocol
 # has no inflection tables.
-jestem	AUX	I am ("jestem w domu", I'm at home) → być
-jesteś	AUX	you are (singular) → być
-jest	AUX	is ("on jest w domu", he is at home) → być | there is ("jest problem", there is a problem)
-jesteśmy	AUX	we are → być
-jesteście	AUX	you are (plural) → być
-są	AUX	are ("oni są w domu", they are at home) → być | there are
-był	AUX	was (masculine: "był w domu", he was at home; "był zbudowany", was built) → być | there was ("był problem", there was a problem)
-była	AUX	was (feminine) → być | there was
-było	AUX	was, it was (neuter: "było zimno", it was cold) → być | there was, there were ("było dużo ludzi", there were many people)
-byli	AUX	were (men or mixed groups) → być
-były	AUX	were (women, children, animals or things) → być
-będę	AUX	I will be → być | I will (future: "będę czytać", I will read)
-będziesz	AUX	you will be → być | you will (future)
-będzie	AUX	will be ("jutro będzie padać", it will rain tomorrow) → być | will (future: "będzie pracował", he will work) | there will be
-będziemy	AUX	we will be → być | we will (future)
-będziecie	AUX	you will be (plural) → być | you will (future)
-będą	AUX	they will be → być | they will (future)
-byłby	AUX	would be (masculine: "byłby szczęśliwy", he would be happy) → być
-byłaby	AUX	would be (feminine) → być
-byłoby	AUX	would be, it would be ("byłoby lepiej", it would be better) → być
-byliby	AUX	would be (men or mixed groups) → być
-byłyby	AUX	would be (women, children, animals or things) → być
-będąc	AUX	being ("będąc w domu", being at home; while one was) → być
+jestem	AUX	form of być: I am: I'm at home (jestem w domu) → być
+jesteś	AUX	form of być: you are → być
+jest	AUX	form of być: is: he is at home (on jest w domu) → być | there is: there's a problem (jest problem)
+jesteśmy	AUX	form of być: we are → być
+jesteście	AUX	form of być: you are, to several people → być
+są	AUX	form of być: are: they are at home (oni są w domu) → być | there are
+był	AUX	past of być: was: he was at home (był w domu), was built (był zbudowany) → być | there was: there was a problem (był problem)
+była	AUX	past of być: was → być | there was
+było	AUX	past of być: was, it was: it was cold (było zimno) → być | there was, there were: there were many people (było dużo ludzi)
+byli	AUX	past of być: were, for men or mixed groups → być
+były	AUX	past of być: were, for women, children, animals or things → być
+będę	AUX	future of być: I will be → być | with a verb, I will: I will read (będę czytać)
+będziesz	AUX	future of być: you will be → być | with a verb, you will
+będzie	AUX	future of być: will be: it will rain tomorrow (jutro będzie padać) → być | with a verb, will: he will work (będzie pracował) | there will be
+będziemy	AUX	future of być: we will be → być | with a verb, we will
+będziecie	AUX	future of być: you will be, to several people → być | with a verb, you will
+będą	AUX	future of być: they will be → być | with a verb, they will
+byłby	AUX	form of być: would be: he would be happy (byłby szczęśliwy) → być
+byłaby	AUX	form of być: would be → być
+byłoby	AUX	form of być: would be, it would be: it would be better (byłoby lepiej) → być
+byliby	AUX	form of być: would be, for men or mixed groups → być
+byłyby	AUX	form of być: would be, for women, children, animals or things → być
+będąc	AUX	form of być: being, while one was: being at home (będąc w domu) → być
 
 ## Forms of móc, mieć, chcieć, wiedzieć, iść and dać
-mogę	VERB	I can, I may ("mogę pomóc", I can help; "nie mogę", I can't) → móc
-możesz	VERB	you can ("możesz mi pomóc?", can you help me?) → móc
-może	VERB	can, may (he, she or it: "on może przyjść", he can come) → móc
-może	PART	maybe, perhaps ("może jutro", maybe tomorrow) | how about ("może kawy?", how about some coffee?)
-możemy	VERB	we can ("możemy iść", we can go) → móc
-mogą	VERB	they can, may → móc
-mógł	VERB	could, was able to (past, masculine: "nie mógł spać", he couldn't sleep) → móc | could have, might (with by: "mógłby", he could)
-mogła	VERB	could, was able to (past, feminine) → móc
-mogli	VERB	could, were able to (past, plural) → móc
-mam	VERB	I have ("mam kota", I have a cat) → mieć | I am to, I should ("co mam zrobić?", what should I do?)
-masz	VERB	you have ("masz czas?", have you got time?) → mieć | here you are (handing something over: "masz", here)
-ma	VERB	has ("ona ma dwa lata", she is two years old) → mieć | is to, should ("ma przyjść", he is supposed to come)
-mamy	VERB	we have → mieć
-mają	VERB	they have → mieć
-chcę	VERB	I want ("chcę pić", I'm thirsty) → chcieć
-chcesz	VERB	you want ("chcesz kawy?", do you want some coffee?) → chcieć
-chce	VERB	wants (he, she or it) → chcieć | chce się: feel like ("chce mi się pić", I'm thirsty)
-chcemy	VERB	we want → chcieć
-chcą	VERB	they want → chcieć
-wiem	VERB	I know ("nie wiem", I don't know) → wiedzieć
-wiesz	VERB	you know ("wiesz co?", you know what?) → wiedzieć
-wie	VERB	knows (he, she or it) → wiedzieć
-idę	VERB	I go, I'm going, I'm walking (iść: "idę do domu", I'm going home) → iść
-idzie	VERB	goes, is going (he, she or it; iść) → iść | is going (well): "jak idzie?", how's it going?
-idą	VERB	go, are going (they; iść) → iść
-szedł	VERB	was going, was walking (past of iść, masculine) → iść
-da	VERB	will give (he, she or it; dać) → dać | da się: it can be done ("nie da się", it can't be done)
+mogę	VERB	form of móc: I can, I may: I can help (mogę pomóc), I can't (nie mogę) → móc
+możesz	VERB	form of móc: you can: can you help me? (możesz mi pomóc?) → móc
+może	VERB	form of móc: can, may: he can come (on może przyjść) → móc
+może	PART	maybe, perhaps: maybe tomorrow (może jutro) | how about, offering: how about some coffee? (może kawy?)
+możemy	VERB	form of móc: we can: we can go (możemy iść) → móc
+mogą	VERB	form of móc: they can, may → móc
+mógł	VERB	past of móc: could, was able to: he couldn't sleep (nie mógł spać) → móc | mógłby: could, might
+mogła	VERB	past of móc: could, was able to → móc
+mogli	VERB	past of móc: could, were able to → móc
+mam	VERB	form of mieć: I have: I have a cat (mam kota) → mieć | I am to, I should: what should I do? (co mam zrobić?)
+masz	VERB	form of mieć: you have: have you got time? (masz czas?) → mieć | here you are, handing something over (masz)
+ma	VERB	form of mieć: has; Polish gives your age with mieć: she is two years old (ona ma dwa lata) → mieć | is to, is supposed to: he's supposed to come (ma przyjść)
+mamy	VERB	form of mieć: we have → mieć
+mają	VERB	form of mieć: they have → mieć
+chcę	VERB	form of chcieć: I want: I'm thirsty (chcę pić) → chcieć
+chcesz	VERB	form of chcieć: you want: do you want some coffee? (chcesz kawy?) → chcieć
+chce	VERB	form of chcieć: wants → chcieć | chce się: feel like it: I'm thirsty (chce mi się pić)
+chcemy	VERB	form of chcieć: we want → chcieć
+chcą	VERB	form of chcieć: they want → chcieć
+wiem	VERB	form of wiedzieć: I know: I don't know (nie wiem) → wiedzieć
+wiesz	VERB	form of wiedzieć: you know: you know what? (wiesz co?) → wiedzieć
+wie	VERB	form of wiedzieć: knows → wiedzieć
+idę	VERB	form of iść: I go, I'm going, on foot: I'm going home (idę do domu) → iść
+idzie	VERB	form of iść: goes, is going → iść | is going, of how things go: how's it going? (jak idzie?)
+idą	VERB	form of iść: they go, are going → iść
+szedł	VERB	past of iść: was going, was walking → iść
+da	VERB	form of dać: will give → dać | da się: it can be done: it can't be done (nie da się)
 
 ## Connectives and intensifiers with a sense Wiktionary lacks
-czyli	PART	that is, i.e., in other words ("dwa, czyli para", two, i.e. a pair) | so, which means (a conclusion or the next step: "czyli teraz dodajemy", so now we add)
-w tym	ADP	in this, in that (locative: "w tym roku", this year; "w tym odcinku", in this episode) | including ("pięć osób, w tym dzieci", five people, including children)
-w sensie	PART	in the sense of, as in | I mean, like (colloquial filler: "w sensie, że...", I mean...)
-mega	ADV	very, really (colloquial: "mega niskie", very low) | awesome, great (as a reply)
-super	ADV	very, really (colloquial: "super nowoczesny", super-modern) | great, excellently (as a reply: "Super!", great!)
+czyli	PART	that is, in other words: two, i.e. a pair (dwa, czyli para) | so, which means: so now we add (czyli teraz dodajemy)
+w tym	ADP	in this, in that: this year (w tym roku) | including: five people, including children (pięć osób, w tym dzieci)
+w sensie	PART	in the sense of, as in | (colloquial) I mean, like: I mean ... (w sensie, że ...)
+mega	ADV	(colloquial) very, really: very low (mega niskie) | (colloquial) awesome, as a reply
+super	ADV	(colloquial) very, really: super-modern (super nowoczesny) | (colloquial) great, as a reply (Super!)
 
 ## Units and abbreviations
-m	NOUN	m, metre (symbol: "10 m", ten metres; "m kw.", square metres)
-cm	NOUN	cm, centimetre (symbol)
-g	NOUN	g, gram (symbol: "100 g", 100 grams)
-kg	NOUN	kg, kilogram (symbol)
-ok	ADV	about, approximately (abbreviation of około: "ok. 50 osób", about 50 people) | OK, okay (colloquial)
+m	NOUN	metre: ten metres (10 m); m kw.: square metres
+cm	NOUN	centimetre
+g	NOUN	gram: 100 grams (100 g)
+kg	NOUN	kilogram
+ok	ADV	about, roughly: short for około: about 50 people (ok. 50 osób) → około | (colloquial) OK, okay
 CO2	NOUN	CO₂, carbon dioxide
 
 ## Hesitation and backchannel sounds
-yyy	INTJ	uh, um (hesitation in speech)
-mhm	INTJ	uh-huh, mm-hmm (agreement, listening)
-e	INTJ	eh, um (hesitation, at the start of a sentence: "E, nie wiem", um, I don't know) | hey! (calling someone's attention)
+yyy	INTJ	uh, um: a pause while thinking
+mhm	INTJ	uh-huh, mm-hmm: agreeing, or showing you're listening
+e	INTJ	eh, um: a pause at the start: um, I don't know (E, nie wiem) | hey!, to get someone's attention
 
 ## Set phrases English Wiktionary lacks (hand patches; the context rules match them like any phrase)
 za dużo	ADV	too much, too many
 za mało	ADV	too little, too few
-nie wolno	ADV	it is not allowed, one must not ("nie wolno palić", no smoking)
-pod postacią	ADP	in the form of (+ genitive)
+nie wolno	ADV	it's not allowed, one must not: no smoking (nie wolno palić)
+pod postacią	ADP	in the form of
 nie później niż	ADV	no later than
-mieć dosyć	VERB	to have had enough, to be fed up ("mam dosyć", I've had enough)
-dojść do	VERB	to happen, to take place ("doszło do wypadku", there was an accident) | to reach, to come to ("dojść do wniosku", to come to a conclusion)
-dochodzić do	VERB	to happen, to take place ("dochodzi do konfliktów", conflicts arise) | to reach, to come to
+mieć dosyć	VERB	to have had enough, to be fed up: I've had enough (mam dosyć)
+dojść do	VERB	to happen: there was an accident (doszło do wypadku) | to reach, to come to: to come to a conclusion (dojść do wniosku)
+dochodzić do	VERB	to happen: conflicts arise (dochodzi do konfliktów) | to reach, to come to
 podjąć decyzję	VERB	to make a decision
 podejmować decyzję	VERB	to make decisions, to decide
 zrobić zdjęcie	VERB	to take a photo
 robić zdjęcie	VERB	to take a photo, to take photos
-by było	X	it would be (conditional: "fajnie by było", it would be nice)
-można było	X	one could, it was possible ("można było zobaczyć", one could see)
+by było	X	it would be: it would be nice (fajnie by było)
+można było	X	one could, it was possible: one could see (można było zobaczyć)
 można będzie	X	one will be able to, it will be possible
 jak wiadomo	ADV	as is known, as everyone knows
 w związku z tym	ADV	therefore, in view of this
 w związku z czym	ADV	therefore, for this reason
 
 ## Senses Wiktionary lacks
-zdaniem	ADP	in the opinion of, according to (+ genitive: "zdaniem ekspertów", according to experts; "moim zdaniem", in my opinion)
-pewnie	ADV	probably, I suppose (colloquial: "pewnie tak", probably so; "pewnie jest w domu", he's probably at home) | surely, certainly | confidently, firmly
-teraz	ADV	now (at the present time) | then, by then (in a past narrative: "teraz już wiedział", by then he knew)
+zdaniem	ADP	in the opinion of: according to experts (zdaniem ekspertów), in my opinion (moim zdaniem)
+pewnie	ADV	(colloquial) probably, I suppose: he's probably at home (pewnie jest w domu) | surely, certainly | confidently, firmly
+teraz	ADV	now | then, by then, in a story told in the past: by then he knew (teraz już wiedział)
