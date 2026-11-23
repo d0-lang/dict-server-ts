@@ -101,7 +101,7 @@ export const singleWord = (c: Click): Answer => {
       ? []
       : c
           .rows(lemma)
-          .filter((row) => lookupKey(row.lemma) === lookupKey(lemma))
+          .filter((row) => c.ownLemma(row, lemma))
           .map((row) => row.id);
   const ranked =
     byLemma.length > 0

@@ -166,8 +166,7 @@ const clauseEdgeIds = (c: Click): ReadonlyArray<number> => {
         .filter(
           (row) =>
             !NAMING.has(row.pos) &&
-            ((row.source === FormSource.Lemma &&
-              lookupKey(row.lemma) === key) ||
+            ((row.source === FormSource.Lemma && c.ownLemma(row, key)) ||
               row.source === FormSource.FormOf ||
               (row.source === FormSource.Inflection &&
                 !INFLECTING.has(row.pos))),

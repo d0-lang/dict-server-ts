@@ -1,0 +1,62 @@
+#:schema ../../spec/language.schema.json
+# Chinese: written Mandarin, in simplified and traditional characters. Every
+# setting is checked against the dump (data/raw/zh.jsonl: 328,919 lines) and
+# the corpus in profile.md.
+
+code = "zh"
+name = "Chinese"
+target = "en"
+
+[import]
+# Wiktionary keeps each word on its traditional page (學習) and names the
+# simplified spelling there (116,906 forms); the simplified page is a soft
+# redirect (125,147 lines). A reader of either script looks up the same word.
+otherScriptTags = ["Simplified-Chinese"]
+# Headword lines list variant characters as alternatives (44,498 forms), and
+# a variant is often a word of its own: 悅 "joy" lists 說 "to say", 搿 lists
+# 个. They only reach the word when they reach nothing else.
+markedAlternatives = true
+# The Chinese header holds every variety. A reader of Mandarin doesn't read
+# Cantonese, Hokkien or Wu words (住 "for now", 扯 "to leave" in Cantonese):
+# about 25,000 senses. A sense also tagged Mandarin stays (欠缺), and so does
+# a literary one ("(literary or Hakka) my" for 吾): literary Chinese is read
+# in Mandarin texts. Taiwanese Mandarin is Mandarin, but not the mainland's
+# most texts are written in: its senses come after the others, and a line of
+# only such senses after the word's other lines (喬 "to negotiate", tagged
+# Hokkien too; 有夠, 龜毛 with Min). Not with Jin: the only such senses are
+# 著's zhe and zhù lines (20), where the pair names the varieties that spell
+# them 著, and 着 doesn't mean "famous" (著名 keeps 著).
+varieties = { others = ["Cantonese", "Hokkien", "Min", "Hakka", "Wu", "Teochew", "Xiang", "Gan", "Jin", "Puxian-Min", "Taiwanese-Hokkien", "Zhangzhou-Hokkien", "Xiamen", "Quanzhou", "Zhangzhou", "Leizhou-Min", "Pinghua", "Hainanese", "Jinjiang-Hokkien", "Penang-Hokkien", "Taishanese", "Sixian", "Hailu", "Dabu", "Raoping", "Zhao'an", "Longyan-Min", "Coastal-Min", "Yilan-Hokkien", "Penghu-Hokkien", "Sanxia-Hokkien", "Taichung-Hokkien", "Lukang-Hokkien", "Hsinchu-Hokkien", "Kaohsiung-Hokkien", "Huizhou", "Waxiang", "Dungan", "Sichuanese"], keep = ["Mandarin", "literary", "Classical"], later = ["Taiwanese-Mandarin"], laterNotWith = ["Jin"] }
+# The reading is Hanyu Pinyin, which 200,380 lines give (學習: xuéxí): a
+# learner sounds the word out by it. Only the standard pronunciation's: not
+# Sichuanese (說 so²) or Xi'an (shě).
+readingSounds = [["Mandarin", "Pinyin"], ["Mandarin", "Standard", "Pinyin"], ["Mandarin", "Pinyin", "Standard-Chinese"]]
+# IPA of standard Mandarin (tagged Mandarin and Standard-Chinese), not of
+# the dozens of other varieties and cities a line may give (我: Chengdu,
+# Xi'an, Cantonese, Hokkien, Wu...).
+standardPronTags = ["Mandarin", "Standard-Chinese"]
+# Where a sense is used, which the gloss doesn't say: Classical and literary
+# senses (之 "(literary) to go") read in formal writing, and words of Taiwan
+# or the mainland (土豆 "potato" on the mainland, "peanut" in Taiwan).
+glossLabels = ["Classical", "literary", "Taiwan", "Taiwanese-Mandarin", "Mainland-China", "Hong-Kong", "Singapore", "Malaysia", "dialectal"]
+
+[headword]
+labels = []
+# 学习 (學習) in simplified text, 學習 (学习) in traditional.
+otherSpellings = true
+
+[context.analyzer]
+# Chinese writes no spaces, and the browser's segmenter (ICU) gives pieces
+# the dictionary lacks (都很, 觉得很): 12.9% of the corpus's words found
+# nothing on the plain import. Words don't inflect, so no analyzer is needed:
+# the dictionary's own words cut the sentence (profile.md: the piece when the
+# dictionary has it, else the dictionary's word around the click, agreed with
+# the corpus's reference words on 84.1%, against ICU's 80.6% and Lindera's
+# CC-CEDICT, which only adds a second word list and 125 MB).
+dictionary = "words"
+
+# The dictionary's words, made of their letters: a word's letters are its
+# parts (手|机 under 手机), as a learner of characters reads it.
+[[context.analyzer.join]]
+pos = ["I"]
+after = ["B", "I"]

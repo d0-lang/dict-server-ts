@@ -6,7 +6,11 @@ import {
 import { hiragana } from "@dict/core/kana";
 import { cleanWord, lookupKey } from "@dict/core/lookupKey";
 import type { PronKind, UdPos } from "@dict/core/schema";
-import { isHistorical, type LanguageRules } from "./languages.ts";
+import {
+  isHistorical,
+  isLaterVariety,
+  type LanguageRules,
+} from "./languages.ts";
 import { toUdPos } from "./pos.ts";
 import {
   grammarPointerTarget,
@@ -16,6 +20,7 @@ import {
   isMarkedAlternative,
   isMisreadFormOf,
   isMisreadTarget,
+  isOtherScriptForm,
   isOwnEntryGloss,
   isPlaceholderGloss,
   isVerbalNounForm,
@@ -80,6 +85,11 @@ export type ImportEntry = {
    * as the lemma is, so a kana spelling's redirect reaches the verb too.
    */
   readonly bareLemma?: string;
+  /**
+   * The lemma in the language's other script (`otherScriptTags`: `学习` of
+   * `學習`), normalized: found and ranked as the lemma is.
+   */
+  readonly scriptForms?: ReadonlyArray<string>;
 };
 
 /** A form a table tags comparative or superlative, and which of the two, if only one. */
@@ -128,6 +138,12 @@ export type TransformResult = {
    * only senses belong to a historical stage (`książę`).
    */
   readonly historicalEntry?: ImportEntry;
+  /**
+   * An entry of only `varieties.later` senses (`著` "famous", Taiwanese
+   * Mandarin), written after the whole dump so it ranks after the word's
+   * other entries.
+   */
+  readonly laterEntry?: ImportEntry;
   /** The word's reflexive senses as entries of their own (`bawić się`), for `rules.reflexive`. */
   readonly reflexiveEntries?: ReadonlyArray<ImportEntry>;
   readonly formOf: ReadonlyArray<FormOfLink>;
@@ -233,15 +249,54 @@ const taggedReading = (
   return form?.form.trim();
 };
 
+/**
+ * The headword's reading from its sounds (`readingSounds`: Chinese pinyin,
+ * `shuō` of `shuō (shuo¹)`), each distinct one in order, joined with `, `.
+ */
+const soundReading = (
+  rules: LanguageRules,
+  sounds: ReadonlyArray<WiktextractSound>,
+  earlier: ReadonlySet<string>,
+  etymologyReading: string | undefined,
+): string | undefined => {
+  const sets = rules.readingSounds ?? [];
+  if (sets.length === 0) return undefined;
+  const sameSet = (tags: ReadonlyArray<string>, set: ReadonlyArray<string>) =>
+    tags.length === set.length && set.every((t) => tags.includes(t));
+  const readings = (all: boolean) =>
+    sounds.flatMap((sound) => {
+      const text = sound.zh_pron?.replace(/\s*\(.*$/u, "").trim() ?? "";
+      return text !== "" &&
+        (all || !earlier.has(sound.zh_pron!)) &&
+        sets.some((set) => sameSet(sound.tags ?? [], set))
+        ? [text]
+        : [];
+    });
+  const own = readings(false);
+  if (own.length > 0) return [...new Set(own)].join(", ");
+  // A line whose every sound an earlier one gave: another part of speech of
+  // an etymology read already (`安全` the verb after the noun), or an
+  // etymology with no sounds of its own, which the page's sounds read only
+  // when they are one (`喬` "to negotiate", qiáo; not `底` "which", of dǐ,
+  // de, di).
+  if (etymologyReading !== undefined) return etymologyReading;
+  const all = [...new Set(readings(true))];
+  return all.length === 1 ? all[0] : undefined;
+};
+
 const pickPronunciations = (
   rules: LanguageRules,
   sounds: ReadonlyArray<WiktextractSound>,
   reading?: string,
 ): ImportEntry["pronunciations"] => {
   const usable = sounds.filter((s) => !isHistorical(rules, s.tags));
+  const required = rules.standardPronTags ?? [];
   const isStandard = (s: WiktextractSound) =>
     (s.note === undefined || rules.standardPronNotes.includes(s.note)) &&
-    (s.tags === undefined || s.tags.every((t) => t === "standard"));
+    (required.length > 0
+      ? required.every((t) => s.tags?.includes(t) === true) &&
+        !(s.tags ?? []).includes("variant")
+      : s.tags === undefined || s.tags.every((t) => t === "standard"));
   const withIpa = usable.filter((s) => s.ipa !== undefined && s.ipa !== "");
   const standardIpa = withIpa.filter(isStandard);
   const ipa = (standardIpa.length > 0 ? standardIpa : withIpa).map(
@@ -326,6 +381,46 @@ const glossPath = (
       ? [parent]
       : [];
   });
+};
+
+/** A labelled gloss of the entry, by its unlabelled path: how it shows, and its labels. */
+type LabelledGlosses = Map<
+  string,
+  { readonly text: string; readonly labels: ReadonlyArray<string> }
+>;
+
+/**
+ * `path` with the sense's `glossLabels` tags before its last gloss, in
+ * brackets (`(literary) to go`), hyphens as spaces (`Mainland China`). A
+ * parent gloss shows as its own sense labelled it, and a subsense leaves out
+ * the labels its parent shows (`(literary) to go`, then `to sprout`), so both
+ * stay one sense group.
+ */
+const labelled = (
+  rules: LanguageRules,
+  sense: WiktextractSense,
+  path: ReadonlyArray<string>,
+  seen: LabelledGlosses,
+): ReadonlyArray<string> => {
+  if (path.length === 0) return path;
+  const own = (rules.glossLabels ?? []).filter((tag) =>
+    (sense.tags ?? []).includes(tag),
+  );
+  const inherited = new Set<string>();
+  const shown = path.map((gloss, i) => {
+    if (i === path.length - 1) return gloss;
+    const parent = seen.get(path.slice(0, i + 1).join("\u0000"));
+    parent?.labels.forEach((tag) => inherited.add(tag));
+    return parent?.text ?? gloss;
+  });
+  const labels = own.filter((tag) => !inherited.has(tag));
+  const last =
+    labels.length === 0
+      ? path.at(-1)!
+      : `(${labels.map((tag) => tag.replace(/-/gu, " ")).join(", ")}) ${path.at(-1)!}`;
+  if (own.length > 0)
+    seen.set(path.join("\u0000"), { text: last, labels: own });
+  return [...shown.slice(0, -1), last];
 };
 
 /** Senses being built, merged by their top parent in first-seen order. */
@@ -627,6 +722,10 @@ const reflexiveParticle = (sense: WiktextractSense): string | undefined => {
 export const transformEntry = (
   rules: LanguageRules,
   raw: WiktextractEntry,
+  /** Sounds earlier lines of the same page gave (`readingSounds`). */
+  earlierSounds: ReadonlySet<string> = new Set(),
+  /** The reading an earlier line of this etymology got (`readingSounds`). */
+  etymologyReading?: string,
 ): TransformResult => {
   const lemma = cleanWord(raw.word);
   const lemmaKey = lookupKey(lemma);
@@ -644,6 +743,7 @@ export const transformEntry = (
       skippedSenses: {
         archaic: 0,
         "historical-stage": 0,
+        "other-variety": 0,
         "no-gloss": 0,
         placeholder: 0,
       },
@@ -665,14 +765,18 @@ export const transformEntry = (
   const skippedSenses: Record<SkippedSenseReason, number> = {
     archaic: 0,
     "historical-stage": 0,
+    "other-variety": 0,
     "no-gloss": 0,
     placeholder: 0,
   };
   const formOf: Array<FormOfLink> = [];
   const senses = makeSenseGroups();
   const historicalSenses = makeSenseGroups();
+  /** `varieties.later` senses, after the others. */
+  const laterSenses = makeSenseGroups();
   const parentGlosses = new Set<string>();
   const derived: Array<DerivedSense> = [];
+  const labelledGlosses: LabelledGlosses = new Map();
   /** particle -> the reflexive senses with it, as an entry of their own */
   const reflexive = new Map<
     string,
@@ -725,7 +829,12 @@ export const transformEntry = (
         }
         break;
       case "gloss": {
-        const path = glossPath(rules, sense);
+        const path = labelled(
+          rules,
+          sense,
+          glossPath(rules, sense),
+          labelledGlosses,
+        );
         for (const target of pointerParentTargets(rules, sense)) {
           const lemma = lookupKey(target);
           if (lemma !== lemmaKey) {
@@ -738,7 +847,11 @@ export const transformEntry = (
           }
         }
         path.slice(0, -1).forEach((parent) => parentGlosses.add(parent));
-        own.senses.add(
+        const later =
+          particle === undefined &&
+          isLaterVariety(rules, sense.tags) &&
+          !senses.groups.has(path[0] ?? "");
+        (later ? laterSenses : own.senses).add(
           path,
           seeTargets(rules, outcome.gloss, sense.links ?? []).filter(
             (word) => lookupKey(word) !== lemmaKey,
@@ -754,7 +867,8 @@ export const transformEntry = (
   // The bare word stays a lemma (`bareLemma`).
   const reading =
     rubyReading(raw.word, raw.forms ?? []) ??
-    taggedReading(rules, raw.forms ?? []);
+    taggedReading(rules, raw.forms ?? []) ??
+    soundReading(rules, raw.sounds ?? [], earlierSounds, etymologyReading);
   const spellsWord = (form: WiktextractForm) => {
     // In either kana script: `ハッとした` of `はっと`.
     const key = hiragana(lookupKey(form.form));
@@ -780,7 +894,7 @@ export const transformEntry = (
   // `man` on the headword line of `Mann` ("obsolete"): the variant points here
   // only if it turns out to be no word of its own.
   for (const form of raw.forms ?? []) {
-    if (!isMarkedAlternative(form)) continue;
+    if (!isMarkedAlternative(form, rules)) continue;
     const key = lookupKey(form.form);
     if (key !== "" && key !== lemmaKey && !/\s/.test(key)) {
       formOf.push({
@@ -792,6 +906,14 @@ export const transformEntry = (
     }
   }
   const features = lineFeatures(rules, raw, toUdPos(raw.pos));
+  const scriptForms = [
+    ...new Set(
+      (raw.forms ?? [])
+        .filter((form) => isOtherScriptForm(rules, form))
+        .map((form) => lookupKey(form.form))
+        .filter((key) => key !== "" && key !== lemmaKey && !/\s/u.test(key)),
+    ),
+  ];
   const makeEntry = (
     entrySenses: ReadonlyArray<ImportSense>,
     derivedSenses: ReadonlyArray<DerivedSense>,
@@ -824,6 +946,7 @@ export const transformEntry = (
     ...(features !== undefined ? { features } : {}),
     ...(particle !== undefined ? { reflexiveOf: shownLemma } : {}),
     ...(added !== "" ? { bareLemma: lemma } : {}),
+    ...(scriptForms.length > 0 ? { scriptForms } : {}),
   });
 
   const reflexiveEntries = [...reflexive].flatMap(([particle, own]) =>
@@ -833,7 +956,11 @@ export const transformEntry = (
   );
   const withReflexive = reflexiveEntries.length > 0 ? { reflexiveEntries } : {};
 
-  if (senses.groups.size === 0 && reflexiveEntries.length === 0) {
+  if (
+    senses.groups.size === 0 &&
+    laterSenses.groups.size === 0 &&
+    reflexiveEntries.length === 0
+  ) {
     // No entry here, so this word's table belongs to the word it points at.
     const targets = new Map(dedupeLinks(formOf).map((l) => [l.lemma, l]));
     const tableLinks = forms.flatMap((form) =>
@@ -850,13 +977,32 @@ export const transformEntry = (
       parentGlosses: [...parentGlosses],
       skippedSenses,
       droppedForms: dropped,
+      // A page of no meaning that points elsewhere, as a soft redirect does,
+      // though its line has a part of speech (Chinese `说`, a `character`
+      // line pointing at `說`). Only in a language written in two scripts:
+      // Japanese has such lines too (`いみ` -> `意味`, but also `39` ->
+      // `未来`), not yet checked.
+      ...((raw.redirects ?? []).length > 0 &&
+      (rules.otherScriptTags ?? []).length > 0
+        ? {
+            redirect: {
+              form: lemmaKey,
+              targets: (raw.redirects ?? []).map(cleanWord),
+            },
+          }
+        : {}),
     };
   }
 
   const links = dedupeLinks(formOf);
   return {
     entry:
-      senses.groups.size > 0 ? makeEntry(senses.senses(), derived) : undefined,
+      senses.groups.size > 0
+        ? makeEntry([...senses.senses(), ...laterSenses.senses()], derived)
+        : undefined,
+    ...(senses.groups.size === 0 && laterSenses.groups.size > 0
+      ? { laterEntry: makeEntry(laterSenses.senses(), derived) }
+      : {}),
     ...withReflexive,
     formOf: links,
     parentGlosses: [...parentGlosses],

@@ -14,6 +14,7 @@ export type ImportStats = {
   readonly skippedSenses: {
     archaic: number;
     historicalStage: number;
+    otherVariety: number;
     noGloss: number;
     placeholder: number;
   };
@@ -67,7 +68,13 @@ export const makeTally = () => ({
   invalidLines: 0,
   linesWithoutEntry: 0,
   droppedForms: 0,
-  skippedSenses: { archaic: 0, historicalStage: 0, noGloss: 0, placeholder: 0 },
+  skippedSenses: {
+    archaic: 0,
+    historicalStage: 0,
+    otherVariety: 0,
+    noGloss: 0,
+    placeholder: 0,
+  },
   parentGlosses: new Map<string, number>(),
 });
 export type Tally = ReturnType<typeof makeTally>;
@@ -85,6 +92,7 @@ export const tallyResult = (tally: Tally, result: TransformResult) => {
   tally.skippedSenses.archaic += result.skippedSenses.archaic;
   tally.skippedSenses.historicalStage +=
     result.skippedSenses["historical-stage"];
+  tally.skippedSenses.otherVariety += result.skippedSenses["other-variety"];
   tally.skippedSenses.noGloss += result.skippedSenses["no-gloss"];
   tally.skippedSenses.placeholder += result.skippedSenses.placeholder;
   tally.droppedForms += result.droppedForms;

@@ -1,0 +1,143 @@
+# Chinese grammar words. One line per word as written + part of speech:
+# word <TAB> UD part of speech <TAB> senses separated by " | ".
+# Words are written traditional first, then their simplified spelling after
+# a `/` (還/还): both are the word's lemma, and the headword shows the one the
+# text uses first. A line comes before Wiktionary's entries for the word,
+# which are mostly a character's whole page, in Wiktionary's order (的 opens
+# on "bright; clear"); content words stay after it.
+# Lines are for a word's common grammatical uses, which a character's page
+# lists late or not at all. See apps/importer/src/grammar.ts.
+
+## Particles
+的	PART	of, 's: links a describing word or phrase to the noun after it (我的書, my book; 紅色的花, red flowers) | the one(s) that: stands for a noun left out (新的, the new one; 賣菜的, someone who sells vegetables) | at the end of a sentence, stresses that something is so (我會去的, I will go, for sure) | 是…的: stresses when, where or how something happened (他是昨天來的, it was yesterday that he came)
+了	PART	after a verb: the action is done (我吃了飯, I ate) | at the end of a sentence: something has changed, or is now so (下雨了, it's raining now; 我懂了, I get it now) | 太…了: too…, so… (太好了, great!)
+著/着	PART	-ing: an action or state goes on (他笑著說, he said, smiling; 門開著, the door is open)
+過/过	PART	after a verb: have (ever) done (我去過北京, I have been to Beijing)
+地	PART	-ly: makes an adverb of the word before it (慢慢地走, walk slowly; 認真地學習, study seriously)
+得	PART	after a verb or adjective, says how or how much (他跑得很快, he runs fast; 累得不想動, so tired one doesn't want to move) | 得 between a verb and its result: can (看得見, can see; 聽得懂, can understand)
+嗎/吗	PART	makes a yes-or-no question (你好嗎?, how are you?; 你是學生嗎?, are you a student?)
+呢	PART	and…?, what about…? (我很好, 你呢?, I'm fine, and you?) | softens a question (你在做什麼呢?, what are you doing?) | an action going on (他在睡覺呢, he's sleeping)
+吧	PART	let's, suggests or asks softly (我們走吧, let's go; 你來吧, come on) | I suppose, right?: guesses (你是老師吧?, you're a teacher, right?)
+呀	PART	ah, oh: 啊 after a vowel, softens or stresses what is said (好呀, OK!; 快來呀, come on!) | after each item of a list, in speech
+啊	PART	at the end of a sentence: ah, oh, softens or stresses what is said (好啊, OK!; 真漂亮啊, so beautiful!) | after each item of a list, or a pause in speech (這個啊, 我也不知道, as for this, I don't know either)
+嘛	PART	stresses what is obvious: after all, you know (這是應該的嘛, that's how it should be, after all) | marks a pause before what follows
+們/们	PART	plural of people and pronouns (我們, we; 朋友們, friends)
+
+## Adverbs
+還/还	ADV	still, yet (他還在睡, he is still asleep; 還沒, not yet) | also, in addition, too (我還想喝茶, I'd also like some tea) | even more (今天比昨天還冷, today is even colder than yesterday) | fairly, passably (還不錯, not bad; 還好, all right)
+就	ADV	right away, then (我馬上就來, I'll come right away; 說完就走了, left as soon as (he) had spoken) | just, exactly, precisely (就是他, it's him; 就在這裡, right here) | only, just (就一個, just one) | then, in that case (要是你去, 我就去, if you go, then I'll go)
+才	ADV	only then, not until (他十點才來, he didn't come until ten) | only, just (才五塊錢, only five yuan) | just now (我才知道, I've only just found out)
+都	ADV	all, both (我們都是學生, we are all students) | already (都十點了, it's already ten o'clock) | even (連他都知道, even he knows)
+也	ADV	also, too (我也去, I'm going too) | 也不, 也沒: (not) either, (not) even (一點也不累, not tired at all)
+又	ADV	again (他又來了, he came again) | and also, both… and… (又便宜又好, both cheap and good)
+再	ADV	again, once more (in the future) (再說一遍, say it again; 再見, goodbye) | then, after that (吃完飯再走, leave after eating)
+很	ADV	very, quite; also links an adjective to its subject without adding much (他很高, he is tall)
+太	ADV	too (太貴了, too expensive) | so, very (太好了, great!)
+最	ADV	most, -est (最好, best; 最重要, most important)
+更	ADV	more, even more (更好, better; 更重要的是, what's more important)
+已經/已经	ADV	already (他已經走了, he has already left)
+正在	ADV	in the middle of, -ing (我正在吃飯, I'm eating)
+在	ADV	in the middle of, -ing: before a verb (他在看書, he is reading)
+不	ADV	not, no (不是, is not; 不好, not good) | 不…不…: neither…nor; 不得不: have to
+沒/没	ADV	not (in the past), have not (我沒去, I didn't go; 還沒吃, haven't eaten yet)
+別/别	ADV	don't (別說話, don't talk; 別擔心, don't worry)
+一起	ADV	together (我們一起去吧, let's go together)
+一直	ADV	always, all along, continuously (他一直在等, he has been waiting all along) | straight (一直走, go straight ahead)
+只	ADV	only, just (我只有一個, I only have one; 只是, it's only that)
+越	ADV	越…越…: the more… the more… (越來越好, better and better; 越快越好, the faster the better)
+
+## Locatives
+裡/里	ADP	in, inside: after a noun (房間裡, in the room; 城市裡, in the city; 心裡, in one's heart)
+中	ADP	in, among, during: after a noun (生活中, in life; 學生中, among the students; 一年中, during the year)
+上	ADP	on, above: after a noun (桌子上, on the table) | in, in terms of (網上, online; 歷史上, in history; 實際上, in fact)
+下	ADP	under, below: after a noun (桌子下, under the table) | 在…下: under (the conditions of) (在他的幫助下, with his help)
+內/内	ADP	inside, within: after a noun (國內, within the country; 三天內, within three days)
+外	ADP	outside, beyond: after a noun (國外, abroad; 門外, outside the door) | 以外, 之外: besides, other than
+
+## Prepositions and conjunctions
+在	ADP	at, in, on: where something is or happens (在家, at home; 在中國, in China; 在這方面, in this respect)
+把	ADP	puts the object before the verb, to say what is done to it (把門關上, close the door; 把書給我, give me the book)
+被	ADP	by: makes a verb passive (他被老師批評了, he was criticised by the teacher)
+給/给	ADP	to, for (給他打電話, call him; 給你看, show you)
+對/对	ADP	to, towards, about (對我很好, kind to me; 對這個問題, about this question)
+跟	ADP	with (跟朋友去, go with friends) | 跟…一樣: the same as | and (我跟你, you and I)
+和	CCONJ	and (我和你, you and I; 書和筆, books and pens)
+與/与	CCONJ	and, with (formal) (老師與學生, teachers and students)
+從/从	ADP	from (從北京來, come from Beijing; 從今天開始, starting today)
+向	ADP	towards, to (向東走, walk east; 向他學習, learn from him)
+往	ADP	towards, to (往前走, walk forward; 往左, to the left)
+為/为	ADP	for, for the sake of (為你高興, happy for you) | 為了: in order to
+以	ADP	with, by means of, as (以…為主, mainly…; 以前, before; 以後, after) | in order to (formal)
+於/于	ADP	at, in, on (formal) (位於北京, located in Beijing; 於2020年, in 2020) | than, to: after an adjective or verb (大於, greater than; 屬於, belong to)
+將/将	ADP	puts the object before the verb, as 把 does (formal) (將水燒開, bring the water to the boil)
+將/将	ADV	will, be going to (formal) (會議將在明天舉行, the meeting will be held tomorrow)
+比	ADP	than: compares (他比我高, he is taller than me)
+並/并	CCONJ	and, and also: joins verbs or clauses (formal) (討論並通過, discussed and passed)
+並/并	ADV	並不, 並沒有: not at all, actually not (並不難, not hard at all)
+而	CCONJ	and, but, while: joins two clauses or words (formal) (快而好, fast and good; 不是…而是…, not… but…)
+但是	CCONJ	but (很好, 但是太貴, good, but too expensive)
+可是	CCONJ	but (我想去, 可是沒時間, I want to go, but I have no time)
+所以	CCONJ	so, therefore (下雨了, 所以我沒去, it rained, so I didn't go)
+因為/因为	SCONJ	because (因為下雨, 我沒去, because it rained, I didn't go)
+如果	SCONJ	if (如果你有時間, if you have time)
+雖然/虽然	SCONJ	although (雖然很累, 但是很高興, though tired, happy)
+或者	CCONJ	or (in statements) (茶或者咖啡, tea or coffee)
+還是/还是	CCONJ	or (in questions) (你喝茶還是咖啡?, tea or coffee?)
+還是/还是	ADV	still, all the same (他還是來了, he came all the same) | had better (你還是去吧, you'd better go)
+的話/的话	SCONJ	if: ends an if-clause (下雨的話, 我就不去, if it rains, I won't go)
+
+## Verbs and auxiliaries
+是	AUX	to be: links a subject to what it is (我是學生, I am a student) | yes, right | 是…的: stresses when, where or how something happened
+會/会	AUX	can, know how to (我會游泳, I can swim) | will, be likely to (明天會下雨, it will rain tomorrow)
+能	AUX	can, be able to (我能來, I can come) | may, be allowed to
+可以	AUX	can, may (我可以進來嗎?, may I come in?) | not bad (還可以, OK, so-so)
+要	AUX	want to (我要回家, I want to go home) | will, be going to (要下雨了, it's going to rain) | must, should (你要小心, you must be careful)
+想	AUX	want to, would like to (我想喝水, I'd like some water)
+應該/应该	AUX	should, ought to (你應該休息, you should rest)
+得	AUX	děi: must, have to (我得走了, I have to go)
+有	VERB	to have (我有一個問題, I have a question) | there is, there are (這裡有很多人, there are many people here)
+讓/让	VERB	to let, to make (someone do something) (讓我想想, let me think; 讓他高興, make him happy)
+
+## Pronouns, demonstratives and question words
+這/这	PRON	this (這是我的, this is mine; 這個, this one; 這裡, here)
+那	PRON	that (那是什麼?, what is that?; 那個, that one; 那裡, there)
+那	CCONJ	then, in that case (那我們走吧, then let's go)
+哪	PRON	which (哪個?, which one?; 哪裡, where)
+什麼/什么	PRON	what (你說什麼?, what did you say?) | any, anything (沒什麼, it's nothing) | before a list: things like, such as (in speech) (什麼咖啡、茶都有, there's coffee, tea, all sorts)
+怎麼/怎么	PRON	how (怎麼走?, how do I get there?) | why, how come (你怎麼不來?, why aren't you coming?)
+怎麼樣/怎么样	PRON	how, how about it (你覺得怎麼樣?, what do you think?; 最近怎麼樣?, how have you been?)
+為什麼/为什么	PRON	why (你為什麼哭?, why are you crying?)
+自己	PRON	oneself, one's own (我自己做, I'll do it myself; 自己的房間, one's own room)
+
+## Classifiers
+個/个	X	classifier for most nouns, people and things without a classifier of their own (一個人, one person; 三個蘋果, three apples; 這個, this one)
+些	X	some, a few (一些, some; 這些, these; 那些, those)
+種/种	X	kind, type, sort (這種書, this kind of book; 各種, all kinds of)
+次	X	time, occurrence (一次, once; 第一次, the first time)
+家	X	classifier for shops, companies and families (一家餐廳, a restaurant)
+第	X	-th: makes an ordinal number (第一, first; 第三天, the third day)
+
+## Adverbs and conjunctions Wiktionary lacks
+非常	ADV	very, extremely (非常好, very good; 非常感謝, thank you very much)
+特別/特别	ADV	especially, particularly (特別是, especially; 特別喜歡, especially like)
+當然/当然	ADV	of course, naturally (當然可以, of course you can)
+不過/不过	CCONJ	but, however (不過我沒時間, but I have no time) | only, merely (不過是, only, just)
+反正	ADV	anyway, in any case (反正我不去, I'm not going anyway)
+左右	X	after a number: about, approximately, or so (三分鐘左右, about three minutes)
+接著/接着	ADV	then, next, after that (接著放鹽, then add salt)
+以外	X	besides, apart from, other than (除了…以外, except for…; 中國以外, outside China)
+分別/分别	ADV	respectively, separately, each (分別是, are respectively; 分別討論, discuss separately)
+大概	ADV	probably (他大概不來了, he probably isn't coming) | about, roughly (大概十個人, about ten people)
+真的	ADV	really, truly (真的很好, really good; 真的嗎?, really?)
+有人	PRON	someone, some people (有人說, some people say)
+等	X	after a list: and so on, etc. (書、筆等, books, pens, etc.) | after names: and others, et al.
+臺/台	PROPN	Taiwan: short for 臺灣 (來臺, come to Taiwan; 臺北, Taipei)
+嗯	INTJ	mm, uh-huh: agrees, or shows one is listening or thinking | mm: shows enjoyment
+欸	INTJ	uh, er: a pause while thinking | hey: calls for attention
+
+## Phrases
+就是說/就是说	X	that is to say, in other words
+也就是說/也就是说	X	that is to say, in other words
+不好	X	不好 + verb: hard to, not easy to (不好說, hard to say) | not good
+實際上/实际上	ADV	in fact, actually
+一下	X	after a verb: a moment, a little, to soften a request (看一下, have a look; 等一下, wait a moment)

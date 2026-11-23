@@ -108,6 +108,8 @@ export const makeWriter = (
   verbChainsThroughEntries = false,
   /** The language's numerals file (`replaceNumerals`). */
   numerals: ReadonlyArray<NumeralEntry> = [],
+  /** The language is written in two scripts (`otherScriptTags`): soft redirects are lemmas. */
+  otherScript = false,
 ) => {
   const sqlite = db.$client;
   sqlite.run(`CREATE TEMP TABLE form_of_pending (
@@ -178,6 +180,8 @@ export const makeWriter = (
   let lastId = 0;
   const byKey = new Map<string, EntryState>();
   const historicalEntries: Array<ImportEntry> = [];
+  /** Entries of only `varieties.later` senses, written after the dump. */
+  const laterEntries: Array<ImportEntry> = [];
   const verbalNouns: Array<{ form: string; entryId: number }> = [];
   const participleForms: Array<{ form: string; entryId: number }> = [];
   /** entry id -> gloss -> its derived sense */
@@ -268,6 +272,9 @@ export const makeWriter = (
         addPages(state.id, [entry.page]);
       }
     }
+    for (const form of entry.scriptForms ?? []) {
+      insertForm.run(form, state.id, FormSource.Lemma);
+    }
     for (const { glosses, see } of entry.senses) {
       const k = glosses.join("\u0000");
       if (state.glosses.has(k)) continue;
@@ -337,8 +344,14 @@ export const makeWriter = (
         null,
       );
       insertForm.run(lookupKey(entry.lemma), id, FormSource.Lemma);
+      // In a language written in two scripts, a line's other spelling is the
+      // word in the other script (`還/还`), a lemma as Wiktionary's are.
       for (const form of entry.forms ?? []) {
-        insertForm.run(lookupKey(form), id, FormSource.Inflection);
+        insertForm.run(
+          lookupKey(form),
+          id,
+          otherScript ? FormSource.Lemma : FormSource.Inflection,
+        );
       }
       entry.senses.forEach((sense, idx) => {
         const see = entry.see?.[idx] ?? [];
@@ -400,6 +413,7 @@ export const makeWriter = (
       items: ReadonlyArray<{
         readonly entry: ImportEntry | undefined;
         readonly historicalEntry?: ImportEntry;
+        readonly laterEntry?: ImportEntry;
         readonly reflexiveEntries?: ReadonlyArray<ImportEntry>;
         readonly formOf: ReadonlyArray<FormOfLink>;
         readonly redirect?: Redirect;
@@ -412,6 +426,7 @@ export const makeWriter = (
         if (item.historicalEntry !== undefined) {
           historicalEntries.push(item.historicalEntry);
         }
+        if (item.laterEntry !== undefined) laterEntries.push(item.laterEntry);
         writeLinks(item.formOf);
       }
     },
@@ -447,6 +462,7 @@ export const makeWriter = (
     participleForms,
     participlesSharedWithOwn,
     verbChainsThroughEntries,
+    otherScript,
     derivedByEntry,
     degreeFormsByEntry,
   };
@@ -459,8 +475,13 @@ export const makeWriter = (
     // The passes find and move forms by entry; the shipped file has no use for
     // that index, so it is dropped again before the file is compacted.
     sqlite.run("CREATE INDEX forms_entry_tmp ON forms(entry_id)");
+    // After every other line's entry, so they rank last among the word's.
+    sqlite.transaction(() => laterEntries.forEach(writeEntry))();
     // Words that depend on others, which may come later in the dump.
     restoreHistoricalEntries();
+    // The word in the other script is a lemma before any link resolves, so a
+    // marked variant (`个` on `搿`) sees that it reaches a word (`個`).
+    if (otherScript) addRedirects(ctx);
     followLinkChains(ctx);
     copyDerivedMeanings(ctx);
     settleDegreeEntries(ctx);
@@ -472,7 +493,7 @@ export const makeWriter = (
     addDegreeForms(ctx);
     addParticipleForms(ctx);
     // After every form spelled so, which decide what has an entry of its own.
-    addRedirects(ctx);
+    if (!otherScript) addRedirects(ctx);
     // Then the steps that need every form in place (and `replaceGrammarWords`
     // the links, to tell which rows only the fallback added).
     sqlite.transaction(() => {

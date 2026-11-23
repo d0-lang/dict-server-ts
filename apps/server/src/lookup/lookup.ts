@@ -240,5 +240,6 @@ export const lookupWord = (
     db,
     language,
     contextLookup(db, language, word, context, at),
+    { word, ...(context !== undefined ? { context } : {}) },
   );
 };

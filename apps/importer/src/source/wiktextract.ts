@@ -44,6 +44,8 @@ export const WiktextractSound = Schema.Struct({
   tags: Tags,
   /** Regional variant label, e.g. "Central Greater Poland". */
   note: Schema.optionalKey(Schema.String),
+  /** A Chinese romanization or IPA (`shuō (shuo¹)`), the kind in `tags` (`Pinyin`). */
+  zh_pron: Schema.optionalKey(Schema.String),
 });
 export type WiktextractSound = typeof WiktextractSound.Type;
 

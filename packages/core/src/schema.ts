@@ -55,6 +55,16 @@ export const CaseClass = {
 } as const;
 export type CaseClass = (typeof CaseClass)[keyof typeof CaseClass];
 
+/**
+ * `meta` key, for a language written in two scripts (`import.otherScriptTags`):
+ * a JSON object from a letter of the other script to the letters whose
+ * other-script spelling it is more often than it is itself, in words (`"后":
+ * ["後"]`: words write `後` as `后` more often than they keep `后`; not `"面"`,
+ * which is mostly itself, beside `麵`), or that a grammar-file line spells
+ * so (`裡/里`). Lookups in that script rank those letters' entries first.
+ */
+export const PREFERRED_LETTERS_KEY = "preferredLetters";
+
 /** Key/value info about the import (pair, source, date, counts). */
 export const meta = sqliteTable("meta", {
   key: text("key").primaryKey(),

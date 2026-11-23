@@ -35,6 +35,8 @@ export type WriterContext = {
   readonly participlesSharedWithOwn: boolean;
   /** A verb form's chain goes on through a word with no verb entry (`verbChainsThroughEntries`). */
   readonly verbChainsThroughEntries: boolean;
+  /** Soft redirects spell the word in the other script: lemmas, wherever they point (`otherScriptTags`). */
+  readonly otherScript: boolean;
   /** entry id -> gloss -> its derived sense */
   readonly derivedByEntry: ReadonlyMap<
     number,

@@ -14,6 +14,7 @@ describe("language records", () => {
       "pl",
       "ru",
       "uk",
+      "zh",
     ]);
     for (const code of codes) assert.strictEqual(readLanguage(code).code, code);
   });
@@ -28,6 +29,11 @@ describe("language records", () => {
       ownEntryForms: [],
       pointerWords: [],
       readingTags: [],
+      otherScriptTags: [],
+      markedAlternatives: false,
+      readingSounds: [],
+      standardPronTags: [],
+      glossLabels: [],
       stressedLemmas: false,
       headwordGenders: false,
       unmarkedStressForms: false,
@@ -59,6 +65,7 @@ describe("language records", () => {
     assert.strictEqual(language.elision, false);
     assert.deepStrictEqual(language.headword, {
       labels: ["Gender", "Animacy", "Aspect", "Number"],
+      otherSpellings: false,
     });
   });
 

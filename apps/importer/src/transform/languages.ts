@@ -80,6 +80,23 @@ export type LanguageRules = {
   >;
   /** Head template name -> what the lemma gets added (`ja-verb-suru` -> `する`). */
   readonly lemmaSuffixes?: Readonly<Record<string, string>>;
+  /** Form tags naming the word in the other script (Chinese `Simplified-Chinese`): such forms are lemmas too. */
+  readonly otherScriptTags?: ReadonlyArray<string>;
+  /** Every headword-line alternative is a marked spelling, not a form (Chinese variant characters). */
+  readonly markedAlternatives?: boolean;
+  /** Varieties its readers don't use: see `isOtherVariety`. */
+  readonly varieties?: {
+    readonly others: ReadonlyArray<string>;
+    readonly keep: ReadonlyArray<string>;
+    readonly later?: ReadonlyArray<string>;
+    readonly laterNotWith?: ReadonlyArray<string>;
+  };
+  /** Whole tag sets of the sounds that give the reading (Chinese `Mandarin` + `Pinyin`). */
+  readonly readingSounds?: ReadonlyArray<ReadonlyArray<string>>;
+  /** Tags the standard pronunciation has, all of them (Chinese `Mandarin`, `Standard-Chinese`). */
+  readonly standardPronTags?: ReadonlyArray<string>;
+  /** Sense tags shown in brackets before the gloss (`(literary) to go`). */
+  readonly glossLabels?: ReadonlyArray<string>;
 };
 
 /**
@@ -96,6 +113,33 @@ export const importRules = (language: Language): LanguageRules => ({
 
 export const languagePair = (rules: LanguageRules): string =>
   `${rules.code}_${rules.target}`;
+
+/**
+ * Whether the tags mark a variety the language's readers don't use
+ * (`varieties`): one of `others`, and none of `keep` or `later` (Cantonese,
+ * but not "literary or Hakka"); `later` with one of `laterNotWith` doesn't
+ * count (著 "famous", Jin and Taiwanese Mandarin).
+ */
+export const isOtherVariety = (
+  rules: LanguageRules,
+  tags: ReadonlyArray<string> = [],
+): boolean =>
+  rules.varieties !== undefined &&
+  tags.some((t) => rules.varieties!.others.includes(t)) &&
+  !tags.some((t) => rules.varieties!.keep.includes(t)) &&
+  !(
+    isLaterVariety(rules, tags) &&
+    !tags.some((t) => (rules.varieties!.laterNotWith ?? []).includes(t))
+  );
+
+/**
+ * Whether the tags mark a variety kept after the word's other senses
+ * (`varieties.later`: Taiwanese Mandarin).
+ */
+export const isLaterVariety = (
+  rules: LanguageRules,
+  tags: ReadonlyArray<string> = [],
+): boolean => tags.some((t) => (rules.varieties?.later ?? []).includes(t));
 
 /** Whether the tags mark a historical stage of the language. */
 export const isHistorical = (

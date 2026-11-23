@@ -12,6 +12,7 @@ import { cleanWord, lookupKey } from "@dict/core/lookupKey";
 import { FormSource } from "@dict/core/schema";
 import type { Audio, LookupEntry, LookupResult } from "./common/entries.ts";
 import { wiktionaryPageUrl } from "./common/sources.ts";
+import { inScriptOrder, withOtherSpellings } from "./scripts.ts";
 
 /**
  * The headword a reader sees: the lemma as a learner's dictionary prints it
@@ -115,10 +116,17 @@ const unique = (values: ReadonlyArray<string>) => [...new Set(values)];
  * `see` words written as their targets' headwords, and entries that share a
  * headword (and segment) merged in the order they first appear.
  */
+/** What the reader clicked: the word and its sentence, if sent. */
+export type ClickedText = {
+  readonly word: string;
+  readonly context?: string;
+};
+
 export const presentResult = (
   db: DictionaryDb,
   language: Language,
   result: LookupResult,
+  clicked?: ClickedText,
 ): LookupResult => {
   const segmentOf = new Map<number, number>();
   result.segments?.forEach((segment, s) =>
@@ -138,13 +146,34 @@ export const presentResult = (
   /** The merged entries with each headword, readings aside, in order. */
   const withKey = new Map<string, Array<number>>();
   const newIndex = new Map<number, number>();
-  result.entries.forEach((entry, i) => {
-    const grammar = headwordOf(
-      language,
-      entry.lemma,
-      entry.pos,
-      entry.features,
-    );
+  const spelled = result.entries.map((entry, i) => {
+    const segment = segmentOf.get(i);
+    return language.headword.otherSpellings
+      ? withOtherSpellings(db, entry.lemma, [
+          ...(entry.match ?? []),
+          ...(segment !== undefined ? [result.segments![segment]!.text] : []),
+          ...(clicked !== undefined ? [clicked.word] : []),
+          ...(clicked?.context !== undefined ? [clicked.context] : []),
+        ])
+      : { lemma: entry.lemma, otherScript: undefined, used: entry.lemma };
+  });
+  const order = language.headword.otherSpellings
+    ? inScriptOrder(
+        db,
+        [clicked?.context ?? clicked?.word ?? ""].join(""),
+        result.entries.map((entry, i) => ({
+          group: JSON.stringify([segmentOf.get(i), entry.match]),
+          otherScript: spelled[i]!.otherScript,
+          used: spelled[i]!.used,
+          lemma: entry.lemma,
+        })),
+      )
+    : result.entries.map((_, i) => i);
+  for (const i of order) {
+    const entry = result.entries[i]!;
+    const segment = segmentOf.get(i);
+    const lemma = spelled[i]!.lemma;
+    const grammar = headwordOf(language, lemma, entry.pos, entry.features);
     // Labels the lookup added stay after the grammar's (`て form`).
     const head = {
       ...grammar,
@@ -155,7 +184,7 @@ export const presentResult = (
       head.lemma,
       entry.pos,
       head.labels,
-      segmentOf.get(i),
+      segment,
       entry.match,
     ]);
     // A different reading is a different headword (`人前` as ひとまえ "the
@@ -219,7 +248,7 @@ export const presentResult = (
             },
       ),
     );
-  });
+  }
 
   const entries: Array<LookupEntry> = merged.map((entry) => {
     const pron = {
@@ -238,9 +267,13 @@ export const presentResult = (
     };
   });
   const segments = result.segments?.map((segment) => {
-    const indexes = [
+    const remapped = [
       ...new Set((segment.entries ?? []).map((i) => newIndex.get(i)!)),
     ];
+    // Ranked by the text's script, the segment's entries are in that order.
+    const indexes = language.headword.otherSpellings
+      ? remapped.sort((a, b) => a - b)
+      : remapped;
     return indexes.length > 0
       ? { text: segment.text, entries: indexes }
       : { text: segment.text };

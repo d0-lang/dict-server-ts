@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chinese (zh_en): language report</title>
+<style>
+:root{--bg:#fff;--fg:#1d1d1f;--muted:#6b6b70;--line:#e3e3e6;--card:#f6f6f8;--up:#1a7f37;--down:#b3261e;--accent:#2f5fd0}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--fg:#ececef;--muted:#9a9aa2;--line:#2c2c31;--card:#1c1c20;--up:#4ac26b;--down:#ff7b72;--accent:#7aa2ff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1060px;margin:0 auto;padding:32px 24px 64px}h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:40px 0 10px;padding-top:8px;border-top:1px solid var(--line)}h3{font-size:15px;margin:22px 0 8px}
+.sub{color:var(--muted);margin:0 0 20px}code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card);padding:1px 4px;border-radius:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}.kpi{background:var(--card);border-radius:10px;padding:12px 14px}.kpi .v{font-size:24px;font-weight:650}.kpi .l{color:var(--muted);font-size:13px}.kpi .d{font-size:13px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;margin:8px 0 4px}th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--muted)}
+.small{font-size:13px}.tests div{margin-bottom:3px}.tests div::before{content:"✓ ";color:var(--up)}ul{padding-left:20px}li{margin:3px 0}.note{color:var(--muted);font-size:13px}
+@media (max-width:600px){main{padding:24px 16px 48px}}
+</style></head><body><main>
+<h1>Chinese (zh_en): language report</h1>
+<p class="sub">Branch <code>chinese</code>, 2026-11-22. Tier 1, built with the add-language skill, with no reader of Chinese. Profile and round log: <code>languages/zh/profile.md</code>. All three gates pass at r5, and at r7 after the review fixes. One pair for both scripts: the headword shows the text's spelling first, <code>学习 (學習)</code>.</p>
+<div class="kpis">
+<div class="kpi"><div class="l">Tier</div><div class="v">Model only</div><div class="d">unreviewed: no reader checked the profile, the grammar file or a sample</div></div>
+<div class="kpi"><div class="l">Common grammar words</div><div class="v">97.7%</div><div class="d"><span class="up">+8.1</span> from 89.6%; <span class="up">passes</span> (needs 97.5%); 97.9% without missing words</div></div>
+<div class="kpi"><div class="l">Common content words</div><div class="v">96.6%</div><div class="d"><span class="up">+2.7</span> from 93.9%; <span class="up">passes</span> (needs 92.5%)</div></div>
+<div class="kpi"><div class="l">Random words</div><div class="v">91.1%</div><div class="d"><span class="up">+17.8</span> from 73.3%; <span class="up">passes</span> (needs 87.5%); 95.2% without missing words</div></div>
+<div class="kpi"><div class="l">Judge: understood (2,200 items)</div><div class="v">93.0%</div><div class="d"><span class="up">+15.8</span> from 77.2%</div></div>
+</div>
+
+<h2>Profile summary</h2>
+<ul>
+<li><b>Data.</b> English Wiktionary dump of 2026-11-01, 328,919 Chinese lines, 125,147 of them soft redirects (simplified spellings). <code>zh_en.sqlite</code> (38 MB) has about 155,600 entries; 151,201 have a pinyin reading. There is no separate Classical Chinese: <code>Classical</code> and <code>literary</code> are sense tags.</li>
+<li><b>Corpus.</b> 36 texts, 93.6k words (jieba's units). Spoken: 16 YouTube videos in 10 genres, 72.5k characters, 9 with simplified and 7 with traditional subtitles. Chinese videos rarely have auto-captions, so these are the uploaders' subtitles, punctuated by Haiku, words unchanged. Written: 20 texts in 16 genres, 83.6k characters: zh.wikipedia in both scripts, BBC中文, DW中文, 中央社, sspai.</li>
+<li><b>Scripts.</b> Wiktionary keeps a word under its traditional spelling. The simplified spelling is now a lemma of the entry, from the headword's <code>Simplified-Chinese</code> form, from a soft redirect that spells the target letter for letter, or, for letters with no redirect (<code>机</code> for <code>機</code>, <code>干</code> for <code>乾</code> and <code>幹</code>, <code>还</code>, <code>几</code>), from the letter pairs of 116,906 words. A text's script ranks a letter's entries: <code>后</code> opens on <code>後</code> "after" in simplified text, on "empress" in traditional.</li>
+<li><b>Varieties.</b> 43,265 senses of Cantonese, Hokkien, Wu and other varieties are dropped, unless also tagged Mandarin or literary. Classical and literary senses stay, labelled <code>(literary)</code>, as do Taiwan and Mainland ones.</li>
+<li><b>Words.</b> The dictionary's own words cut the sentence (<code>dictionary = "words"</code>): the fewest words with an entry, ties to the cut that leaves alone fewest letters without a grammar line, then the longer last word. A word shows its letters as parts (<code>手机 (手機)</code>: <code>手 | 机</code>). No analyzer loads: Lindera's CC-CEDICT (125 MB) misread more and has no parts of speech.</li>
+<li><b>Grammar file.</b> 116 lines: particles (的, 了, 着, 过, 得, 吗, 呢, 吧), adverbs (还 "also", 就, 才, 都), locatives (里, 中, 上), prepositions, auxiliaries, classifiers, and senses Wiktionary's entries lack (非常 "very", 当然 "of course", 不过 "but", 左右 "about").</li>
+<li><b>Headword.</b> Both spellings, the text's first; reading in pinyin (<code>xuéxí</code>), one etymology's own; IPA of standard Mandarin only. No labels.</li>
+</ul>
+
+<h2>Gates</h2>
+<p class="small">Same 2,200 items in every run (sampled from <code>r0</code>), judged by Haiku on the popover the extension shows. Words are jieba's units, ranked by their simplified spelling; the reader clicks a letter, and the item sends the piece the browser's segmenter gives there. In brackets: the figure without the judge's <code>missing_word</code> misses.</p>
+<div class="scroll"><table>
+<tr><th>Gate</th><th class="n">Needs</th><th class="n">r0 (plain)</th><th class="n">r1</th><th class="n">r3</th><th class="n">r4</th><th class="n">r5</th><th class="n">r7, r8 (final)</th></tr>
+<tr><td>Common grammar words</td><td class="n">97.5%</td><td class="n">89.6% (91.6%)</td><td class="n">92.6% (92.8%)</td><td class="n">92.8% (92.8%)</td><td class="n">95.9% (96.1%)</td><td class="n">97.7% (97.9%)</td><td class="n up">97.5% (97.7%)</td></tr>
+<tr><td>Common content words</td><td class="n">92.5%</td><td class="n">93.9% (95.1%)</td><td class="n">92.7% (93.0%)</td><td class="n">93.6% (93.8%)</td><td class="n">96.5% (96.9%)</td><td class="n">96.6% (97.0%)</td><td class="n up">96.8% (97.2%)</td></tr>
+<tr><td>Random words</td><td class="n">87.5%</td><td class="n">73.3% (90.4%)</td><td class="n">88.4% (92.6%)</td><td class="n">88.5% (92.6%)</td><td class="n">91.0% (94.9%)</td><td class="n">91.1% (95.2%)</td><td class="n up">90.9% (95.1%)</td></tr>
+<tr><td>Understood, all 2,200</td><td class="n"></td><td class="n">77.2%</td><td class="n">89.3%</td><td class="n">89.9%</td><td class="n">92.5%</td><td class="n">93.0%</td><td class="n">93.0%</td></tr>
+</table></div>
+<p class="small">r1: both scripts, letter pairs, varieties, pinyin, the <code>words</code> analyzer (entries found for 98.0% of corpus words, from 87.1%). r3: the grammar file, readings per etymology, phrases over whole words. r4: fixes from the classified diffs. r5: ties by letters standing alone, locatives, senses Wiktionary lacks. r7: the review's fixes (a sense and its subsense stay one, letter pairs count words, the other spelling keeps the word's capitals), Taiwanese Mandarin senses after the rest (r8: not 著's lines tagged Jin too, which put "famous" on 着), no reading guessed for an etymology without sounds; the judge's 3 worse of 129 changed are the same senses arranged otherwise. API and extension agree on every popover; 72 items differ only in the sentence (the extension joins a Wikipedia heading line to the next sentence) and one in which tab shows the whole word. Judging r1–r7 cost $3.23 on Haiku by the judge's tally (r0's wasn't kept).</p>
+<ul class="small">
+<li><b>Grammar</b> went from 47 misses to 12. Most of the gain is the scripts: <code>个</code>, <code>还</code>, <code>后</code>, <code>与</code>, <code>将</code>, <code>里</code>, <code>种</code>, <code>万</code>, <code>亿</code> showed other characters or nothing, as their simplified spellings reached no entry.</li>
+<li><b>Random</b> was 73.3%: the browser's pieces (<code>都很</code>, <code>我的</code>) had no entry. The dictionary's words fixed that.</li>
+<li><b>Classified diffs:</b> r1 → r2 342 better, 19 worse; r1 → r3 327 better, 18 worse, 335 the same. The "worse" ones led to r4.</li>
+</ul>
+
+<h2>Accepted rules and their unit tests</h2>
+<p class="small">Settings in <code>languages/zh/language.toml</code>; the TypeScript names no language. Tests: <code>apps/importer/src/chinese.test.ts</code> (8, a whole import of trimmed lines), <code>apps/server/src/lookup/features/analyzedWords/lookup.zh.test.ts</code> (9) and <code>apps/server/src/lookup/headword.zh.test.ts</code> (5), on the in-memory dictionary <code>apps/server/src/lookup/testing/chinese.ts</code>.</p>
+<h3>Both scripts (<code>import.otherScriptTags</code>, <code>headword.otherSpellings</code>)</h3>
+<p>A headword form tagged <code>Simplified-Chinese</code> is a lemma of the entry. A soft redirect is one where each letter is the target's or a kept letter pair; other redirects (variants: <code>旳</code>, <code>ㄉ</code>, <code>説</code>) are plain redirects. A letter pair counts with 3 words and 10% of the words with the letter. A file's <code>meta</code> names the letters a simplified letter mostly stands for (by words, and by grammar lines: <code>里</code> for <code>裡</code>).</p>
+<div class="tests small"><div>finds a word by its simplified spelling as by its lemma, read in pinyin</div><div>takes a character's simplified page as its lemma, not a variant's</div><div>gives a simplified letter the entries words spell with it, and ranks them</div><div>prefers the letter a grammar line spells, though words keep it</div><div>shows the spelling the text uses first, the other in brackets</div><div>opens a simplified letter on the word it mostly stands for, in simplified text</div><div>opens on the word as written in traditional text</div><div>keeps a letter's own word first where it is mostly itself (<code>面</code> "face" before <code>麵</code>)</div></div>
+<h3>Variants, varieties, readings (<code>markedAlternatives</code>, <code>varieties</code>, <code>readingSounds</code>, <code>standardPronTags</code>, <code>glossLabels</code>)</h3>
+<div class="tests small"><div>keeps a variant listed on a headword line out of the word it spells (<code>悅</code> lists <code>說</code>)</div><div>drops other varieties' senses, but not a literary one, and labels it</div><div>reads each etymology by its own sounds (<code>的</code> de, not dì, dí, de)</div><div>gives standard Mandarin's IPA, not other varieties'</div></div>
+<h3>The dictionary's own words (<code>context.analyzer.dictionary = "words"</code>)</h3>
+<div class="tests small"><div>cuts a run into the fewest words, the longer last word on a tie (<code>研究|生命</code>)</div><div>on a tie, leaves alone a letter that is a grammar word (<code>城市|里</code>)</div><div>finds a phrase only over whole words (no <code>的话</code> in <code>的|话题</code>)</div><div>shows a letter's grammar line before its other entries, a word's letters as parts</div><div>answers a piece the dictionary lacks by the words in it (<code>都很</code>)</div><div>cuts Han letters from digits and Latin letters written onto them</div><div>shows a piece inside a longer word by its own entries, then the word (<code>都</code> of <code>都会</code>)</div><div>finds a letter's entries in the other script among its parts (<code>机</code>: <code>機</code>)</div></div>
+
+<h2>What got worse, and why it stays</h2>
+<ul class="small">
+<li><b>More text per popover.</b> A word shows all its letters' entries as parts; popovers with a junk sense went from 19.6% (r0) to 44%. The parts are what a learner of characters reads, and the judge's understood rose; trimming a letter's rare senses in a compound is tier 2.</li>
+<li><b>Segmentation errors</b> the fewest words make and a frequency model would fix: <code>过|年前</code>, <code>更|好的</code>, <code>为我|的</code>, <code>是以</code> "therefore" in <code>是|以</code>, <code>都会</code> "metropolis" when the browser sends the whole piece.</li>
+<li><b><code>只</code></b> opens on <code>隻</code> the classifier in simplified text: Wiktionary has more words with <code>隻</code> than words that keep <code>只</code> "only". Its own entry follows.</li>
+<li>Grammar lines have no reading, and their examples are in traditional characters.</li>
+</ul>
+
+<h2>False positives and hand patches</h2>
+<p class="small">No false positives were filed. The senses English Wiktionary's Chinese entries lack, added as grammar-file lines: 非常 "very", 特别 "especially", 当然 "of course", 不过 "but", 反正 "anyway", 左右 "about", 接着 "then", 以外 "besides", 分别 "respectively", 大概 "probably", 真的 "really", 有人 "someone", 等 "etc.", 台 "Taiwan", 还 "also", the fillers 嗯, 欸, 呀. Remaining misses Wiktionary lacks: <code>以…为代表</code>, Taiwanese <code>远别</code>, <code>天</code> "dawn" in <code>九更天</code>, <code>C</code> for °C.</p>
+
+<h2>Memory and speed</h2>
+<p class="small">No analyzer loads. A server with only <code>zh_en</code>: 127 MB after its first lookup (only <code>uk_en</code>: 139 MB), 168–203 MB after the corpus's 93,606 lookups. A lookup takes 2–5 ms once warm. Every other language imports identically; Japanese (72,686) and Korean (102,553) lookups are unchanged.</p>
+</main></body></html>

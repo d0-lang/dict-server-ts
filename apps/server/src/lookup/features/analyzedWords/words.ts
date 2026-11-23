@@ -65,6 +65,14 @@ export const wordsOf = (
   return words;
 };
 
+/**
+ * Whether the words are the dictionary's own (`dictionary = "words"`): a
+ * phrase then starts and ends where words do, and a letter's grammar-file
+ * line only adds to its entries, as a letter is a word.
+ */
+export const dictionaryWords = (settings: Settings): boolean =>
+  settings.dictionary === "words";
+
 export const startOf = (w: Word): number => w[0]!.start;
 export const endOf = (w: Word): number => w.at(-1)!.end;
 

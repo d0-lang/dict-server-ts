@@ -2,6 +2,7 @@ import type { DictionaryDb } from "@dict/core/DictionaryDb";
 import { hiragana } from "@dict/core/kana";
 import type { Language } from "@dict/core/language";
 import { lookupKey } from "@dict/core/lookupKey";
+import { FormSource } from "@dict/core/schema";
 import {
   analyzerFor,
   type Analyzer,
@@ -66,6 +67,13 @@ export type Click = {
   readonly matchOf: (start: number, end: number) => Pick<LookupEntry, "match">;
   /** The dictionary's rows for a form, cached for the lookup. */
   readonly rows: (form: string) => ReadonlyArray<FormRow>;
+  /**
+   * Whether a row of `form` is an entry of that word itself: its lemma is
+   * spelled so, or, in a language written in two scripts
+   * (`import.otherScriptTags`), the form is its lemma in the other script
+   * (`机` of `機`).
+   */
+  readonly ownLemma: (row: FormRow, form: string) => boolean;
   /** The UD parts of speech the language maps the morpheme's tags to. */
   readonly uposOf: (m: Morpheme) => ReadonlySet<string>;
   readonly infoOf: (id: number) => EntryInfo;
@@ -106,7 +114,7 @@ export const clickOf = (
   at?: number,
 ): Click | undefined => {
   const settings = language.context.analyzer;
-  const analyze = analyzerFor(language);
+  const analyze = analyzerFor(language, db);
   if (settings === undefined || analyze === undefined) return undefined;
   // The click by its place in the string, as `at` counts copies of `word`,
   // not by the server's own segmenter: Bun's cuts a sentence otherwise than
@@ -225,6 +233,10 @@ export const clickOf = (
         : {};
     },
     rows,
+    ownLemma: (row, form) =>
+      lookupKey(row.lemma) === lookupKey(form) ||
+      (language.import.otherScriptTags.length > 0 &&
+        row.source === FormSource.Lemma),
     uposOf: (m) =>
       new Set(
         Object.entries(settings.upos).flatMap(([tag, tags]) =>

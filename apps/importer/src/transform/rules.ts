@@ -1,6 +1,10 @@
 import { lookupKey } from "@dict/core/lookupKey";
 import type { WiktextractForm } from "../source/wiktextract.ts";
-import { isHistorical, type LanguageRules } from "./languages.ts";
+import {
+  isHistorical,
+  isOtherVariety,
+  type LanguageRules,
+} from "./languages.ts";
 
 /**
  * Keep-or-drop decisions for senses and forms. The tag lists here are shared by
@@ -18,7 +22,10 @@ const SKIPPED_SENSE_TAGS = ["archaic", "no-gloss"] as const;
  * `historicalStages`, unrelated to wiktextract's `historical` tag.
  */
 export type SkippedSenseReason =
-  (typeof SKIPPED_SENSE_TAGS)[number] | "historical-stage" | "placeholder";
+  | (typeof SKIPPED_SENSE_TAGS)[number]
+  | "historical-stage"
+  | "other-variety"
+  | "placeholder";
 
 /** Wiktionary's text for a sense nobody could define; not a meaning. */
 const PLACEHOLDER_GLOSS = "The meaning of this term is uncertain";
@@ -89,7 +96,11 @@ export const skipSense = (
   tags: ReadonlyArray<string>,
 ): SkippedSenseReason | undefined =>
   SKIPPED_SENSE_TAGS.find((tag) => tags.includes(tag)) ??
-  (isHistorical(language, tags) ? "historical-stage" : undefined);
+  (isHistorical(language, tags)
+    ? "historical-stage"
+    : isOtherVariety(language, tags)
+      ? "other-variety"
+      : undefined);
 
 /**
  * Gloss openings of `form-of` / `alt-of` senses that describe a word of its own
@@ -396,11 +407,33 @@ const MARKED_TAGS: ReadonlySet<string> = new Set([
 export const isMarked = (tags: ReadonlyArray<string> = []): boolean =>
   tags.some((t) => MARKED_TAGS.has(t));
 
-/** A headword-line spelling variant with a usage label: a marked link, not a form. */
-export const isMarkedAlternative = (form: WiktextractForm): boolean =>
+/**
+ * A headword-line spelling variant with a usage label, or any with
+ * `markedAlternatives`: a marked link, not a form.
+ */
+export const isMarkedAlternative = (
+  form: WiktextractForm,
+  language?: LanguageRules,
+): boolean =>
   form.source === undefined &&
   (form.tags?.includes("alternative") ?? false) &&
-  isMarked(form.tags);
+  (language?.markedAlternatives === true || isMarked(form.tags));
+
+/**
+ * A headword-line form naming the word in the other script (`otherScriptTags`:
+ * `学习` on `學習`), not a variant (`alternative`).
+ */
+export const isOtherScriptForm = (
+  language: LanguageRules,
+  form: WiktextractForm,
+): boolean => {
+  const tags = form.tags ?? [];
+  return (
+    form.source === undefined &&
+    tags.some((t) => language.otherScriptTags?.includes(t)) &&
+    !tags.includes("alternative")
+  );
+};
 
 /** A headword-line form that names a case or number of the word itself (`моне́ти` genitive). */
 const isHeadwordInflection = (
@@ -457,6 +490,9 @@ export const keepForm = (
   if (isVerbalNounForm(form)) return false;
   if (isAuxiliaryRow(form)) return false;
   if (isHistorical(language, tags)) return false;
+  if (isOtherVariety(language, tags)) return false;
+  // The word in the other script is a lemma (`scriptForms`), not a form.
+  if (isOtherScriptForm(language, form)) return false;
   if (
     form.source !== undefined &&
     language.formlessPos?.includes(pos) &&
@@ -465,7 +501,7 @@ export const keepForm = (
     return false;
   }
   if (form.source === undefined) {
-    if (isMarkedAlternative(form)) return false;
+    if (isMarkedAlternative(form, language)) return false;
     const agrees = language.headwordGenders === true && AGREEING_POS.has(pos);
     if (noTable && isHeadwordInflection(tags, agrees)) return true;
     return (
