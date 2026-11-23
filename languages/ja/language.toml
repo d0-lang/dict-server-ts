@@ -63,7 +63,10 @@ prefixes = ["接頭辞"]
 suffixes = ["接尾辞"]
 # The て form ends the piece before it, as a reader takes it: 並んで|います,
 # 使わ|れて|います, not 並ん|で|い|ます. That piece's entries are labelled.
-formEndings = [{ pos = ["助詞-接続助詞"], surface = ["て", "で"], label = "て form" }]
+# に after a な-adjective is だ's adverb form, which also ends the piece:
+# 確かに "certainly", 静かに "quietly", labelled like the て form, with に's
+# own line (grammar.tsv), not だ's, which a reader would take for "is".
+formEndings = [{ pos = ["助詞-接続助詞"], surface = ["て", "で"], label = "て form" }, { pos = ["助動詞"], surface = ["に"], label = "adverb" }]
 
 # UniDic reads よ between two nouns as the stem of よい "good", and the noun
 # after it as a suffix: 鏡|よ|鏡|よ "mirror, mirror". The stem goes on with
@@ -112,15 +115,30 @@ pos = ["助動詞"]
 surface = ["な"]
 after = ["形状詞-一般"]
 
+# に after a な-adjective, or a noun used as one, which makes it an adverb:
+# 確か|に, 普通|に (UniDic tags this に as だ, an auxiliary; the particle に
+# after a noun is 助詞). Not after よう, そう, みたい, as with な.
+[[context.analyzer.join]]
+pos = ["助動詞"]
+surface = ["に"]
+after = ["形状詞-一般", "名詞-普通名詞-形状詞可能"]
+
 # Auxiliaries after a verb, adjective or auxiliary: 食べ|まし|た, 行か|ない.
 [[context.analyzer.join]]
 pos = ["助動詞"]
 after = ["動詞", "形容詞", "助動詞"]
 
-# ない and the like after a stem or auxiliary: やり|たく|ない.
+# ない and the like after a verb or adjective: 美しく|ない, 読み|にくい.
 [[context.analyzer.join]]
 pos = ["形容詞-非自立可能"]
-after = ["動詞", "形容詞", "助動詞"]
+after = ["動詞", "形容詞"]
+
+# Only ない after an auxiliary: やり|たく|ない, 静かで|ない. Not いい, 良い:
+# after に (だ) that is the next word, 普通に|いい "fine, really".
+[[context.analyzer.join]]
+pos = ["形容詞-非自立可能"]
+base = ["ない", "無い"]
+after = ["助動詞"]
 
 # The て form, the conditional ば, and ながら/つつ "while": 食べ|て,
 # 食べれ|ば, 実験し|ながら.

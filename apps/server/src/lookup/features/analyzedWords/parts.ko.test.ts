@@ -1,7 +1,7 @@
 import { assert, beforeAll, describe, it } from "@effect/vitest";
 import { loadAnalyzer } from "../../common/analyzer.ts";
 import { lookupWord } from "../../lookup.ts";
-import { languageOf } from "../../testing/dictionary.ts";
+import { dictionary, languageOf } from "../../testing/dictionary.ts";
 import { korean } from "../../testing/korean.ts";
 
 const lookup = (word: string, context: string) =>
@@ -23,6 +23,28 @@ const parts = (word: string, context: string) => {
 beforeAll(() => loadAnalyzer(languageOf("ko_en")), 60_000);
 
 describe("Korean endings shown as parts", () => {
+  it("shows a prefix by its entries as a prefix, not by a grammar line spelled alike", () => {
+    // Kiwi: 저 (prefix XPN) + 출산; the grammar file's 저 is the pronoun "I".
+    const db = dictionary([
+      ["저", "PRON", [], ["I, me (humble)"], "grammar"],
+      ["저", "X", [], ["low"], "prefix"],
+      ["출산", "NOUN", [], ["childbirth"]],
+    ]);
+    const { entries, segments } = lookupWord(
+      db,
+      languageOf("ko_en"),
+      "저출산",
+      "저출산 문제가 심각하다.",
+      1,
+    );
+    assert.deepStrictEqual(
+      segments?.[0]?.entries?.map(
+        (i) => `${entries[i]!.lemma} ${entries[i]!.pos}`,
+      ),
+      ["저 X", "저 PRON"],
+    );
+  });
+
   it("reads the copula Kiwi gives no letters of with the ending after it", () => {
     // Kiwi: 냄새 + 이 (length 0) + 야, so 야 is the copula, not "hey".
     assert.deepStrictEqual(parts("냄새야", "이게 뭔 냄새야?"), [

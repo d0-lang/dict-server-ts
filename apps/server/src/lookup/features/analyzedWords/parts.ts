@@ -190,6 +190,14 @@ export const wholeIds = (
   // its own (`하지만`).
   const verbal =
     headPos.has("VERB") || headPos.has("ADJ") || derived.length > 0;
+  const last = w.at(-1)!;
+  // An adjective's form: the head and the form ending right after it
+  // (`別|に`). Not a verb's (`して` is する's, not "and"; `至って` the
+  // verb's, not "very"), nor a する-noun's (`学習|さ|せ|て`).
+  const formWord =
+    w.indexOf(last) === w.indexOf(head) + 1 &&
+    formEndingOf(c, last) !== undefined &&
+    !headPos.has("VERB");
   // Only of a stem that inflects (not the copula `이`, whose `이어` is `잇다`'s).
   const stem = headPos.size === 0 || headPos.has("VERB") || headPos.has("ADJ");
   const stemForms =
@@ -217,9 +225,11 @@ export const wholeIds = (
     // when it no longer inflects (`하지만` "but", of `하다` + `-지만`;
     // `例えば` "for example"), unless it names something: a noun spelled
     // alike is another word (`하지` "summer solstice", for `하` + `-지`).
+    // Without spaces, only of a word that ends in a form ending, even after
+    // a noun used as a な-adjective: `別に` "not particularly" and `急に`
+    // "suddenly" before `別`, `急`.
     const own = (row: FormRow) =>
-      c.settings.spacedWords &&
-      verbal &&
+      ((c.settings.spacedWords && verbal) || formWord) &&
       form === written &&
       row.source === FormSource.Lemma &&
       LEXICALIZED.has(row.pos) &&
@@ -238,8 +248,12 @@ export const wholeIds = (
       headPos.size > 0;
     if (spelledAlike && fitting.length === 0) continue;
     const read = spelledAlike ? fitting : found;
+    // An adjective's form (`普通に`) is of an adjective entry: not a verb's
+    // that the spelling also reaches (`風` is `振りする`'s too, for `風に`
+    // "this way"); with none, the word's entries stay.
     const inflecting = read.filter(
-      (row) => INFLECTING.has(row.pos) || own(row),
+      (row) =>
+        (formWord ? row.pos === "ADJ" : INFLECTING.has(row.pos)) || own(row),
     );
     const kept = inflected && inflecting.length > 0 ? inflecting : read;
     // The base forms' own entries first, the last named first: it is the
@@ -260,7 +274,10 @@ export const wholeIds = (
     // redirects there). A kana lemma is its own reading (`なる`).
     const reading =
       head.reading === undefined ? undefined : hiragana(head.reading);
+    // The word itself as written is read as the whole word, not its head
+    // (`別に` べつに, against `別` べつ).
     const misread = (row: FormRow) => {
+      if (own(row)) return 0;
       const readings = [
         ...c.infoOf(row.id).readings,
         ...(isKana(row.lemma) ? [hiragana(row.lemma)] : []),
@@ -487,7 +504,9 @@ export const morphemeParts = (
               ranked.map((row) => row.id),
               grammar,
             )
-          : !isHead && grammar.length > 0
+          : // An ending after the head by its line; a prefix keeps its
+            // entries as a prefix first (`저|출산` is 저 "low", not 저 "I").
+            head >= 0 && i > head && grammar.length > 0
             ? grammar
             : ranked.map((row) => row.id),
       isHead,
@@ -555,6 +574,14 @@ const knownRuns = (
   return runs;
 };
 
+/** The form ending `m` is (`formEndings`: the て of `食べて`, the に of `確かに`). */
+const formEndingOf = (c: Click, m: Morpheme) =>
+  c.settings.formEndings.find(
+    (ending) =>
+      hasPos(m.pos, ending.pos) &&
+      (ending.surface === undefined || ending.surface.includes(m.surface)),
+  );
+
 /**
  * The parts with each form ending moved onto the part before it, which it
  * closes (`並ん|で` is `並んで`): that part's entries get the ending's label,
@@ -569,12 +596,7 @@ const withFormEndings = (
   parts: ReadonlyArray<Part & { readonly from: number; readonly to: number }>,
   shown: ReadonlySet<number>,
 ): ReadonlyArray<Part> => {
-  const endingOf = (m: Morpheme) =>
-    c.settings.formEndings.find(
-      (ending) =>
-        hasPos(m.pos, ending.pos) &&
-        (ending.surface === undefined || ending.surface.includes(m.surface)),
-    );
+  const endingOf = (m: Morpheme) => formEndingOf(c, m);
   const out: Array<Part> = [];
   /** Whether the last part takes in the parts after it: what follows a form ending. */
   let open = false;
@@ -584,9 +606,17 @@ const withFormEndings = (
     const ending = part.from > head ? endingOf(first) : undefined;
     const before = out.at(-1);
     if (ending !== undefined && before !== undefined) {
-      const own = first.bases
-        .flatMap((base) => grammarIds(c.db, base))
-        .filter((id) => !shown.has(id) && !before.ids.includes(id));
+      // The ending's own line: an ending's line spelled as it is written
+      // (`に` "makes an adverb", not its base form `だ` "is"), else its base
+      // form's (`で` is `て`).
+      const spelled = grammarIds(c.db, first.surface).filter(
+        (id) => c.infoOf(id).pos === "X",
+      );
+      const own = (
+        spelled.length > 0
+          ? spelled
+          : first.bases.flatMap((base) => grammarIds(c.db, base))
+      ).filter((id) => !shown.has(id) && !before.ids.includes(id));
       out[out.length - 1] = {
         ...before,
         text: before.text + first.surface,

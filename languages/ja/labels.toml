@@ -5,6 +5,10 @@
 name = "て form"
 text = "The verb or adjective in its て form, which links it to what follows: and, and then (食べて寝る, eat and sleep), or a verb after it that adds a meaning (食べている, is eating; 食べてみる, try eating; 食べてしまう, end up eating). Verbs make it like the past た: 読んで, 書いて, 行って. Adjectives end in くて (高くて, expensive and)."
 
+[adverb]
+name = "adverb"
+text = "The な-adjective with に, which makes it an adverb: 静かに, quietly; 確かに, certainly; 普通に, normally; 簡単に, easily. Before a noun it takes な instead (静かな部屋, a quiet room)."
+
 [godan]
 text = "A godan (five-row) verb changes the last kana of its stem: 書く, 書かない, 書きます, 書いて. Some end in る like ichidan verbs (帰る, 切る, 知る), which is why the class is shown: 帰らない, not 帰ない."
 
