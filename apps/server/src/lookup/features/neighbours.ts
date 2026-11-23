@@ -26,6 +26,10 @@ const MAX_ADVERBS = 2;
 const oneWord = (entry: LookupEntry, pos: LookupEntry["pos"]): boolean =>
   entry.pos === pos && !/\s/u.test(entry.lemma);
 
+/** An entry with a sense that points at another word (`→ aller`). */
+const pointsAtWord = (entry: LookupEntry): boolean =>
+  entry.senses.some((sense) => (sense.see?.length ?? 0) > 0);
+
 const keys = (words: ReadonlyArray<string>): ReadonlySet<string> =>
   new Set(words.map(lookupKey));
 
@@ -105,7 +109,9 @@ const permute = (
  *   the verb and auxiliary entries come first. Among them, a verb whose
  *   lemma is the word itself follows the verbs it is a form of: such a verb is
  *   an infinitive or a participle used alone (`dit` "called"), while here the
- *   word is a verb's finite form (`dire`). A word of either list is itself
+ *   word is a verb's finite form (`dire`). A grammar-file line that points at
+ *   its verb is that finite form, and keeps its place: `on va` opens on `va`
+ *   "goes → aller", then `aller`. A word of either list is itself
  *   a pronoun on the way to the verb, so it keeps its order: `il lui dit` is
  *   no `luire`.
  * - After one of `noVerbAfter` (`des mesures`), the verb entries come last.
@@ -241,7 +247,7 @@ export const orderByNeighbours = (
           ? 0
           : !oneWord(entry, "VERB")
             ? 2
-            : lookupKey(entry.lemma) === key
+            : lookupKey(entry.lemma) === key && !pointsAtWord(entry)
               ? 1
               : 0;
     order = [...all].sort((a, b) => rank(own[a]!) - rank(own[b]!) || a - b);

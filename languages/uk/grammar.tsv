@@ -164,22 +164,44 @@
 мі́нус	NOUN	minus, drawback ("плюси і мінуси", pros and cons) | minus sign
 
 ## Forms of бути and могти
-був	AUX	was (past of бути, masculine: "він був вдома", he was at home)
-була́	AUX	was (past of бути, feminine: "вона була вдома", she was at home)
-було́	AUX	was, it was (past of бути, neuter: "було тихо", it was quiet) | there was, there were ("було багато людей", there were many people)
-були́	AUX	were (past of бути, plural: "ми були вдома", we were at home)
-бу́ду	AUX	I will be | I will (with an infinitive: "я буду читати", I will read)
-бу́деш	AUX	you will be | you will (with an infinitive)
-бу́де	AUX	will be ("завтра буде дощ", it will rain tomorrow) | will (with an infinitive: "він буде працювати", he will work) | there will be
-бу́демо	AUX	we will be | we will (with an infinitive) | let's ("будемо сподіватися", let's hope)
-бу́дете	AUX	you will be | you will (with an infinitive)
-бу́дуть	AUX	they will be | they will (with an infinitive: "будуть працювати", they will work)
-будь	AUX	be (imperative of бути: "будь обережний", be careful) | "будь ласка", please
-мо́же	AUX	can, is able to, may (he, she or it; present of могти: "він може прийти", he can come) | maybe, perhaps (on its own: "може, завтра", maybe tomorrow; "може бути", it may be)
-міг	AUX	could, was able to (past of могти, masculine: "він не міг спати", he couldn't sleep) | could, might (with би: "міг би", could, might)
-могла́	AUX	could, was able to (past of могти, feminine)
-могло́	AUX	could (past of могти, neuter: "могло бути гірше", it could have been worse)
-могли́	AUX	could, were able to (past of могти, plural)
+був	AUX	was (past of бути, masculine: "він був вдома", he was at home) → бути
+була́	AUX	was (past of бути, feminine: "вона була вдома", she was at home) → бути
+було́	AUX	was, it was (past of бути, neuter: "було тихо", it was quiet) → бути | there was, there were ("було багато людей", there were many people)
+були́	AUX	were (past of бути, plural: "ми були вдома", we were at home) → бути
+бу́ду	AUX	I will be → бути | I will (with an infinitive: "я буду читати", I will read)
+бу́деш	AUX	you will be → бути | you will (with an infinitive)
+бу́де	AUX	will be ("завтра буде дощ", it will rain tomorrow) → бути | will (with an infinitive: "він буде працювати", he will work) | there will be
+бу́демо	AUX	we will be → бути | we will (with an infinitive) | let's ("будемо сподіватися", let's hope)
+бу́дете	AUX	you will be → бути | you will (with an infinitive)
+бу́дуть	AUX	they will be → бути | they will (with an infinitive: "будуть працювати", they will work)
+будь	AUX	be (imperative of бути: "будь обережний", be careful) → бути | "будь ласка", please
+мо́же	AUX	can, is able to, may (he, she or it; present of могти: "він може прийти", he can come) → бути | maybe, perhaps (on its own: "може, завтра", maybe tomorrow; "може бути", it may be)
+міг	AUX	could, was able to (past of могти, masculine: "він не міг спати", he couldn't sleep) → могти | could, might (with би: "міг би", could, might)
+могла́	AUX	could, was able to (past of могти, feminine) → могти
+могло́	AUX	could (past of могти, neuter: "могло бути гірше", it could have been worse) → бути
+могли́	AUX	could, were able to (past of могти, plural) → могти
+
+## Present forms of могти and хотіти, and forms of йти, їсти and дати
+мо́жу	AUX	I can, I am able to (present of могти: "я можу допомогти", I can help) → могти
+мо́жеш	AUX	you can (present of могти) → могти
+мо́жемо	AUX	we can (present of могти) → могти
+мо́жуть	AUX	they can, may (present of могти: "вони можуть прийти", they can come) → могти
+хо́чу	VERB	I want (хотіти: "я хочу додому", I want to go home) → хотіти
+хо́чеш	VERB	you want (хотіти: "хочеш чаю?", do you want some tea?) → хотіти
+хо́че	VERB	wants (he, she or it; хотіти) → хотіти
+хо́чемо	VERB	we want (хотіти) → хотіти
+хо́чуть	VERB	they want (хотіти) → хотіти
+йде	VERB	goes, is going, walks (he, she or it; йти: "він йде додому", he is going home) → йти | is on, is falling ("йде дощ", it's raining; "йде фільм", a film is on) | мова йде про: it's about, the subject is ("мова йде про гроші", it's about money)
+йдуть	VERB	go, are going (they; йти) → йти
+йшов	VERB	was going, was walking (past of йти, masculine) → йти
+йшла	VERB	was going, was walking (past of йти, feminine) → йти
+йшли	VERB	were going, were walking (past of йти, plural) → йти
+пішо́в	VERB	went, left (past of піти, masculine: "він пішов додому", he went home) → піти
+пішла́	VERB	went, left (past of піти, feminine) → піти
+пішли́	VERB	went, left (past of піти, plural) → піти | let's go ("пішли!", let's go!)
+їсть	VERB	eats (he, she or it; їсти) → їсти
+їдя́ть	VERB	they eat (їсти) → їсти
+даду́ть	VERB	they will give (дати) → дати
 
 ## Adverbs with a sense Wiktionary lacks
 # Each line replaces Wiktionary's adverb entry for the word, so it keeps its senses too.

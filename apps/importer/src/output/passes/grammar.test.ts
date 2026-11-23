@@ -130,6 +130,34 @@ describe("replaceGrammarWords", () => {
     assert.deepStrictEqual(reached(sqlite, "a"), ["a AUX", "a X"]);
   });
 
+  it("keeps the verbs a content line points at, and drops its other ones", () => {
+    const sqlite = file(
+      [
+        [1, "va", "VERB", GRAMMAR_SOURCE_POS],
+        [2, "aller", "VERB", "verb"],
+        [3, "vader", "VERB", "verb"],
+        [4, "va", "INTJ", "intj"],
+        [5, "aller se faire voir", "VERB", "verb"],
+      ],
+      [
+        ["va", 1, FormSource.Lemma],
+        ["va", 2, FormSource.Inflection],
+        ["va", 3, FormSource.Inflection],
+        ["va", 4, FormSource.Lemma],
+        ["va", 5, FormSource.Inflection],
+      ],
+    );
+    sqlite.run(`INSERT INTO senses VALUES (1, 0, '["goes"]', '["aller"]')`);
+    run(sqlite);
+    assert.deepStrictEqual(reached(sqlite, "va"), [
+      "va VERB",
+      "aller VERB",
+      "va INTJ",
+      // A phrase made from the verb stays too (Polish `mieć się` for `mam`).
+      "aller se faire voir VERB",
+    ]);
+  });
+
   it("keeps a link that spells the other word without its optional letters", () => {
     // Russian texts write `всё` as `все`, which the file lists too.
     const sqlite = file(

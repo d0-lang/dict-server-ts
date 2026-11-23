@@ -1,6 +1,6 @@
 import { assert, describe, it } from "@effect/vitest";
 import { lookupWord } from "../lookup.ts";
-import { languageOf, lemmas } from "../testing/dictionary.ts";
+import { dictionary, languageOf, lemmas } from "../testing/dictionary.ts";
 import { french } from "../testing/french.ts";
 
 describe("the neighbouring word orders the word's entries", () => {
@@ -65,6 +65,18 @@ describe("the neighbouring word orders the word's entries", () => {
       "dire",
       "dit",
       "dit",
+    ]);
+  });
+
+  it("keeps a grammar line that points at its verb before that verb", () => {
+    const db = dictionary([
+      ["va", "VERB", [], ["goes"], "grammar"],
+      ["aller", "VERB", ["va"], ["to go"]],
+    ]);
+    db.$client.run(`UPDATE senses SET see = '["aller"]' WHERE entry_id = 1`);
+    assert.deepStrictEqual(lemmas(db, "fr_en", "va", "On va partir."), [
+      "va",
+      "aller",
     ]);
   });
 

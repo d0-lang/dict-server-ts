@@ -250,21 +250,48 @@
 среди́	ADP	among, in the middle of (+ genitive: "среди друзей", among friends)
 
 ## Forms of быть and мочь
-был	AUX	was (past of быть, masculine: "он был дома", he was at home; "был построен", was built)
-была́	AUX	was (past of быть, feminine: "она была дома", she was at home; "была создана", was created)
-бы́ло	AUX	was, it was (past of быть, neuter: "там было тихо", it was quiet there; "было построено", was built) | there was, there were ("было много людей", there were many people)
-бы́ло	PART	nearly, was about to (with a past verb: "я было начал", I was about to start)
-бы́ли	AUX	were (past of быть, plural: "мы были дома", we were at home; "были построены", were built)
-бу́ду	AUX	I will be | I will (with an infinitive: "я буду читать", I will read)
-бу́дешь	AUX	you will be | you will (with an infinitive: "будешь читать", you will read)
-бу́дет	AUX	will be ("завтра будет дождь", it will rain tomorrow) | will (with an infinitive: "он будет работать", he will work) | there will be | be (with пусть: "пусть будет так", let it be so; "пусть он будет царём", let him be king)
-бу́дем	AUX	we will be | we will (with an infinitive: "будем работать", we will work) | let's ("будем надеяться", let's hope)
-бу́дете	AUX	you will be | you will (with an infinitive: "будете работать", you will work)
-бу́дут	AUX	they will be | they will (with an infinitive: "будут работать", they will work; "будут построены", will be built)
-мог	AUX	could, was able to (past of мочь, masculine: "он не мог спать", he couldn't sleep) | could, might (with бы: "мог бы", could, might)
-могла́	AUX	could, was able to (past of мочь, feminine)
-могло́	AUX	could (past of мочь, neuter: "могло быть хуже", it could have been worse)
-могли́	AUX	could, were able to (past of мочь, plural)
+был	AUX	was (past of быть, masculine: "он был дома", he was at home; "был построен", was built) → быть
+была́	AUX	was (past of быть, feminine: "она была дома", she was at home; "была создана", was created) → быть
+бы́ло	AUX	was, it was (past of быть, neuter: "там было тихо", it was quiet there; "было построено", was built) → быть | there was, there were ("было много людей", there were many people)
+бы́ло	PART	nearly, was about to (with a past verb: "я было начал", I was about to start) → быть
+бы́ли	AUX	were (past of быть, plural: "мы были дома", we were at home; "были построены", were built) → быть
+бу́ду	AUX	I will be → быть | I will (with an infinitive: "я буду читать", I will read)
+бу́дешь	AUX	you will be → быть | you will (with an infinitive: "будешь читать", you will read)
+бу́дет	AUX	will be ("завтра будет дождь", it will rain tomorrow) → быть | will (with an infinitive: "он будет работать", he will work) | there will be | be (with пусть: "пусть будет так", let it be so; "пусть он будет царём", let him be king)
+бу́дем	AUX	we will be → быть | we will (with an infinitive: "будем работать", we will work) | let's ("будем надеяться", let's hope)
+бу́дете	AUX	you will be → быть | you will (with an infinitive: "будете работать", you will work)
+бу́дут	AUX	they will be → быть | they will (with an infinitive: "будут работать", they will work; "будут построены", will be built)
+мог	AUX	could, was able to (past of мочь, masculine: "он не мог спать", he couldn't sleep) → мочь | could, might (with бы: "мог бы", could, might)
+могла́	AUX	could, was able to (past of мочь, feminine) → мочь
+могло́	AUX	could (past of мочь, neuter: "могло быть хуже", it could have been worse) → быть
+могли́	AUX	could, were able to (past of мочь, plural) → мочь
+
+## Present forms of мочь and хотеть, and forms of идти, есть and дать
+могу́	AUX	I can, I am able to (present of мочь: "я могу помочь", I can help; "не могу", I can't) → мочь
+мо́жешь	AUX	you can (present of мочь: "ты можешь прийти?", can you come?) → мочь
+мо́жет	AUX	can, is able to, may (he, she or it; present of мочь: "он может прийти", he can come) → мочь | maybe, perhaps (on its own: "может, завтра", maybe tomorrow; "может быть", maybe)
+мо́жем	AUX	we can (present of мочь) → мочь
+мо́жете	AUX	you can (plural or polite; present of мочь: "вы можете мне помочь?", can you help me?) → мочь
+мо́гут	AUX	they can, may (present of мочь) → мочь
+хочу́	VERB	I want (хотеть: "я хочу пить", I'm thirsty; "хочу домой", I want to go home) → хотеть
+хо́чешь	VERB	you want (хотеть: "хочешь чаю?", do you want some tea?) → хотеть
+хо́чет	VERB	wants (he, she or it; хотеть) → хотеть
+хоти́м	VERB	we want (хотеть) → хотеть
+хоти́те	VERB	you want (plural or polite; хотеть: "что вы хотите?", what do you want?) → хотеть
+хотя́т	VERB	they want (хотеть) → хотеть
+шёл	VERB	was going, was walking (past of идти, masculine: "он шёл домой", he was walking home) → идти | was on, was falling ("шёл дождь", it was raining)
+шла	VERB	was going, was walking (past of идти, feminine) → идти | was on ("шла война", a war was on)
+шло	VERB	was going (past of идти, neuter: "время шло", time went by) → идти
+шли	VERB	were going, were walking (past of идти, plural) → идти | were on (of films, plays or rain: "шли дожди", it was raining; "в театре шли спектакли", plays were on at the theatre)
+пошёл	VERB	went, set off (past of пойти, masculine: "он пошёл домой", he went home) → пойти | started (to fall: "пошёл дождь", it started raining)
+пошла́	VERB	went, set off (past of пойти, feminine) → пойти
+пошли́	VERB	went, set off (past of пойти, plural) → пойти | let's go ("пошли!", let's go!)
+ем	VERB	I eat (есть: "я ем", I eat, I'm eating) → есть
+ест	VERB	eats (he, she or it; есть) → есть
+едя́т	VERB	they eat (есть) → есть
+дам	VERB	I will give (дать: "я дам тебе книгу", I'll give you the book) → дать
+даст	VERB	will give (he, she or it; дать) → дать
+даду́т	VERB	they will give (дать) → дать
 
 ## Adverbs with a sense Wiktionary lacks
 здесь	ADV	here | in this case, in this respect ("здесь важно другое", what matters here is something else)

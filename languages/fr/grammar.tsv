@@ -5,6 +5,10 @@
 # adverbs and other content words stay (`la` the note, `pas` "step"), unless a
 # line lists that part of speech too. A word's lines come first in the popover,
 # in this file's order, so its commonest use goes first. Case matters.
+# Irregular verb forms a reader can't connect to their infinitive get lines of
+# their own (`va` "goes", `peut` "can"): the protocol has no inflection tables.
+# "→ aller" links the line to its verb, which the popover still shows after it;
+# a VERB line replaces Wiktionary's other verbs for the word (`vader` for `va`).
 # See apps/importer/src/grammar.ts.
 
 ## Articles, and the contractions of à and de with them
@@ -118,45 +122,159 @@ ou	CCONJ	or
 mais	CCONJ	but
 si	SCONJ	if, whether
 soit	CCONJ	either ... or (soit ... soit) | that is, namely (soit 20 %, i.e. 20%)
-soit	AUX	be (subjunctive of être: qu'il soit, that he be)
+soit	AUX	be (subjunctive of être: qu'il soit, that he be) → être
 
 ## Negation and comparison
 pas	ADV	not (ne ... pas: je ne sais pas, I don't know; often alone in speech: je sais pas)
 plus	ADV	more, -er (plus grand, bigger) | most, -est (le plus grand, the biggest) | no more, no longer (ne ... plus: il n'est plus là, he is no longer here) | plus, in addition
 
 ## Forms of être "to be" and avoir "to have" (also the auxiliaries of the past)
-est	AUX	is (il est, he is; être) | has, have (with a past participle: il est venu, he came)
-sont	AUX	are (ils sont, they are; être) | have (with a past participle: ils sont partis, they left)
-suis	AUX	am (je suis, I am; être) | have (with a past participle: je suis venu, I came)
-es	AUX	are (tu es, you are; être)
-sommes	AUX	are (nous sommes, we are; être)
-êtes	AUX	are (vous êtes, you are; être)
-était	AUX	was, were, used to be (il était; être) | had (with a past participle: il était parti, he had left)
-étaient	AUX	were, used to be (ils étaient; être)
-étais	AUX	was, used to be (j'étais, tu étais; être)
-été	AUX	been (past participle of être: il a été, he has been / he was)
-sera	AUX	will be (il sera; être)
-seront	AUX	will be (ils seront; être)
-serait	AUX	would be (il serait; être)
-seraient	AUX	would be (ils seraient; être)
-soient	AUX	be (subjunctive of être: qu'ils soient, that they be)
-a	AUX	has (il a, he has; avoir) | has, have (with a past participle: il a mangé, he ate / he has eaten) | there is (il y a)
-ont	AUX	have (ils ont; avoir) | have (with a past participle: ils ont vu, they saw / they have seen)
-ai	AUX	have (j'ai, I have; avoir) | have (with a past participle: j'ai vu, I saw / I have seen)
-as	AUX	have (tu as, you have; avoir)
-avons	AUX	have (nous avons; avoir)
-avez	AUX	have (vous avez; avoir)
-avait	AUX	had (il avait; avoir) | had (with a past participle: il avait vu, he had seen)
-avaient	AUX	had (ils avaient; avoir)
-avais	AUX	had (j'avais, tu avais; avoir)
-aura	AUX	will have (il aura; avoir)
-aurait	AUX	would have (il aurait; avoir)
-eu	AUX	had (past participle of avoir: j'ai eu, I had)
-ayant	AUX	having (present participle of avoir: ayant fini, having finished)
-étant	AUX	being (present participle of être: étant donné, given)
-fut	AUX	was (il fut; past historic of être, in writing) | was (with a past participle: il fut élu, he was elected)
-furent	AUX	were (ils furent; past historic of être, in writing)
-eut	AUX	had (il eut; past historic of avoir, in writing)
+est	AUX	is (il est, he is; être) → être | has, have (with a past participle: il est venu, he came)
+sont	AUX	are (ils sont, they are; être) → être | have (with a past participle: ils sont partis, they left)
+suis	AUX	am (je suis, I am; être) → être | have (with a past participle: je suis venu, I came)
+es	AUX	are (tu es, you are; être) → être
+sommes	AUX	are (nous sommes, we are; être) → être
+êtes	AUX	are (vous êtes, you are; être) → être
+était	AUX	was, were, used to be (il était; être) → être | had (with a past participle: il était parti, he had left)
+étaient	AUX	were, used to be (ils étaient; être) → être
+étais	AUX	was, used to be (j'étais, tu étais; être) → être
+été	AUX	been (past participle of être: il a été, he has been / he was) → être
+sera	AUX	will be (il sera; être) → être
+seront	AUX	will be (ils seront; être) → être
+serait	AUX	would be (il serait; être) → être
+seraient	AUX	would be (ils seraient; être) → être
+soient	AUX	be (subjunctive of être: qu'ils soient, that they be) → être
+a	AUX	has (il a, he has; avoir) → avoir | has, have (with a past participle: il a mangé, he ate / he has eaten) | there is (il y a)
+ont	AUX	have (ils ont; avoir) → avoir | have (with a past participle: ils ont vu, they saw / they have seen)
+ai	AUX	have (j'ai, I have; avoir) → avoir | have (with a past participle: j'ai vu, I saw / I have seen)
+as	AUX	have (tu as, you have; avoir) → avoir
+avons	AUX	have (nous avons; avoir) → avoir
+avez	AUX	have (vous avez; avoir) → avoir
+avait	AUX	had (il avait; avoir) → avoir | had (with a past participle: il avait vu, he had seen)
+avaient	AUX	had (ils avaient; avoir) → avoir
+avais	AUX	had (j'avais, tu avais; avoir) → avoir
+aura	AUX	will have (il aura; avoir) → avoir
+aurait	AUX	would have (il aurait; avoir) → avoir
+eu	AUX	had (past participle of avoir: j'ai eu, I had) → avoir
+ayant	AUX	having (present participle of avoir: ayant fini, having finished) → avoir
+étant	AUX	being (present participle of être: étant donné, given) → être
+serai	AUX	will be (je serai; être) → être
+seras	AUX	will be (tu seras; être) → être
+serons	AUX	will be (nous serons; être) → être
+serez	AUX	will be (vous serez; être) → être
+serais	AUX	would be (je serais, tu serais; être) → être
+sois	AUX	be (subjunctive of être: que je sois, that I be) → être | be! (command: sois sage, be good)
+soyez	AUX	be (subjunctive of être: que vous soyez) → être | be! (command: soyez prudents, be careful)
+aurai	AUX	will have (j'aurai; avoir) → avoir | will have (with a past participle: j'aurai fini, I will have finished)
+auras	AUX	will have (tu auras; avoir) → avoir
+aurons	AUX	will have (nous aurons; avoir) → avoir
+aurez	AUX	will have (vous aurez; avoir) → avoir
+auront	AUX	will have (ils auront; avoir) → avoir
+aurais	AUX	would have (j'aurais, tu aurais; avoir) → avoir | would have (with a past participle: j'aurais aimé, I would have liked)
+auraient	AUX	would have (ils auraient; avoir) → avoir | would have (with a past participle: ils auraient dû, they should have)
+aie	AUX	have (subjunctive of avoir: que j'aie, that I have) → avoir
+ait	AUX	have, has (subjunctive of avoir: qu'il ait, that he have; bien qu'il ait vu, although he saw) → avoir
+aient	AUX	have (subjunctive of avoir: qu'ils aient) → avoir
+ayez	AUX	have (subjunctive of avoir: que vous ayez) → avoir | have! (command: n'ayez pas peur, don't be afraid)
+fut	AUX	was (il fut; past historic of être, in writing) → être | was (with a past participle: il fut élu, he was elected)
+furent	AUX	were (ils furent; past historic of être, in writing) → être
+eut	AUX	had (il eut; past historic of avoir, in writing) → avoir
+
+## Forms of the commonest irregular verbs
+vais	VERB	I go, I'm going (je vais; aller) → aller | I'm going to (with an infinitive: je vais partir, I'm going to leave)
+vas	VERB	you go, you're going (tu vas; aller) → aller | you're going to (with an infinitive: tu vas voir, you'll see)
+va	VERB	goes, is going (il va, he goes; aller) → aller | is going to (with an infinitive: il va pleuvoir, it's going to rain) | go! (command: va voir, go and see)
+vont	VERB	go, are going (ils vont; aller) → aller | are going to (with an infinitive: ils vont venir, they're going to come)
+ira	VERB	will go (il ira; aller) → aller
+irai	VERB	I will go (j'irai; aller) → aller
+iront	VERB	will go (ils iront; aller) → aller
+irait	VERB	would go (il irait; aller) → aller
+irais	VERB	would go (j'irais, tu irais; aller) → aller
+aille	VERB	go (subjunctive of aller: qu'il aille, that he go) → aller
+aillent	VERB	go (subjunctive of aller: qu'ils aillent, that they go) → aller
+fais	VERB	do, make (je fais, tu fais; faire) → faire | do! make! (command: fais attention, be careful)
+fait	VERB	done, made, did (past participle of faire: il a fait, he did, he has done) → faire | does, makes (il fait; faire) | is (of the weather: il fait beau, it's nice out; il fait froid, it's cold)
+font	VERB	do, make (ils font; faire) → faire
+fera	VERB	will do, will make (il fera; faire) → faire | will be (of the weather: il fera beau, it will be nice)
+ferait	VERB	would do, would make (il ferait; faire) → faire
+ferais	VERB	would do, would make (je ferais, tu ferais; faire) → faire
+fasse	VERB	do, make (subjunctive of faire: qu'il fasse, that he do) → faire
+fassent	VERB	do, make (subjunctive of faire: qu'ils fassent) → faire
+fit	VERB	did, made (il fit; past historic of faire, in writing) → faire
+peux	VERB	can (je peux, tu peux; pouvoir) → pouvoir
+peut	VERB	can, may (il peut; pouvoir) → pouvoir
+peuvent	VERB	can, may (ils peuvent; pouvoir) → pouvoir
+pourra	VERB	will be able to (il pourra; pouvoir) → pouvoir
+pourrai	VERB	I will be able to (je pourrai; pouvoir) → pouvoir
+pourront	VERB	will be able to (ils pourront; pouvoir) → pouvoir
+pourrait	VERB	could, might (il pourrait; on pourrait dire, one could say; pouvoir) → pouvoir
+pourrais	VERB	could, might (je pourrais, tu pourrais; pouvoir) → pouvoir
+pourraient	VERB	could, might (ils pourraient; pouvoir) → pouvoir
+puisse	VERB	can, may (subjunctive of pouvoir: qu'il puisse, that he can) → pouvoir
+puissent	VERB	can, may (subjunctive of pouvoir: qu'ils puissent) → pouvoir
+pu	VERB	been able to, could (past participle of pouvoir: il a pu, he could, he was able to) → pouvoir
+veux	VERB	want (je veux, tu veux; vouloir) → vouloir
+veut	VERB	wants (il veut; vouloir) → vouloir
+veulent	VERB	want (ils veulent; vouloir) → vouloir
+voudrait	VERB	would like (il voudrait; vouloir) → vouloir
+voudrais	VERB	would like (je voudrais, I would like; vouloir) → vouloir
+veuillez	VERB	please (polite command of vouloir: veuillez patienter, please wait) → vouloir
+dois	VERB	must, have to (je dois, tu dois; devoir) → devoir | owe
+doit	VERB	must, has to (il doit; devoir) → devoir | must be (a guess: il doit être tard, it must be late) | owes
+doivent	VERB	must, have to (ils doivent; devoir) → devoir
+devrait	VERB	should, ought to (il devrait; devoir) → devoir
+devrais	VERB	should, ought to (je devrais, tu devrais; devoir) → devoir
+devraient	VERB	should, ought to (ils devraient; devoir) → devoir
+devra	VERB	will have to (il devra; devoir) → devoir
+devront	VERB	will have to (ils devront; devoir) → devoir
+doive	VERB	must, have to (subjunctive of devoir: qu'il doive) → devoir
+dû	VERB	had to (past participle of devoir: il a dû partir, he had to leave) → devoir | must have (a guess: il a dû oublier, he must have forgotten) | owed, due (dû à, due to)
+sais	VERB	know (je sais, tu sais; savoir) → savoir | tu sais: you know (in speech)
+sait	VERB	knows (il sait; on ne sait jamais, you never know; savoir) → savoir
+savent	VERB	know (ils savent; savoir) → savoir
+saura	VERB	will know (il saura; savoir) → savoir
+saurait	VERB	would know (il saurait; savoir) → savoir | could (with ne: on ne saurait dire, one couldn't say)
+sache	VERB	know (subjunctive of savoir: que je sache, as far as I know) → savoir
+sachant	VERB	knowing (savoir: sachant que, given that, knowing that) → savoir
+faut	VERB	it is necessary, one must (il faut partir, we have to leave; falloir) → falloir | it takes, is needed (il faut du temps, it takes time)
+faudra	VERB	it will be necessary, will have to (il faudra; falloir) → falloir
+faudrait	VERB	it would be necessary, should (il faudrait, we should; falloir) → falloir
+fallait	VERB	it was necessary, had to (il fallait; falloir) → falloir
+fallu	VERB	been necessary (past participle of falloir: il a fallu, it was necessary, we had to) → falloir
+vaut	VERB	is worth (ça vaut, it's worth; valoir) → valoir | il vaut mieux: it's better (to)
+vaudrait	VERB	would be worth (valoir) → valoir | il vaudrait mieux: it would be better (to)
+viens	VERB	come (je viens, tu viens; venir) → venir | have just (venir de: je viens de manger, I have just eaten) | come! (command: viens ici, come here)
+vient	VERB	comes (il vient; venir) → venir | has just (venir de: il vient de partir, he has just left)
+viennent	VERB	come (ils viennent; venir) → venir | have just (venir de)
+viendra	VERB	will come (il viendra; venir) → venir
+viendrait	VERB	would come (il viendrait; venir) → venir
+vint	VERB	came (il vint; past historic of venir, in writing) → venir
+tient	VERB	holds, keeps (il tient; tenir) → tenir | tient à: cares about, insists on
+tiens	VERB	hold, keep (je tiens, tu tiens; tenir) → tenir | here, take this (tiens!) | well, look (surprise: tiens, c'est toi, well, it's you)
+tiennent	VERB	hold, keep (ils tiennent; tenir) → tenir
+vois	VERB	see (je vois, tu vois; voir) → voir | tu vois: you see (in speech)
+voit	VERB	sees (il voit; on voit, you can see; voir) → voir
+voient	VERB	see (ils voient; voir) → voir
+verra	VERB	will see (il verra; on verra, we'll see; voir) → voir
+verrai	VERB	I will see (je verrai; voir) → voir
+verrait	VERB	would see (il verrait; voir) → voir
+vu	VERB	seen, saw (past participle of voir: j'ai vu, I saw, I have seen) → voir
+vu	ADP	given, in view of (vu la situation, given the situation) | vu que: given that, since
+vit	VERB	lives (il vit; vivre) → vivre | saw (il vit; past historic of voir, in writing) → voir
+dit	VERB	said, told (past participle of dire: il a dit, he said) → dire | says, tells (il dit; dire) | called, known as (Charles dit le Chauve, Charles known as the Bald)
+dis	VERB	say, tell (je dis, tu dis; dire) → dire | say! tell! (command: dis-moi, tell me)
+disent	VERB	say, tell (ils disent; dire) → dire
+dirait	VERB	would say (il dirait; dire) → dire | on dirait: it looks like, you'd think
+prend	VERB	takes (il prend; prendre) → prendre
+prends	VERB	take (je prends, tu prends; prendre) → prendre | take! (command: prends ça, take this)
+prennent	VERB	take (ils prennent; prendre) → prendre
+pris	VERB	taken, took (past participle of prendre: j'ai pris, I took, I have taken) → prendre
+prit	VERB	took (il prit; past historic of prendre, in writing) → prendre
+prenne	VERB	take (subjunctive of prendre: qu'il prenne, that he take) → prendre
+met	VERB	puts (il met; mettre) → mettre | se met à: starts to (il se met à pleuvoir, it starts to rain)
+mets	VERB	put (je mets, tu mets; mettre) → mettre | put! (command: mets-le là, put it there)
+mis	VERB	put (past participle of mettre: il a mis, he put, he has put) → mettre
+mit	VERB	put (il mit; past historic of mettre, in writing) → mettre
 
 ## Words Wiktionary glosses misleadingly for a reader
 bah	INTJ	well, meh, oh well (hesitation or indifference)

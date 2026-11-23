@@ -2,7 +2,12 @@
 # word <TAB> UD part of speech <TAB> senses separated by " | ".
 # The file replaces Wiktionary's determiner, pronoun, preposition, conjunction,
 # particle and auxiliary entries for every word listed here; nouns, verbs and
-# other content words stay. Case matters (Sie / sie). See apps/importer/src/grammar.ts.
+# other content words stay. Case matters (Sie / sie).
+# Irregular verb forms a reader can't connect to their infinitive get lines of
+# their own (`gab` "gave", `ging` "went"): the protocol has no inflection
+# tables. "→ geben" links the line to its verb, which the popover still shows
+# after it; a VERB line replaces Wiktionary's other verbs for the word.
+# See apps/importer/src/grammar.ts.
 
 ## Definite article and relative/demonstrative der
 der	DET	the (masculine, subject) | of the, to the (feminine: genitive, dative) | of the (plural, genitive)
@@ -212,59 +217,127 @@ fürs	ADP	for the (für das)
 # Past and subjunctive forms a reader can't connect to their tense by
 # themselves: Wiktionary's entry only says "to be". The protocol has no
 # inflection tables, so these are entries of their own.
-war	AUX	was ("es war kalt", it was cold) | had (past perfect with verbs of motion and change: "er war gegangen", he had gone)
-warst	AUX	were (du: "du warst dort", you were there) | had (past perfect: "du warst gekommen", you had come)
-waren	AUX	were ("wir waren müde", we were tired) | had (past perfect: "sie waren gekommen", they had come)
-wart	AUX	were (ihr) | had (past perfect)
-wäre	AUX	would be ("das wäre schön", that would be nice) | were (in a condition: "wenn ich reich wäre", if I were rich) | would have (with verbs of motion and change: "er wäre gekommen", he would have come)
-wärst	AUX	would be, were (du) | would have (with verbs of motion and change)
-wären	AUX	would be, were (wir, sie, Sie: "das wären zwei Euro", that would be two euros) | would have (with verbs of motion and change)
-wärt	AUX	would be, were (ihr) | would have (with verbs of motion and change)
-sei	AUX	is, be (reported speech: "er sagt, er sei krank", he says he is ill) | be! (command: "sei still!", be quiet!) | let ... be ("es sei denn", unless)
-seien	AUX	are, be (reported speech, plural: "sie seien zufrieden", they are said to be satisfied) | let us be ("seien wir ehrlich", let's be honest)
-gewesen	AUX	been ("ich bin dort gewesen", I have been there)
-hatte	AUX	had ("ich hatte keine Zeit", I had no time) | had (past perfect: "sie hatte gegessen", she had eaten)
-hattest	AUX	had (du) | had (past perfect)
-hatten	AUX	had (wir, sie, Sie) | had (past perfect: "wir hatten gewartet", we had waited)
-hattet	AUX	had (ihr) | had (past perfect)
-hätte	AUX	would have ("ich hätte gern einen Kaffee", I would like a coffee; "das hätte ich nicht gedacht", I wouldn't have thought so) | had (in a condition: "wenn ich Zeit hätte", if I had time) | could have, should have (with a modal: "er hätte kommen können", he could have come)
-hättest	AUX	would have, had (du) | could have, should have (with a modal)
-hätten	AUX	would have, had (wir, sie, Sie) | could have, should have (with a modal)
-hättet	AUX	would have, had (ihr) | could have, should have (with a modal)
-gehabt	AUX	had ("ich habe Glück gehabt", I was lucky)
-wurde	AUX	was, became (past: "es wurde dunkel", it became dark) | was (passive: "das Haus wurde gebaut", the house was built)
-wurdest	AUX	were, became (du) | were (passive)
-wurden	AUX	were, became (wir, sie, Sie) | were (passive: "sie wurden gewählt", they were elected)
-wurdet	AUX	were, became (ihr) | were (passive)
-würde	AUX	would ("ich würde gern kommen", I would like to come; "das würde helfen", that would help)
-würdest	AUX	would (du: "würdest du mir helfen?", would you help me?)
-würden	AUX	would (wir, sie, Sie: "würden Sie bitte...", would you please...)
-würdet	AUX	would (ihr)
-worden	AUX	been (passive perfect: "es ist gebaut worden", it has been built)
-geworden	AUX	become ("es ist kalt geworden", it has become cold)
+war	AUX	was ("es war kalt", it was cold) → sein | had (past perfect with verbs of motion and change: "er war gegangen", he had gone)
+warst	AUX	were (du: "du warst dort", you were there) → sein | had (past perfect: "du warst gekommen", you had come)
+waren	AUX	were ("wir waren müde", we were tired) → sein | had (past perfect: "sie waren gekommen", they had come)
+wart	AUX	were (ihr) → sein | had (past perfect)
+wäre	AUX	would be ("das wäre schön", that would be nice) → sein | were (in a condition: "wenn ich reich wäre", if I were rich) | would have (with verbs of motion and change: "er wäre gekommen", he would have come)
+wärst	AUX	would be, were (du) → sein | would have (with verbs of motion and change)
+wären	AUX	would be, were (wir, sie, Sie: "das wären zwei Euro", that would be two euros) → sein | would have (with verbs of motion and change)
+wärt	AUX	would be, were (ihr) → sein | would have (with verbs of motion and change)
+sei	AUX	is, be (reported speech: "er sagt, er sei krank", he says he is ill) → sein | be! (command: "sei still!", be quiet!) | let ... be ("es sei denn", unless)
+seien	AUX	are, be (reported speech, plural: "sie seien zufrieden", they are said to be satisfied) → sein | let us be ("seien wir ehrlich", let's be honest)
+gewesen	AUX	been ("ich bin dort gewesen", I have been there) → sein
+hatte	AUX	had ("ich hatte keine Zeit", I had no time) → haben | had (past perfect: "sie hatte gegessen", she had eaten)
+hattest	AUX	had (du) → haben | had (past perfect)
+hatten	AUX	had (wir, sie, Sie) → haben | had (past perfect: "wir hatten gewartet", we had waited)
+hattet	AUX	had (ihr) → haben | had (past perfect)
+hätte	AUX	would have ("ich hätte gern einen Kaffee", I would like a coffee; "das hätte ich nicht gedacht", I wouldn't have thought so) → haben | had (in a condition: "wenn ich Zeit hätte", if I had time) | could have, should have (with a modal: "er hätte kommen können", he could have come)
+hättest	AUX	would have, had (du) → haben | could have, should have (with a modal)
+hätten	AUX	would have, had (wir, sie, Sie) → haben | could have, should have (with a modal)
+hättet	AUX	would have, had (ihr) → haben | could have, should have (with a modal)
+gehabt	AUX	had ("ich habe Glück gehabt", I was lucky) → haben
+wurde	AUX	was, became (past: "es wurde dunkel", it became dark) → werden | was (passive: "das Haus wurde gebaut", the house was built)
+wurdest	AUX	were, became (du) → werden | were (passive)
+wurden	AUX	were, became (wir, sie, Sie) → werden | were (passive: "sie wurden gewählt", they were elected)
+wurdet	AUX	were, became (ihr) → werden | were (passive)
+würde	AUX	would ("ich würde gern kommen", I would like to come; "das würde helfen", that would help) → werden
+würdest	AUX	would (du: "würdest du mir helfen?", would you help me?) → werden
+würden	AUX	would (wir, sie, Sie: "würden Sie bitte...", would you please...) → werden
+würdet	AUX	would (ihr) → werden
+worden	AUX	been (passive perfect: "es ist gebaut worden", it has been built) → werden
+geworden	AUX	become ("es ist kalt geworden", it has become cold) → werden
 
-## Past and subjunctive forms of the modal verbs
-konnte	AUX	could, was able to (past: "ich konnte nicht schlafen", I couldn't sleep)
-konnten	AUX	could, were able to (past)
-könnte	AUX	could, might ("das könnte stimmen", that could be true; "könnte ich...?", could I...?)
-könnten	AUX	could, might (wir, sie, Sie: "könnten Sie mir helfen?", could you help me?)
-musste	AUX	had to (past: "ich musste gehen", I had to go)
-mussten	AUX	had to (past)
-müsste	AUX	would have to, ought to, should ("das müsste reichen", that should be enough)
-müssten	AUX	would have to, ought to, should
-sollte	AUX	should, ought to ("du solltest schlafen", you should sleep) | was supposed to (past: "er sollte kommen", he was supposed to come) | should, if (in a condition: "sollte es regnen", should it rain)
-sollten	AUX	should, ought to | were supposed to (past)
-solltest	AUX	should, ought to (du)
-wollte	AUX	wanted to (past: "ich wollte dich anrufen", I wanted to call you) | would like to (polite: "ich wollte fragen, ob...", I wanted to ask whether...)
-wollten	AUX	wanted to (past)
-durfte	AUX	was allowed to (past)
-durften	AUX	were allowed to (past)
-dürfte	AUX	would be allowed to | is likely to, probably ("das dürfte reichen", that should probably be enough)
-dürften	AUX	would be allowed to | are likely to, probably
-möchte	AUX	would like (to) ("ich möchte einen Kaffee", I would like a coffee; "ich möchte gehen", I would like to go)
-möchten	AUX	would like (to) (wir, sie, Sie: "möchten Sie etwas trinken?", would you like something to drink?)
-möchtest	AUX	would like (to) (du)
-mochte	AUX	liked (past of mögen: "ich mochte ihn", I liked him)
+## Present, past and subjunctive forms of the modal verbs
+kann	AUX	can, is able to ("ich kann schwimmen", I can swim; "er kann Deutsch", he speaks German) → können | may, might ("das kann sein", that may be)
+kannst	AUX	can (du: "kannst du mir helfen?", can you help me?) → können
+muss	AUX	must, has to ("ich muss gehen", I have to go) → müssen | must be (a guess: "das muss schwer sein", that must be hard)
+musst	AUX	must, have to (du: "du musst nicht", you don't have to) → müssen
+darf	AUX	may, is allowed to ("darf ich?", may I?; "man darf nicht rauchen", smoking isn't allowed) → dürfen
+will	AUX	wants (to) ("ich will nach Hause", I want to go home) → wollen
+willst	AUX	want (to) (du: "was willst du?", what do you want?) → wollen
+soll	AUX	is to, should, is supposed to ("was soll ich tun?", what should I do?) → sollen | is said to ("er soll reich sein", he is said to be rich)
+mag	AUX	like(s) ("ich mag Kaffee", I like coffee) → mögen | may (a guess: "das mag sein", that may be)
+konnte	AUX	could, was able to (past: "ich konnte nicht schlafen", I couldn't sleep) → können
+konnten	AUX	could, were able to (past) → können
+könnte	AUX	could, might ("das könnte stimmen", that could be true; "könnte ich...?", could I...?) → können
+könnten	AUX	could, might (wir, sie, Sie: "könnten Sie mir helfen?", could you help me?) → können
+musste	AUX	had to (past: "ich musste gehen", I had to go) → müssen
+mussten	AUX	had to (past) → müssen
+müsste	AUX	would have to, ought to, should ("das müsste reichen", that should be enough) → müssen
+müssten	AUX	would have to, ought to, should → müssen
+sollte	AUX	should, ought to ("du solltest schlafen", you should sleep) → sollen | was supposed to (past: "er sollte kommen", he was supposed to come) | should, if (in a condition: "sollte es regnen", should it rain)
+sollten	AUX	should, ought to → sollen | were supposed to (past)
+solltest	AUX	should, ought to (du) → sollen
+wollte	AUX	wanted to (past: "ich wollte dich anrufen", I wanted to call you) → wollen | would like to (polite: "ich wollte fragen, ob...", I wanted to ask whether...)
+wollten	AUX	wanted to (past) → wollen
+durfte	AUX	was allowed to (past) → dürfen
+durften	AUX	were allowed to (past) → dürfen
+dürfte	AUX	would be allowed to → dürfen | is likely to, probably ("das dürfte reichen", that should probably be enough)
+dürften	AUX	would be allowed to → dürfen | are likely to, probably
+möchte	AUX	would like (to) ("ich möchte einen Kaffee", I would like a coffee; "ich möchte gehen", I would like to go) → mögen
+möchten	AUX	would like (to) (wir, sie, Sie: "möchten Sie etwas trinken?", would you like something to drink?) → mögen
+möchtest	AUX	would like (to) (du) → mögen
+mochte	AUX	liked (past of mögen: "ich mochte ihn", I liked him) → mögen
+
+## Forms of the commonest strong verbs
+gibt	VERB	gives ("er gibt mir das Buch", he gives me the book) → geben | es gibt: there is, there are ("es gibt keine Milch", there's no milk)
+gab	VERB	gave ("sie gab ihm das Geld", she gave him the money) → geben | es gab: there was, there were
+gegeben	VERB	given ("er hat es mir gegeben", he gave it to me) → geben | es hat gegeben: there has been, there was
+weiß	VERB	know(s) ("ich weiß", I know; "er weiß es nicht", he doesn't know) → wissen
+weißt	VERB	know (du: "weißt du?", do you know?) → wissen
+wusste	VERB	knew ("ich wusste es", I knew it) → wissen
+kam	VERB	came ("er kam spät", he came late) → kommen
+kamen	VERB	came (wir, sie, Sie) → kommen
+ging	VERB	went ("sie ging nach Hause", she went home) → gehen | es ging um: it was about
+gingen	VERB	went (wir, sie, Sie) → gehen
+gegangen	VERB	gone, went ("er ist gegangen", he has gone, he left) → gehen
+sieht	VERB	sees ("er sieht nichts", he sees nothing) → sehen | sieht aus: looks ("sie sieht müde aus", she looks tired)
+sah	VERB	saw ("ich sah ihn", I saw him) → sehen
+gesehen	VERB	seen, saw ("ich habe ihn gesehen", I have seen him, I saw him) → sehen
+nimmt	VERB	takes ("er nimmt den Bus", he takes the bus) → nehmen
+nahm	VERB	took ("sie nahm das Buch", she took the book) → nehmen
+genommen	VERB	taken, took ("ich habe es genommen", I took it) → nehmen
+fand	VERB	found ("er fand den Schlüssel", he found the key) → finden | thought ("ich fand es gut", I thought it was good)
+gefunden	VERB	found ("ich habe es gefunden", I found it) → finden
+stand	VERB	stood ("er stand an der Tür", he stood at the door) → stehen | stand in: said, was written in ("es stand in der Zeitung", it was in the paper)
+standen	VERB	stood (wir, sie, Sie) → stehen
+lag	VERB	lay, was (lying) ("das Buch lag auf dem Tisch", the book was on the table) → liegen
+blieb	VERB	stayed, remained ("er blieb zu Hause", he stayed at home) → bleiben
+hält	VERB	holds, stops ("der Bus hält hier", the bus stops here) → halten | hält für: thinks, considers ("er hält es für richtig", he thinks it's right)
+lässt	VERB	lets, leaves ("er lässt mich gehen", he lets me go) → lassen | has (something) done ("sie lässt das Auto reparieren", she has the car repaired)
+ließ	VERB	let, left ("er ließ mich gehen", he let me go) → lassen | had (something) done
+trat	VERB	stepped, kicked ("er trat ins Zimmer", he stepped into the room) → treten
+spricht	VERB	speaks, talks ("sie spricht Deutsch", she speaks German) → sprechen | spricht für: suggests, speaks for ("das spricht für ihn", that speaks in his favour; "vieles spricht dafür", there's a lot to suggest it)
+sprach	VERB	spoke, talked → sprechen
+gesprochen	VERB	spoken, spoke ("wir haben darüber gesprochen", we talked about it) → sprechen
+bekam	VERB	got, received ("ich bekam einen Brief", I got a letter) → bekommen
+schrieb	VERB	wrote → schreiben
+geschrieben	VERB	written, wrote ("er hat einen Brief geschrieben", he wrote a letter) → schreiben
+brachte	VERB	brought ("er brachte Blumen", he brought flowers) → bringen
+gebracht	VERB	brought ("sie hat es gebracht", she brought it) → bringen
+dachte	VERB	thought ("ich dachte, du kommst", I thought you were coming) → denken
+gedacht	VERB	thought ("ich habe an dich gedacht", I thought of you) → denken
+tat	VERB	did ("er tat nichts", he did nothing) → tun | es tat mir leid: I was sorry
+getan	VERB	done, did ("was hast du getan?", what have you done?) → tun
+fällt	VERB	falls ("der Regen fällt", the rain falls) → fallen | fällt auf: is noticeable; fällt schwer: is hard (for someone)
+fiel	VERB	fell → fallen
+gilt	VERB	is valid, applies, counts ("das gilt für alle", that applies to everyone) → gelten | gilt als: is considered ("er gilt als Experte", he is considered an expert)
+galt	VERB	was valid, applied | galt als: was considered → gelten
+begann	VERB	began, started ("es begann zu regnen", it began to rain) → beginnen
+trifft	VERB	meets, hits ("er trifft seine Freunde", he meets his friends) → treffen | trifft zu: applies, is true
+läuft	VERB	runs, walks, is on ("der Film läuft", the film is on; "wie läuft's?", how's it going?) → laufen
+hilft	VERB	helps ("das hilft", that helps) → helfen
+zog	VERB	pulled, moved ("sie zog nach Berlin", she moved to Berlin) → ziehen
+gezogen	VERB	pulled, moved ("wir sind umgezogen", we have moved) → ziehen
+fuhr	VERB	drove, went (by vehicle) → fahren
+fährt	VERB	drives, goes (by vehicle) ("der Zug fährt um acht", the train leaves at eight) → fahren
+hieß	VERB	was called ("er hieß Paul", his name was Paul) → heißen
+rief	VERB	called, shouted → rufen
+wuchs	VERB	grew → wachsen
+starb	VERB	died ("er starb 1900", he died in 1900) → sterben
+geboren	VERB	born ("ich bin 1990 geboren", I was born in 1990) → gebären
+bot	VERB	offered ("er bot mir Hilfe an", he offered me help) → bieten
 
 ## Units and abbreviations
 # The dump spells these as other words (KG "basement", KM "base rent"), or

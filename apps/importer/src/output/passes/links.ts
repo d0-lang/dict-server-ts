@@ -1,6 +1,13 @@
 import { FormSource, GRAMMAR_SOURCE_POS } from "@dict/core/schema";
+import { GRAMMAR_POS } from "../../grammar.ts";
 import type { WriterContext } from "./context.ts";
 import { MAX_CHAIN_STEPS } from "./context.ts";
+
+/**
+ * `e` is a grammar-file line of a content word (`pris VERB`, the past
+ * participle's line), not of a grammar word or an ending (`X`).
+ */
+const contentGrammarLine = `(e.source_pos = '${GRAMMAR_SOURCE_POS}' AND e.pos NOT IN (${[...GRAMMAR_POS, "X"].map((p) => `'${p}'`).join(", ")}))`;
 
 /**
  * `tańsi -> tańszy` and `tańszy -> tani` also give `tańsi -> tani`. A chain
@@ -15,7 +22,9 @@ import { MAX_CHAIN_STEPS } from "./context.ts";
  * noun `Spielens` is the genitive of `Spielen` "playing", which is spelled
  * like a dative plural of `Spiel` and has only the verb's entry. A word the
  * grammar file lists is an entry of every part of speech (`нее` is `неё`,
- * not also `она`, `он` and `они`, which `неё` is a form of).
+ * not also `она`, `он` and `они`, which `неё` is a form of), unless its line
+ * is a content word's: `prise` "feminine of pris" goes on to `prendre`
+ * through the line for `pris`, the past participle.
  */
 export const followLinkChains = ({
   sqlite,
@@ -25,7 +34,7 @@ export const followLinkChains = ({
     `SELECT 1 FROM forms f JOIN entries e ON e.id = f.entry_id
      WHERE f.form = p.lemma AND f.source = ${FormSource.Lemma}${pos}`;
   const goesOn = verbChainsThroughEntries
-    ? `NOT EXISTS (${entryOf(` AND e.source_pos IN (p.source_pos, '${GRAMMAR_SOURCE_POS}')`)})
+    ? `NOT EXISTS (${entryOf(` AND (e.source_pos = p.source_pos OR (e.source_pos = '${GRAMMAR_SOURCE_POS}' AND NOT ${contentGrammarLine}))`)})
          AND (
            (p.source_pos = 'verb' AND q.source_pos = 'verb')
            OR NOT EXISTS (${entryOf("")})
