@@ -13,7 +13,7 @@ target = "en"
 historicalStages = []
 # A reflexive verb is the verb with a suffix (`sākt` "to begin", `sākties`
 # "to begin" of something that begins by itself), and Wiktionary has an entry
-# for about 30 of them against 3,249 verbs with a table, so `sākās`,
+# for 111 of them against 3,249 verbs with a table, so `sākās`,
 # `beidzās`, `mainās` and `izveidojās` had no entry (about 400 corpus words of
 # r0, 174 word types). Each verb with a table gets "reflexive of sākt" with the
 # verb's meanings, where the dump has no reflexive of its own. The suffix

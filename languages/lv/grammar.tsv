@@ -96,13 +96,16 @@ cik	ADV	how much, how many: how much is it? (cik maksā?) | as ... as: as far as
 gan	CCONJ	both ... and: both here and there (gan šeit, gan tur)
 gan	PART	stresses or concedes: indeed, though: this one is cheap, though (šis gan ir lēts)
 it	PART	stresses the next word: especially (it īpaši) | it kā: as if, supposedly
+a	PART	(colloquial) and, but, starting a question or a new turn: and you? (a tu?)
 tūlīt	ADV	at once, right away | in a moment, soon: I'm coming (tūlīt nāku)
+tālāk	ADV	further, farther | on, onward, next: and then? (un tālāk?), to pass it on (nodot tālāk)
 nost	ADV	off, away: to take off (ņemt nost), get away! (nost!)
 pakaļ	ADV	after, behind | to fetch someone or something: to go and get the kids (iet pakaļ bērniem)
 klāt	ADV	present, here: summer is here (vasara ir klāt) | in addition, onto: to add salt (likt klāt sāli) | close to, up to: to come up (nākt klāt)
 šādi	ADV	like this, in this way
 visvairāk	ADV	most, the most: what I like most (kas man patīk visvairāk)
 ik	ADV	every: every day (ik dienu), every five years (ik pa pieciem gadiem)
+ik pa	ADV	every, at intervals: every five years (ik pa pieciem gadiem)
 
 ## Adverbs with a sense Wiktionary lacks
 protams	ADV	of course, naturally
@@ -161,9 +164,11 @@ lielā mērā	ADV	to a great extent, largely
 pa lielam	ADV	(colloquial) mostly, by and large
 ik pa laikam	ADV	from time to time, now and then
 lielākā daļa	NOUN	most, the majority: most people (lielākā daļa cilvēku)
+lielāko daļu	NOUN	most of, the greater part: most of the time (lielāko daļu laika)
 tikt galā	VERB	to cope, to manage: to cope with a problem (tikt galā ar problēmu)
 likt priekšā	VERB	to propose, to suggest
 ņemt vērā	VERB	to take into account, to consider
+vērā	NOUN	attention, in ņemt vērā: to take into account (ņemt vērā)
 pievērst uzmanību	VERB	to pay attention, to draw attention
 tā saucamais	ADJ	so-called
 kaut kas	PRON	something, anything
@@ -197,6 +202,7 @@ toreiz	ADV	then, at that time
 vienreiz	ADV	once, one time | (colloquial) just, for once: listen for once (paklausies vienreiz)
 citur	ADV	elsewhere, somewhere else
 visur	ADV	everywhere
+nekur	ADV	nowhere, not anywhere
 savādāk/citādāk	ADV	otherwise, differently | or else: otherwise I'll be late (savādāk es nokavēšu)
 citādi	ADV	otherwise, differently | or else
 paralēli	ADV	in parallel, at the same time
@@ -213,9 +219,11 @@ pamazām	ADV	little by little, slowly
 tikmēr	ADV	meanwhile, in the meantime | with kamēr: as long as, while
 savulaik	ADV	once, at one time, in the past
 vakardien	ADV	yesterday
+beidzot	ADV	at last, finally
 pirmkārt	ADV	first, firstly, in the first place
 otrkārt	ADV	second, secondly
 vispirms	ADV	first, first of all
+godīgi	ADV	honestly, to be honest | fairly
 labprāt	ADV	gladly, willingly
 nesen	ADV	recently, not long ago
 regulāri	ADV	regularly
@@ -225,7 +233,7 @@ atbilstoši	ADV	accordingly, appropriately | in line with: according to the rule
 ilgtermiņā	ADV	in the long term
 tamlīdzīgi	ADV	and so on, and the like
 nosacīti	ADV	relatively, in a manner of speaking
-pazīstami	ADV	known, familiar: well-known people (pazīstami cilvēki)
+pazīstams/pazīstama/pazīstamam/pazīstamu/pazīstamā/pazīstami/pazīstamiem/pazīstamus/pazīstamos/pazīstamas/pazīstamai/pazīstamām/pazīstamās/pazīstamais/pazīstamajam/pazīstamo/pazīstamajā/pazīstamie/pazīstamajiem/pazīstamajos/pazīstamajai/pazīstamajām/pazīstamajās	ADJ	known, well-known, familiar: well-known people (pazīstami cilvēki)
 bišķiņ/bišķi/bišku	ADV	(colloquial) a bit, a little
 mūsdienās	ADV	nowadays, today
 
@@ -249,7 +257,7 @@ vairāki/vairākas/vairāku/vairākiem/vairākām/vairākus/vairākos/vairākās
 šitas/šitā/šito/šitam/šitai/šitie/šitās/šitiem/šitām/šitos/šitajā/šitajos	PRON	(colloquial) this, this one, for šis → šis
 šitā	ADV	(colloquial) like this, this way, for šādi
 šit/šiten	ADV	(colloquial) here, for šeit → šeit
-rekur	ADV	(colloquial) here it is, look here
+rekur	ADV	(colloquial) right there, over there, pointing at a place: here, there and over there (šeit, tur un rekur)
 visāds/visāda/visādam/visādu/visādā/visādi/visādiem/visādus/visādos/visādas/visādai/visādām/visādās/visādais/visādajam/visādo/visādajā/visādie/visādajiem/visādajos/visādajai/visādajām/visādajās	DET	all kinds of, all sorts of: all kinds of things (visādas lietas)
 visādi	ADV	in all kinds of ways, every which way
 pārējais/pārējā/pārējajam/pārējo/pārējajā/pārējie/pārējajiem/pārējos/pārējajos/pārējās/pārējajai/pārējajām/pārējajās	ADJ	the rest, the other, the remaining: the others (pārējie)
@@ -294,6 +302,7 @@ finanses/finanšu/finansēm/finansēs	NOUN	finance, finances
 sacensības/sacensību/sacensībām/sacensībās	NOUN	competition, contest
 izlase/izlases/izlasei/izlasi/izlasē/izlašu/izlasēm/izlasēs	NOUN	national team, selected team | selection
 migrācija/migrācijas/migrācijai/migrāciju/migrācijā/migrācijām/migrācijās	NOUN	migration
+okupācija/okupācijas/okupācijai/okupāciju/okupācijā/okupācijām/okupācijās	NOUN	occupation: the Soviet occupation (padomju okupācija)
 lībietis/lībieša/lībietim/lībieti/lībietī/lībieši/lībiešu/lībiešiem/lībiešus/lībiešos	NOUN	Livonian (a member of the Livonian people)
 mūsdienas/mūsdienu/mūsdienām/mūsdienās	NOUN	the present day, our time | mūsdienu: modern, present-day: modern technology (mūsdienu tehnoloģijas)
 radio	NOUN	radio
@@ -365,6 +374,7 @@ neliels/neliela/nelielam/nelielu/nelielā/nelieli/nelieliem/nelielus/nelielos/ne
 
 ## Verbs
 veidot/veido/veidoju/veidoja/veidos/veidotu/veidojot/veidots/veidota/veidoti/veidotas	VERB	to form, to make up, to create
+ietekmēt/ietekmē/ietekmēju/ietekmēja/ietekmēs/ietekmētu/ietekmējot/ietekmēts/ietekmēta	VERB	to influence, to affect
 nodrošināt/nodrošina/nodrošinu/nodrošināja/nodrošinās/nodrošinātu/nodrošinot/nodrošināts/nodrošināta	VERB	to ensure, to provide
 noteikt/nosaka/nosaku/noteica/noteiks/noteiktu/nosakot	VERB	to determine, to set, to lay down: the law sets the rules (likums nosaka noteikumus) | to say firmly
 uzskatīt/uzskata/uzskatu/uzskatām/uzskatāt/uzskatīja/uzskatīs/uzskatītu/uzskatot/uzskatīts/uzskatīta/uzskatīti	VERB	to think, to consider, to believe: I think that... (es uzskatu, ka...) | uzskatīt par: to regard as
@@ -376,7 +386,7 @@ sekot/seko/sekoju/sekoja/sekos/sekotu/sekojot	VERB	to follow
 ietvert/ietver/ietvēra/ietvers/ietvertu/ietverot/ietverts	VERB	to include, to contain
 sanākt/sanāk/sanāca/sanāks/sanāktu	VERB	to come together, to gather | (colloquial) to work out, to turn out: it worked out (sanāca) | to come to, to amount to
 mēgt/mēdz/mēdzu/mēdza	VERB	to tend to, to usually do: people tend to think (cilvēki mēdz domāt)
-uztaisīt/uztaisu/uztaisa/uztaisām/uztaisīja/uztaisīju/uztaisīšu/uztaisīsim/uztaisītu/uztaisot/uztaisīts	VERB	(colloquial) to make, to do: to make a video (uztaisīt video)
+uztaisīt/uztaisu/uztaisa/uztaisām/uztaisīja/uztaisīju/uztaisīšu/uztaisīsim/uztaisītu/uztaisot/uztaisīts	VERB	(colloquial) to make, to do: to make a video (uztaisīt video) | to take (a photo): to take pictures (uztaisīt bildes)
 paņemt/paņem/paņemu/paņemam/paņēma/paņēmu/paņems/paņemšu/paņemsim/paņemtu/paņemot/paņemts	VERB	to take, to pick up
 nopirkt/nopērk/nopērku/nopirka/nopirku/nopirkām/nopirks/nopirkšu/nopirktu/nopirkts	VERB	to buy
 paēst/paēd/paēdu/paēda/paēdām/paēdīs/paēstu	VERB	to eat, to have a meal
@@ -414,7 +424,7 @@ ienākt/ienāk/ienāca/ienāks	VERB	to come in, to enter
 nonākt/nonāk/nonāca/nonāks	VERB	to end up, to reach, to come to
 atjaunot/atjauno/atjaunoja/atjaunots/atjaunota	VERB	to restore, to renew
 nomainīt/nomaina/nomainīja/nomainīs	VERB	to replace, to change
-piekrist/piekrītu/piekrīt/piekrita/piekritu	VERB	to agree
+piekrist/piekrītu/piekrīt/piekrita/piekritu	VERB	to agree, to go along with: I agree with you (es tev piekrītu) | to consent, to accept: to agree to the terms (piekrist noteikumiem)
 pieļaut/pieļauju/pieļauj/pieļāva	VERB	to allow | to suppose, to admit the possibility: I suppose (pieļauju)
 nemaldīties/nemaldos	VERB	if I'm not mistaken (ja nemaldos)
 atšķirties/atšķiras/atšķīrās	VERB	to differ
@@ -428,4 +438,5 @@ sazināties/sazinās/sazinājās	VERB	to get in touch, to contact
 nodarboties/nodarbojas/nodarbojās	VERB	to be engaged in, to do (for work or a hobby)
 
 ## The passive auxiliary
+netiek/netika/netiks/netiktu	AUX	form of tikt: makes the negative passive: is not done, was not done: it is not used (netiek izmantots) → tikt
 tikt/tiek/tiku/tiekam/tika/tikām/tiks/tikšu/tiktu/tikts/tikuši/tikusi/tikušas/tikušies/netiek/netika/netiks/netiktu	AUX	makes the passive with a participle: is done, was done: it is used (tiek izmantots), it was built (tika uzcelts); the other forms of tikt → tikt
