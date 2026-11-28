@@ -62,6 +62,18 @@ export type LanguageRules = {
   readonly pointerWords?: ReadonlyArray<string>;
   /** Form tags that mark the headword's reading (Korean `romanization`), where it has no ruby. */
   readonly readingTags?: ReadonlyArray<string>;
+  /** Reflexive verbs spelled with a suffix from the verb's table (`sākt` -> `sākties`, `sākās`): see `suffixReflexive`. */
+  readonly reflexiveSuffix?: {
+    readonly infinitive: {
+      readonly ending: string;
+      readonly reflexive: string;
+    };
+    readonly rules: ReadonlyArray<{
+      readonly tags: ReadonlyArray<string>;
+      readonly ending: string;
+      readonly reflexive: string;
+    }>;
+  };
   /** Reflexive senses become an entry with the particle before or after the lemma (`bawić się`). */
   readonly reflexive?: "before" | "after";
   /** Without a table, the headword line's cases and numbers are forms (`structures` for `structure`). */

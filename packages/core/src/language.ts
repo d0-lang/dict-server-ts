@@ -62,6 +62,27 @@ const Import = doc(
         "Senses Wiktionary labels `reflexive with <particle>` become an entry of their own, with the particle before or after the lemma (`after`: Polish `bawić się`, `wyobrażać sobie`). Learners learn these as words of their own.",
       ),
     ),
+    reflexiveSuffix: Schema.optionalKey(
+      doc(
+        Schema.Struct({
+          infinitive: doc(
+            Schema.Struct({ ending: Schema.String, reflexive: Schema.String }),
+            "How the reflexive infinitive is spelled from the verb's: Latvian `t` becomes `ties` (`sākt`, `sākties`).",
+          ),
+          rules: doc(
+            Schema.Array(
+              Schema.Struct({
+                tags: strings,
+                ending: Schema.String,
+                reflexive: Schema.String,
+              }),
+            ),
+            "Each table row with all of `tags` that ends in `ending` gives the reflexive form with `reflexive` in its place; the first rule that fits a row applies, and an empty `ending` adds `reflexive` (`sākam` + `ies`). A row no rule fits gives none.",
+          ),
+        }),
+        'A reflexive verb is the verb with a suffix (Latvian `sākt` "to begin", `sākties` "to begin, intransitive": `sākās`, `sākas`; Lithuanian works alike), and Wiktionary has a page for few of them. A verb with a table and no reflexive entry in the dump gets one, "reflexive of sākt" with the verb\'s meanings, found by the forms the rules spell from its table that no other entry has.',
+      ),
+    ),
     participleDeclension: Schema.optionalKey(
       doc(
         Schema.Struct({

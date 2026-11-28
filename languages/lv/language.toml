@@ -11,13 +11,56 @@ target = "en"
 [import]
 # No sense, form or sound carries an Old Latvian tag.
 historicalStages = []
+# A reflexive verb is the verb with a suffix (`sākt` "to begin", `sākties`
+# "to begin" of something that begins by itself), and Wiktionary has an entry
+# for about 30 of them against 3,249 verbs with a table, so `sākās`,
+# `beidzās`, `mainās` and `izveidojās` had no entry (about 400 corpus words of
+# r0, 174 word types). Each verb with a table gets "reflexive of sākt" with the
+# verb's meanings, where the dump has no reflexive of its own. The suffix
+# replaces the person ending: -u > -os (`sāku`, `sākos`), -i > -ies, the
+# third person's -a > -ās (`sāka`, `sākās`), a long vowel takes -jas
+# (`runā`, `runājas`), a bare stem -as (`sāk`, `sākas`); plurals and other
+# persons add -ies (`sākam`, `sākamies`); the future -s > -sies, the
+# conditional -tu > -tos, the active participle -is > -ies (`sācis`, `sācies`),
+# the adverbial -ot > -oties and -dams > -damies. Reflexives whose meaning
+# drifted from the verb's (`izdoties` "to succeed", `izrādīties` "to turn out")
+# have grammar-file lines, which come first.
+[import.reflexiveSuffix]
+infinitive = { ending = "t", reflexive = "ties" }
+rules = [
+  { tags = ["first-person", "singular"], ending = "u", reflexive = "os" },
+  { tags = ["second-person", "singular"], ending = "i", reflexive = "ies" },
+  { tags = ["second-person", "singular"], ending = "", reflexive = "ies" },
+  { tags = ["first-person", "plural"], ending = "", reflexive = "ies" },
+  { tags = ["second-person", "plural"], ending = "", reflexive = "ies" },
+  { tags = ["third-person", "future"], ending = "s", reflexive = "sies" },
+  { tags = ["third-person"], ending = "a", reflexive = "ās" },
+  { tags = ["third-person"], ending = "ā", reflexive = "ājas" },
+  { tags = ["third-person"], ending = "ē", reflexive = "ējas" },
+  { tags = ["third-person"], ending = "o", reflexive = "ojas" },
+  { tags = ["third-person", "present"], ending = "", reflexive = "as" },
+  { tags = ["debitive"], ending = "a", reflexive = "ās" },
+  { tags = ["debitive"], ending = "ā", reflexive = "ājas" },
+  { tags = ["debitive"], ending = "o", reflexive = "ojas" },
+  { tags = ["debitive"], ending = "", reflexive = "as" },
+  { tags = ["conditional", "present"], ending = "tu", reflexive = "tos" },
+  { tags = ["participle", "active", "past"], ending = "is", reflexive = "ies" },
+  { tags = ["participle"], ending = "dams", reflexive = "damies" },
+  { tags = ["participle"], ending = "ot", reflexive = "oties" },
+  { tags = ["renarrative", "present"], ending = "ot", reflexive = "oties" },
+]
+
+[import.participleDeclension]
 # Past passive participles decline like adjectives (`saistīts` "linked":
 # `saistīta`, `saistīti`, `saistītās`), but verb tables list only the
 # masculine `-ts`. Wiktionary has pages for some declined forms (`izmantota`)
 # and not for most (`saistīta`, `uzskatīta`). Only forms no other entry has:
 # many of these participles are adjectives too (`noteikts` "definite"), whose
 # own tables keep them.
-participleDeclension = { tags = ["participle", "passive", "past"], ending = "s", onlyNew = true, endings = [
+tags = ["participle", "passive", "past"]
+ending = "s"
+onlyNew = true
+endings = [
   "a", "am", "u", "ā", "i", "iem", "us", "os", "as", "ai", "ām", "ās",
   "ais", "ajam", "o", "ajā", "ie", "ajiem", "ajos", "ajai", "ajām", "ajās",
-] }
+]

@@ -146,6 +146,12 @@ export type TransformResult = {
   readonly laterEntry?: ImportEntry;
   /** The word's reflexive senses as entries of their own (`bawić się`), for `rules.reflexive`. */
   readonly reflexiveEntries?: ReadonlyArray<ImportEntry>;
+  /**
+   * The verb's reflexive spelled with a suffix (`sākties` from `sākt`), for
+   * `rules.reflexiveSuffix`: written only if the dump gives the word no entry,
+   * with the forms no other entry has.
+   */
+  readonly suffixReflexive?: ImportEntry;
   readonly formOf: ReadonlyArray<FormOfLink>;
   /** Distinct parent glosses of this line, to spot new templates across words. */
   readonly parentGlosses: ReadonlyArray<string>;
@@ -1019,11 +1025,32 @@ export const transformEntry = (
   }
 
   const links = dedupeLinks(formOf);
+  const reflexiveSpelled =
+    senses.groups.size > 0 && toUdPos(raw.pos) === "VERB"
+      ? suffixReflexive(rules, lemma, raw.forms ?? [], raw.pos)
+      : undefined;
+  const ofVerb = `reflexive of ${shownLemma}`;
   return {
     entry:
       senses.groups.size > 0
         ? makeEntry([...senses.senses(), ...laterSenses.senses()], derived)
         : undefined,
+    ...(reflexiveSpelled !== undefined
+      ? {
+          suffixReflexive: {
+            ...makeEntry(
+              [{ glosses: [ofVerb], see: [] }],
+              [{ gloss: ofVerb, bases: [lemmaKey] }],
+            ),
+            lemma: reflexiveSpelled.lemma,
+            forms: reflexiveSpelled.forms,
+            pronunciations: [],
+            verbalNouns: [],
+            degreeForms: [],
+            participleForms: [],
+          },
+        }
+      : {}),
     ...(senses.groups.size === 0 && laterSenses.groups.size > 0
       ? { laterEntry: makeEntry(laterSenses.senses(), derived) }
       : {}),
@@ -1032,6 +1059,55 @@ export const transformEntry = (
     parentGlosses: [...parentGlosses],
     skippedSenses,
     droppedForms: dropped,
+  };
+};
+
+/**
+ * A verb's reflexive spelled with a suffix (`reflexiveSuffix`): the reflexive
+ * infinitive (`sākt` -> `sākties`) and the forms the rules spell from the
+ * table rows kept as forms (`sāka` -> `sākās`, `sāk` -> `sākas`). Undefined
+ * for a language without the rules, or a verb its infinitive rule doesn't fit,
+ * such as one that is already reflexive (`smieties`).
+ */
+export const suffixReflexive = (
+  rules: LanguageRules,
+  lemma: string,
+  forms: ReadonlyArray<WiktextractForm>,
+  pos: string,
+):
+  | { readonly lemma: string; readonly forms: ReadonlyArray<string> }
+  | undefined => {
+  const spec = rules.reflexiveSuffix;
+  if (spec === undefined || !lemma.endsWith(spec.infinitive.ending)) {
+    return undefined;
+  }
+  const reflexiveLemma =
+    lemma.slice(0, lemma.length - spec.infinitive.ending.length) +
+    spec.infinitive.reflexive;
+  const spelled = forms.flatMap((form) => {
+    if (
+      form.source === undefined ||
+      !keepForm(rules, lemma, form, false, pos)
+    ) {
+      return [];
+    }
+    const word = cleanWord(form.form);
+    const tags = form.tags ?? [];
+    const rule = spec.rules.find(
+      (r) => r.tags.every((t) => tags.includes(t)) && word.endsWith(r.ending),
+    );
+    return rule === undefined
+      ? []
+      : [
+          lookupKey(
+            word.slice(0, word.length - rule.ending.length) + rule.reflexive,
+          ),
+        ];
+  });
+  const key = lookupKey(reflexiveLemma);
+  return {
+    lemma: reflexiveLemma,
+    forms: [...new Set(spelled)].filter((form) => form !== key),
   };
 };
 

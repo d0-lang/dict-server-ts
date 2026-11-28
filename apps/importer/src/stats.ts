@@ -45,6 +45,8 @@ export type ImportStats = {
   readonly grammarEntries: number;
   /** Wiktionary grammar-word `forms` rows those entries replaced. */
   readonly grammarReplaced: number;
+  /** Reflexive verbs spelled from a verb's table (`reflexiveSuffix`: `sākties`). */
+  readonly suffixReflexives: number;
   /** Abbreviations also reachable without their period (`bzw` -> `bzw.`). */
   readonly abbreviations: number;
   /** Forms also indexed with an optional letter written plainly (`все` -> `всё`). */
