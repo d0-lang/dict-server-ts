@@ -18,7 +18,7 @@ Corpus: `../corpus/lv`, 53 texts, 125,921 words, gathered 2026-11-28.
 
 - **Abbreviations** are dotted (`u.c.`, `t.i.`, `piem.`, `g.`, `gs.`), and Chromium splits them at the period (`u`, `c`). They have grammar lines, which the abbreviations feature joins back (`u. c.` "and others").
 - **Hyphens and apostrophes** are rare: 5 hyphenated words in the dump, none with an apostrophe, none in the corpus. `hyphenWords` and `elision` stay off.
-- **Browser and API:** 0 of the 2,200 sampled words differ (r0). The full browser collection is checked against r4 in the Log.
+- **Browser and API:** 0 of the 2,200 sampled words differ (r0), and the full browser collection of r4 (all 122,574 words, 14 minutes) shows the same word, entries and senses as the API's for every one.
 
 ## Coverage
 
