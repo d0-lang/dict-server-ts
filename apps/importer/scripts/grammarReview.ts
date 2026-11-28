@@ -49,10 +49,16 @@ const key = (e: GrammarEntry) => `${e.lemma}\t${e.pos}`;
 
 const read = (lang: string, ref?: string): ReadonlyArray<GrammarEntry> => {
   const path = `languages/${lang}/grammar.tsv`;
-  const text =
-    ref === undefined
-      ? readFileSync(path, "utf8")
-      : execFileSync("git", ["show", `${ref}:${path}`], { encoding: "utf8" });
+  if (ref === undefined)
+    return parseGrammarFile(readFileSync(path, "utf8"), path);
+  // A language new since `ref` has no file there: every line is new.
+  const listed = execFileSync("git", ["ls-tree", "--name-only", ref, path], {
+    encoding: "utf8",
+  });
+  if (listed.trim() === "") return [];
+  const text = execFileSync("git", ["show", `${ref}:${path}`], {
+    encoding: "utf8",
+  });
   return parseGrammarFile(text, path);
 };
 
