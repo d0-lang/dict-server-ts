@@ -2,7 +2,7 @@
 
 Tier: **Model only, unreviewed.** No reader of Latvian has checked this profile, the grammar file or any sample. Every point below rests on counts from the dump and the corpus, read by the developer agent, and the judge is Haiku. Tier 1 ran 2026-11-28: the two common gates pass and the random gate fails on missing words alone (see Log). No tier-2 work, no context benchmark (`gold/`).
 
-Data: `data/raw/lv.jsonl`, filtered from the 2026-11-01 dump (134,448 lines, 117,944 of them pages for single forms). The plain import had 16,460 entries; `data/lv_en.sqlite` now has 18,048: 6,113 verbs (1,240 of them reflexives spelled from a verb's table), 5,780 nouns, 2,129 adjectives, 2,097 adverbs, 1,389 names, and 374 lines from the grammar file. English Wiktionary is thin for Latvian: Ukrainian has 38k entries, Russian 62k.
+Data: `data/raw/lv.jsonl`, filtered from the 2026-11-01 dump (134,448 lines, 117,944 of them pages for single forms). The plain import had 16,460 entries; `data/lv_en.sqlite` now has 18,048: 6,113 verbs (1,240 of them reflexives spelled from a verb's table), 5,780 nouns, 2,129 adjectives, 2,097 adverbs, 1,389 names, and 373 lines from the grammar file. English Wiktionary is thin for Latvian: Ukrainian has 38k entries, Russian 62k.
 
 Corpus: `../corpus/lv`, 53 texts, 125,921 words, gathered 2026-11-28.
 - **Spoken:** 75,571 words in 23 YouTube videos (auto-captions repaired by Haiku, 30 parts, all passing the check), 15 genres: interviews with a minister and the prime minister, a sport interview, a dermatologist, two history lectures, two radio talk shows, a business podcast, cooking, travel and nature shows, fishing, a flat renovation, a car review, and six everyday vlogs by ordinary people (a day in the life, a family abroad, student life, a Q&A, Minecraft). At most two per channel; the largest text is 8% of the spoken words.
@@ -33,7 +33,7 @@ Corpus: `../corpus/lv`, 53 texts, 125,921 words, gathered 2026-11-28.
 
 ## Grammar words
 
-`grammar.tsv`, 374 lines, written without a reader; 129 for grammar words and phrases, 245 for common words the dump lacks. The plain import's problems among the common words:
+`grammar.tsv`, 373 lines, written without a reader; 128 for grammar words and phrases, 245 for common words the dump lacks. The plain import's problems among the common words:
 - **forms of būt** glossed only as forms (`ir` "third-person singular present indicative of būt"). They are `AUX` lines with what they do with another word: there is (`te ir veikals`), has (`man ir suns`), the perfect (`ir uzrakstījis`), "would be" (`būtu`), "must be" (`jābūt`).
 - **the passive auxiliary** `tikt`: Wiktionary gives "to arrive at", so `tiek izmantots` "is used" read as "arrives". An `AUX` line for its forms, and one for `netiek`, `netika`, which comes first.
 - **ranking:** `var` opened on `varš` "copper", and `varam`, `redzam`, `ejam` on their adverbial participles before the verb. Lines for the forms.
