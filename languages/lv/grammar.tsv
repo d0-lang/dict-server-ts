@@ -26,8 +26,10 @@
 # Wiktionary gives these as "third-person singular present indicative of
 # būt": is. A reader also needs what they do with another word: there is,
 # I have (man ir), and the perfect (ir izdarījis "has done").
+# Wiktionary's `ir` conjunction and particle ("also, even", `ir ... ir`
+# "both ... and") are left out: a reader of everyday Latvian doesn't meet them,
+# and they took second place in the popover of one of the commonest words.
 ir	AUX	form of būt: is, are: it's big (tas ir liels) → būt | there is, there are: there's a shop here (te ir veikals) | with a dative, has: I have a dog (man ir suns) | with a past participle, has done: has written (ir uzrakstījis)
-ir	CCONJ	also, even: me too (ir es), even in winter (ir ziemā) | ir ... ir: both ... and: both here and there (ir šeit, ir tur)
 nav	AUX	form of būt: is not, are not → būt | there is no, there are no: there's no time (nav laika) | with a dative, has no: I have no money (man nav naudas) | with a past participle, hasn't done (nav redzējis)
 esmu	AUX	form of būt: am: I'm at home (esmu mājās) → būt | with a past participle, have done: I have seen (esmu redzējis)
 esi	AUX	form of būt: are, to one person: you're at home (tu esi mājās) → būt | have done: you have been (esi bijis)
