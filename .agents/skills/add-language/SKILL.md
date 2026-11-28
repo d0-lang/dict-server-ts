@@ -53,7 +53,15 @@ Keep a candidate only if:
 - It is mostly people talking (not music, or gameplay without commentary), and native speech (not dubbed, not read by a synthetic voice).
 - It is at most two per channel, because one channel's catchphrases would otherwise rank as common words.
 
-Show the user a table (title, channel, minutes, genre) and wait for their picks. Then follow the corpus repo's `repair-captions` skill (`../corpus/.agents/skills/repair-captions/SKILL.md`). It asks before spending tokens: about 60–100k per part.
+Give the user the candidates as an HTML page (published with the Artifact tool, so it opens in their browser), and wait for their picks:
+
+- a row per video that passed: a checkbox, the title linking to the video (opening in a new tab), channel, minutes and genre, the genre editable;
+- your recommended set ticked and listed first, the other candidates below it;
+- a running tally of what is ticked: videos, minutes, estimated words (about 115 a minute), repair parts (2,500 words each), Haiku tokens (60–100k a part) and genres, with a warning when the picks break a corpus target (under 10 texts, 5 genres or 30,000 words; over two per channel);
+- the written-text plan on the same page, each source a link and a checkbox;
+- a button that copies the picks as text to paste back into the chat.
+
+Then follow the corpus repo's `repair-captions` skill (`../corpus/.agents/skills/repair-captions/SKILL.md`). It asks before spending tokens: about 60–100k per part.
 
 **Written texts.**
 
@@ -64,7 +72,7 @@ Show the user a table (title, channel, minutes, genre) and wait for their picks.
   ```
 
   The text is in `query.pages[0].extract`.
-- For other kinds (news, guides, blogs, interviews), the user gives links, or you propose sites for them to approve. Save the article's own text, without menus, comments or related links.
+- For other kinds (news, guides, blogs, interviews), the user gives links, or you propose sites for them to approve, as links on the candidates page. Save the article's own text, without menus, comments or related links.
 
 Save each text as `../corpus/inbox/<lang>-<topic>-<medium>-<url-encoded source url>.md` (topic and medium as in `../corpus/README.md`, e.g. `ru-history-wiki-…`). Then run `bun ingest.ts --dry-run` and `bun ingest.ts` in `../corpus`.
 
