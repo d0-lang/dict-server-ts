@@ -66,6 +66,8 @@ export type WriterCounts = {
   grammarEntries: number;
   /** Wiktionary grammar-word rows replaced by those entries */
   grammarReplaced: number;
+  /** reflexive verbs spelled from a verb's table (`reflexiveSuffix`) */
+  suffixReflexives: number;
   /** abbreviations also reachable without their period */
   abbreviations: number;
   /** forms also reachable with an optional letter written plainly */
@@ -189,6 +191,7 @@ export const makeWriter = (
     seeLinks: 0,
     grammarEntries: 0,
     grammarReplaced: 0,
+    suffixReflexives: 0,
     abbreviations: 0,
     letterVariants: 0,
     unspacedAbbreviations: 0,
@@ -199,6 +202,8 @@ export const makeWriter = (
   const historicalEntries: Array<ImportEntry> = [];
   /** Entries of only `varieties.later` senses, written after the dump. */
   const laterEntries: Array<ImportEntry> = [];
+  /** Reflexives spelled from a verb's table (`sākties`), written after the dump where the word has none. */
+  const suffixReflexives: Array<ImportEntry> = [];
   const verbalNouns: Array<{ form: string; entryId: number }> = [];
   const participleForms: Array<{ form: string; entryId: number }> = [];
   /** entry id -> gloss -> its derived sense */
@@ -432,6 +437,7 @@ export const makeWriter = (
         readonly historicalEntry?: ImportEntry;
         readonly laterEntry?: ImportEntry;
         readonly reflexiveEntries?: ReadonlyArray<ImportEntry>;
+        readonly suffixReflexive?: ImportEntry;
         readonly formOf: ReadonlyArray<FormOfLink>;
         readonly redirect?: Redirect;
         readonly formOfSounds?: TransformResult["formOfSounds"];
@@ -451,6 +457,9 @@ export const makeWriter = (
           historicalEntries.push(item.historicalEntry);
         }
         if (item.laterEntry !== undefined) laterEntries.push(item.laterEntry);
+        if (item.suffixReflexive !== undefined) {
+          suffixReflexives.push(item.suffixReflexive);
+        }
         writeLinks(item.formOf);
       }
     },
@@ -470,6 +479,33 @@ export const makeWriter = (
     );
     for (const entry of missing) writeEntry(entry);
     counts.historicalEntries = missing.length;
+  });
+
+  const hasForm = (form: string): boolean =>
+    sqlite
+      .query<{ n: number }, [string]>(
+        "SELECT count(*) AS n FROM forms WHERE form = ?",
+      )
+      .get(form)!.n > 0;
+
+  /**
+   * Reflexives spelled from a verb's table (`sākties`, "reflexive of sākt"),
+   * for verbs the dump has no reflexive entry for (it has `smieties`), with
+   * the forms no other word has (`beigas` "the end" stays the noun's). Before
+   * the derived meanings are copied, which fill in the verb's meaning.
+   */
+  const writeSuffixReflexives = sqlite.transaction(() => {
+    const seen = new Set<string>();
+    for (const entry of suffixReflexives) {
+      const key = lookupKey(entry.lemma);
+      if (seen.has(key) || hasEntry(key)) continue;
+      seen.add(key);
+      writeEntry({
+        ...entry,
+        forms: entry.forms.filter((form) => !hasForm(form)),
+      });
+      counts.suffixReflexives++;
+    }
   });
 
   /** What the passes in `passes/` work with. */
@@ -503,6 +539,7 @@ export const makeWriter = (
     sqlite.transaction(() => laterEntries.forEach(writeEntry))();
     // Words that depend on others, which may come later in the dump.
     restoreHistoricalEntries();
+    writeSuffixReflexives();
     // The word in the other script is a lemma before any link resolves, so a
     // marked variant (`个` on `搿`) sees that it reaches a word (`個`).
     if (otherScript) addRedirects(ctx);

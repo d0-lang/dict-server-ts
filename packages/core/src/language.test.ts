@@ -11,6 +11,7 @@ describe("language records", () => {
       "it",
       "ja",
       "ko",
+      "lv",
       "pl",
       "ru",
       "uk",
@@ -92,7 +93,7 @@ describe("language records", () => {
   it("names the file and the known codes when a record is missing", () => {
     assert.throws(
       () => readLanguage("xx"),
-      /known: de, es, fr, it, ja, ko, pl, ru/,
+      /known: de, es, fr, it, ja, ko, lv, pl, ru/,
     );
   });
 });

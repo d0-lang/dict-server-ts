@@ -258,6 +258,7 @@ export const importWiktextract = Effect.fn("importWiktextract")(function* (
     seeLinks: writer.counts.seeLinks,
     grammarEntries: writer.counts.grammarEntries,
     grammarReplaced: writer.counts.grammarReplaced,
+    suffixReflexives: writer.counts.suffixReflexives,
     abbreviations: writer.counts.abbreviations,
     letterVariants: writer.counts.letterVariants,
     unspacedAbbreviations: writer.counts.unspacedAbbreviations,
