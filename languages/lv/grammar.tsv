@@ -1,0 +1,431 @@
+# Latvian grammar words. One line per word as written + part of speech:
+# word <TAB> UD part of speech <TAB> senses separated by " | ".
+# The file replaces Wiktionary's determiner, pronoun, preposition, conjunction,
+# particle and auxiliary entries for every word listed here; nouns, verbs,
+# adverbs and other content words stay (ir "is" the verb, tā "so").
+# A line with a content part of speech (protams ADV) replaces Wiktionary's
+# entry of that part of speech for the word; X lines only add.
+# Other spellings after a "/" find the line too: the forms of a word Wiktionary
+# lacks (nosaukums/nosaukuma/nosaukumu), since the protocol has no inflection
+# tables.
+# Written without a reader of the language (see profile.md): every line is the
+# developer's, checked against the dump and the corpus, not by a Latvian reader.
+# See apps/importer/src/grammar.ts.
+#
+# Each sense explains what the word does, for a learner reading it next to
+# the sentence: what it expresses, then the English, then a short phrase in
+# brackets when the English alone doesn't settle it ("with a dative, has: I
+# have a dog (man ir suns)"). No notes on case: the sentence shows those.
+# A form names its base word, which links it: "form of būt: was → būt".
+#
+# The second half holds common words English Wiktionary has no Latvian entry
+# for at all (savukārt, nosaukums, pieņemt): hand patches, each with the
+# forms a reader meets. They are on profile.md's hand-patch list.
+
+## Forms of būt
+# Wiktionary gives these as "third-person singular present indicative of
+# būt": is. A reader also needs what they do with another word: there is,
+# I have (man ir), and the perfect (ir izdarījis "has done").
+ir	AUX	form of būt: is, are: it's big (tas ir liels) → būt | there is, there are: there's a shop here (te ir veikals) | with a dative, has: I have a dog (man ir suns) | with a past participle, has done: has written (ir uzrakstījis)
+ir	CCONJ	also, too, even: both ... and (ir ... ir)
+nav	AUX	form of būt: is not, are not → būt | there is no, there are no: there's no time (nav laika) | with a dative, has no: I have no money (man nav naudas) | with a past participle, hasn't done (nav redzējis)
+esmu	AUX	form of būt: am: I'm at home (esmu mājās) → būt | with a past participle, have done: I have seen (esmu redzējis)
+esi	AUX	form of būt: are, to one person: you're at home (tu esi mājās) → būt | have done: you have been (esi bijis)
+esam	AUX	form of būt: are: we're here (mēs esam šeit) → būt | have done: we have seen (esam redzējuši)
+esat	AUX	form of būt: are, to several people or politely to one → būt | have done
+neesmu	AUX	form of būt: am not → būt | haven't done: I haven't seen it (neesmu redzējis)
+bija	AUX	form of būt: was, were → būt | there was, there were | with a dative, had: I had a car (man bija mašīna) | with a past participle, had done (bija aizgājis)
+biju	AUX	form of būt: was: I was at home (biju mājās) → būt | had done (biju aizmirsis)
+biji	AUX	form of būt: were, to one person → būt
+bijām	AUX	form of būt: were: we were there (mēs bijām tur) → būt
+bijāt	AUX	form of būt: were, to several people or politely to one → būt
+nebija	AUX	form of būt: was not, were not → būt | there was no, there were no | had no: I had no time (man nebija laika)
+būs	AUX	form of būt: will be: it will be cold (būs auksts) → būt | there will be | will have done (būs aizgājis)
+būšu	AUX	form of būt: will be: I'll be at home (būšu mājās) → būt
+būsi	AUX	form of būt: will be, to one person → būt
+būsim	AUX	form of būt: will be: we'll be there (būsim tur) → būt
+būsiet/būsit	AUX	form of būt: will be, to several people or politely to one → būt
+nebūs	AUX	form of būt: will not be → būt | there will be no
+būtu	AUX	form of būt: would be: it would be good (būtu labi) → būt | would have done (būtu izdarījis) | with jā- and a verb, would have to: it would have to be done (būtu jāizdara)
+nebūtu	AUX	form of būt: would not be → būt | would not have done | wouldn't have to (nebūtu jā-)
+jābūt	AUX	form of būt: must be, has to be: it must be ready (jābūt gatavam) → būt
+bijis/bijusi/bijuši/bijušas	AUX	form of būt: been: has been (ir bijis), has been there (ir bijusi tur) → būt
+
+## Forms of varēt, gribēt and others Wiktionary sends elsewhere
+# `var` reached `varš` "copper" first, and `varam`, `redzam`, `ejam` their
+# adverbial participles before the verb.
+var	VERB	form of varēt: can, is able to: you can go (var iet) → varēt | it's possible, may: it may rain (var līt)
+varu	VERB	form of varēt: I can → varēt
+vari	VERB	form of varēt: you can, to one person → varēt
+varam	VERB	form of varēt: we can → varēt
+varat	VERB	form of varēt: you can, to several people or politely to one → varēt
+varētu	VERB	form of varēt: could, might: it could be (varētu būt) → varēt
+gribētu	VERB	form of gribēt: would like: I'd like coffee (es gribētu kafiju) → gribēt
+redzam	VERB	form of redzēt: we see → redzēt
+ejam	VERB	form of iet: we go → iet | let's go! (ejam!)
+teiksim	VERB	form of teikt: we will say → teikt | let's say, for example: let's say tomorrow (teiksim, rīt)
+atrodas/atrodos/atrodamies/atradās/atradīsies	VERB	form of atrasties: is, is located, is found: the building is in the centre (ēka atrodas centrā) → atrasties
+
+## Personal pronouns
+# Latvian nouns keep their gender, so a thing is viņš or viņa.
+viņš	PRON	he | it, for a masculine noun
+viņa	PRON	she | it, for a feminine noun | form of viņš: his, its: his house (viņa māja) → viņš
+sev	PRON	form of sevi: oneself, to oneself, for oneself: he bought it for himself (viņš to nopirka sev) → sevi
+
+## Pats, tāds and kāds
+pats/pati/paša/pašas/pašam/pašai/pašu/pašā/paši/pašiem/pašām/pašus/pašos/pašās	PRON	self, oneself: I did it myself (es pats) | very: at the very bottom (pašā apakšā), from the very first day (no pašas pirmās dienas) | with tas, tāds: the same: the same thing (tas pats)
+tāds pats	DET	the same, just like: the same car (tāda pati mašīna)
+tas pats	PRON	the same, the same one: the same thing again (tas pats atkal)
+kāds/kāda/kādu/kādā/kādam/kādai/kādi/kādas/kādiem/kādām/kādus/kādos/kādās	DET	some, a certain: some time (kādu laiku), in a certain position (kādā pozīcijā) | what, what kind of: what weather is it? (kāds ir laiks?) | about, before a number: about ten (kādi desmit)
+kāds	PRON	someone, somebody: someone called (kāds zvanīja)
+
+## Relatives and question words in their cases
+kurā	PRON	form of kurš: in which, where: the house in which I live (māja, kurā es dzīvoju) → kurš | in which?, where?
+kurās	PRON	form of kurš: in which, for a feminine plural → kurš
+kuram	PRON	form of kurš: to whom, to which: the man to whom (cilvēks, kuram) → kurš
+kurai	PRON	form of kurš: to whom, to which, for a feminine noun → kurš
+kam	PRON	form of kas: to whom, for whom: who needs it? (kam tas vajadzīgs?), those who (tiem, kam) → kas | what for?, why? (kam tas?)
+
+## Particles and conjunctions with a sense Wiktionary lacks
+ja	CCONJ	if: if you want (ja gribi) | in case
+ja	PART	(colloquial) yes, right: yeah, but (ja, bet) | at the end of a sentence: right?, you know
+jau	ADV	already: it's already late (jau ir vēls) | as early as: as early as 1990 (jau 1990. gadā)
+jau	PART	adds weight: really, after all: I told you (es jau teicu) | at the end, settles it: then, anyway: I'll take that one, then (ņemšu to jau)
+tik	ADV	so, so much: so good (tik labi) | as ... as: as much as (tik daudz, cik) | (colloquial) only, just, for tikai → tikai
+cik	ADV	how much, how many: how much is it? (cik maksā?) | as ... as: as far as possible (cik vien iespējams), as far as I know (cik es zinu)
+gan	CCONJ	both ... and: both here and there (gan šeit, gan tur)
+gan	PART	stresses or concedes: indeed, though: this one is cheap, though (šis gan ir lēts)
+it	PART	stresses the next word: especially (it īpaši) | it kā: as if, supposedly
+tūlīt	ADV	at once, right away | in a moment, soon: I'm coming (tūlīt nāku)
+nost	ADV	off, away: to take off (ņemt nost), get away! (nost!)
+pakaļ	ADV	after, behind | to fetch someone or something: to go and get the kids (iet pakaļ bērniem)
+klāt	ADV	present, here: summer is here (vasara ir klāt) | in addition, onto: to add salt (likt klāt sāli) | close to, up to: to come up (nākt klāt)
+šādi	ADV	like this, in this way
+visvairāk	ADV	most, the most: what I like most (kas man patīk visvairāk)
+ik	ADV	every: every day (ik dienu), every five years (ik pa pieciem gadiem)
+
+## Adverbs with a sense Wiktionary lacks
+protams	ADV	of course, naturally
+apmēram	ADV	about, approximately: about ten (apmēram desmit)
+pagaidām	ADV	for now, for the time being
+kopumā	ADV	overall, on the whole, in total
+pamatā	ADV	mainly, basically | at the base of: based on (pamatā ir)
+pārsvarā	ADV	mostly, mainly
+sevišķi	ADV	especially, particularly: especially in summer (sevišķi vasarā)
+ikdienā	ADV	in everyday life, day to day
+ikdienas	ADJ	everyday, daily: everyday life (ikdienas dzīve)
+izmaksas	NOUN	costs, expenses: production costs (ražošanas izmaksas)
+
+## Fillers
+ā	INTJ	hesitation: uh, er
+ē	INTJ	hesitation: uh, er, um
+o	INTJ	oh!, for surprise or delight
+nu	PART	well, so, to start or soften what follows: well, I don't know (nu, nezinu) | now, come on: come on! (nu!)
+vai nu	CCONJ	either: either ... or (vai nu ..., vai ...)
+
+## Abbreviations
+u. c.	ADV	and others, etc.: short for un citi
+u. tml.	ADV	and the like, etc.: short for un tamlīdzīgi
+utt.	ADV	and so on, etc.: short for un tā tālāk
+t. i.	ADV	that is, i.e.: short for tas ir
+piem.	ADV	for example, e.g.: short for piemēram
+t. sk.	ADV	including: short for tajā skaitā
+sk.	VERB	see: short for skatīt, for a reference
+g.	NOUN	year: short for gads: in 1990 (1990. g.)
+gs.	NOUN	century: short for gadsimts: the 20th century (20. gs.)
+nr.	NOUN	number: short for numurs
+milj.	NUM	million: short for miljons
+tūkst.	NUM	thousand: short for tūkstotis
+km	NOUN	kilometre, kilometres
+kg	NOUN	kilogram, kilograms
+cm	NOUN	centimetre, centimetres
+ml	NOUN	millilitre, millilitres
+g	NOUN	gram, grams: 100 g of butter (100 g sviesta)
+
+## Set phrases English Wiktionary lacks (hand patches; the context rules match them like any phrase)
+lai gan	SCONJ	although, even though
+it kā	SCONJ	as if, as though | supposedly, allegedly
+it īpaši	ADV	especially, in particular
+it sevišķi	ADV	especially, in particular
+tajā skaitā	ADV	including
+tai skaitā	ADV	including
+to skaitā	ADV	including, among them
+starp citu	ADV	by the way
+no vienas puses	ADV	on the one hand
+no otras puses	ADV	on the other hand
+katrā ziņā	ADV	in any case, anyway | certainly
+no jauna	ADV	anew, again, from scratch
+uz priekšu	ADV	forward, ahead: things are moving forward (viss iet uz priekšu)
+zināmā mērā	ADV	to some extent
+lielā mērā	ADV	to a great extent, largely
+pa lielam	ADV	(colloquial) mostly, by and large
+ik pa laikam	ADV	from time to time, now and then
+lielākā daļa	NOUN	most, the majority: most people (lielākā daļa cilvēku)
+tikt galā	VERB	to cope, to manage: to cope with a problem (tikt galā ar problēmu)
+likt priekšā	VERB	to propose, to suggest
+ņemt vērā	VERB	to take into account, to consider
+pievērst uzmanību	VERB	to pay attention, to draw attention
+tā saucamais	ADJ	so-called
+kaut kas	PRON	something, anything
+kaut kur	ADV	somewhere, anywhere
+kaut kā	ADV	somehow
+kaut kad	ADV	sometime, at some point
+kaut kāds	DET	some, some kind of, any
+
+
+## Adverbs and linking words
+savukārt	ADV	for a contrast or the next point: in turn, on the other hand, while
+vispār	ADV	in general, on the whole | with a negation: at all: not at all (vispār ne)
+uzreiz	ADV	at once, right away, immediately
+iepriekš	ADV	before, earlier, in advance
+principā	ADV	in principle, basically
+manuprāt	ADV	in my opinion, I think
+turklāt	ADV	adds a point: besides, moreover, what's more
+tostarp	ADV	including, among them
+dažkārt	ADV	sometimes, at times
+drīzāk	ADV	rather, more likely | sooner
+pakāpeniski	ADV	gradually, step by step
+vidēji	ADV	on average
+tādējādi	ADV	thus, in this way, so
+daļēji	ADV	partly, partially
+speciāli	ADV	specially, on purpose | specifically
+praktiski	ADV	practically, almost | in practice
+galvenokārt	ADV	mainly, mostly
+pietiekami	ADV	enough, sufficiently: enough water (pietiekami daudz ūdens)
+toreiz	ADV	then, at that time
+šoreiz	ADV	this time
+vienreiz	ADV	once, one time | (colloquial) just, for once: listen for once (paklausies vienreiz)
+citur	ADV	elsewhere, somewhere else
+visur	ADV	everywhere
+savādāk/citādāk	ADV	otherwise, differently | or else: otherwise I'll be late (savādāk es nokavēšu)
+citādi	ADV	otherwise, differently | or else
+paralēli	ADV	in parallel, at the same time
+attiecīgi	ADV	accordingly, respectively
+absolūti	ADV	absolutely, completely
+obligāti	ADV	necessarily, without fail: it's not a must (nav obligāti)
+personīgi	ADV	personally, in person
+kārtīgi	ADV	properly, thoroughly
+respektīvi	ADV	that is, I mean, in other words
+viennozīmīgi	ADV	definitely, unambiguously
+maksimāli	ADV	as much as possible, to the maximum
+aizvien	ADV	still, ever more: more and more (aizvien vairāk)
+pamazām	ADV	little by little, slowly
+tikmēr	ADV	meanwhile, in the meantime | with kamēr: as long as, while
+savulaik	ADV	once, at one time, in the past
+vakardien	ADV	yesterday
+pirmkārt	ADV	first, firstly, in the first place
+otrkārt	ADV	second, secondly
+vispirms	ADV	first, first of all
+labprāt	ADV	gladly, willingly
+nesen	ADV	recently, not long ago
+regulāri	ADV	regularly
+otrādi	ADV	the other way round, vice versa: on the contrary (gluži otrādi)
+publiski	ADV	publicly, in public
+atbilstoši	ADV	accordingly, appropriately | in line with: according to the rules (atbilstoši noteikumiem)
+ilgtermiņā	ADV	in the long term
+tamlīdzīgi	ADV	and so on, and the like
+nosacīti	ADV	relatively, in a manner of speaking
+pazīstami	ADV	known, familiar: well-known people (pazīstami cilvēki)
+bišķiņ/bišķi/bišku	ADV	(colloquial) a bit, a little
+mūsdienās	ADV	nowadays, today
+
+## Words that work like prepositions
+saskaņā	ADP	with ar: according to, in line with: according to the law (saskaņā ar likumu)
+izņemot	ADP	except, apart from: everyone except him (visi, izņemot viņu)
+pateicoties	ADP	thanks to, owing to: thanks to the help (pateicoties palīdzībai)
+neskatoties	ADP	with uz: despite, in spite of: despite the rain (neskatoties uz lietu)
+salīdzinot	ADP	with ar: compared with: compared with last year (salīdzinot ar pagājušo gadu)
+atšķirībā	ADP	with no: unlike, in contrast to: unlike his brother (atšķirībā no brāļa)
+ietvaros	ADP	within, as part of: within the project (projekta ietvaros)
+tuvumā	ADP	near, close to: near the house (mājas tuvumā)
+līdzās	ADP	beside, next to; besides: next to the door (līdzās durvīm)
+pretī	ADV	opposite, towards: to meet someone (iet pretī) | in return
+starpā	ADV	between, among: among themselves (savā starpā)
+apkārt	ADV	around, round: all around (visapkārt) | about, round: to walk around (staigāt apkārt)
+apakšā	ADV	below, at the bottom, underneath
+
+## Determiners and pronouns
+vairāki/vairākas/vairāku/vairākiem/vairākām/vairākus/vairākos/vairākās	DET	several, a number of: several times (vairākas reizes)
+šitas/šitā/šito/šitam/šitai/šitie/šitās/šitiem/šitām/šitos/šitajā/šitajos	PRON	(colloquial) this, this one, for šis → šis
+šitā	ADV	(colloquial) like this, this way, for šādi
+šit/šiten	ADV	(colloquial) here, for šeit → šeit
+rekur	ADV	(colloquial) here it is, look here
+visāds/visāda/visādam/visādu/visādā/visādi/visādiem/visādus/visādos/visādas/visādai/visādām/visādās/visādais/visādajam/visādo/visādajā/visādie/visādajiem/visādajos/visādajai/visādajām/visādajās	DET	all kinds of, all sorts of: all kinds of things (visādas lietas)
+visādi	ADV	in all kinds of ways, every which way
+pārējais/pārējā/pārējajam/pārējo/pārējajā/pārējie/pārējajiem/pārējos/pārējajos/pārējās/pārējajai/pārējajām/pārējajās	ADJ	the rest, the other, the remaining: the others (pārējie)
+
+## Ordinals and other definite adjectives
+pirmais/pirmā/pirmajam/pirmo/pirmajā/pirmie/pirmajiem/pirmos/pirmajos/pirmās/pirmajai/pirmajām/pirmajās	ADJ	first
+otrais/otrā/otrajam/otro/otrajā/otrie/otrajiem/otros/otrajos/otrās/otrajai/otrajām/otrajās	ADJ	second
+trešais/trešā/trešajam/trešo/trešajā/trešie/trešajiem/trešos/trešajos/trešās/trešajai/trešajām/trešajās	ADJ	third
+ceturtais/ceturtā/ceturtajam/ceturto/ceturtajā/ceturtie/ceturtajiem/ceturtos/ceturtajos/ceturtās/ceturtajai/ceturtajām/ceturtajās	ADJ	fourth
+piektais/piektā/piektajam/piekto/piektajā/piektie/piektajiem/piektos/piektajos/piektās/piektajai/piektajām/piektajās	ADJ	fifth
+pēdējais/pēdējā/pēdējajam/pēdējo/pēdējajā/pēdējie/pēdējajiem/pēdējos/pēdējajos/pēdējās/pēdējajai/pēdējajām/pēdējajās	ADJ	last, latest: last time (pēdējo reizi), in recent years (pēdējos gados)
+vidējais/vidējā/vidējajam/vidējo/vidējajā/vidējie/vidējajiem/vidējos/vidējajos/vidējās/vidējajai/vidējajām/vidējajās	ADJ	average, middle: the middle ages (viduslaiki), the average salary (vidējā alga)
+nākamais/nākamā/nākamajam/nākamo/nākamajā/nākamie/nākamajiem/nākamos/nākamajos/nākamās/nākamajai/nākamajām/nākamajās	ADJ	next: next year (nākamajā gadā)
+saucamais/saucamā/saucamo/saucamajā/saucamie/saucamās/saucamajiem/saucamos	ADJ	with tā: so-called: the so-called crisis (tā saucamā krīze)
+
+## Interjections and speech words
+mhm	INTJ	agrees or shows you're listening: uh-huh, mm-hm
+okei/okej	INTJ	(colloquial) okay, OK
+vot	PART	(colloquial) points at something or sums up: there, so, you see
+davai	INTJ	(colloquial) come on, let's go | bye
+paga	INTJ	(colloquial) wait, hold on, for pagaidi
+hallo/halo	INTJ	hello, especially on the phone
+oi/ui	INTJ	surprise or a small fright: oh, oops
+super	ADV	(colloquial) super, great: really tasty (super garšīgi)
+forši	ADV	(colloquial) cool, great
+
+## Nouns
+nosaukums/nosaukuma/nosaukumam/nosaukumu/nosaukumā/nosaukumi/nosaukumiem/nosaukumus/nosaukumos	NOUN	name, title: the name of the company (uzņēmuma nosaukums)
+spēlētājs/spēlētāja/spēlētājam/spēlētāju/spēlētājā/spēlētāji/spēlētājiem/spēlētājus/spēlētājos	NOUN	player
+priekšsēdētājs/priekšsēdētāja/priekšsēdētājam/priekšsēdētāju/priekšsēdētājā/priekšsēdētāji/priekšsēdētājiem/priekšsēdētājus/priekšsēdētājos/priekšsēdētājas/priekšsēdētājai/priekšsēdētājām/priekšsēdētājās	NOUN	chairman, chairwoman, speaker (of a parliament)
+dati/datu/datiem/datus/datos	NOUN	data
+vārti/vārtu/vārtiem/vārtus/vārtos	NOUN	gate | goal (in football, hockey): to score a goal (gūt vārtus)
+komisija/komisijas/komisijai/komisiju/komisijā/komisijām/komisijās	NOUN	commission, committee
+periods/perioda/periodam/periodu/periodā/periodi/periodiem/periodus/periodos	NOUN	period
+sēde/sēdes/sēdei/sēdi/sēdē/sēžu/sēdēm/sēdēs	NOUN	sitting, session, meeting
+līga/līgas/līgai/līgu/līgā/līgām/līgās	NOUN	league
+pakalpojums/pakalpojuma/pakalpojumam/pakalpojumu/pakalpojumā/pakalpojumi/pakalpojumiem/pakalpojumus/pakalpojumos	NOUN	service: public services (sabiedriskie pakalpojumi)
+pašvaldība/pašvaldības/pašvaldībai/pašvaldību/pašvaldībā/pašvaldībām/pašvaldībās	NOUN	local government, municipality
+atjaunošana/atjaunošanas/atjaunošanai/atjaunošanu/atjaunošanā/atjaunošanām/atjaunošanās	NOUN	restoration, renewal: the restoration of independence (neatkarības atjaunošana)
+internets/interneta/internetam/internetu/internetā/interneti/internetiem/internetus/internetos	NOUN	internet
+finanses/finanšu/finansēm/finansēs	NOUN	finance, finances
+sacensības/sacensību/sacensībām/sacensībās	NOUN	competition, contest
+izlase/izlases/izlasei/izlasi/izlasē/izlašu/izlasēm/izlasēs	NOUN	national team, selected team | selection
+migrācija/migrācijas/migrācijai/migrāciju/migrācijā/migrācijām/migrācijās	NOUN	migration
+lībietis/lībieša/lībietim/lībieti/lībietī/lībieši/lībiešu/lībiešiem/lībiešus/lībiešos	NOUN	Livonian (a member of the Livonian people)
+mūsdienas/mūsdienu/mūsdienām/mūsdienās	NOUN	the present day, our time | mūsdienu: modern, present-day: modern technology (mūsdienu tehnoloģijas)
+radio	NOUN	radio
+konteksts/konteksta/kontekstam/kontekstu/kontekstā/konteksti/kontekstiem/kontekstus/kontekstos	NOUN	context
+risinājums/risinājuma/risinājumam/risinājumu/risinājumā/risinājumi/risinājumiem/risinājumus/risinājumos	NOUN	solution
+modelis/modeļa/modelim/modeli/modelī/modeļi/modeļu/modeļiem/modeļus/modeļos	NOUN	model
+forma/formas/formai/formu/formā/formām/formās	NOUN	form, shape | form (a document to fill in)
+bizness/biznesa/biznesam/biznesu/biznesā/biznesi/biznesiem/biznesus/biznesos	NOUN	business
+joma/jomas/jomai/jomu/jomā/jomām/jomās	NOUN	field, area, sphere
+reforma/reformas/reformai/reformu/reformā/reformām/reformās	NOUN	reform
+paaudze/paaudzes/paaudzei/paaudzi/paaudzē/paaudžu/paaudzēm/paaudzēs	NOUN	generation
+budžets/budžeta/budžetam/budžetu/budžetā/budžeti/budžetiem/budžetus/budžetos	NOUN	budget
+kabinets/kabineta/kabinetam/kabinetu/kabinetā/kabineti/kabinetiem/kabinetus/kabinetos	NOUN	office, study | Ministru kabinets: the Cabinet of Ministers
+izmaiņas/izmaiņu/izmaiņām/izmaiņās	NOUN	changes
+saturs/satura/saturam/saturu/saturā/saturi/saturiem/saturus/saturos	NOUN	content, contents
+satiksme/satiksmes/satiksmei/satiksmi/satiksmē/satiksmju/satiksmēm/satiksmēs	NOUN	traffic, transport: public transport (sabiedriskā satiksme)
+pētījums/pētījuma/pētījumam/pētījumu/pētījumā/pētījumi/pētījumiem/pētījumus/pētījumos	NOUN	study, research
+resurss/resursa/resursam/resursu/resursā/resursi/resursiem/resursus/resursos	NOUN	resource
+kandidāts/kandidāta/kandidātam/kandidātu/kandidātā/kandidāti/kandidātiem/kandidātus/kandidātos/kandidāte/kandidātes/kandidātei/kandidātē/kandidāšu/kandidātēm/kandidātēs	NOUN	candidate
+frakcija/frakcijas/frakcijai/frakciju/frakcijā/frakcijām/frakcijās	NOUN	faction, parliamentary group
+raidījums/raidījuma/raidījumam/raidījumu/raidījumā/raidījumi/raidījumiem/raidījumus/raidījumos	NOUN	programme, show, broadcast
+sekretārs/sekretāra/sekretāram/sekretāru/sekretārā/sekretāri/sekretāriem/sekretārus/sekretāros	NOUN	secretary
+apvienība/apvienības/apvienībai/apvienību/apvienībā/apvienībām/apvienībās	NOUN	union, association, alliance
+kompānija/kompānijas/kompānijai/kompāniju/kompānijā/kompānijām/kompānijās	NOUN	company
+reklāma/reklāmas/reklāmai/reklāmu/reklāmā/reklāmām/reklāmās	NOUN	advertising, advertisement
+izdevumi/izdevumu/izdevumiem/izdevumus/izdevumos	NOUN	expenses, expenditure
+sadarbība/sadarbības/sadarbībai/sadarbību/sadarbībā/sadarbībām/sadarbībās	NOUN	cooperation
+rekords/rekorda/rekordam/rekordu/rekordā/rekordi/rekordiem/rekordus/rekordos	NOUN	record
+celtniecība/celtniecības/celtniecībai/celtniecību/celtniecībā/celtniecībām/celtniecībās	NOUN	building, construction
+pienākums/pienākuma/pienākumam/pienākumu/pienākumā/pienākumi/pienākumiem/pienākumus/pienākumos	NOUN	duty, obligation
+attālums/attāluma/attālumam/attālumu/attālumā/attālumi/attālumiem/attālumus/attālumos	NOUN	distance
+čempionāts/čempionāta/čempionātam/čempionātu/čempionātā/čempionāti/čempionātiem/čempionātus/čempionātos	NOUN	championship
+tēma/tēmas/tēmai/tēmu/tēmā/tēmām/tēmās	NOUN	topic, subject, theme
+kolēģis/kolēģa/kolēģim/kolēģi/kolēģī/kolēģu/kolēģiem/kolēģus/kolēģos/kolēģe/kolēģes/kolēģei/kolēģē/kolēģēm/kolēģēs	NOUN	colleague
+termiņš/termiņa/termiņam/termiņu/termiņā/termiņi/termiņiem/termiņus/termiņos	NOUN	term, deadline, period: expiry date (derīguma termiņš)
+skatītājs/skatītāja/skatītājam/skatītāju/skatītājā/skatītāji/skatītājiem/skatītājus/skatītājos	NOUN	viewer, spectator
+programma/programmas/programmai/programmu/programmā/programmām/programmās	NOUN	programme, program
+izcelsme/izcelsmes/izcelsmei/izcelsmi/izcelsmē/izcelsmju/izcelsmēm/izcelsmēs	NOUN	origin
+objekts/objekta/objektam/objektu/objektā/objekti/objektiem/objektus/objektos	NOUN	object, site
+pieaugums/pieauguma/pieaugumam/pieaugumu/pieaugumā/pieaugumi/pieaugumiem/pieaugumus/pieaugumos	NOUN	growth, increase
+apjoms/apjoma/apjomam/apjomu/apjomā/apjomi/apjomiem/apjomus/apjomos	NOUN	volume, scope, amount
+uzskats/uzskata/uzskatam/uzskatu/uzskatā/uzskati/uzskatiem/uzskatus/uzskatos	NOUN	view, opinion
+izmērs/izmēra/izmēram/izmēru/izmērā/izmēri/izmēriem/izmērus/izmēros	NOUN	size, dimension
+signāls/signāla/signālam/signālu/signālā/signāli/signāliem/signālus/signālos	NOUN	signal
+saslimšana/saslimšanas/saslimšanai/saslimšanu/saslimšanā/saslimšanām/saslimšanās	NOUN	falling ill, disease, illness
+vadlīnijas/vadlīniju/vadlīnijām/vadlīnijās	NOUN	guidelines
+piekraste/piekrastes/piekrastei/piekrasti/piekrastē/piekrastu/piekrastēm/piekrastēs	NOUN	coast, shore, coastal area
+piemiņa/piemiņas/piemiņai/piemiņu/piemiņā/piemiņām/piemiņās	NOUN	memory, remembrance: in memory of (par piemiņu)
+satversme/satversmes/satversmei/satversmi/satversmē/satversmju/satversmēm/satversmēs/Satversme/Satversmes	NOUN	constitution: Satversme, the Constitution of Latvia
+tīmeklis/tīmekļa/tīmeklim/tīmekli/tīmeklī/tīmekļi/tīmekļu/tīmekļiem/tīmekļus/tīmekļos	NOUN	web, the World Wide Web
+tradīcija/tradīcijas/tradīcijai/tradīciju/tradīcijā/tradīcijām/tradīcijās	NOUN	tradition
+pārdošana/pārdošanas/pārdošanai/pārdošanu/pārdošanā/pārdošanām/pārdošanās	NOUN	sale, selling
+pankūka/pankūkas/pankūkai/pankūku/pankūkā/pankūkām/pankūkās	NOUN	pancake
+ievārījums/ievārījuma/ievārījumam/ievārījumu/ievārījumā/ievārījumi/ievārījumiem/ievārījumus/ievārījumos	NOUN	jam
+biezpiens/biezpiena/biezpienam/biezpienu/biezpienā/biezpieni/biezpieniem/biezpienus/biezpienos	NOUN	cottage cheese, curd cheese
+kalorija/kalorijas/kalorijai/kaloriju/kalorijā/kalorijām/kalorijās	NOUN	calorie
+
+## Adjectives
+piemērots/piemērota/piemērotam/piemērotu/piemērotā/piemēroti/piemērotiem/piemērotus/piemērotos/piemērotas/piemērotai/piemērotām/piemērotās/piemērotais/piemērotajam/piemēroto/piemērotajā/piemērotie/piemērotajiem/piemērotajos/piemērotajai/piemērotajām/piemērotajās	ADJ	suitable, fit
+nozīmīgs/nozīmīga/nozīmīgam/nozīmīgu/nozīmīgā/nozīmīgi/nozīmīgiem/nozīmīgus/nozīmīgos/nozīmīgas/nozīmīgai/nozīmīgām/nozīmīgās/nozīmīgais/nozīmīgajam/nozīmīgo/nozīmīgajā/nozīmīgie/nozīmīgajiem/nozīmīgajos/nozīmīgajai/nozīmīgajām/nozīmīgajās	ADJ	important, significant
+ārvalstu	ADJ	foreign: foreign students (ārvalstu studenti)
+papildu	ADJ	additional, extra
+papildus	ADV	in addition, additionally, extra
+augšējs/augšēja/augšējam/augšēju/augšējā/augšēji/augšējiem/augšējus/augšējos/augšējas/augšējai/augšējām/augšējās/augšējais/augšējajam/augšējo/augšējajā/augšējie/augšējajiem/augšējajos/augšējajai/augšējajām/augšējajās	ADJ	upper, top
+standarta	ADJ	standard
+kristīgs/kristīga/kristīgam/kristīgu/kristīgā/kristīgi/kristīgiem/kristīgus/kristīgos/kristīgas/kristīgai/kristīgām/kristīgās/kristīgais/kristīgajam/kristīgo/kristīgajā/kristīgie/kristīgajiem/kristīgajos/kristīgajai/kristīgajām/kristīgajās	ADJ	Christian
+katoļu	ADJ	Catholic
+neliels/neliela/nelielam/nelielu/nelielā/nelieli/nelieliem/nelielus/nelielos/nelielas/nelielai/nelielām/nelielās/nelielais/nelielajam/nelielo/nelielajā/nelielie/nelielajiem/nelielajos/nelielajai/nelielajām/nelielajās	ADJ	small, little, slight
+
+## Verbs
+veidot/veido/veidoju/veidoja/veidos/veidotu/veidojot/veidots/veidota/veidoti/veidotas	VERB	to form, to make up, to create
+nodrošināt/nodrošina/nodrošinu/nodrošināja/nodrošinās/nodrošinātu/nodrošinot/nodrošināts/nodrošināta	VERB	to ensure, to provide
+noteikt/nosaka/nosaku/noteica/noteiks/noteiktu/nosakot	VERB	to determine, to set, to lay down: the law sets the rules (likums nosaka noteikumus) | to say firmly
+uzskatīt/uzskata/uzskatu/uzskatām/uzskatāt/uzskatīja/uzskatīs/uzskatītu/uzskatot/uzskatīts/uzskatīta/uzskatīti	VERB	to think, to consider, to believe: I think that... (es uzskatu, ka...) | uzskatīt par: to regard as
+iegūt/iegūst/iegūstu/ieguva/ieguvu/iegūs/iegūtu/iegūstot/iegūts/iegūta/iegūti	VERB	to get, to gain, to win, to obtain
+pieņemt/pieņem/pieņemu/pieņēma/pieņēmu/pieņems/pieņemsim/pieņemtu/pieņemot/pieņemts/pieņemta/pieņemti/pieņemtas	VERB	to accept, to take: to make a decision (pieņemt lēmumu) | to adopt (a law) | pieņemsim: let's say, suppose
+mēģināt/mēģina/mēģinu/mēģinām/mēģināja/mēģināju/mēģinās/mēģināšu/mēģināsim/mēģinātu/mēģinot	VERB	to try
+norādīt/norāda/norādu/norādīja/norādīs/norādītu/norādot/norādīts	VERB	to point out, to indicate, to state
+sekot/seko/sekoju/sekoja/sekos/sekotu/sekojot	VERB	to follow
+ietvert/ietver/ietvēra/ietvers/ietvertu/ietverot/ietverts	VERB	to include, to contain
+sanākt/sanāk/sanāca/sanāks/sanāktu	VERB	to come together, to gather | (colloquial) to work out, to turn out: it worked out (sanāca) | to come to, to amount to
+mēgt/mēdz/mēdzu/mēdza	VERB	to tend to, to usually do: people tend to think (cilvēki mēdz domāt)
+uztaisīt/uztaisu/uztaisa/uztaisām/uztaisīja/uztaisīju/uztaisīšu/uztaisīsim/uztaisītu/uztaisot/uztaisīts	VERB	(colloquial) to make, to do: to make a video (uztaisīt video)
+paņemt/paņem/paņemu/paņemam/paņēma/paņēmu/paņems/paņemšu/paņemsim/paņemtu/paņemot/paņemts	VERB	to take, to pick up
+nopirkt/nopērk/nopērku/nopirka/nopirku/nopirkām/nopirks/nopirkšu/nopirktu/nopirkts	VERB	to buy
+paēst/paēd/paēdu/paēda/paēdām/paēdīs/paēstu	VERB	to eat, to have a meal
+apēst/apēd/apēdu/apēda/apēdām/apēdīs/apēstu	VERB	to eat up
+nopelnīt/nopelna/nopelnu/nopelnīja/nopelnīs/nopelnītu	VERB	to earn
+filmēt/filmē/filmēju/filmēja/filmēs/filmētu/filmējot	VERB	to film
+atnest/atnes/atnesu/atnesa/atnesīs/atnestu	VERB	to bring
+atnākt/atnāk/atnāku/atnāca/atnācu/atnāks/atnāktu	VERB	to come, to arrive
+savākt/savāc/savācu/savāca/savāks/savāktu	VERB	to collect, to gather
+piedāvāt/piedāvā/piedāvāju/piedāvāja/piedāvās/piedāvātu/piedāvājot	VERB	to offer
+salīdzināt/salīdzina/salīdzinu/salīdzināja/salīdzinās/salīdzinātu	VERB	to compare
+uzlabot/uzlabo/uzlaboju/uzlaboja/uzlabos/uzlabotu/uzlabojot	VERB	to improve
+risināt/risina/risinu/risināja/risinās/risinātu/risinot	VERB	to solve, to deal with
+ielikt/ieliek/ielieku/ieliekam/ielika/ielikšu/ieliks/ieliktu/ieliekot	VERB	to put in, to put into
+salikt/saliek/salieku/saliekam/salika/saliks/saliktu	VERB	to put together, to arrange
+ieviest/ievieš/ieviesa/ieviesīs/ieviestu/ieviešot/ieviests	VERB	to introduce, to bring in
+aizņemt/aizņem/aizņēma/aizņems/aizņemtu	VERB	to take up, to occupy: it takes time (tas aizņem laiku)
+tērēt/tērē/tērēju/tērēja/tērēs/tērētu	VERB	to spend: to spend money (tērēt naudu)
+pastāstīt/pastāsta/pastāstu/pastāstīja/pastāstīšu/pastāstīs/pastāstītu	VERB	to tell
+paiet/pagāja/paies	VERB	to pass, to go by (of time): time flies (laiks ātri paiet)
+parādīt/parāda/parādu/parādīja/parādīšu/parādīs/parādītu	VERB	to show
+pievienot/pievieno/pievienoju/pievienoja/pievienos	VERB	to add, to attach
+atņemt/atņem/atņēma/atņems	VERB	to take away
+izņemt/izņem/izņēma/izņems/izņemtu	VERB	to take out
+izdzīvot/izdzīvo/izdzīvoja/izdzīvos	VERB	to survive
+iedalīt/iedala/iedalīja/iedalīts	VERB	to divide, to classify
+dēvēt/dēvē/dēvēja/dēvēts	VERB	to call, to name
+atspoguļot/atspoguļo/atspoguļoja	VERB	to reflect, to show
+dominēt/dominē/dominēja	VERB	to dominate, to prevail
+ietilpt/ietilpst/ietilpa	VERB	to fit in, to belong to, to be part of
+pasniegt/pasniedz/pasniedza/pasniegs	VERB	to hand, to present, to serve | to teach (a subject)
+veicināt/veicina/veicināja/veicinās	VERB	to promote, to encourage
+publicēt/publicē/publicēja/publicēts	VERB	to publish
+ienākt/ienāk/ienāca/ienāks	VERB	to come in, to enter
+nonākt/nonāk/nonāca/nonāks	VERB	to end up, to reach, to come to
+atjaunot/atjauno/atjaunoja/atjaunots/atjaunota	VERB	to restore, to renew
+nomainīt/nomaina/nomainīja/nomainīs	VERB	to replace, to change
+piekrist/piekrītu/piekrīt/piekrita/piekritu	VERB	to agree
+pieļaut/pieļauju/pieļauj/pieļāva	VERB	to allow | to suppose, to admit the possibility: I suppose (pieļauju)
+nemaldīties/nemaldos	VERB	if I'm not mistaken (ja nemaldos)
+atšķirties/atšķiras/atšķīrās	VERB	to differ
+izdoties/izdodas/izdevās/izdosies/izdotos	VERB	to succeed, to work out: I managed (man izdevās)
+izrādīties/izrādās/izrādījās/izrādīsies	VERB	to turn out: it turned out that... (izrādījās, ka...)
+parādīties/parādās/parādījās/parādīsies	VERB	to appear, to show up
+piedalīties/piedalās/piedalos/piedalījās/piedalīsies/piedalītos	VERB	to take part, to participate
+darboties/darbojas/darbojos/darbojās/darbosies/darbotos	VERB	to work, to operate, to be active
+tikties/tiekamies/tiekas/tiekos/tikās/tikāmies/tiksimies/tiksies	VERB	to meet: see you (tiksimies)
+sazināties/sazinās/sazinājās	VERB	to get in touch, to contact
+nodarboties/nodarbojas/nodarbojās	VERB	to be engaged in, to do (for work or a hobby)
+
+## The passive auxiliary
+tikt/tiek/tiku/tiekam/tika/tikām/tiks/tikšu/tiktu/tikts/tikuši/tikusi/tikušas/tikušies/netiek/netika/netiks/netiktu	AUX	makes the passive with a participle: is done, was done: it is used (tiek izmantots), it was built (tika uzcelts); the other forms of tikt → tikt

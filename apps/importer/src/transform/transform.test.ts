@@ -12,6 +12,7 @@ const italian = importRules(readLanguage("it"));
 const ru = importRules(readLanguage("ru"));
 const uk = importRules(readLanguage("uk"));
 const ko = importRules(readLanguage("ko"));
+const lv = importRules(readLanguage("lv"));
 
 const entry = (patch: Partial<WiktextractEntry>): WiktextractEntry => ({
   word: "lapis",
@@ -1054,6 +1055,37 @@ describe("transformEntry", () => {
       }),
     );
     assert.deepStrictEqual(passer.entry?.forms, ["passé"]);
+  });
+
+  it("does not index a verb table's pronoun headings as forms", () => {
+    // Latvian tables head each row with its pronoun, tagged without a tense.
+    const result = transformEntry(
+      lv,
+      entry({
+        word: "sākt",
+        pos: "verb",
+        lang_code: "lv",
+        senses: [{ glosses: ["to begin"] }],
+        forms: [
+          {
+            form: "mēs",
+            tags: ["first-person", "indicative", "plural"],
+            source: "conjugation",
+          },
+          {
+            form: "sākam",
+            tags: ["first-person", "indicative", "plural", "present"],
+            source: "conjugation",
+          },
+          {
+            form: "sāc",
+            tags: ["imperative", "second-person", "singular"],
+            source: "conjugation",
+          },
+        ],
+      }),
+    );
+    assert.deepStrictEqual(result.entry?.forms, ["sākam", "sāc"]);
   });
 
   it("reads a noun's or verb's grammar wherever the language puts it", () => {

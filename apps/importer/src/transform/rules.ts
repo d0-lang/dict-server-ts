@@ -373,6 +373,43 @@ const isAuxiliaryRow = (form: WiktextractForm): boolean =>
   ((form.tags?.includes("multiword-construction") ?? false) &&
     !hasWhitespace(form.form));
 
+/** Tags that place a verb form in a tense, a mood other than the indicative, or a non-finite form. */
+const VERB_FORM_TAGS: ReadonlySet<string> = new Set([
+  "present",
+  "past",
+  "future",
+  "imperfect",
+  "perfect",
+  "pluperfect",
+  "aorist",
+  "preterite",
+  "conditional",
+  "imperative",
+  "subjunctive",
+  "optative",
+  "jussive",
+  "renarrative",
+  "debitive",
+  "infinitive",
+  "participle",
+  "gerund",
+]);
+
+/**
+ * Latvian verb tables head each row with its pronoun (`es`, `tu`, `viņš`,
+ * `mēs`), which wiktextract keeps as a form tagged with the person, number
+ * and `indicative` but no tense. Without this, `mēs` "we" resolved to the 916
+ * verbs with a table. A real indicative form always has its tense.
+ */
+const isPronounHeadingRow = (form: WiktextractForm): boolean => {
+  const tags = form.tags ?? [];
+  return (
+    tags.includes("indicative") &&
+    tags.some((t) => GRAMMAR_PERSONS.has(t)) &&
+    !tags.some((t) => VERB_FORM_TAGS.has(t))
+  );
+};
+
 /**
  * Usage labels of a spelling outside the standard language. A form-of link or
  * headword alternative carrying one is "marked": it only resolves when the
@@ -489,6 +526,7 @@ export const keepForm = (
   if (tags.some((t) => language.untrustedFormTags?.includes(t))) return false;
   if (isVerbalNounForm(form)) return false;
   if (isAuxiliaryRow(form)) return false;
+  if (isPronounHeadingRow(form)) return false;
   if (isHistorical(language, tags)) return false;
   if (isOtherVariety(language, tags)) return false;
   // The word in the other script is a lemma (`scriptForms`), not a form.

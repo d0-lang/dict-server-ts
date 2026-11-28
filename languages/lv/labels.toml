@@ -1,0 +1,10 @@
+# What Latvian's labels mean, in English (the pair's target language), for
+# `/v1/get-labels`. Names come from `languages/labels.en.toml` unless given
+# here. `text` at most 1000 characters, plain text.
+
+[m]
+text = "Masculine nouns take masculine adjectives and participles: liels galds, viņš ir bijis. Most end in -s, -š, -is or -us; a few in -a or -e (puika, bende)."
+
+[f]
+text = "Feminine nouns take feminine adjectives and participles: liela māja, viņa ir bijusi. Most end in -a or -e; a few in -s (sirds, pils)."
+

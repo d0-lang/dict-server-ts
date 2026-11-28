@@ -1,0 +1,23 @@
+#:schema ../../spec/language.schema.json
+# Latvian. Started from Polish's record and checked against the Latvian dump
+# (data/raw/lv.jsonl, 134,448 lines) and corpus; settings left out take their
+# defaults (spec/language.schema.json). The profile and iteration log are in
+# profile.md.
+
+code = "lv"
+name = "Latvian"
+target = "en"
+
+[import]
+# No sense, form or sound carries an Old Latvian tag.
+historicalStages = []
+# Past passive participles decline like adjectives (`saistīts` "linked":
+# `saistīta`, `saistīti`, `saistītās`), but verb tables list only the
+# masculine `-ts`. Wiktionary has pages for some declined forms (`izmantota`)
+# and not for most (`saistīta`, `uzskatīta`). Only forms no other entry has:
+# many of these participles are adjectives too (`noteikts` "definite"), whose
+# own tables keep them.
+participleDeclension = { tags = ["participle", "passive", "past"], ending = "s", onlyNew = true, endings = [
+  "a", "am", "u", "ā", "i", "iem", "us", "os", "as", "ai", "ām", "ās",
+  "ais", "ajam", "o", "ajā", "ie", "ajiem", "ajos", "ajai", "ajām", "ajās",
+] }
