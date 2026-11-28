@@ -89,10 +89,11 @@ kurai	PRON	form of kurš: to whom, to which, for a feminine noun → kurš
 kam	PRON	form of kas: to whom, for whom: who needs it? (kam tas vajadzīgs?), those who (tiem, kam) → kas | what for?, why? (kam tas?)
 
 ## Particles and conjunctions with a sense Wiktionary lacks
-ja	CCONJ	if: if you want (ja gribi) | in case
-ja	PART	(colloquial) yes, right: yeah, but (ja, bet) | at the end of a sentence: right?, you know
+ja	SCONJ	if: if you want (ja gribi) | in case
+ja	PART	(spoken) yeah, right: it was cheap, right? (bija lēti, ja?)
 jau	ADV	already: it's already late (jau ir vēls) | as early as: as early as 1990 (jau 1990. gadā)
-jau	PART	adds weight: really, after all: I told you (es jau teicu) | at the end, settles it: then, anyway: I'll take that one, then (ņemšu to jau)
+jau	PART	adds weight: really, after all: I told you (es jau teicu) | gan jau: surely, I'm sure: it'll be fine (gan jau būs labi)
+jā	PART	yes, yeah: yes, of course (jā, protams) | at the end of a question: right?: you're coming, right? (tu nāksi, jā?)
 tik	ADV	so, so much: so good (tik labi) | as ... as: as much as (tik daudz, cik) | (colloquial) only, just, for tikai → tikai
 cik	ADV	how much, how many: how much is it? (cik maksā?) | as ... as: as far as possible (cik vien iespējams), as far as I know (cik es zinu)
 gan	CCONJ	both ... and: both here and there (gan šeit, gan tur)
@@ -119,14 +120,17 @@ pārsvarā	ADV	mostly, mainly
 sevišķi	ADV	especially, particularly: especially in summer (sevišķi vasarā)
 ikdienā	ADV	in everyday life, day to day
 ikdienas	ADJ	everyday, daily: everyday life (ikdienas dzīve)
-izmaksas	NOUN	costs, expenses: production costs (ražošanas izmaksas)
+izmaksas/izmaksu/izmaksām/izmaksās	NOUN	costs, expenses: production costs (ražošanas izmaksas)
 
 ## Fillers
-ā	INTJ	hesitation: uh, er
+ā	INTJ	hesitation: uh, er | realization or surprise: oh!, ah!: oh, I see! (ā, skaidrs!)
 ē	INTJ	hesitation: uh, er, um
 o	INTJ	oh!, for surprise or delight
 nu	PART	well, so, to start or soften what follows: well, I don't know (nu, nezinu) | now, come on: come on! (nu!)
 vai nu	CCONJ	either, with vai: either today or tomorrow (vai nu šodien, vai rīt)
+tā kā	SCONJ	since, as: since there's no time, let's go (tā kā nav laika, ejam) | (spoken) sort of, kind of: kind of cold (tā kā auksti)
+kā arī	CCONJ	as well as, and also: tea as well as coffee (tēja, kā arī kafija)
+gan jau	PART	surely, I'm sure, probably: it'll work out (gan jau sanāks)
 
 ## Abbreviations
 u. c.	ADV	and others, etc.: short for un citi
@@ -170,6 +174,9 @@ lielāko daļu	NOUN	most of, the greater part: most of the time (lielāko daļu 
 tikt galā	VERB	to cope, to manage: to cope with a problem (tikt galā ar problēmu)
 likt priekšā	VERB	to propose, to suggest
 ņemt vērā	VERB	to take into account, to consider
+ņemot vērā	ADP	taking into account, given: given the weather (ņemot vērā laikapstākļus)
+pie tam	ADV	moreover, besides, what's more: cheap and tasty too (lēti un pie tam garšīgi)
+tikt klāt	VERB	to get to, to reach, to get near: to get to the shop (tikt klāt veikalam)
 vērā	NOUN	attention, in ņemt vērā: to take into account (ņemt vērā)
 pievērst uzmanību	VERB	to pay attention, to draw attention
 tā saucamais	ADJ	so-called
@@ -182,7 +189,7 @@ kaut kāds	DET	some, some kind of, any
 
 ## Adverbs and linking words
 savukārt	ADV	for a contrast or the next point: in turn, on the other hand, while
-vispār	ADV	in general, on the whole | with a negation: at all: not at all (vispār ne)
+vispār	ADV	in general, on the whole | with a negation: at all: I don't know at all (es vispār nezinu)
 uzreiz	ADV	at once, right away, immediately
 iepriekš	ADV	before, earlier, in advance
 principā	ADV	in principle, basically
@@ -258,7 +265,7 @@ apakšā	ADV	below, at the bottom, underneath
 vairāki/vairākas/vairāku/vairākiem/vairākām/vairākus/vairākos/vairākās	DET	several, a number of: several times (vairākas reizes)
 šitas/šitā/šito/šitam/šitai/šitie/šitās/šitiem/šitām/šitos/šitajā/šitajos	PRON	(colloquial) this, this one, for šis → šis
 šitā	ADV	(colloquial) like this, this way, for šādi
-šit/šiten	ADV	(colloquial) here, for šeit → šeit
+šit/šite/šiten	ADV	(colloquial) here, for šeit → šeit
 rekur	ADV	(colloquial) right there, over there, pointing at a place: here, there and over there (šeit, tur un rekur)
 visāds/visāda/visādam/visādu/visādā/visādi/visādiem/visādus/visādos/visādas/visādai/visādām/visādās/visādais/visādajam/visādo/visādajā/visādie/visādajiem/visādajos/visādajai/visādajām/visādajās	DET	all kinds of, all sorts of: all kinds of things (visādas lietas)
 visādi	ADV	in all kinds of ways, every which way
@@ -271,7 +278,7 @@ trešais/trešā/trešajam/trešo/trešajā/trešie/trešajiem/trešos/trešajos
 ceturtais/ceturtā/ceturtajam/ceturto/ceturtajā/ceturtie/ceturtajiem/ceturtos/ceturtajos/ceturtās/ceturtajai/ceturtajām/ceturtajās	ADJ	fourth
 piektais/piektā/piektajam/piekto/piektajā/piektie/piektajiem/piektos/piektajos/piektās/piektajai/piektajām/piektajās	ADJ	fifth
 pēdējais/pēdējā/pēdējajam/pēdējo/pēdējajā/pēdējie/pēdējajiem/pēdējos/pēdējajos/pēdējās/pēdējajai/pēdējajām/pēdējajās	ADJ	last, latest: last time (pēdējo reizi), in recent years (pēdējos gados)
-vidējais/vidējā/vidējajam/vidējo/vidējajā/vidējie/vidējajiem/vidējos/vidējajos/vidējās/vidējajai/vidējajām/vidējajās	ADJ	average, middle: the middle ages (viduslaiki), the average salary (vidējā alga)
+vidējais/vidējā/vidējajam/vidējo/vidējajā/vidējie/vidējajiem/vidējos/vidējajos/vidējās/vidējajai/vidējajām/vidējajās	ADJ	average, middle: the average salary (vidējā alga), the middle lane (vidējā josla) | vidējā izglītība: secondary education
 nākamais/nākamā/nākamajam/nākamo/nākamajā/nākamie/nākamajiem/nākamos/nākamajos/nākamās/nākamajai/nākamajām/nākamajās	ADJ	next: next year (nākamajā gadā)
 saucamais/saucamā/saucamo/saucamajā/saucamie/saucamās/saucamajiem/saucamos	ADJ	with tā: so-called: the so-called crisis (tā saucamā krīze)
 
@@ -441,4 +448,4 @@ nodarboties/nodarbojas/nodarbojās	VERB	to be engaged in, to do (for work or a h
 
 ## The passive auxiliary
 netiek/netika/netiks/netiktu	AUX	form of tikt: makes the negative passive: is not done, was not done: it is not used (netiek izmantots) → tikt
-tikt/tiek/tiku/tiekam/tika/tikām/tiks/tikšu/tiktu/tikts/tikuši/tikusi/tikušas/tikušies/netiek/netika/netiks/netiktu	AUX	makes the passive with a participle: is done, was done: it is used (tiek izmantots), it was built (tika uzcelts); the other forms of tikt → tikt
+tikt/tiek/tiku/tiekam/tika/tikām/tiks/tikšu/tiktu/tikts/tiktas/tikti/tikta/tikuši/tikusi/tikušas/netiek/netika/netiks/netiktu/ticis	AUX	makes the passive with a participle: is done, was done: it is used (tiek izmantots), it was built (tika uzcelts)
