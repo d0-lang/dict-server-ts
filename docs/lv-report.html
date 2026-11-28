@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Latvian (lv_en): language report</title>
+<style>
+:root{--bg:#fff;--fg:#1d1d1f;--muted:#6b6b70;--line:#e3e3e6;--card:#f6f6f8;--up:#1a7f37;--down:#b3261e;--accent:#2f5fd0}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--fg:#ececef;--muted:#9a9aa2;--line:#2c2c31;--card:#1c1c20;--up:#4ac26b;--down:#ff7b72;--accent:#7aa2ff}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1060px;margin:0 auto;padding:32px 24px 64px}h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:40px 0 10px;padding-top:8px;border-top:1px solid var(--line)}h3{font-size:15px;margin:22px 0 8px}
+.sub{color:var(--muted);margin:0 0 20px}code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card);padding:1px 4px;border-radius:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}.kpi{background:var(--card);border-radius:10px;padding:12px 14px}.kpi .v{font-size:24px;font-weight:650}.kpi .l{color:var(--muted);font-size:13px}.kpi .d{font-size:13px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;margin:8px 0 4px}th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ul{padding-left:20px}li{margin:3px 0}.note{color:var(--muted);font-size:13px}
+.m{color:var(--muted)} .pass{color:var(--up);font-weight:600} .fail{color:var(--down);font-weight:600}
+@media (max-width:600px){main{padding:24px 16px 48px}}
+</style>
+</head><body><main>
+<h1>Latvian (lv_en): tier 1</h1>
+<p class="sub">2026-11-28 · model only, unreviewed (no reader of Latvian checked it) · judge: Haiku · run <code>r4</code></p>
+
+<div class="kpis">
+<div class="kpi"><div class="v pass">98.9%</div><div class="l">common grammar words (needs 97.5)</div><div class="d">90.3 in the plain import</div></div>
+<div class="kpi"><div class="v pass">97.2%</div><div class="l">common content words (needs 92.5)</div><div class="d">90.0 plain; 97.4 without missing words</div></div>
+<div class="kpi"><div class="v fail">59.2%</div><div class="l">random words (needs 87.5)</div><div class="d">53.0 plain; 91.5 without missing words</div></div>
+<div class="kpi"><div class="v">78.9%</div><div class="l">all 2,200 items understood</div><div class="d">67.0 in the plain import</div></div>
+</div>
+
+<h2>Summary</h2>
+<p>English Wiktionary's Latvian is small: 16,460 entries in the plain import, against Ukrainian's 38k and Russian's 62k. Many everyday words have no Latvian entry at all (<code>veidot</code>, <code>dati</code>, <code>savukārt</code>, <code>vispār</code>, <code>nosaukums</code>, <code>pieņemt</code>), checked against the full dump. The plain import found an entry for 78.4% of corpus words. Four things held the common words back:</p>
+<ul>
+<li><b>Pronoun headings as forms.</b> Verb tables head each row with its pronoun (<code>es</code>, <code>tu</code>, <code>mēs</code>), kept as a form, so "we" opened on <code>robot</code> "to notch". Fixed in the importer, for every language.</li>
+<li><b>Reflexive verbs.</b> Latvian writes them with a suffix (<code>sākt</code>, <code>sākties</code>), and the dump has 111 against 3,249 verbs with a table. A new setting, <code>reflexiveSuffix</code>, spells 1,240 of them from their verb's table.</li>
+<li><b>Grammar words.</b> Forms of <i>būt</i> glossed only as forms, <code>tiek</code> (the passive) as "arrives", <code>var</code> "can" opening on "copper". The grammar file fixes them.</li>
+<li><b>Missing common words</b>, 121 of the 1,000 commonest. The grammar file adds them by hand, each with its forms (2 left).</li>
+</ul>
+<p>The common gates pass. The random gate fails on missing words alone: without them it is 91.5%, above its 87.5%. Latvian needs hand patches or a better source, not more rules.</p>
+
+<h2>Profile</h2>
+<ul>
+<li><b>Corpus:</b> 53 texts, 125,921 words, gathered for this run.
+<ul>
+<li>Spoken: 75,571 words from 23 videos (captions repaired by Haiku, 30 parts, all passing) in 15 genres, at most two per channel. Six are everyday vlogs by ordinary people (day in the life, family abroad, student life, Q&amp;A, Minecraft), standing in for the blogs Latvian hardly has.</li>
+<li>Written: 50,350 words from 24 lv.wikipedia articles and 6 LSM.lv articles, in 18 genres. No government guides: those sites timed out from this machine.</li>
+<li>No text over 10% of its kind.</li>
+</ul></li>
+<li><b>Spelling:</b> texts and the dump both write the long vowels and soft consonants, so <code>lookupKey</code> stays. The 394 headwords with tone marks (<code>laĩva</code>, <code>ar̂t</code>) show plain: texts never write them, and 2% of lemmas would show them.</li>
+<li><b>Headword:</b> gender labels (<code>m</code>, <code>f</code>) on 99% of Wiktionary's nouns, explained in <code>labels.toml</code>.</li>
+<li><b>Tokens:</b> dotted abbreviations (<code>u.c.</code>, <code>t.i.</code>) split in the browser and joined back by the abbreviations feature; no apostrophes, hardly any hyphens. Browser and API showed the same popover for all 2,200 sampled words.</li>
+<li><b>Coverage:</b> 78.4% → 83.3% of corpus words with an entry (spoken 83.1 → 87.1%, written 70.9 → 77.3%).</li>
+</ul>
+
+<h2>Runs</h2>
+<p>The same 2,200 items in every run. Each cell gives understood %, then % without the words the judge called missing.</p>
+<div class="scroll"><table><tr><th>Run</th><th>Grammar</th><th>Content</th><th>Random</th><th class="n">Coverage</th><th>Change</th></tr>
+<tr><td><code>r0</code></td><td>90.3</td><td>90.0 <span class=m>/ 91.3</span></td><td>53.0 <span class=m>/ 91.4</span></td><td class="n">78.4%</td><td>plain import</td></tr>
+<tr><td><code>r1</code></td><td class=m>not judged</td><td></td><td></td><td class="n">83.0%</td><td>pronoun headings dropped, participle declension, grammar file, labels</td></tr>
+<tr><td><code>r2</code></td><td>97.7</td><td>95.3 <span class=m>/ 96.1</span></td><td>59.2 <span class=m>/ 91.5</span></td><td class="n">83.3%</td><td><code>reflexiveSuffix</code></td></tr>
+<tr><td><code>r3</code></td><td>98.9</td><td>97.0 <span class=m>/ 97.2</span></td><td>59.2 <span class=m>/ 91.5</span></td><td class="n">83.3%</td><td>lines the r2 judge found missing; 7 false positives</td></tr>
+<tr><td><code>r4</code></td><td><b>98.9</b></td><td><b>97.2</b> <span class=m>/ 97.4</span></td><td><b>59.2</b> <span class=m>/ 91.5</span></td><td class="n">83.3%</td><td><code>netiek galā</code> keeps its phrase</td></tr>
+</table></div>
+<p class="note">r0 was judged in two goes: the first stopped at 200 items on the 5-hour usage limit, after the caption repairs. The r0 judge cost 88 batches; later runs judged only changed popovers (16, then 1, then 1 batch).</p>
+
+<h2>Accepted rules</h2>
+<div class="scroll"><table><tr><th>Rule</th><th>What it does</th><th>Tests</th></tr>
+<tr><td>Pronoun headings are no forms (<code>rules.ts</code>, every language)</td><td>A verb-table row with a person and <code>indicative</code> but no tense is the row's pronoun, not a form. 7,328 rows in Latvian's dump, none in the other eight languages'.</td><td><code>transform.test.ts</code>: <code>mēs</code> dropped, <code>sākam</code> and the imperative <code>sāc</code> kept; <code>latvian.test.ts</code>: <code>es</code> is only the pronoun</td></tr>
+<tr><td><code>import.reflexiveSuffix</code> (new setting)</td><td>Spells a verb's reflexive from its table by tag rules (<code>sāka</code> &gt; <code>sākās</code>, <code>sāk</code> &gt; <code>sākas</code>, <code>sāku</code> &gt; <code>sākos</code>), as an entry "reflexive of sākt" with the verb's meanings, only where the dump has no such entry and only with forms no other word has. Lithuanian works the same way.</td><td><code>latvian.test.ts</code>: seven forms reach <code>sākties</code> with the verb's meaning; a noun keeps its form (<code>beidzas</code>); a dump reflexive is left alone (<code>smieties</code>)</td></tr>
+<tr><td><code>import.participleDeclension</code> (Latvian settings)</td><td>Past passive participles decline: <code>saistīts</code> gives <code>saistīta</code>, <code>saistītās</code>. 6,913 forms, only where no other word has them.</td><td>existing participle tests</td></tr>
+<tr><td><code>grammar.tsv</code>, 374 lines</td><td>129 for grammar words, phrases and abbreviations; 245 hand patches for common words the dump lacks, each with its forms.</td><td><code>grammar.test.ts</code>: every link names its word</td></tr>
+</table></div>
+
+<h2>What got worse, and why it stays</h2>
+<p>The gate sample's diff from r0 to r2 had 343 changes: 285 rated better, 66 the same, 16 worse. Every "worse" was read.</p>
+<ul>
+<li><b>13 were misreadings</b> of a reorder. For example, <code>jūs</code> lost three unrelated verbs and kept "you".</li>
+<li><b>Fixed:</b> <code>pazīstami</code> is now an adjective line; <code>piekrist</code>'s line had dropped Wiktionary's richer senses; <code>netiek galā</code> lost its phrase when <code>netiek</code> got a line of its own (r3, fixed in r4).</li>
+<li><b>Stays:</b> <code>aizvadīta</code> now reaches <code>aizvadīt</code>, whose senses lack "to hold (a game)": a Wiktionary gap, better than no entry.</li>
+<li><b>Order:</b> <code>kāda</code> opens on "some, a certain" before "what kind of". The r0 judge failed five items on the missing "some" and the classifier one on the order, so "some" stays first.</li>
+</ul>
+
+<h2>False positives</h2>
+<p>7, in <code>../corpus/eval/out/lv/false-positives.jsonl</code>. Six are plurals and cases read as their singular (<code>putnu</code>, <code>vietām</code>, <code>miljoniem</code>, <code>Lielu</code>, <code>gados</code>, <code>latvieši</code>); one is the definite comparative, which is the superlative, read as the comparative (<code>lielākais</code>).</p>
+
+<h2>Borrowed and colloquial words</h2>
+<p>The judge already leaves out foreign words: 15 random items were English inside Latvian sentences. Of the 342 random items with no entry, about 20 are slang, abbreviations or tech borrowings (<code>knapi</code>, <code>sūdīgi</code>, <code>šmuce</code>, <code>parkings</code>, <code>suši</code>, <code>PVN</code>, <code>MHz</code>, <code>UDP</code>). Leaving them out of the figures would move the random gate by about 2 points, not to a pass. The common colloquial words have lines (<code>okei</code>, <code>vot</code>, <code>bišķiņ</code>, <code>šitā</code>, <code>davai</code>, <code>paga</code>).</p>
+
+<h2>Hand-patch list</h2>
+<ul>
+<li><b>Patched in the grammar file</b>, for a reader to check before anything goes to Wiktionary:
+<ul>
+<li>adverbs and linking words: <code>savukārt</code>, <code>vispār</code>, <code>uzreiz</code>, <code>iepriekš</code>, <code>principā</code>, <code>manuprāt</code>, <code>turklāt</code>, <code>tostarp</code>, <code>drīzāk</code>, <code>galvenokārt</code>, <code>godīgi</code>, <code>beidzot</code>;</li>
+<li>prepositional words: <code>saskaņā</code>, <code>izņemot</code>, <code>pateicoties</code>, <code>neskatoties</code>;</li>
+<li>nouns: <code>nosaukums</code>, <code>dati</code>, <code>spēlētājs</code>, <code>priekšsēdētājs</code>, <code>vārti</code>, <code>pakalpojums</code>, <code>pašvaldība</code>;</li>
+<li>verbs: <code>veidot</code>, <code>nodrošināt</code>, <code>uzskatīt</code>, <code>iegūt</code>, <code>pieņemt</code>, <code>mēģināt</code>, <code>ietekmēt</code>;</li>
+<li>and 200 more.</li>
+</ul></li>
+<li><b>Not patched:</b> the rest of the random gate's 342 missing words, mostly ordinary vocabulary (<code>pieņemšana</code>, <code>ievēlēšana</code>, <code>pētnieks</code>, <code>atļauties</code>, <code>parunāt</code>, <code>pārtraukums</code>, <code>rīcība</code>, <code>reakcija</code>).</li>
+<li><b>Data errors:</b>
+<ul>
+<li><code>svērt</code>'s table gives its past forms as bare endings (<code>u</code>, <code>i</code>, <code>a</code>);</li>
+<li><code>noteikt</code> "to determine" (<code>nosaka</code>) is missing beside <code>noteikt</code> "to say firmly";</li>
+<li><code>tikt</code> lacks the passive auxiliary;</li>
+<li><code>ikdiena</code> gives only "weekday";</li>
+<li><code>izmaksa</code> lacks "costs".</li>
+</ul></li>
+</ul>
+
+<h2>Tier 2 candidates</h2>
+<ul>
+<li>Negated verb forms (<code>nepatīk</code>, <code>nenotiek</code>, <code>negribās</code>): tables give only the negated infinitive. A prefix setting next to <code>reflexiveSuffix</code>, which would also let <code>neņēma vērā</code> reach <code>ņemt vērā</code>.</li>
+<li>The debitive (<code>jāsāk</code> "must begin") and the perfect's meaning in the popover.</li>
+<li>Compounds written as one word (<code>rupjmaize</code>), with the segments benchmark.</li>
+</ul>
+</main></body></html>
