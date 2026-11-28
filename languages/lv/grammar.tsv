@@ -27,7 +27,7 @@
 # būt": is. A reader also needs what they do with another word: there is,
 # I have (man ir), and the perfect (ir izdarījis "has done").
 ir	AUX	form of būt: is, are: it's big (tas ir liels) → būt | there is, there are: there's a shop here (te ir veikals) | with a dative, has: I have a dog (man ir suns) | with a past participle, has done: has written (ir uzrakstījis)
-ir	CCONJ	also, too, even: both ... and (ir ... ir)
+ir	CCONJ	also, even: me too (ir es), even in winter (ir ziemā) | ir ... ir: both ... and: both here and there (ir šeit, ir tur)
 nav	AUX	form of būt: is not, are not → būt | there is no, there are no: there's no time (nav laika) | with a dative, has no: I have no money (man nav naudas) | with a past participle, hasn't done (nav redzējis)
 esmu	AUX	form of būt: am: I'm at home (esmu mājās) → būt | with a past participle, have done: I have seen (esmu redzējis)
 esi	AUX	form of būt: are, to one person: you're at home (tu esi mājās) → būt | have done: you have been (esi bijis)
@@ -124,7 +124,7 @@ izmaksas	NOUN	costs, expenses: production costs (ražošanas izmaksas)
 ē	INTJ	hesitation: uh, er, um
 o	INTJ	oh!, for surprise or delight
 nu	PART	well, so, to start or soften what follows: well, I don't know (nu, nezinu) | now, come on: come on! (nu!)
-vai nu	CCONJ	either: either ... or (vai nu ..., vai ...)
+vai nu	CCONJ	either, with vai: either today or tomorrow (vai nu šodien, vai rīt)
 
 ## Abbreviations
 u. c.	ADV	and others, etc.: short for un citi
@@ -377,7 +377,7 @@ veidot/veido/veidoju/veidoja/veidos/veidotu/veidojot/veidots/veidota/veidoti/vei
 ietekmēt/ietekmē/ietekmēju/ietekmēja/ietekmēs/ietekmētu/ietekmējot/ietekmēts/ietekmēta	VERB	to influence, to affect
 nodrošināt/nodrošina/nodrošinu/nodrošināja/nodrošinās/nodrošinātu/nodrošinot/nodrošināts/nodrošināta	VERB	to ensure, to provide
 noteikt/nosaka/nosaku/noteica/noteiks/noteiktu/nosakot	VERB	to determine, to set, to lay down: the law sets the rules (likums nosaka noteikumus) | to say firmly
-uzskatīt/uzskata/uzskatu/uzskatām/uzskatāt/uzskatīja/uzskatīs/uzskatītu/uzskatot/uzskatīts/uzskatīta/uzskatīti	VERB	to think, to consider, to believe: I think that... (es uzskatu, ka...) | uzskatīt par: to regard as
+uzskatīt/uzskata/uzskatu/uzskatām/uzskatāt/uzskatīja/uzskatīs/uzskatītu/uzskatot/uzskatīts/uzskatīta/uzskatīti	VERB	to think, to consider, to believe: I think it's right (es uzskatu, ka tas ir pareizi) | uzskatīt par: to regard as: he is considered the best (viņu uzskata par labāko)
 iegūt/iegūst/iegūstu/ieguva/ieguvu/iegūs/iegūtu/iegūstot/iegūts/iegūta/iegūti	VERB	to get, to gain, to win, to obtain
 pieņemt/pieņem/pieņemu/pieņēma/pieņēmu/pieņems/pieņemsim/pieņemtu/pieņemot/pieņemts/pieņemta/pieņemti/pieņemtas	VERB	to accept, to take: to make a decision (pieņemt lēmumu) | to adopt (a law) | pieņemsim: let's say, suppose
 mēģināt/mēģina/mēģinu/mēģinām/mēģināja/mēģināju/mēģinās/mēģināšu/mēģināsim/mēģinātu/mēģinot	VERB	to try
@@ -429,7 +429,7 @@ pieļaut/pieļauju/pieļauj/pieļāva	VERB	to allow | to suppose, to admit the p
 nemaldīties/nemaldos	VERB	if I'm not mistaken (ja nemaldos)
 atšķirties/atšķiras/atšķīrās	VERB	to differ
 izdoties/izdodas/izdevās/izdosies/izdotos	VERB	to succeed, to work out: I managed (man izdevās)
-izrādīties/izrādās/izrādījās/izrādīsies	VERB	to turn out: it turned out that... (izrādījās, ka...)
+izrādīties/izrādās/izrādījās/izrādīsies	VERB	to turn out: it turned out to be true (izrādījās, ka tā ir taisnība)
 parādīties/parādās/parādījās/parādīsies	VERB	to appear, to show up
 piedalīties/piedalās/piedalos/piedalījās/piedalīsies/piedalītos	VERB	to take part, to participate
 darboties/darbojas/darbojos/darbojās/darbosies/darbotos	VERB	to work, to operate, to be active
